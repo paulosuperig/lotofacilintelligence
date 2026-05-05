@@ -815,21 +815,32 @@ const Index = () => {
                           </div>
                         </div>
                       ) : (
-                        aiChat.map((msg, i) => (
                           <div key={i} className={cn(
-                            "flex flex-col max-w-[85%]",
+                            "flex flex-col max-w-[90%] md:max-w-[85%]",
                             msg.role === 'user' ? "ml-auto items-end" : "mr-auto items-start"
                           )}>
                             <div className={cn(
-                              "p-4 rounded-2xl text-sm leading-relaxed shadow-sm",
+                              "p-4 rounded-2xl text-sm leading-relaxed shadow-sm relative group/msg",
                               msg.role === 'user' 
                                 ? "bg-purple-600 text-white rounded-tr-none" 
                                 : "bg-white text-zinc-700 border border-purple-100 rounded-tl-none"
                             )}>
                               {msg.role === 'assistant' ? (
-                                <div className="prose prose-sm max-w-none prose-headings:font-bold prose-headings:text-zinc-900 prose-h1:text-base prose-h2:text-base prose-h3:text-sm prose-h4:text-sm prose-p:my-2 prose-p:leading-relaxed prose-strong:text-purple-700 prose-strong:font-bold prose-ul:my-2 prose-ol:my-2 prose-li:my-0.5 prose-hr:my-3 prose-hr:border-purple-100 prose-code:text-purple-700 prose-code:bg-purple-50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none">
-                                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
-                                </div>
+                                <>
+                                  <div className="prose prose-sm max-w-none prose-headings:font-bold prose-headings:text-zinc-900 prose-h1:text-base prose-h2:text-base prose-h3:text-sm prose-h4:text-sm prose-p:my-2 prose-p:leading-relaxed prose-strong:text-purple-700 prose-strong:font-bold prose-ul:my-2 prose-ol:my-2 prose-li:my-0.5 prose-hr:my-3 prose-hr:border-purple-100 prose-code:text-purple-700 prose-code:bg-purple-50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none">
+                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+                                  </div>
+                                  <div className="flex justify-end mt-2 pt-2 border-t border-purple-50">
+                                    <Button 
+                                      variant="ghost" 
+                                      size="sm" 
+                                      className="h-7 px-2 text-[10px] text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg gap-1.5"
+                                      onClick={() => saveAiGameToHistory(msg.content)}
+                                    >
+                                      <History size={12} /> Salvar Jogo
+                                    </Button>
+                                  </div>
+                                </>
                               ) : (
                                 msg.content
                               )}
@@ -838,7 +849,6 @@ const Index = () => {
                               {msg.role === 'user' ? 'Você' : 'Lotofácil Intelligence'}
                             </span>
                           </div>
-                        ))
                       )}
                       {isAiLoading && (
                         <div className="flex items-center gap-2 text-purple-600 animate-pulse">
