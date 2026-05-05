@@ -137,7 +137,7 @@ export const GameGenerator = () => {
                 key="game"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="flex flex-wrap justify-center gap-4 md:gap-5"
+                className="flex flex-wrap justify-center gap-2.5 md:gap-5"
               >
                 {generatedGame.map((num, i) => (
                   <motion.div
