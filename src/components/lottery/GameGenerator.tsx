@@ -62,7 +62,7 @@ export const GameGenerator = () => {
           <Button 
             onClick={generateGame} 
             disabled={isGenerating}
-            className="w-full bg-white text-black hover:bg-zinc-200 font-display font-black text-[11px] uppercase tracking-widest h-12 px-6 rounded-xl shadow-xl shadow-white/5 transition-all active:scale-95"
+            className="w-full bg-purple-600 text-white hover:bg-purple-700 font-display font-black text-[11px] uppercase tracking-widest h-12 px-6 rounded-xl shadow-xl shadow-purple-500/20 transition-all active:scale-95"
           >
             {isGenerating ? <RefreshCcw className="animate-spin mr-2" size={14} /> : <Zap className="mr-2" size={14} fill="currentColor" />}
             Gerar Jogo
