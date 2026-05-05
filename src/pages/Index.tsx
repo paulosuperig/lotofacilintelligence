@@ -483,25 +483,25 @@ const Index = () => {
                 </motion.div>
 
                 {/* Official Result Bento - Secondary Focus */}
-                <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-2 bg-white/50 border border-purple-100 rounded-[2rem] p-8 relative group overflow-hidden shadow-sm hover:bg-white transition-colors duration-500">
-                  <div className="absolute top-0 right-0 p-8 opacity-[0.02] group-hover:scale-110 transition-transform duration-1000 text-purple-900">
+                <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-2 bg-white/50 border border-purple-100 rounded-3xl md:rounded-[2rem] p-6 md:p-8 relative group overflow-hidden shadow-sm hover:bg-white transition-colors duration-500">
+                  <div className="absolute top-0 right-0 p-8 opacity-[0.02] group-hover:scale-110 transition-transform duration-1000 text-purple-900 hidden md:block">
                     <Trophy size={180} strokeWidth={0.5} />
                   </div>
                   
                   <div className="relative z-10 h-full flex flex-col">
-                    <div className="mb-6">
-                      <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-600 text-[8px] font-bold mb-4 uppercase tracking-widest">
-                        <History size={10} /> Último Sorteio
+                    <div className="mb-4 md:mb-6">
+                      <div className="inline-flex items-center gap-2 px-2 py-0.5 md:px-2.5 md:py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-600 text-[8px] font-bold mb-3 md:mb-4 uppercase tracking-widest">
+                        <History size={10} /> Sorteio
                       </div>
-                      <h2 className="text-4xl font-display font-bold text-zinc-900 mb-2">
+                      <h2 className="text-3xl md:text-4xl font-display font-bold text-zinc-900 mb-1 md:mb-2">
                         Nº {latestResult?.concurso || "---"}
                       </h2>
-                      <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider flex items-center gap-2">
+                      <p className="text-zinc-500 text-[9px] md:text-[10px] font-bold uppercase tracking-wider flex items-center gap-2">
                         <Calendar size={12} strokeWidth={2} /> {latestResult ? latestResult.data : "---"}
                       </p>
                     </div>
 
-                    <div className="grid grid-cols-5 gap-2 mb-8">
+                    <div className="grid grid-cols-5 gap-1.5 md:gap-2 mb-6 md:mb-8">
                       {isLoading ? (
                         Array(15).fill(0).map((_, i) => (
                           <div key={i} className="aspect-square rounded-full bg-purple-100/50 animate-pulse" />
