@@ -145,7 +145,7 @@ const Index = () => {
                     </div>
                   </div>
                   
-                  <div className="bg-white/5 p-6 md:p-8 rounded-[1.5rem] premium-border backdrop-blur-xl">
+                  <div className="bg-purple-50/50 p-6 md:p-8 rounded-[1.5rem] border border-purple-100 backdrop-blur-xl">
                     <p className="text-[9px] text-zinc-500 uppercase font-black tracking-[0.2em] mb-2">Próximo Prêmio</p>
                     <p className="text-3xl md:text-4xl font-display font-black text-emerald-400">
                       {latestResult ? formatCurrency(latestResult.valor_estimado_proximo_concurso || latestResult.estimativa_proximo_concurso || 0) : "R$ ---"}
