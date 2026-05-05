@@ -341,7 +341,7 @@ const Index = () => {
             setActiveTab('historico');
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }} />
-          {user.role === 'admin' && <NavIcon icon={<Cpu size={20} strokeWidth={1.5} />} active={activeTab === 'ia'} label="IA" onClick={() => setActiveTab('ia')} />}
+          <NavIcon icon={<Cpu size={20} strokeWidth={1.5} />} active={activeTab === 'ia'} label="IA" onClick={() => setActiveTab('ia')} />
         </div>
         <div className="flex w-12 flex-col gap-2 items-center pt-2 border-t border-purple-100/70">
            {user.role === 'admin' && (
