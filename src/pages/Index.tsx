@@ -205,7 +205,57 @@ const Index = () => {
                   )}
                 </div>
               </motion.div>
+            ) : activeTab === 'stats' ? (
+              <motion.div
+                key="fechamentos-page"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="grid grid-cols-1 gap-6"
+              >
+                <div className="bg-white border border-purple-200 rounded-[2rem] p-8 md:p-12 shadow-xl shadow-purple-500/5">
+                  <div className="flex items-center justify-between mb-10">
+                    <div>
+                      <h2 className="text-3xl font-display font-bold text-zinc-900 mb-2">Fechamentos PRO</h2>
+                      <p className="text-zinc-500 text-sm">Modelos matemáticos exclusivos para aumentar suas chances</p>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setActiveTab('home')}
+                      className="rounded-xl border-purple-100 text-purple-600 hover:bg-purple-50"
+                    >
+                      Voltar ao Início
+                    </Button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[
+                      { title: "R7 - 14 Pontos", desc: "Fechamento garantindo 14 pontos se acertar 15 números.", numbers: 15 },
+                      { title: "Especial Ímpares", desc: "Foco total na tendência de 8 ou 9 ímpares.", numbers: 20 },
+                      { title: "Redução de Quadrantes", desc: "Distribuição inteligente em todos os quadrantes.", numbers: 18 },
+                      { title: "Ciclo Mestre", desc: "Modelos baseados no ciclo das dezenas.", numbers: 22 },
+                      { title: "VIP 25-15-14", desc: "Sistema premium de alta performance.", numbers: 25 },
+                      { title: "Filtro de Soma", desc: "Jogos balanceados por soma de dezenas.", numbers: 15 }
+                    ].map((model, i) => (
+                      <div key={i} className="p-8 bg-purple-50/50 border border-purple-100 rounded-[2rem] hover:border-purple-300 transition-all group cursor-pointer">
+                        <div className="w-12 h-12 rounded-2xl bg-white border border-purple-100 flex items-center justify-center text-purple-600 mb-6 group-hover:scale-110 transition-transform">
+                          <ShieldCheck size={24} />
+                        </div>
+                        <h4 className="text-lg font-bold text-zinc-900 mb-2">{model.title}</h4>
+                        <p className="text-xs text-zinc-500 mb-6 leading-relaxed">{model.desc}</p>
+                        <div className="flex items-center justify-between mt-auto">
+                          <span className="text-[10px] font-bold text-purple-400 uppercase tracking-widest">{model.numbers} dezenas</span>
+                          <Button className="h-8 px-4 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-[10px] font-bold uppercase tracking-widest">
+                            Usar Modelo
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
             ) : (
+
               <motion.div 
                 key="home-page"
                 variants={containerVariants}
