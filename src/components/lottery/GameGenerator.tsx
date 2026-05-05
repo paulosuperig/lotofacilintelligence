@@ -43,47 +43,48 @@ export const GameGenerator = () => {
   };
 
   return (
-    <Card className="bg-slate-900/40 border-white/5 backdrop-blur-xl overflow-hidden">
-      <CardContent className="p-8">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+    <div className="flex flex-col h-full">
+      <div className="p-8 md:p-10 border-b border-white/5">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
           <div>
-            <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-              <Zap className="text-amber-400" size={24} /> Gerador Inteligente
+            <div className="flex items-center gap-2 text-premium-accent mb-2">
+              <Zap size={18} fill="currentColor" />
+              <span className="text-[10px] uppercase font-bold tracking-[0.2em]">Sistemas de Elite</span>
+            </div>
+            <h2 className="text-3xl font-display font-black text-white">
+              Gerador Inteligente
             </h2>
-            <p className="text-slate-400 text-sm">Algoritmo equilibrado baseado em tendências históricas.</p>
           </div>
           
-          <div className="flex gap-3 w-full md:w-auto">
-            <Button 
-              onClick={generateGame} 
-              disabled={isGenerating}
-              className="flex-1 md:flex-none bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border-none h-12 px-8 font-bold rounded-xl shadow-lg shadow-purple-900/20"
-            >
-              {isGenerating ? <RefreshCcw className="animate-spin mr-2" size={18} /> : <Zap className="mr-2" size={18} />}
-              GERAR JOGO
-            </Button>
-          </div>
+          <Button 
+            onClick={generateGame} 
+            disabled={isGenerating}
+            className="w-full md:w-auto bg-white text-premium-dark hover:bg-white/90 font-display font-black text-xs uppercase tracking-widest h-14 px-10 rounded-2xl shadow-xl shadow-white/5 transition-all active:scale-95"
+          >
+            {isGenerating ? <RefreshCcw className="animate-spin mr-3" size={16} /> : <Zap className="mr-3" size={16} fill="currentColor" />}
+            GERAR JOGO
+          </Button>
         </div>
 
-        <div className="min-h-[160px] flex flex-wrap justify-center gap-3 md:gap-4 mb-10 bg-white/5 rounded-3xl p-8 border border-white/5 relative overflow-hidden">
+        <div className="min-h-[220px] flex flex-wrap justify-center content-center gap-4 bg-white/[0.02] rounded-[2rem] p-10 premium-border relative overflow-hidden group">
           <AnimatePresence mode="wait">
             {generatedGame.length > 0 ? (
               <motion.div 
                 key="game"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="flex flex-wrap justify-center gap-3 md:gap-4"
+                className="flex flex-wrap justify-center gap-4 md:gap-5"
               >
                 {generatedGame.map((num, i) => (
                   <motion.div
                     key={`${num}-${i}`}
-                    initial={{ y: 20, opacity: 0, scale: 0.5 }}
+                    initial={{ y: 30, opacity: 0, scale: 0.8 }}
                     animate={{ y: 0, opacity: 1, scale: 1 }}
                     transition={{ 
                       type: "spring", 
-                      stiffness: 260, 
-                      damping: 20,
-                      delay: i * 0.04 
+                      stiffness: 200, 
+                      damping: 25,
+                      delay: i * 0.05 
                     }}
                   >
                     <Ball number={num} active size="lg" />
@@ -95,53 +96,53 @@ export const GameGenerator = () => {
                 key="placeholder"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="flex flex-col items-center justify-center text-slate-500 gap-3"
+                className="flex flex-col items-center justify-center text-premium-text-muted gap-4"
               >
                 <div className="flex gap-2">
-                   {Array(15).fill(0).map((_, i) => (
-                     <div key={i} className={cn("w-3 h-3 rounded-full bg-white/5", i < 5 && "hidden md:block")} />
+                   {Array(8).fill(0).map((_, i) => (
+                     <div key={i} className="w-1.5 h-1.5 rounded-full bg-white/[0.05]" />
                    ))}
                 </div>
-                <p className="text-sm font-medium">Clique em gerar para criar uma nova combinação</p>
+                <p className="text-sm font-medium tracking-wide">Aguardando comando de geração...</p>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
+      </div>
 
+      <div className="p-8 md:p-10 flex-grow flex flex-col">
         {generatedGame.length > 0 && (
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
+            className="grid grid-cols-2 gap-4 mb-10"
           >
             <StatCard label="Pares/Ímpares" value={`${stats.pairs}p / ${stats.odd}í`} icon={<TrendingUp size={14}/>} />
-            <StatCard label="Números Primos" value={stats.primes} icon={<TrendingUp size={14}/>} />
             <StatCard label="Soma Total" value={stats.sum} icon={<TrendingUp size={14}/>} />
-            <StatCard label="Probabilidade" value="Alta" icon={<Info size={14}/>} variant="success" />
           </motion.div>
         )}
 
-        <div className="flex flex-col sm:flex-row gap-4">
-           <Button variant="outline" className="flex-1 bg-white/5 border-white/10 text-slate-300 hover:bg-white/10 hover:text-white h-12 rounded-xl">
-             <Save className="mr-2" size={18} /> Salvar na minha conta
+        <div className="mt-auto grid grid-cols-1 sm:grid-cols-2 gap-4">
+           <Button variant="outline" className="h-14 rounded-2xl bg-white/[0.03] border-white/5 text-premium-text-primary hover:bg-white/[0.08] font-bold text-xs uppercase tracking-widest">
+             <Save className="mr-3" size={18} /> Salvar Jogo
            </Button>
-           <Button variant="outline" className="flex-1 bg-white/5 border-white/10 text-slate-300 hover:bg-white/10 hover:text-white h-12 rounded-xl">
-             Copiar dezenas
+           <Button variant="outline" className="h-14 rounded-2xl bg-white/[0.03] border-white/5 text-premium-text-primary hover:bg-white/[0.08] font-bold text-xs uppercase tracking-widest">
+             Copiar Dados
            </Button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
 const StatCard = ({ label, value, icon, variant = 'default' }: { label: string, value: string | number, icon: React.ReactNode, variant?: 'default' | 'success' }) => (
-  <div className="bg-white/5 border border-white/5 rounded-2xl p-4">
-    <div className="flex items-center gap-2 text-slate-500 mb-1">
+  <div className="bg-white/[0.02] premium-border rounded-2xl p-5">
+    <div className="flex items-center gap-2 text-premium-text-muted mb-2">
       {icon}
-      <span className="text-[10px] uppercase font-bold tracking-wider">{label}</span>
+      <span className="text-[10px] uppercase font-bold tracking-widest">{label}</span>
     </div>
     <div className={cn(
-      "text-xl font-bold",
+      "text-2xl font-display font-bold",
       variant === 'success' ? "text-emerald-400" : "text-white"
     )}>
       {value}
