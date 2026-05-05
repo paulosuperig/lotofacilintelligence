@@ -28,6 +28,7 @@ import { cn, formatDate, formatCurrency } from "@/lib/utils";
 const Index = () => {
   const [latestResult, setLatestResult] = useState<LotteryResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('home');
   const { toast } = useToast();
 
   useEffect(() => {
