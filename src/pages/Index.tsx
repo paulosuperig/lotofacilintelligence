@@ -157,7 +157,7 @@ const Index = () => {
         <div className="max-w-[1400px] mx-auto p-4 sm:p-6 md:p-12 lg:p-16">
           
           {/* Top Header - Minimalist */}
-          <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 md:mb-16 gap-6 md:gap-8 relative">
+          <header className="flex flex-col md:flex-row justify-between items-start md:items-center mt-8 md:mt-0 mb-10 md:mb-16 gap-6 md:gap-8 relative">
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
