@@ -876,15 +876,18 @@ const Index = () => {
                                   <div className="prose prose-sm max-w-none prose-headings:font-bold prose-headings:text-zinc-900 prose-h1:text-base prose-h2:text-base prose-h3:text-sm prose-h4:text-sm prose-p:my-2 prose-p:leading-relaxed prose-strong:text-purple-700 prose-strong:font-bold prose-ul:my-2 prose-ol:my-2 prose-li:my-0.5 prose-hr:my-3 prose-hr:border-purple-100 prose-code:text-purple-700 prose-code:bg-purple-50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none">
                                     <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
                                   </div>
-                                  <div className="flex justify-end mt-2 pt-2 border-t border-purple-50">
-                                    <Button 
-                                      variant="ghost" 
-                                      size="sm" 
-                                      className="h-7 px-2 text-[10px] text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg gap-1.5"
-                                      onClick={() => saveAiGameToHistory(msg.content)}
-                                    >
-                                      <History size={12} /> Salvar Jogo
-                                    </Button>
+                                  <div className="flex justify-between items-center mt-3 pt-3 border-t border-purple-50">
+                                    <span className="text-[10px] text-zinc-400 font-medium italic">Extraído da análise DeepSeek</span>
+                                    <div className="flex gap-2">
+                                      <Button 
+                                        variant="ghost" 
+                                        size="sm" 
+                                        className="h-8 px-3 text-[10px] text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg gap-2 border border-purple-100/50"
+                                        onClick={() => saveAiGameToHistory(msg.content)}
+                                      >
+                                        <Save size={12} /> Salvar Tudo
+                                      </Button>
+                                    </div>
                                   </div>
                                 </>
                               ) : (
