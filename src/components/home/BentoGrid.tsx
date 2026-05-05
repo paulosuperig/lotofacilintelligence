@@ -240,8 +240,8 @@ export const BentoGrid = ({
           <ShieldCheck size={32} />
         </div>
         <div>
-          <h4 className="text-lg font-display font-bold text-zinc-900">Fechamentos Pro</h4>
-          <p className="text-sm text-zinc-500">Acesse modelos matemáticos exclusivos.</p>
+          <h4 className="text-lg font-display font-bold text-zinc-900 dark:text-zinc-100">Fechamentos Pro</h4>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">Acesse modelos matemáticos exclusivos.</p>
         </div>
         <ArrowUpRight size={20} className="ml-auto text-zinc-400 group-hover:text-purple-600 transition-colors" />
       </motion.div>
