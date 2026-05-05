@@ -132,7 +132,7 @@ const Index = () => {
               <div className="relative z-10 h-full flex flex-col">
                 <div className="flex flex-wrap justify-between items-start gap-6 mb-12">
                   <div>
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[9px] font-bold mb-6 uppercase tracking-widest">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-600 text-[9px] font-bold mb-6 uppercase tracking-widest">
                       <History size={10} /> Resultado Oficial
                     </div>
                     <h2 className="text-5xl md:text-7xl font-display font-black text-white mb-6">
