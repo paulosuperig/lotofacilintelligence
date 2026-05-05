@@ -92,7 +92,7 @@ interface SidebarProps {
 
 export const Sidebar = ({ activeTab, setActiveTab, role, onLogout }: SidebarProps) => {
   return (
-    <aside className="hidden md:flex fixed left-0 top-0 bottom-0 w-[5rem] flex-col items-center py-8 bg-white/80 backdrop-blur-xl border-r border-purple-100 z-50 shadow-xl shadow-purple-500/5">
+    <aside className="hidden md:flex fixed left-0 top-0 bottom-0 w-[5rem] flex-col items-center py-8 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border-r border-purple-100 dark:border-zinc-800 z-50 shadow-xl shadow-purple-500/5">
       <div className="mb-12">
          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-600 to-fuchsia-600 flex items-center justify-center shadow-lg shadow-purple-500/20 transform hover:rotate-12 transition-transform duration-300">
            <Trophy size={20} className="text-white" />
