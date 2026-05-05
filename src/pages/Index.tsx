@@ -254,7 +254,10 @@ const Index = () => {
                   </div>
                 </div>
               </motion.div>
-            ) : (
+            ) : activeTab === 'dicas' ? (
+              <motion.div
+                key="dicas-page"
+                initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 className="grid grid-cols-1 gap-6"
