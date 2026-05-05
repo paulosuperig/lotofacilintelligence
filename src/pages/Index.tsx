@@ -371,28 +371,21 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f3ff] text-zinc-900 selection:bg-purple-500/30 overflow-x-hidden font-sans pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
-      {/* Sidebar Navigation - Desktop */}
-      <aside className="fixed left-8 top-1/2 -translate-y-1/2 w-16 h-auto max-h-none flex-col items-center justify-center gap-2 rounded-[2rem] p-2 bg-white/80 backdrop-blur-xl border border-purple-100 z-50 shadow-xl shadow-purple-500/10 transition-all duration-300 hidden md:flex">
-        <div className="flex w-12 h-12 items-center justify-center shrink-0">
-           <div className="w-12 h-12 rounded-[1.25rem] bg-gradient-to-br from-purple-600 to-fuchsia-600 flex items-center justify-center shadow-lg shadow-purple-500/20 transform hover:rotate-12 transition-transform duration-300">
+    <div className="min-h-screen bg-[#f5f3ff] text-zinc-900 selection:bg-purple-500/30 overflow-x-hidden font-sans pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] flex flex-col md:flex-row">
+      {/* Sidebar Navigation - Desktop (Left Side) */}
+      <aside className="hidden md:flex fixed left-0 top-0 bottom-0 w-[5rem] flex-col items-center py-8 bg-white/80 backdrop-blur-xl border-r border-purple-100 z-50 shadow-xl shadow-purple-500/5">
+        <div className="mb-12">
+           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-600 to-fuchsia-600 flex items-center justify-center shadow-lg shadow-purple-500/20 transform hover:rotate-12 transition-transform duration-300">
              <Trophy size={20} className="text-white" />
            </div>
         </div>
-        <div className="flex flex-col items-center justify-center gap-2 w-12">
+        <nav className="flex flex-col gap-4 flex-grow">
           <NavIcon icon={<LayoutDashboard size={20} strokeWidth={1.5} />} active={activeTab === 'home'} label="Home" onClick={() => setActiveTab('home')} />
           <NavIcon icon={<Zap size={20} strokeWidth={1.5} />} active={activeTab === 'gerador'} label="Gerador" onClick={() => {
             setActiveTab('gerador');
             document.getElementById('generator-section')?.scrollIntoView({ behavior: 'smooth' });
           }} />
-          <NavIcon icon={<TrendingUp size={20} strokeWidth={1.5} />} active={activeTab === 'stats'} label="Stats" onClick={() => {
-            setActiveTab('stats');
-            toast({ title: "Módulo de Estatísticas", description: "Carregando análises detalhadas..." });
-          }} />
-          <NavIcon icon={<History size={20} strokeWidth={1.5} />} active={activeTab === 'historico'} label="Histórico" onClick={() => {
-            setActiveTab('historico');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }} />
+          <NavIcon icon={<History size={20} strokeWidth={1.5} />} active={activeTab === 'historico'} label="Histórico" onClick={() => setActiveTab('historico')} />
           <NavIcon 
             icon={<Cpu size={20} strokeWidth={1.5} />} 
             active={activeTab === 'ia'} 
@@ -400,48 +393,44 @@ const Index = () => {
             onClick={() => setActiveTab('ia')}
             highlight
           />
-        </div>
-        <div className="flex w-12 flex-col gap-2 items-center pt-2 border-t border-purple-100/70">
-           {user.role === 'admin' && (
+          {user.role === 'admin' && (
              <NavIcon icon={<Settings size={20} strokeWidth={1.5} />} active={activeTab === 'ajustes'} label="Ajustes" onClick={() => setActiveTab('ajustes')} />
-           )}
+          )}
+        </nav>
+        <div className="mt-auto">
            <NavIcon icon={<LogOut size={20} strokeWidth={1.5} />} label="Sair" onClick={handleLogout} />
         </div>
       </aside>
 
-      {/* Bottom Navigation - Mobile */}
-      <nav className="fixed bottom-0 left-0 right-0 h-auto bg-white/95 backdrop-blur-xl border-t border-purple-100 z-50 flex items-center justify-between px-1 pb-[env(safe-area-inset-bottom)] shadow-[0_-10px_25px_-5px_rgba(168,85,247,0.1)] md:hidden">
-        <NavIcon icon={<LayoutDashboard size={20} strokeWidth={1.5} />} active={activeTab === 'home'} label="Início" onClick={() => setActiveTab('home')} />
-        <NavIcon icon={<Zap size={20} strokeWidth={1.5} />} active={activeTab === 'gerador'} label="Gerar" onClick={() => {
-          setActiveTab('gerador');
-          document.getElementById('generator-section')?.scrollIntoView({ behavior: 'smooth' });
-        }} />
-        <NavIcon icon={<History size={20} strokeWidth={1.5} />} active={activeTab === 'historico'} label="Histórico" onClick={() => setActiveTab('historico')} />
+      {/* Bottom Navigation - Mobile (Refined Bottom Bar) */}
+      <nav className="fixed bottom-0 left-0 right-0 h-[calc(4rem+env(safe-area-inset-bottom))] bg-white/95 backdrop-blur-xl border-t border-purple-100 z-50 flex items-center justify-around px-2 pb-[env(safe-area-inset-bottom)] shadow-[0_-10px_25px_-5px_rgba(168,85,247,0.1)] md:hidden">
+        <NavIcon icon={<LayoutDashboard size={22} />} active={activeTab === 'home'} label="Início" onClick={() => setActiveTab('home')} />
+        <NavIcon icon={<Zap size={22} />} active={activeTab === 'gerador'} label="Gerar" onClick={() => setActiveTab('gerador')} />
+        <NavIcon icon={<History size={22} />} active={activeTab === 'historico'} label="Histórico" onClick={() => setActiveTab('historico')} />
         <NavIcon 
-          icon={<Cpu size={20} strokeWidth={1.5} />} 
+          icon={<Cpu size={22} />} 
           active={activeTab === 'ia'} 
           label="IA" 
           onClick={() => setActiveTab('ia')} 
           highlight
         />
         {user.role === 'admin' ? (
-          <NavIcon icon={<Settings size={20} strokeWidth={1.5} />} active={activeTab === 'ajustes'} label="Ajustes" onClick={() => setActiveTab('ajustes')} />
+          <NavIcon icon={<Settings size={22} />} active={activeTab === 'ajustes'} label="Ajustes" onClick={() => setActiveTab('ajustes')} />
         ) : (
-          <NavIcon icon={<LogOut size={20} strokeWidth={1.5} />} label="Sair" onClick={handleLogout} />
+          <NavIcon icon={<LogOut size={22} />} label="Sair" onClick={handleLogout} />
         )}
       </nav>
 
+      {/* Demo Mode Banner (Responsive) */}
       {user.role === 'demo' && (
-        <div className="fixed top-0 left-0 right-0 bg-amber-500/90 backdrop-blur-sm text-white text-[10px] font-bold uppercase tracking-[0.2em] py-1.5 text-center z-[100] shadow-sm">
-          Modo de Demonstração — Algumas funcionalidades podem estar limitadas
+        <div className="fixed top-0 left-0 right-0 bg-amber-500/90 backdrop-blur-sm text-white text-[clamp(8px,1.5vw,10px)] font-bold uppercase tracking-[0.2em] py-1.5 text-center z-[100] shadow-sm">
+          Modo de Demonstração — Acesso VIP Intelligence
         </div>
       )}
 
-
-
-
-      <main className="pb-24 md:pb-12 md:pl-32">
-        <div className="max-w-[1400px] mx-auto p-4 sm:p-6 md:p-12 lg:p-16">
+      {/* Main Content Area - Fluid Margin */}
+      <main className="flex-grow w-full md:pl-[5rem] pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-12 min-h-screen">
+        <div className="w-full max-w-[min(1600px,95%)] mx-auto p-4 sm:p-6 lg:p-10 transition-all duration-300">
           
           {/* Top Header - Minimalist */}
           <header className="flex flex-col md:flex-row justify-between items-start md:items-center mt-8 md:mt-0 mb-10 md:mb-16 gap-6 md:gap-8 relative">
