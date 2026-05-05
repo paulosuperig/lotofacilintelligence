@@ -17,7 +17,9 @@ import {
   PieChart,
   Target,
   ShieldCheck,
-  Trash2
+  Trash2,
+  Flame,
+  Snowflake
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { 
