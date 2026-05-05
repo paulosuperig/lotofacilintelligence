@@ -291,14 +291,14 @@ export const AdminPanel = ({
         </table>
       </div>
 
-      <div className="mt-8 p-8 border-t border-purple-100">
+      <div className="mt-8 p-8 border-t border-purple-100 dark:border-zinc-800">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 rounded-xl bg-indigo-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
             <Cpu size={20} />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-zinc-900 leading-none">Integração DeepSeek AI</h3>
-            <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest mt-1">Configuração de Inteligência Artificial</p>
+            <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 leading-none">Integração DeepSeek AI</h3>
+            <p className="text-[10px] text-zinc-500 dark:text-zinc-400 uppercase font-bold tracking-widest mt-1">Configuração de Inteligência Artificial</p>
           </div>
         </div>
         
