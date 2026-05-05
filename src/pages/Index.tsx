@@ -165,7 +165,9 @@ const Index = () => {
           }} />
         </div>
         <div className="flex w-12 flex-col gap-2 items-center pt-2 border-t border-purple-100/70">
-           <NavIcon icon={<Settings size={20} strokeWidth={1.5} />} active={activeTab === 'ajustes'} label="Ajustes" onClick={() => setActiveTab('ajustes')} />
+           {user.role === 'admin' && (
+             <NavIcon icon={<Settings size={20} strokeWidth={1.5} />} active={activeTab === 'ajustes'} label="Ajustes" onClick={() => setActiveTab('ajustes')} />
+           )}
            <NavIcon icon={<LogOut size={20} strokeWidth={1.5} />} label="Sair" onClick={handleLogout} />
         </div>
       </aside>
@@ -178,6 +180,9 @@ const Index = () => {
           document.getElementById('generator-section')?.scrollIntoView({ behavior: 'smooth' });
         }} />
         <NavIcon icon={<History size={20} strokeWidth={1.5} />} active={activeTab === 'historico'} label="Jogos" onClick={() => setActiveTab('historico')} />
+        {user.role === 'admin' && (
+          <NavIcon icon={<Settings size={20} strokeWidth={1.5} />} active={activeTab === 'ajustes'} label="Ajustes" onClick={() => setActiveTab('ajustes')} />
+        )}
         <NavIcon icon={<LogOut size={20} strokeWidth={1.5} />} label="Sair" onClick={handleLogout} />
       </nav>
 
@@ -505,6 +510,104 @@ const Index = () => {
                 </div>
               </motion.div>
 
+            ) : activeTab === 'ajustes' && user.role === 'admin' ? (
+              <motion.div
+                key="ajustes-page"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="grid grid-cols-1 gap-6"
+              >
+                <div className="bg-white border border-purple-200 rounded-3xl md:rounded-[2rem] p-6 md:p-12 shadow-xl shadow-purple-500/5">
+                  <div className="flex flex-col md:flex-row items-center md:items-center justify-between mb-8 md:mb-10 gap-4 text-center md:text-left">
+                    <div className="flex flex-col items-center md:items-start">
+                      <h2 className="text-2xl md:text-3xl font-display font-bold text-zinc-900 mb-1 md:mb-2">Configurações do Sistema</h2>
+                      <p className="text-zinc-500 text-xs">Gerenciamento de usuários e acessos</p>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setActiveTab('home')}
+                      className="rounded-xl border-purple-100 text-purple-600 hover:bg-purple-50"
+                    >
+                      Voltar ao Início
+                    </Button>
+                  </div>
+
+                  <div className="overflow-hidden rounded-2xl border border-purple-100">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="bg-purple-50/50">
+                          <th className="px-6 py-4 text-[10px] font-bold text-purple-400 uppercase tracking-widest border-b border-purple-100">Usuário</th>
+                          <th className="px-6 py-4 text-[10px] font-bold text-purple-400 uppercase tracking-widest border-b border-purple-100">Perfil</th>
+                          <th className="px-6 py-4 text-[10px] font-bold text-purple-400 uppercase tracking-widest border-b border-purple-100">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-purple-50">
+                        <tr>
+                          <td className="px-6 py-5">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
+                                <ShieldCheck size={16} />
+                              </div>
+                              <div>
+                                <p className="text-sm font-bold text-zinc-900">admin@admin.com.br</p>
+                                <p className="text-[10px] text-zinc-500">Administrador Master</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-5">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 text-[10px] font-bold uppercase tracking-wider">
+                              Admin
+                            </span>
+                          </td>
+                          <td className="px-6 py-5">
+                            <div className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                              <span className="text-[10px] font-bold text-zinc-600 uppercase">Ativo</span>
+                            </div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="px-6 py-5">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500">
+                                <Sparkles size={16} />
+                              </div>
+                              <div>
+                                <p className="text-sm font-bold text-zinc-900">demo@demo.com.br</p>
+                                <p className="text-[10px] text-zinc-500">Usuário Demonstrativo</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-5">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-700 text-[10px] font-bold uppercase tracking-wider">
+                              Demo
+                            </span>
+                          </td>
+                          <td className="px-6 py-5">
+                            <div className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                              <span className="text-[10px] font-bold text-zinc-600 uppercase">Ativo</span>
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="mt-8 p-6 bg-amber-50 border border-amber-100 rounded-2xl flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center text-white shrink-0 shadow-lg shadow-amber-500/20">
+                      <Target size={20} />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-amber-900 mb-1">Painel de Controle</h4>
+                      <p className="text-xs text-amber-700 leading-relaxed">
+                        Como administrador, você tem acesso total às estatísticas e pode visualizar todos os usuários cadastrados no sistema.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
             ) : (
               <motion.div 
                 key="home-page"
