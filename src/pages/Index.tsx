@@ -237,15 +237,33 @@ const Index = () => {
                       { title: "VIP 25-15-14", desc: "Sistema premium de alta performance.", numbers: 25 },
                       { title: "Filtro de Soma", desc: "Jogos balanceados por soma de dezenas.", numbers: 15 }
                     ].map((model, i) => (
-                      <div key={i} className="p-8 bg-purple-50/50 border border-purple-100 rounded-[2rem] hover:border-purple-300 transition-all group cursor-pointer">
-                        <div className="w-12 h-12 rounded-2xl bg-white border border-purple-100 flex items-center justify-center text-purple-600 mb-6 group-hover:scale-110 transition-transform">
+                      <div key={i} className="p-8 bg-purple-50/50 border border-purple-100 rounded-[2rem] hover:border-purple-300 transition-all group flex flex-col">
+                        <div className="w-12 h-12 rounded-2xl bg-white border border-purple-100 flex items-center justify-center text-purple-600 mb-6 group-hover:scale-110 transition-transform shrink-0">
                           <ShieldCheck size={24} />
                         </div>
-                        <h4 className="text-lg font-bold text-zinc-900 mb-2">{model.title}</h4>
-                        <p className="text-xs text-zinc-500 mb-6 leading-relaxed">{model.desc}</p>
-                        <div className="flex items-center justify-between mt-auto">
-                          <span className="text-[10px] font-bold text-purple-400 uppercase tracking-widest">{model.numbers} dezenas</span>
-                          <Button className="h-8 px-4 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-[10px] font-bold uppercase tracking-widest">
+                        <h4 className="text-lg font-bold text-zinc-900 mb-2 leading-tight min-h-[3.5rem]">{model.title}</h4>
+                        <p className="text-xs text-zinc-500 mb-6 leading-relaxed flex-grow">{model.desc}</p>
+                        <div className="flex flex-col gap-3 mt-auto pt-4 border-t border-purple-100">
+                          <span className="text-[10px] font-bold text-purple-400 uppercase tracking-widest">{model.numbers} Dezenas</span>
+                          <Button 
+                            onClick={() => {
+                              const numbers: number[] = [];
+                              const pool = Array.from({ length: 25 }, (_, idx) => idx + 1);
+                              for (let k = 0; k < model.numbers && pool.length > 0; k++) {
+                                const randIdx = Math.floor(Math.random() * pool.length);
+                                numbers.push(pool.splice(randIdx, 1)[0]);
+                              }
+                              const sorted = numbers.sort((a, b) => a - b);
+                              const saved = JSON.parse(localStorage.getItem('lottery_history') || '[]');
+                              const newGame = { numbers: sorted, timestamp: Date.now(), model: model.title };
+                              localStorage.setItem('lottery_history', JSON.stringify([newGame, ...saved].slice(0, 100)));
+                              toast({
+                                title: `Modelo "${model.title}" gerado!`,
+                                description: `${model.numbers} dezenas: ${sorted.map(n => n.toString().padStart(2, '0')).join(' ')}`,
+                              });
+                            }}
+                            className="w-full h-10 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-[10px] font-bold uppercase tracking-widest shadow-md shadow-purple-500/20"
+                          >
                             Usar Modelo
                           </Button>
                         </div>
