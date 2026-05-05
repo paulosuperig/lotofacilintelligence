@@ -39,13 +39,37 @@ import { getLatestResult } from "@/services/lotteryApi";
 import { LotteryResult } from "@/types/lottery";
 import { GameGenerator } from "@/components/lottery/GameGenerator";
 import { cn, formatDate, formatCurrency } from "@/lib/utils";
+import Login from '@/components/Login';
 
 const Index = () => {
+  const [user, setUser] = useState<{ email: string, role: 'admin' | 'demo' } | null>(null);
   const [latestResult, setLatestResult] = useState<LotteryResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('home');
   const [history, setHistory] = useState<any[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem('intelligence_user');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+  }, []);
+
+  const handleLogin = (userData: { email: string, role: 'admin' | 'demo' }) => {
+    setUser(userData);
+    localStorage.setItem('intelligence_user', JSON.stringify(userData));
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem('intelligence_user');
+    toast({
+      title: "Sessão encerrada",
+      description: "Você saiu do sistema com sucesso.",
+    });
+  };
+
 
   useEffect(() => {
     const saved = localStorage.getItem('lottery_history');
