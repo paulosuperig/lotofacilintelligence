@@ -220,8 +220,9 @@ const Index = () => {
                 </motion.div>
               </button>
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-bold text-zinc-900">Membro VIP</p>
-                <p className="text-[10px] uppercase tracking-widest text-zinc-500">Acesso Vitalício</p>
+                <p className="text-sm font-bold text-zinc-900">{user.role === 'admin' ? 'Administrador' : 'Membro VIP'}</p>
+                <p className="text-[10px] uppercase tracking-widest text-zinc-500">{user.role === 'admin' ? 'Acesso Total' : 'Acesso Demonstrativo'}</p>
+
               </div>
               <div className="hidden md:flex w-12 h-12 rounded-xl bg-gradient-to-br from-purple-600 to-fuchsia-600 border border-purple-100 items-center justify-center text-sm font-display font-bold text-white group cursor-pointer hover:shadow-lg hover:shadow-purple-500/20 transition-all duration-300">
                 <span className="group-hover:scale-110 transition-transform duration-500">VIP</span>
