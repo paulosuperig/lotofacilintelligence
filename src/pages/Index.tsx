@@ -209,7 +209,7 @@ const Index = () => {
                 </div>
                 <div className="text-right">
                   <p className="text-[10px] font-bold text-premium-text-muted uppercase tracking-widest">Consistência</p>
-                  <p className="text-2xl font-display font-bold text-white">94.2%</p>
+                  <p className="text-2xl font-display font-bold text-zinc-900">94.2%</p>
                 </div>
               </div>
               <div>
