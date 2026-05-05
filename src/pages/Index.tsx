@@ -1329,22 +1329,60 @@ const Index = () => {
   );
 };
 
-const NavIcon = ({ icon, active = false, label, onClick }: { icon: React.ReactNode, active?: boolean, label: string, onClick?: () => void }) => (
+const NavIcon = ({ 
+  icon, 
+  active = false, 
+  label, 
+  onClick, 
+  highlight = false 
+}: { 
+  icon: React.ReactNode, 
+  active?: boolean, 
+  label: string, 
+  onClick?: () => void,
+  highlight?: boolean
+}) => (
   <button 
     onClick={onClick}
-    className="flex h-full flex-1 flex-col items-center justify-center gap-1 group relative outline-none transition-transform active:scale-90 md:h-12 md:w-12 md:flex-none md:p-0"
+    className={cn(
+      "flex h-full flex-1 flex-col items-center justify-center gap-1 group relative outline-none transition-transform active:scale-90 md:h-12 md:w-12 md:flex-none md:p-0",
+      highlight && !active && "relative"
+    )}
   >
+    {highlight && !active && (
+      <motion.div
+        layoutId="highlight-pulse"
+        className="absolute inset-0 rounded-full bg-purple-400/20 md:hidden"
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1.2, opacity: [0, 0.5, 0] }}
+        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+      />
+    )}
     <div className={cn(
       "w-10 h-10 rounded-[1.15rem] flex items-center justify-center transition-all duration-300 md:w-12 md:h-12 md:rounded-[1.25rem] md:group-hover:bg-purple-100/50",
       active 
         ? "text-purple-600 md:bg-purple-100/50" 
-        : "text-zinc-500 hover:text-purple-600"
+        : highlight 
+          ? "text-purple-500 bg-purple-50 md:bg-transparent" 
+          : "text-zinc-500 hover:text-purple-600"
     )}>
-      {icon}
+      <motion.div
+        animate={highlight && !active ? { 
+          scale: [1, 1.1, 1],
+          rotate: [0, 5, -5, 0]
+        } : {}}
+        transition={highlight && !active ? { 
+          duration: 3, 
+          repeat: Infinity, 
+          ease: "easeInOut" 
+        } : {}}
+      >
+        {icon}
+      </motion.div>
     </div>
     <span className={cn(
       "text-[9px] font-bold uppercase tracking-[0.1em] mt-1 md:hidden",
-      active ? "text-purple-600" : "text-zinc-500"
+      active ? "text-purple-600" : highlight ? "text-purple-500" : "text-zinc-500"
     )}>
       {label}
     </span>
@@ -1354,6 +1392,9 @@ const NavIcon = ({ icon, active = false, label, onClick }: { icon: React.ReactNo
         className="hidden md:block absolute -left-2 w-1 h-5 bg-purple-600 rounded-full"
         transition={{ type: "spring", stiffness: 400, damping: 30 }}
       />
+    )}
+    {highlight && !active && (
+      <span className="absolute top-1 right-1 md:top-0 md:right-0 w-2 h-2 bg-fuchsia-500 rounded-full border-2 border-white animate-bounce" />
     )}
   </button>
 );
