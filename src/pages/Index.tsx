@@ -85,7 +85,8 @@ const Index = () => {
         }} />
         <NavIcon icon={<History size={22} strokeWidth={1.5} />} active={activeTab === 'historico'} label="Histórico" onClick={() => {
           setActiveTab('historico');
-          toast({ title: "Histórico", description: "Acesse seus jogos salvos em breve." });
+          document.getElementById('generator-section')?.scrollIntoView({ behavior: 'smooth' });
+          toast({ title: "Histórico", description: "Visualizando jogos dos últimos 7 dias." });
         }} />
         <div className="hidden md:flex flex-col gap-8 mt-auto mb-4 pt-8 border-t border-white/5">
            <NavIcon icon={<Settings size={22} strokeWidth={1.5} />} active={activeTab === 'ajustes'} label="Ajustes" onClick={() => setActiveTab('ajustes')} />
