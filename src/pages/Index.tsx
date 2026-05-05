@@ -286,8 +286,11 @@ const Index = () => {
   );
 };
 
-const NavIcon = ({ icon, active = false, label }: { icon: React.ReactNode, active?: boolean, label: string }) => (
-  <button className="flex flex-col items-center gap-1 group relative outline-none transition-transform active:scale-90">
+const NavIcon = ({ icon, active = false, label, onClick }: { icon: React.ReactNode, active?: boolean, label: string, onClick?: () => void }) => (
+  <button 
+    onClick={onClick}
+    className="flex flex-col items-center gap-1 group relative outline-none transition-transform active:scale-90"
+  >
     <div className={cn(
       "p-3 rounded-xl transition-all duration-300 md:group-hover:bg-purple-100/50",
       active 
