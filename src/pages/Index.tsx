@@ -27,7 +27,13 @@ import {
   CheckCircle,
   MoreVertical,
   Mail,
-  Lock
+  Lock,
+  Cpu,
+  Send,
+  Loader2,
+  Eye,
+  EyeOff,
+  Key
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { 
@@ -85,6 +91,82 @@ const Index = () => {
   const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<any>(null);
   const [userFormData, setUserFormData] = useState({ email: '', password: '', role: 'demo', status: 'active' });
+  const [deepSeekKey, setDeepSeekKey] = useState('');
+  const [showKey, setShowKey] = useState(false);
+  const [aiChat, setAiChat] = useState<{ role: 'user' | 'assistant', content: string }[]>([]);
+  const [isAiLoading, setIsAiLoading] = useState(false);
+  const [aiMessage, setAiMessage] = useState('');
+
+  useEffect(() => {
+    const savedKey = localStorage.getItem('deepseek_api_key');
+    if (savedKey) setDeepSeekKey(savedKey);
+  }, []);
+
+  const saveDeepSeekKey = () => {
+    localStorage.setItem('deepseek_api_key', deepSeekKey);
+    toast({
+      title: "Configuração Salva",
+      description: "A chave da API DeepSeek foi armazenada com sucesso.",
+    });
+  };
+
+  const handleSendAiMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!aiMessage.trim()) return;
+    if (!deepSeekKey) {
+      toast({
+        title: "API Key Ausente",
+        description: "Configure a chave da API DeepSeek nas configurações para usar a IA.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const newMessage = { role: 'user' as const, content: aiMessage };
+    setAiChat(prev => [...prev, newMessage]);
+    setAiMessage('');
+    setIsAiLoading(true);
+
+    try {
+      const systemPrompt = `Você é o "Lotofácil Intelligence AI", um especialista em estatística, probabilidade e análise de loterias brasileiras, especialmente a Lotofácil. 
+      Seu objetivo é ajudar usuários a analisar tendências, sugerir números baseados em lógica matemática e fornecer insights sobre fechamentos.
+      Sempre mantenha um tom profissional, técnico e encorajador. 
+      Lembre-se: jogos de loteria são baseados em sorte, use termos como "probabilidades", "tendências" e "estatísticas".
+      Sempre que sugerir números, formate-os de forma clara (ex: 01, 05, 10...).`;
+
+      const response = await fetch('https://api.deepseek.com/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${deepSeekKey}`
+        },
+        body: JSON.stringify({
+          model: "deepseek-chat",
+          messages: [
+            { role: "system", content: systemPrompt },
+            ...aiChat,
+            newMessage
+          ],
+          stream: false
+        })
+      });
+
+      if (!response.ok) throw new Error('Falha na comunicação com a API');
+
+      const data = await response.json();
+      const assistantMessage = { role: 'assistant' as const, content: data.choices[0].message.content };
+      setAiChat(prev => [...prev, assistantMessage]);
+    } catch (error) {
+      console.error("Erro na IA:", error);
+      toast({
+        title: "Erro na Inteligência Artificial",
+        description: "Não foi possível processar sua solicitação. Verifique sua API Key.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsAiLoading(false);
+    }
+  };
 
   useEffect(() => {
     const savedUser = localStorage.getItem('intelligence_user');
@@ -259,6 +341,7 @@ const Index = () => {
             setActiveTab('historico');
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }} />
+          <NavIcon icon={<Cpu size={20} strokeWidth={1.5} />} active={activeTab === 'ia'} label="IA" onClick={() => setActiveTab('ia')} />
         </div>
         <div className="flex w-12 flex-col gap-2 items-center pt-2 border-t border-purple-100/70">
            {user.role === 'admin' && (
@@ -276,6 +359,7 @@ const Index = () => {
           document.getElementById('generator-section')?.scrollIntoView({ behavior: 'smooth' });
         }} />
         <NavIcon icon={<History size={20} strokeWidth={1.5} />} active={activeTab === 'historico'} label="Jogos" onClick={() => setActiveTab('historico')} />
+        <NavIcon icon={<Cpu size={20} strokeWidth={1.5} />} active={activeTab === 'ia'} label="IA" onClick={() => setActiveTab('ia')} />
         {user.role === 'admin' && (
           <NavIcon icon={<Settings size={20} strokeWidth={1.5} />} active={activeTab === 'ajustes'} label="Ajustes" onClick={() => setActiveTab('ajustes')} />
         )}
@@ -606,6 +690,126 @@ const Index = () => {
                 </div>
               </motion.div>
 
+            ) : activeTab === 'ia' ? (
+              <motion.div
+                key="ia-page"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="grid grid-cols-1 gap-6"
+              >
+                <div className="bg-white border border-purple-200 rounded-3xl md:rounded-[2rem] p-6 md:p-12 shadow-xl shadow-purple-500/5 min-h-[600px] flex flex-col">
+                  <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
+                    <div className="flex flex-col items-center md:items-start">
+                      <h2 className="text-2xl md:text-3xl font-display font-bold text-zinc-900 mb-1">Lotofácil Intelligence AI</h2>
+                      <p className="text-zinc-500 text-xs">Especialista em análises e probabilidades (Powered by DeepSeek)</p>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setActiveTab('home')}
+                      className="rounded-xl border-purple-100 text-purple-600 hover:bg-purple-50"
+                    >
+                      Voltar
+                    </Button>
+                  </div>
+
+                  <div className="flex-grow flex flex-col bg-purple-50/30 rounded-[2rem] border border-purple-100 overflow-hidden relative">
+                    {!deepSeekKey && user.role === 'admin' ? (
+                      <div className="absolute inset-0 z-10 bg-white/60 backdrop-blur-sm flex items-center justify-center p-8 text-center">
+                        <div className="max-w-md">
+                          <div className="w-16 h-16 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <Key size={32} />
+                          </div>
+                          <h3 className="text-lg font-bold mb-2">Configuração Necessária</h3>
+                          <p className="text-sm text-zinc-500 mb-6">A API do DeepSeek ainda não foi configurada. Vá em Configurações para inserir sua chave.</p>
+                          <Button onClick={() => setActiveTab('ajustes')} className="bg-purple-600 hover:bg-purple-700 text-white rounded-xl">
+                            Configurar Agora
+                          </Button>
+                        </div>
+                      </div>
+                    ) : !deepSeekKey && user.role !== 'admin' ? (
+                      <div className="absolute inset-0 z-10 bg-white/60 backdrop-blur-sm flex items-center justify-center p-8 text-center">
+                        <div className="max-w-md">
+                          <div className="w-16 h-16 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <ShieldCheck size={32} />
+                          </div>
+                          <h3 className="text-lg font-bold mb-2">IA Indisponível</h3>
+                          <p className="text-sm text-zinc-500">A Inteligência Artificial está temporariamente desativada pelo administrador.</p>
+                        </div>
+                      </div>
+                    ) : null}
+
+                    <div className="flex-grow overflow-y-auto p-6 space-y-4 max-h-[400px]">
+                      {aiChat.length === 0 ? (
+                        <div className="h-full flex flex-col items-center justify-center text-center py-10">
+                          <div className="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center text-purple-400 mb-4">
+                            <Cpu size={32} />
+                          </div>
+                          <p className="text-sm text-zinc-500 max-w-xs">Olá! Eu sou seu assistente inteligente. Como posso ajudar com suas análises hoje?</p>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-6">
+                            {[
+                              "Analise as tendências para o próximo sorteio",
+                              "Quais as dezenas mais prováveis?",
+                              "Explique o fechamento R7",
+                              "Sugira um jogo baseado em soma"
+                            ].map((suggestion, i) => (
+                              <button 
+                                key={i}
+                                onClick={() => setAiMessage(suggestion)}
+                                className="px-4 py-2 bg-white border border-purple-100 rounded-xl text-[11px] text-zinc-600 hover:border-purple-300 transition-colors"
+                              >
+                                {suggestion}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        aiChat.map((msg, i) => (
+                          <div key={i} className={cn(
+                            "flex flex-col max-w-[85%]",
+                            msg.role === 'user' ? "ml-auto items-end" : "mr-auto items-start"
+                          )}>
+                            <div className={cn(
+                              "p-4 rounded-2xl text-sm leading-relaxed shadow-sm",
+                              msg.role === 'user' 
+                                ? "bg-purple-600 text-white rounded-tr-none" 
+                                : "bg-white text-zinc-700 border border-purple-100 rounded-tl-none"
+                            )}>
+                              {msg.content}
+                            </div>
+                            <span className="text-[9px] text-zinc-400 mt-1 uppercase font-bold tracking-widest px-1">
+                              {msg.role === 'user' ? 'Você' : 'Lotofácil Intelligence'}
+                            </span>
+                          </div>
+                        ))
+                      )}
+                      {isAiLoading && (
+                        <div className="flex items-center gap-2 text-purple-600 animate-pulse">
+                          <Loader2 size={16} className="animate-spin" />
+                          <span className="text-xs font-bold uppercase tracking-widest">Analisando dados...</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <form onSubmit={handleSendAiMessage} className="p-4 bg-white border-t border-purple-100 flex gap-2">
+                      <Input 
+                        placeholder="Pergunte ao especialista..." 
+                        value={aiMessage}
+                        onChange={(e) => setAiMessage(e.target.value)}
+                        className="rounded-xl border-purple-100"
+                        disabled={isAiLoading || !deepSeekKey}
+                      />
+                      <Button 
+                        type="submit" 
+                        disabled={isAiLoading || !deepSeekKey}
+                        className="bg-purple-600 hover:bg-purple-700 text-white rounded-xl w-12 h-10 p-0 shrink-0"
+                      >
+                        <Send size={18} />
+                      </Button>
+                    </form>
+                  </div>
+                </div>
+              </motion.div>
             ) : activeTab === 'ajustes' && user.role === 'admin' ? (
               <motion.div
                 key="ajustes-page"
@@ -811,6 +1015,52 @@ const Index = () => {
                         ))}
                       </tbody>
                     </table>
+                  </div>
+
+                  <div className="mt-8 p-8 border-t border-purple-100">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-10 h-10 rounded-xl bg-indigo-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
+                        <Cpu size={20} />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-zinc-900 leading-none">Integração DeepSeek AI</h3>
+                        <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest mt-1">Configuração de Inteligência Artificial</p>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-1 gap-6 max-w-2xl">
+                      <div className="space-y-3">
+                        <Label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">API Key do DeepSeek</Label>
+                        <div className="flex gap-2">
+                          <div className="relative flex-grow">
+                            <Key className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
+                            <Input 
+                              type={showKey ? "text" : "password"} 
+                              placeholder="sk-..." 
+                              value={deepSeekKey}
+                              onChange={(e) => setDeepSeekKey(e.target.value)}
+                              className="pl-10 rounded-xl border-purple-100"
+                            />
+                            <button 
+                              type="button"
+                              onClick={() => setShowKey(!showKey)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-purple-600 transition-colors"
+                            >
+                              {showKey ? <EyeOff size={16} /> : <Eye size={16} />}
+                            </button>
+                          </div>
+                          <Button 
+                            onClick={saveDeepSeekKey}
+                            className="bg-purple-600 hover:bg-purple-700 text-white rounded-xl px-6"
+                          >
+                            Salvar Chave
+                          </Button>
+                        </div>
+                        <p className="text-[10px] text-zinc-400 leading-relaxed italic">
+                          A chave será armazenada localmente e usada para alimentar o especialista em IA na aba "IA".
+                        </p>
+                      </div>
+                    </div>
                   </div>
 
                   <div className="mt-8 p-6 bg-amber-50 border border-amber-100 rounded-2xl flex items-start gap-4">
