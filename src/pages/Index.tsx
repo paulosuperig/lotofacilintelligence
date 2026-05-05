@@ -205,11 +205,11 @@ const Index = () => {
                 exit={{ opacity: 0, x: -20 }}
                 className="grid grid-cols-1 gap-6"
               >
-                <div className="bg-white border border-purple-200 rounded-[2rem] p-8 md:p-12 shadow-xl shadow-purple-500/5">
-                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-10 gap-4">
+                <div className="bg-white border border-purple-200 rounded-3xl md:rounded-[2rem] p-6 md:p-12 shadow-xl shadow-purple-500/5">
+                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 md:mb-10 gap-4">
                     <div>
-                      <h2 className="text-3xl font-display font-bold text-zinc-900 mb-2">Seu Histórico</h2>
-                      <p className="text-zinc-500 text-sm">Jogos salvos nos últimos 7 dias</p>
+                      <h2 className="text-2xl md:text-3xl font-display font-bold text-zinc-900 mb-1 md:mb-2">Seu Histórico</h2>
+                      <p className="text-zinc-500 text-xs">Jogos salvos nos últimos 7 dias</p>
                     </div>
                     <div className="flex items-center gap-3">
                       {history.length > 0 && (
