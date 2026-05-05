@@ -124,8 +124,8 @@ const Index = () => {
           >
             
             {/* Main Result Bento - Large */}
-            <motion.div variants={itemVariants} className="lg:col-span-8 lg:row-span-2 glass-morphism premium-border rounded-[2rem] p-8 md:p-10 relative group overflow-hidden">
-              <div className="absolute top-0 right-0 p-12 opacity-[0.02] group-hover:scale-110 transition-transform duration-1000">
+            <motion.div variants={itemVariants} className="lg:col-span-8 lg:row-span-2 bg-white border border-purple-100 rounded-[2rem] p-8 md:p-10 relative group overflow-hidden shadow-sm">
+              <div className="absolute top-0 right-0 p-12 opacity-[0.03] group-hover:scale-110 transition-transform duration-1000 text-purple-900">
                 <Trophy size={280} strokeWidth={0.5} />
               </div>
               
