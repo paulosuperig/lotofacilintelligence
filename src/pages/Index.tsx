@@ -65,9 +65,9 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-[#f5f3ff] text-zinc-900 selection:bg-purple-500/30 overflow-x-hidden font-sans">
       {/* Sidebar Navigation - Apple Style */}
-      <aside className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md h-16 glass-morphism premium-border rounded-2xl z-50 md:top-1/2 md:left-8 md:-translate-x-0 md:-translate-y-1/2 md:w-20 md:h-[600px] md:flex-col md:rounded-3xl flex items-center justify-around md:justify-center md:gap-8 py-4 px-6 md:px-0 shadow-2xl shadow-black/50">
+      <aside className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md h-16 bg-white/80 backdrop-blur-xl border border-purple-100 rounded-2xl z-50 md:top-1/2 md:left-8 md:-translate-x-0 md:-translate-y-1/2 md:w-20 md:h-[600px] md:flex-col md:rounded-3xl flex items-center justify-around md:justify-center md:gap-8 py-4 px-6 md:px-0 shadow-xl shadow-purple-500/10">
         <div className="hidden md:flex flex-col items-center mb-8">
-           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-premium-accent to-indigo-600 flex items-center justify-center shadow-lg shadow-premium-accent/20">
+           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-fuchsia-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
              <Trophy size={20} className="text-white" />
            </div>
         </div>
