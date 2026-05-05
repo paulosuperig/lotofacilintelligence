@@ -136,6 +136,10 @@ const Index = () => {
     }
   };
 
+  if (!user) {
+    return <Login onLogin={handleLogin} />;
+  }
+
   return (
     <div className="min-h-screen bg-[#f5f3ff] text-zinc-900 selection:bg-purple-500/30 overflow-x-hidden font-sans pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
       {/* Sidebar Navigation - Desktop */}
@@ -162,7 +166,7 @@ const Index = () => {
         </div>
         <div className="flex w-12 flex-col gap-2 items-center pt-2 border-t border-purple-100/70">
            <NavIcon icon={<Settings size={20} strokeWidth={1.5} />} active={activeTab === 'ajustes'} label="Ajustes" onClick={() => setActiveTab('ajustes')} />
-           <NavIcon icon={<LogOut size={20} strokeWidth={1.5} />} label="Sair" onClick={() => toast({ title: "Sair", description: "Encerrando sessão..." })} />
+           <NavIcon icon={<LogOut size={20} strokeWidth={1.5} />} label="Sair" onClick={handleLogout} />
         </div>
       </aside>
 
@@ -174,8 +178,9 @@ const Index = () => {
           document.getElementById('generator-section')?.scrollIntoView({ behavior: 'smooth' });
         }} />
         <NavIcon icon={<History size={20} strokeWidth={1.5} />} active={activeTab === 'historico'} label="Jogos" onClick={() => setActiveTab('historico')} />
-        <NavIcon icon={<Settings size={20} strokeWidth={1.5} />} active={activeTab === 'ajustes'} label="Menu" onClick={() => setActiveTab('ajustes')} />
+        <NavIcon icon={<LogOut size={20} strokeWidth={1.5} />} label="Sair" onClick={handleLogout} />
       </nav>
+
 
       <main className="pb-24 md:pb-12 md:pl-32">
         <div className="max-w-[1400px] mx-auto p-4 sm:p-6 md:p-12 lg:p-16">
