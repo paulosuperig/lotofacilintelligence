@@ -50,7 +50,7 @@ export const GameGenerator = () => {
       <div className="p-8 md:p-12 border-b border-purple-50">
         <div className="flex flex-col gap-6 mb-8">
           <div>
-            <div className="flex items-center gap-2 text-indigo-400 mb-3">
+            <div className="flex items-center gap-2 text-purple-600 mb-3">
               <Zap size={16} fill="currentColor" />
               <span className="text-[10px] uppercase font-black tracking-[0.25em]">Sistemas Pro</span>
             </div>
