@@ -184,8 +184,8 @@ const Index = () => {
             </motion.div>
 
             {/* Frequência Bento */}
-            <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-1 glass-morphism premium-border rounded-[2rem] p-8 flex flex-col justify-between group overflow-hidden relative">
-              <div className="absolute -right-4 -bottom-4 opacity-[0.05] group-hover:scale-110 transition-transform duration-700">
+            <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-1 bg-white border border-purple-100 rounded-[2rem] p-8 flex flex-col justify-between group overflow-hidden relative shadow-sm">
+              <div className="absolute -right-4 -bottom-4 opacity-[0.05] group-hover:scale-110 transition-transform duration-700 text-purple-900">
                 <PieChart size={140} strokeWidth={1} />
               </div>
               <div>
