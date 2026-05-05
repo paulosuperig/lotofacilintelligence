@@ -234,7 +234,7 @@ export const BentoGrid = ({
       <motion.div 
         variants={itemVariants} 
         onClick={() => onNavigate('stats')}
-        className="lg:col-span-4 lg:row-span-1 bg-white border border-purple-100 rounded-[2rem] p-8 flex items-center gap-6 group cursor-pointer hover:bg-purple-50/50 transition-all shadow-sm"
+        className="lg:col-span-4 lg:row-span-1 bg-white dark:bg-zinc-900 border border-purple-100 dark:border-zinc-800 rounded-[2rem] p-8 flex items-center gap-6 group cursor-pointer hover:bg-purple-50/50 dark:hover:bg-zinc-800/50 transition-all shadow-sm"
       >
         <div className="w-16 h-16 rounded-3xl bg-purple-500/10 border border-purple-100 flex items-center justify-center text-purple-600 group-hover:scale-110 transition-transform duration-500">
           <ShieldCheck size={32} />
