@@ -269,7 +269,7 @@ const NavIcon = ({ icon, active = false, label }: { icon: React.ReactNode, activ
     </div>
     <span className={cn(
       "text-[9px] font-bold uppercase tracking-[0.1em] mt-1 md:hidden",
-      active ? "text-indigo-400" : "text-zinc-500"
+      active ? "text-purple-600" : "text-zinc-500"
     )}>
       {label}
     </span>
