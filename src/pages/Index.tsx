@@ -1062,33 +1062,7 @@ const Index = () => {
                       </div>
                     </div>
 
-                    <div className="border border-purple-100 rounded-3xl overflow-hidden bg-purple-50/20">
-                      <div className="p-4 bg-purple-100/50 border-b border-purple-100 flex items-center justify-between">
-                        <h4 className="text-sm font-bold text-purple-900 flex items-center gap-2">
-                          <Cpu size={16} /> Assistente de Inteligência Artificial
-                        </h4>
-                        <Button 
-                          size="sm" 
-                          variant="ghost" 
-                          onClick={() => setActiveTab('ia')}
-                          className="text-xs font-bold text-purple-600 hover:bg-purple-100"
-                        >
-                          Abrir em Tela Cheia <ChevronRight size={14} />
-                        </Button>
-                      </div>
-                      <div className="p-6">
-                        <p className="text-xs text-zinc-600 leading-relaxed mb-4">
-                          Utilize o assistente para realizar análises complexas, cruzamento de dados e obter sugestões baseadas em estatísticas avançadas da Lotofácil.
-                        </p>
-                        <Button 
-                          onClick={() => setActiveTab('ia')}
-                          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl py-6 flex items-center justify-center gap-2 group"
-                        >
-                          <Sparkles size={18} className="group-hover:rotate-12 transition-transform" />
-                          Iniciar Chat com IA
-                        </Button>
-                      </div>
-                    </div>
+                    {/* IA section removed from Settings for non-admins and access logic moved back to Navbar */}
                   </div>
 
                   <div className="mt-8 p-6 bg-amber-50 border border-amber-100 rounded-2xl flex items-start gap-4">
