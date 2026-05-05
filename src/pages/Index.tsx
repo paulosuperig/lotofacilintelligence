@@ -91,12 +91,12 @@ const Index = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
             >
-              <div className="flex items-center gap-3 mb-2">
-                <span className="w-2 h-2 rounded-full bg-premium-accent animate-pulse" />
-                <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-premium-text-muted">Status: Membro Premium</span>
+              <div className="flex items-center gap-3 mb-4">
+                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)] animate-pulse" />
+                <span className="text-[10px] uppercase font-bold tracking-[0.25em] text-zinc-500">Membro Premium Intelligence</span>
               </div>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-black tracking-tight leading-tight">
-                Lotofácil <span className="text-transparent bg-clip-text bg-gradient-to-r from-premium-accent to-indigo-400">Intelligence</span>
+              <h1 className="text-4xl md:text-6xl font-display font-black tracking-tight leading-[1.1]">
+                Lotofácil <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-indigo-200 to-white/50">Intelligence</span>
               </h1>
             </motion.div>
             
@@ -106,11 +106,11 @@ const Index = () => {
               className="flex items-center gap-6"
             >
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-medium text-premium-text-primary">João Silva</p>
-                <p className="text-xs text-premium-text-muted">Pro Analytics Dashboard</p>
+                <p className="text-sm font-bold text-zinc-200">João Silva</p>
+                <p className="text-[10px] uppercase tracking-widest text-zinc-500">Pro Analyst</p>
               </div>
-              <div className="w-14 h-14 rounded-2xl glass-morphism premium-border flex items-center justify-center text-lg font-display font-bold group cursor-pointer hover:border-premium-accent/50 transition-colors">
-                <span className="group-hover:scale-110 transition-transform duration-500">JS</span>
+              <div className="w-12 h-12 rounded-xl glass-morphism premium-border flex items-center justify-center text-sm font-display font-bold group cursor-pointer hover:border-indigo-500/50 transition-all duration-300">
+                <span className="group-hover:scale-110 transition-transform duration-500 text-zinc-300">JS</span>
               </div>
             </motion.div>
           </header>
@@ -124,9 +124,9 @@ const Index = () => {
           >
             
             {/* Main Result Bento - Large */}
-            <motion.div variants={itemVariants} className="lg:col-span-8 lg:row-span-2 glass-morphism premium-border rounded-[2.5rem] p-10 relative group overflow-hidden">
-              <div className="absolute top-0 right-0 p-12 opacity-[0.03] group-hover:scale-110 transition-transform duration-1000">
-                <Trophy size={280} strokeWidth={1} />
+            <motion.div variants={itemVariants} className="lg:col-span-8 lg:row-span-2 glass-morphism premium-border rounded-[2rem] p-8 md:p-10 relative group overflow-hidden">
+              <div className="absolute top-0 right-0 p-12 opacity-[0.02] group-hover:scale-110 transition-transform duration-1000">
+                <Trophy size={280} strokeWidth={0.5} />
               </div>
               
               <div className="relative z-10 h-full flex flex-col">
