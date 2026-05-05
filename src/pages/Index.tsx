@@ -65,12 +65,17 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-premium-dark bg-mesh-gradient text-premium-text-primary selection:bg-premium-accent/30 overflow-x-hidden">
       {/* Sidebar Navigation - Apple Style */}
-      <aside className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md h-16 glass-morphism premium-border rounded-full z-50 md:top-1/2 md:left-8 md:-translate-x-0 md:-translate-y-1/2 md:w-20 md:h-auto md:flex-col md:rounded-3xl flex items-center justify-around md:justify-center md:gap-8 py-4 px-6 md:px-0">
+      <aside className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md h-16 glass-morphism premium-border rounded-full z-50 md:top-1/2 md:left-6 md:-translate-x-0 md:-translate-y-1/2 md:w-20 md:h-[600px] md:flex-col md:rounded-3xl flex items-center justify-around md:justify-center md:gap-8 py-4 px-6 md:px-0">
+        <div className="hidden md:flex flex-col items-center mb-8">
+           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-premium-accent to-indigo-600 flex items-center justify-center shadow-lg shadow-premium-accent/20">
+             <Trophy size={20} className="text-white" />
+           </div>
+        </div>
         <NavIcon icon={<LayoutDashboard size={22} strokeWidth={1.5} />} active label="Home" />
         <NavIcon icon={<Zap size={22} strokeWidth={1.5} />} label="Gerador" />
         <NavIcon icon={<TrendingUp size={22} strokeWidth={1.5} />} label="Stats" />
         <NavIcon icon={<History size={22} strokeWidth={1.5} />} label="Histórico" />
-        <div className="hidden md:flex flex-col gap-8 mt-12 pt-8 border-t border-white/5">
+        <div className="hidden md:flex flex-col gap-8 mt-auto mb-4 pt-8 border-t border-white/5">
            <NavIcon icon={<Settings size={22} strokeWidth={1.5} />} label="Ajustes" />
            <NavIcon icon={<LogOut size={22} strokeWidth={1.5} />} label="Sair" />
         </div>
@@ -143,7 +148,7 @@ const Index = () => {
                   <div className="bg-white/[0.03] p-6 rounded-[2rem] premium-border backdrop-blur-xl">
                     <p className="text-[10px] text-premium-text-muted uppercase font-bold tracking-[0.2em] mb-2">Prêmio Estimado</p>
                     <p className="text-3xl font-display font-black text-emerald-400">
-                      {latestResult ? formatCurrency(latestResult.valor_estimado_proximo_concurso) : "R$ ---"}
+                      {latestResult ? formatCurrency(latestResult.valor_estimado_proximo_concurso || latestResult.estimativa_proximo_concurso || 0) : "R$ ---"}
                     </p>
                   </div>
                 </div>
