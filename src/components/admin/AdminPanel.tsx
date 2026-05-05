@@ -197,18 +197,18 @@ export const AdminPanel = ({
           </thead>
           <tbody className="divide-y divide-purple-50">
             {users.map((u) => (
-              <tr key={u.id} className="hover:bg-purple-50/30 transition-colors">
+              <tr key={u.id} className="hover:bg-purple-50/30 dark:hover:bg-zinc-800/30 transition-colors">
                 <td className="px-6 py-5">
                   <div className="flex items-center gap-3">
                     <div className={cn(
                       "w-8 h-8 rounded-full flex items-center justify-center",
-                      u.role === 'admin' ? "bg-purple-100 text-purple-600" : "bg-zinc-100 text-zinc-500"
+                      u.role === 'admin' ? "bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400"
                     )}>
                       {u.role === 'admin' ? <ShieldCheck size={16} /> : <Sparkles size={16} />}
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-zinc-900">{maskSensitiveData(u.email)}</p>
-                      <p className="text-[10px] text-zinc-500">
+                      <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{maskSensitiveData(u.email)}</p>
+                      <p className="text-[10px] text-zinc-500 dark:text-zinc-400">
                         ID: {u.id.substring(0, 8)}... | Cadastrado em {new Date(u.createdAt).toLocaleDateString('pt-BR')}
                       </p>
                     </div>
