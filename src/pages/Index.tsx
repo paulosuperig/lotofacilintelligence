@@ -213,7 +213,7 @@ const Index = () => {
                 </div>
               </div>
               <div>
-                <h4 className="font-bold text-white mb-1">Índice de Acertos</h4>
+                <h4 className="font-bold text-zinc-900 mb-1">Índice de Acertos</h4>
                 <p className="text-xs text-premium-text-muted">Seu desempenho está acima de 85% dos usuários Pro.</p>
               </div>
             </motion.div>
