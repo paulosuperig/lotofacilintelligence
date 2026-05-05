@@ -85,7 +85,7 @@ export const BentoGrid = ({
       </motion.div>
 
       {/* Official Result Bento */}
-      <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-2 bg-white/50 border border-purple-100 rounded-3xl md:rounded-[2rem] p-6 md:p-8 relative group overflow-hidden shadow-sm hover:bg-white transition-colors duration-500">
+      <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-2 bg-white/50 dark:bg-zinc-900/50 border border-purple-100 dark:border-zinc-800 rounded-3xl md:rounded-[2rem] p-6 md:p-8 relative group overflow-hidden shadow-sm hover:bg-white dark:hover:bg-zinc-900 transition-colors duration-500">
         <div className="absolute top-0 right-0 p-8 opacity-[0.02] group-hover:scale-110 transition-transform duration-1000 text-purple-900 hidden md:block">
           <Trophy size={180} strokeWidth={0.5} />
         </div>
