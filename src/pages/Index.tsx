@@ -341,7 +341,13 @@ const Index = () => {
             setActiveTab('historico');
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }} />
-          <NavIcon icon={<Cpu size={20} strokeWidth={1.5} />} active={activeTab === 'ia'} label="IA" onClick={() => setActiveTab('ia')} />
+          <NavIcon 
+            icon={<Cpu size={20} strokeWidth={1.5} />} 
+            active={activeTab === 'ia'} 
+            label="IA" 
+            onClick={() => setActiveTab('ia')}
+            highlight
+          />
         </div>
         <div className="flex w-12 flex-col gap-2 items-center pt-2 border-t border-purple-100/70">
            {user.role === 'admin' && (
@@ -352,18 +358,25 @@ const Index = () => {
       </aside>
 
       {/* Bottom Navigation - Mobile */}
-      <nav className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-4 right-4 h-16 bg-white/90 backdrop-blur-xl border border-purple-100 rounded-2xl z-50 flex items-center justify-around px-2 shadow-xl shadow-purple-500/10 md:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 h-auto bg-white/95 backdrop-blur-xl border-t border-purple-100 z-50 flex items-center justify-between px-1 pb-[env(safe-area-inset-bottom)] shadow-[0_-10px_25px_-5px_rgba(168,85,247,0.1)] md:hidden">
         <NavIcon icon={<LayoutDashboard size={20} strokeWidth={1.5} />} active={activeTab === 'home'} label="Início" onClick={() => setActiveTab('home')} />
         <NavIcon icon={<Zap size={20} strokeWidth={1.5} />} active={activeTab === 'gerador'} label="Gerar" onClick={() => {
           setActiveTab('gerador');
           document.getElementById('generator-section')?.scrollIntoView({ behavior: 'smooth' });
         }} />
-        <NavIcon icon={<History size={20} strokeWidth={1.5} />} active={activeTab === 'historico'} label="Jogos" onClick={() => setActiveTab('historico')} />
-        <NavIcon icon={<Cpu size={20} strokeWidth={1.5} />} active={activeTab === 'ia'} label="IA" onClick={() => setActiveTab('ia')} />
-        {user.role === 'admin' && (
+        <NavIcon icon={<History size={20} strokeWidth={1.5} />} active={activeTab === 'historico'} label="Histórico" onClick={() => setActiveTab('historico')} />
+        <NavIcon 
+          icon={<Cpu size={20} strokeWidth={1.5} />} 
+          active={activeTab === 'ia'} 
+          label="IA" 
+          onClick={() => setActiveTab('ia')} 
+          highlight
+        />
+        {user.role === 'admin' ? (
           <NavIcon icon={<Settings size={20} strokeWidth={1.5} />} active={activeTab === 'ajustes'} label="Ajustes" onClick={() => setActiveTab('ajustes')} />
+        ) : (
+          <NavIcon icon={<LogOut size={20} strokeWidth={1.5} />} label="Sair" onClick={handleLogout} />
         )}
-        <NavIcon icon={<LogOut size={20} strokeWidth={1.5} />} label="Sair" onClick={handleLogout} />
       </nav>
 
       {user.role === 'demo' && (
