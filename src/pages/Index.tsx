@@ -84,7 +84,7 @@ const Index = () => {
 
       if (gamesToSave.length > 0) {
         const newGames = gamesToSave.map(nums => ({
-          id: Math.random().toString(36).substr(2, 9),
+          id: generateSecureId(),
           numbers: nums,
           timestamp: Date.now(),
           type: 'IA Insight'
