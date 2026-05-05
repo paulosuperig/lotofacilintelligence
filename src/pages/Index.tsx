@@ -341,7 +341,7 @@ const Index = () => {
             setActiveTab('historico');
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }} />
-          <NavIcon icon={<Cpu size={20} strokeWidth={1.5} />} active={activeTab === 'ia'} label="IA" onClick={() => setActiveTab('ia')} />
+          {user.role === 'admin' && <NavIcon icon={<Cpu size={20} strokeWidth={1.5} />} active={activeTab === 'ia'} label="IA" onClick={() => setActiveTab('ia')} />}
         </div>
         <div className="flex w-12 flex-col gap-2 items-center pt-2 border-t border-purple-100/70">
            {user.role === 'admin' && (
@@ -359,7 +359,7 @@ const Index = () => {
           document.getElementById('generator-section')?.scrollIntoView({ behavior: 'smooth' });
         }} />
         <NavIcon icon={<History size={20} strokeWidth={1.5} />} active={activeTab === 'historico'} label="Jogos" onClick={() => setActiveTab('historico')} />
-        <NavIcon icon={<Cpu size={20} strokeWidth={1.5} />} active={activeTab === 'ia'} label="IA" onClick={() => setActiveTab('ia')} />
+        {user.role === 'admin' && <NavIcon icon={<Cpu size={20} strokeWidth={1.5} />} active={activeTab === 'ia'} label="IA" onClick={() => setActiveTab('ia')} />}
         {user.role === 'admin' && (
           <NavIcon icon={<Settings size={20} strokeWidth={1.5} />} active={activeTab === 'ajustes'} label="Ajustes" onClick={() => setActiveTab('ajustes')} />
         )}
@@ -1028,7 +1028,7 @@ const Index = () => {
                       </div>
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-1 gap-6 max-w-2xl">
+                    <div className="grid grid-cols-1 md:grid-cols-1 gap-6 max-w-2xl mb-8">
                       <div className="space-y-3">
                         <Label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">API Key do DeepSeek</Label>
                         <div className="flex gap-2">
@@ -1057,8 +1057,36 @@ const Index = () => {
                           </Button>
                         </div>
                         <p className="text-[10px] text-zinc-400 leading-relaxed italic">
-                          A chave será armazenada localmente e usada para alimentar o especialista em IA na aba "IA".
+                          A chave será armazenada localmente e usada para alimentar o especialista em IA.
                         </p>
+                      </div>
+                    </div>
+
+                    <div className="border border-purple-100 rounded-3xl overflow-hidden bg-purple-50/20">
+                      <div className="p-4 bg-purple-100/50 border-b border-purple-100 flex items-center justify-between">
+                        <h4 className="text-sm font-bold text-purple-900 flex items-center gap-2">
+                          <Cpu size={16} /> Assistente de Inteligência Artificial
+                        </h4>
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          onClick={() => setActiveTab('ia')}
+                          className="text-xs font-bold text-purple-600 hover:bg-purple-100"
+                        >
+                          Abrir em Tela Cheia <ChevronRight size={14} />
+                        </Button>
+                      </div>
+                      <div className="p-6">
+                        <p className="text-xs text-zinc-600 leading-relaxed mb-4">
+                          Utilize o assistente para realizar análises complexas, cruzamento de dados e obter sugestões baseadas em estatísticas avançadas da Lotofácil.
+                        </p>
+                        <Button 
+                          onClick={() => setActiveTab('ia')}
+                          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl py-6 flex items-center justify-center gap-2 group"
+                        >
+                          <Sparkles size={18} className="group-hover:rotate-12 transition-transform" />
+                          Iniciar Chat com IA
+                        </Button>
                       </div>
                     </div>
                   </div>
