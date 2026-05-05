@@ -208,7 +208,7 @@ export const GameGenerator = () => {
               });
             }}
             disabled={generatedGame.length === 0}
-            className="h-12 rounded-xl bg-white border-purple-100 text-zinc-900 hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200 font-bold text-[10px] uppercase tracking-widest transition-all disabled:opacity-50"
+            className="h-12 rounded-xl bg-white dark:bg-zinc-800 border-purple-100 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 hover:bg-purple-50 dark:hover:bg-zinc-700 hover:text-purple-700 dark:hover:text-purple-400 hover:border-purple-200 dark:hover:border-purple-800 font-bold text-[10px] uppercase tracking-widest transition-all disabled:opacity-50"
           >
              <Save className="mr-3" size={16} /> Salvar Jogo
            </Button>
@@ -223,7 +223,7 @@ export const GameGenerator = () => {
               });
             }}
             disabled={generatedGame.length === 0}
-            className="h-12 rounded-xl bg-white border-purple-100 text-zinc-900 hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200 font-bold text-[10px] uppercase tracking-widest transition-all disabled:opacity-50"
+            className="h-12 rounded-xl bg-white dark:bg-zinc-800 border-purple-100 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 hover:bg-purple-50 dark:hover:bg-zinc-700 hover:text-purple-700 dark:hover:text-purple-400 hover:border-purple-200 dark:hover:border-purple-800 font-bold text-[10px] uppercase tracking-widest transition-all disabled:opacity-50"
           >
              Copiar
            </Button>
