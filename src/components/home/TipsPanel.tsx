@@ -55,17 +55,17 @@ export const TipsPanel = ({ onBack }: TipsPanelProps) => {
               <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">Estratégia de Quadrantes</h3>
             </div>
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-zinc-50 rounded-xl">
-                <span className="text-xs font-bold text-zinc-500 uppercase">Q1 (01-05)</span>
-                <span className="text-sm font-bold text-purple-600">Alta Frequência</span>
+              <div className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-900 rounded-xl">
+                <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase">Q1 (01-05)</span>
+                <span className="text-sm font-bold text-purple-600 dark:text-purple-400">Alta Frequência</span>
               </div>
-              <div className="flex items-center justify-between p-4 bg-zinc-50 rounded-xl">
-                <span className="text-xs font-bold text-zinc-500 uppercase">Q3 (11-15)</span>
-                <span className="text-sm font-bold text-emerald-500">Equilibrado</span>
+              <div className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-900 rounded-xl">
+                <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase">Q3 (11-15)</span>
+                <span className="text-sm font-bold text-emerald-500 dark:text-emerald-400">Equilibrado</span>
               </div>
-              <div className="flex items-center justify-between p-4 bg-zinc-50 rounded-xl">
-                <span className="text-xs font-bold text-zinc-500 uppercase">Q5 (21-25)</span>
-                <span className="text-sm font-bold text-amber-500">Padrão de Repetição</span>
+              <div className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-900 rounded-xl">
+                <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase">Q5 (21-25)</span>
+                <span className="text-sm font-bold text-amber-500 dark:text-amber-400">Padrão de Repetição</span>
               </div>
             </div>
           </div>
