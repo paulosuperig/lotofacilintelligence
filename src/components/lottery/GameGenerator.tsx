@@ -29,7 +29,7 @@ export const GameGenerator = () => {
   const [generatedGame, setGeneratedGame] = useState<number[]>([]);
   const [history, setHistory] = useState<SavedGame[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [stats, setStats] = useState({ pairs: 0, odd: 0, primes: 0, sum: 0 });
+  const [stats, setStats] = useState({ pairs: 0, odd: 0, primes: 0, sum: 0, mold: 0, sequence: 0 });
   const { toast } = useToast();
 
   useEffect(() => {
@@ -59,15 +59,32 @@ export const GameGenerator = () => {
 
   const calculateStats = useCallback((nums: number[]) => {
     const primes = [2, 3, 5, 7, 11, 13, 17, 19, 23];
+    const moldNumbers = [1, 2, 3, 4, 5, 6, 10, 11, 15, 16, 20, 21, 22, 23, 24, 25];
+    
     const pCount = nums.filter(n => primes.includes(n)).length;
     const evenCount = nums.filter(n => n % 2 === 0).length;
+    const moldCount = nums.filter(n => moldNumbers.includes(n)).length;
     const sum = nums.reduce((a, b) => a + b, 0);
+    
+    // Calcular maior sequência
+    let maxSeq = 1;
+    let currentSeq = 1;
+    for (let i = 1; i < nums.length; i++) {
+      if (nums[i] === nums[i - 1] + 1) {
+        currentSeq++;
+        maxSeq = Math.max(maxSeq, currentSeq);
+      } else {
+        currentSeq = 1;
+      }
+    }
     
     setStats({
       pairs: evenCount,
       odd: 15 - evenCount,
       primes: pCount,
-      sum
+      sum,
+      mold: moldCount,
+      sequence: maxSeq
     });
   }, []);
 
@@ -76,30 +93,60 @@ export const GameGenerator = () => {
     setIsGenerating(true);
     
     setTimeout(() => {
-      const numbers: number[] = [];
+      let attempts = 0;
+      let finalGame: number[] = [];
+      let valid = false;
+
+      // Pool de números da Lotofácil (1 a 25)
       const pool = Array.from({ length: 25 }, (_, i) => i + 1);
-      
-      // Criar um novo pool local para garantir unicidade em cada geração
-      const localPool = [...pool];
-      
-      for (let i = 0; i < 15; i++) {
-        if (localPool.length === 0) break;
-        const randomIndex = Math.floor(Math.random() * localPool.length);
-        const selectedNumber = localPool.splice(randomIndex, 1)[0];
-        numbers.push(selectedNumber);
+      const primes = [2, 3, 5, 7, 11, 13, 17, 19, 23];
+      const moldNumbers = [1, 2, 3, 4, 5, 6, 10, 11, 15, 16, 20, 21, 22, 23, 24, 25];
+
+      while (!valid && attempts < 100) {
+        attempts++;
+        const numbers: number[] = [];
+        const localPool = [...pool];
+        
+        for (let i = 0; i < 15; i++) {
+          const randomIndex = Math.floor(Math.random() * localPool.length);
+          numbers.push(localPool.splice(randomIndex, 1)[0]);
+        }
+        
+        const sorted = numbers.sort((a, b) => a - b);
+        
+        // Critérios de Tendência (Matemática de Loteria)
+        const evenCount = sorted.filter(n => n % 2 === 0).length;
+        const oddCount = 15 - evenCount;
+        const sum = sorted.reduce((a, b) => a + b, 0);
+        const pCount = sorted.filter(n => primes.includes(n)).length;
+        const moldCount = sorted.filter(n => moldNumbers.includes(n)).length;
+
+        // Tendências Lotofácil:
+        // 1. Pares/Ímpares: Geralmente 7/8 ou 8/7
+        // 2. Primos: Geralmente 5 a 6
+        // 3. Moldura: Geralmente 9 a 11
+        // 4. Soma: Geralmente entre 180 e 210
+        const checkParity = (evenCount === 7 || evenCount === 8);
+        const checkPrimes = (pCount >= 5 && pCount <= 6);
+        const checkMold = (moldCount >= 9 && moldCount <= 11);
+        const checkSum = (sum >= 170 && sum <= 220);
+
+        if ((checkParity && checkPrimes && checkSum) || attempts > 50) {
+          finalGame = sorted;
+          valid = true;
+        }
       }
 
-      const sortedNumbers = numbers.sort((a, b) => a - b);
-      setGeneratedGame(sortedNumbers);
+      setGeneratedGame(finalGame);
       
       const newGame: SavedGame = {
         id: generateSecureId(),
-        numbers: sortedNumbers,
+        numbers: finalGame,
         timestamp: Date.now()
       };
       saveHistory([newGame, ...history].slice(0, 50));
       
-      calculateStats(sortedNumbers);
+      calculateStats(finalGame);
       setIsGenerating(false);
     }, 800);
   };
@@ -187,14 +234,17 @@ export const GameGenerator = () => {
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col gap-4 mb-10"
+            className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-10"
           >
             <StatCard 
               label="Pares / Ímpares" 
-              value={`${stats.pairs} pares e ${stats.odd} ímpares`} 
+              value={`${stats.pairs}P / ${stats.odd}Í`} 
               icon={<TrendingUp size={14}/>} 
             />
             <StatCard label="Soma Total" value={stats.sum} icon={<TrendingUp size={14}/>} />
+            <StatCard label="Moldura" value={stats.mold} icon={<TrendingUp size={14}/>} />
+            <StatCard label="Primos" value={stats.primes} icon={<TrendingUp size={14}/>} />
+            <StatCard label="Maior Seq." value={stats.sequence} icon={<TrendingUp size={14}/>} />
           </motion.div>
         )}
 
