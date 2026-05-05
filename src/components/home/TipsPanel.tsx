@@ -47,12 +47,12 @@ export const TipsPanel = ({ onBack }: TipsPanelProps) => {
             </div>
           </div>
 
-          <div className="p-8 bg-white border border-purple-100 rounded-[2.5rem] shadow-sm">
+          <div className="p-8 bg-white dark:bg-zinc-800 border border-purple-100 dark:border-zinc-700 rounded-[2.5rem] shadow-sm">
             <div className="flex items-center gap-4 mb-6">
               <div className="w-12 h-12 rounded-2xl bg-emerald-500 flex items-center justify-center text-white shadow-lg">
                 <TrendingUp size={24} />
               </div>
-              <h3 className="text-xl font-bold text-zinc-900">Estratégia de Quadrantes</h3>
+              <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">Estratégia de Quadrantes</h3>
             </div>
             <div className="space-y-4">
               <div className="flex items-center justify-between p-4 bg-zinc-50 rounded-xl">
