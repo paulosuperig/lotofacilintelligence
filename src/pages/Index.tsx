@@ -389,7 +389,7 @@ const Index = () => {
                         Array(15).fill(0).map((_, i) => (
                           <div key={i} className="aspect-square rounded-full bg-purple-100/50 animate-pulse" />
                         ))
-                      ) : (
+            ) : (
                         latestResult?.dezenas.map((num) => (
                           <Ball key={num} number={num} active size="sm" />
                         ))
