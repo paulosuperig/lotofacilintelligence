@@ -29,7 +29,7 @@ export const Ball: React.FC<BallProps> = ({
       whileTap={{ scale: 0.95 }}
       onClick={onClick}
       className={cn(
-        "rounded-full flex items-center justify-center font-display font-bold transition-all duration-500 cursor-default select-none border",
+        "rounded-full flex items-center justify-center font-display font-bold transition-all duration-500 cursor-default select-none border shrink-0",
         active 
           ? "bg-gradient-to-br from-purple-600 to-purple-800 text-white shadow-[0_0_15px_rgba(168,85,247,0.2)] border-purple-400" 
           : "bg-white text-zinc-400 border-purple-100 hover:text-purple-600 hover:bg-purple-50 hover:border-purple-200 shadow-sm",
