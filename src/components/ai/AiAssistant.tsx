@@ -153,7 +153,7 @@ export const AiAssistant = ({
                   "p-4 rounded-2xl text-sm leading-relaxed shadow-sm relative group/msg",
                   msg.role === 'user' 
                     ? "bg-purple-600 text-white rounded-tr-none" 
-                    : "bg-white text-zinc-700 border border-purple-100 rounded-tl-none"
+                    : "bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 border border-purple-100 dark:border-zinc-700 rounded-tl-none"
                 )}>
                   {msg.role === 'assistant' ? (
                     <>
