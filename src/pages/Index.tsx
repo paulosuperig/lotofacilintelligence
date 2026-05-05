@@ -180,7 +180,7 @@ const Index = () => {
               <button 
                 onClick={fetchData}
                 disabled={isRefreshing}
-                className="w-10 h-10 rounded-xl bg-white border border-purple-100 flex items-center justify-center text-purple-600 hover:border-purple-300 transition-all active:scale-95 disabled:opacity-50"
+                className="hidden md:flex w-10 h-10 rounded-xl bg-white border border-purple-100 items-center justify-center text-purple-600 hover:border-purple-300 transition-all active:scale-95 disabled:opacity-50"
               >
                 <motion.div animate={isRefreshing ? { rotate: 360 } : {}} transition={isRefreshing ? { repeat: Infinity, duration: 1, ease: "linear" } : {}}>
                   <Sparkles size={18} />
@@ -190,7 +190,7 @@ const Index = () => {
                 <p className="text-sm font-bold text-zinc-900">Membro VIP</p>
                 <p className="text-[10px] uppercase tracking-widest text-zinc-500">Acesso Vitalício</p>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-600 to-fuchsia-600 border border-purple-100 flex items-center justify-center text-sm font-display font-bold text-white group cursor-pointer hover:shadow-lg hover:shadow-purple-500/20 transition-all duration-300">
+              <div className="hidden md:flex w-12 h-12 rounded-xl bg-gradient-to-br from-purple-600 to-fuchsia-600 border border-purple-100 items-center justify-center text-sm font-display font-bold text-white group cursor-pointer hover:shadow-lg hover:shadow-purple-500/20 transition-all duration-300">
                 <span className="group-hover:scale-110 transition-transform duration-500">VIP</span>
               </div>
             </motion.div>
