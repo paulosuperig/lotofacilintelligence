@@ -815,6 +815,7 @@ const Index = () => {
                           </div>
                         </div>
                       ) : (
+                        aiChat.map((msg, i) => (
                           <div key={i} className={cn(
                             "flex flex-col max-w-[90%] md:max-w-[85%]",
                             msg.role === 'user' ? "ml-auto items-end" : "mr-auto items-start"
@@ -849,6 +850,7 @@ const Index = () => {
                               {msg.role === 'user' ? 'Você' : 'Lotofácil Intelligence'}
                             </span>
                           </div>
+                        ))
                       )}
                       {isAiLoading && (
                         <div className="flex items-center gap-2 text-purple-600 animate-pulse">
