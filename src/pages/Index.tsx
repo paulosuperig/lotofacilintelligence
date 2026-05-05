@@ -166,9 +166,9 @@ const Index = () => {
                 </div>
 
                 <div className="mt-auto pt-10 border-t border-white/5 flex flex-wrap gap-12 items-center">
-                  <StatDetail label="Pares" value="08" percentage={53} color="from-premium-accent to-indigo-500" />
-                  <StatDetail label="Ímpares" value="07" percentage={47} color="from-indigo-400 to-cyan-400" />
-                  <StatDetail label="Primos" value="05" percentage={33} color="from-emerald-400 to-teal-400" />
+                  <StatDetail label="Pares" value={latestResult ? latestResult.dezenas.filter(n => parseInt(n) % 2 === 0).length.toString().padStart(2, '0') : "00"} percentage={latestResult ? (latestResult.dezenas.filter(n => parseInt(n) % 2 === 0).length / 15) * 100 : 0} color="from-premium-accent to-indigo-500" />
+                  <StatDetail label="Ímpares" value={latestResult ? latestResult.dezenas.filter(n => parseInt(n) % 2 !== 0).length.toString().padStart(2, '0') : "00"} percentage={latestResult ? (latestResult.dezenas.filter(n => parseInt(n) % 2 !== 0).length / 15) * 100 : 0} color="from-indigo-400 to-cyan-400" />
+                  <StatDetail label="Primos" value={latestResult ? latestResult.dezenas.filter(n => [2, 3, 5, 7, 11, 13, 17, 19, 23].includes(parseInt(n))).length.toString().padStart(2, '0') : "00"} percentage={latestResult ? (latestResult.dezenas.filter(n => [2, 3, 5, 7, 11, 13, 17, 19, 23].includes(parseInt(n))).length / 15) * 100 : 0} color="from-emerald-400 to-teal-400" />
                   
                   <Button variant="ghost" className="ml-auto text-premium-text-muted hover:text-white transition-all gap-2 group text-xs font-bold uppercase tracking-widest">
                     Relatório Detalhado <ArrowUpRight size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />

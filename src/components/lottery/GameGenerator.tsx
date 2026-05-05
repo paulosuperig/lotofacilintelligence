@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Ball } from './Ball';
 import { Button } from '@/components/ui/button';
-import { Zap, RefreshCcw, Save, TrendingUp, Info } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Zap, RefreshCcw, Save, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export const GameGenerator = () => {
@@ -11,24 +10,7 @@ export const GameGenerator = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [stats, setStats] = useState({ pairs: 0, odd: 0, primes: 0, sum: 0 });
 
-  const generateGame = () => {
-    setIsGenerating(true);
-    
-    // Simulate complex calculation
-    setTimeout(() => {
-      const numbers: number[] = [];
-      while (numbers.length < 15) {
-        const n = Math.floor(Math.random() * 25) + 1;
-        if (!numbers.includes(n)) numbers.push(n);
-      }
-      const sortedNumbers = numbers.sort((a, b) => a - b);
-      setGeneratedGame(sortedNumbers);
-      calculateStats(sortedNumbers);
-      setIsGenerating(false);
-    }, 800);
-  };
-
-  const calculateStats = (nums: number[]) => {
+  const calculateStats = useCallback((nums: number[]) => {
     const primes = [2, 3, 5, 7, 11, 13, 17, 19, 23];
     const pCount = nums.filter(n => primes.includes(n)).length;
     const evenCount = nums.filter(n => n % 2 === 0).length;
@@ -40,6 +22,27 @@ export const GameGenerator = () => {
       primes: pCount,
       sum
     });
+  }, []);
+
+  const generateGame = () => {
+    if (isGenerating) return;
+    setIsGenerating(true);
+    
+    setTimeout(() => {
+      const numbers: number[] = [];
+      const pool = Array.from({ length: 25 }, (_, i) => i + 1);
+      
+      // Fisher-Yates shuffle variation to pick 15
+      for (let i = 0; i < 15; i++) {
+        const randomIndex = Math.floor(Math.random() * pool.length);
+        numbers.push(pool.splice(randomIndex, 1)[0]);
+      }
+
+      const sortedNumbers = numbers.sort((a, b) => a - b);
+      setGeneratedGame(sortedNumbers);
+      calculateStats(sortedNumbers);
+      setIsGenerating(false);
+    }, 800);
   };
 
   return (
@@ -150,4 +153,4 @@ const StatCard = ({ label, value, icon, variant = 'default' }: { label: string, 
   </div>
 );
 
-import { AnimatePresence } from 'framer-motion';
+
