@@ -16,11 +16,18 @@ export const useLottery = () => {
     try {
       const data = await getLatestResult();
       setLatestResult(data);
+      // Salvar no cache local para carregamento instantâneo no futuro
+      localStorage.setItem('latest_lottery_result', JSON.stringify(data));
     } catch (error) {
       console.error("Error fetching latest result:", error);
+      // Tentar carregar do cache se a API falhar
+      const cached = localStorage.getItem('latest_lottery_result');
+      if (cached) {
+        setLatestResult(JSON.parse(cached));
+      }
       toast({
         title: "Erro ao atualizar",
-        description: "Não foi possível carregar os últimos resultados.",
+        description: "Exibindo últimos dados salvos. Verifique sua conexão.",
         variant: "destructive"
       });
     } finally {
