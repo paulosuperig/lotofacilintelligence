@@ -112,7 +112,7 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f3ff] text-zinc-900 selection:bg-purple-500/30 overflow-x-hidden font-sans pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] flex flex-col md:flex-row">
+    <div className="min-h-screen bg-[#f5f3ff] dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 selection:bg-purple-500/30 overflow-x-hidden font-sans pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] flex flex-col md:flex-row">
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} role={user.role} onLogout={handleLogout} />
       <MobileNav activeTab={activeTab} setActiveTab={setActiveTab} role={user.role} onLogout={handleLogout} />
 
