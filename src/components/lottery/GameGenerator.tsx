@@ -29,7 +29,7 @@ export const GameGenerator = () => {
   const [generatedGame, setGeneratedGame] = useState<number[]>([]);
   const [history, setHistory] = useState<SavedGame[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [stats, setStats] = useState({ pairs: 0, odd: 0, primes: 0, sum: 0 });
+  const [stats, setStats] = useState({ pairs: 0, odd: 0, primes: 0, sum: 0, mold: 0, sequence: 0 });
   const { toast } = useToast();
 
   useEffect(() => {
