@@ -88,6 +88,7 @@ export const GameGenerator = () => {
       setGeneratedGame(sortedNumbers);
       
       const newGame: SavedGame = {
+        id: generateSecureId(),
         numbers: sortedNumbers,
         timestamp: Date.now()
       };
