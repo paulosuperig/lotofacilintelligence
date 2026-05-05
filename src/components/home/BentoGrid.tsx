@@ -126,11 +126,11 @@ export const BentoGrid = ({
             <div className="grid grid-cols-2 gap-3">
               <div className="text-center px-2">
                 <p className="text-[8px] text-zinc-400 uppercase font-bold tracking-widest mb-1">Pares</p>
-                <p className="text-lg font-display font-bold text-zinc-800">{latestResult ? latestResult.dezenas.filter(n => parseInt(n) % 2 === 0).length : "0"}</p>
+                <p className="text-lg font-display font-bold text-zinc-800 dark:text-zinc-200">{latestResult ? latestResult.dezenas.filter(n => parseInt(n) % 2 === 0).length : "0"}</p>
               </div>
               <div className="text-center px-2">
                 <p className="text-[8px] text-zinc-400 uppercase font-bold tracking-widest mb-1">Ímpares</p>
-                <p className="text-lg font-display font-bold text-zinc-800">{latestResult ? latestResult.dezenas.filter(n => parseInt(n) % 2 !== 0).length : "0"}</p>
+                <p className="text-lg font-display font-bold text-zinc-800 dark:text-zinc-200">{latestResult ? latestResult.dezenas.filter(n => parseInt(n) % 2 !== 0).length : "0"}</p>
               </div>
             </div>
           </div>
