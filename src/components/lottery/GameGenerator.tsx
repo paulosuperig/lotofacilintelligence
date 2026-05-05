@@ -4,11 +4,13 @@ import { Ball } from './Ball';
 import { Button } from '@/components/ui/button';
 import { Zap, RefreshCcw, Save, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 export const GameGenerator = () => {
   const [generatedGame, setGeneratedGame] = useState<number[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [stats, setStats] = useState({ pairs: 0, odd: 0, primes: 0, sum: 0 });
+  const { toast } = useToast();
 
   const calculateStats = useCallback((nums: number[]) => {
     const primes = [2, 3, 5, 7, 11, 13, 17, 19, 23];
@@ -126,10 +128,32 @@ export const GameGenerator = () => {
         )}
 
         <div className="mt-auto grid grid-cols-1 sm:grid-cols-2 gap-4">
-           <Button variant="outline" className="h-12 rounded-xl bg-white border-purple-100 text-zinc-900 hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200 font-black text-[10px] uppercase tracking-widest transition-all disabled:opacity-50">
+           <Button 
+            variant="outline" 
+            onClick={() => {
+              toast({
+                title: "Jogo salvo!",
+                description: "Seu jogo foi armazenado no histórico.",
+              });
+            }}
+            disabled={generatedGame.length === 0}
+            className="h-12 rounded-xl bg-white border-purple-100 text-zinc-900 hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200 font-black text-[10px] uppercase tracking-widest transition-all disabled:opacity-50"
+          >
              <Save className="mr-3" size={16} /> Salvar Jogo
            </Button>
-           <Button variant="outline" className="h-12 rounded-xl bg-white border-purple-100 text-zinc-900 hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200 font-black text-[10px] uppercase tracking-widest transition-all disabled:opacity-50">
+           <Button 
+            variant="outline" 
+            onClick={() => {
+              const text = generatedGame.map(n => n.toString().padStart(2, '0')).join(' ');
+              navigator.clipboard.writeText(text);
+              toast({
+                title: "Copiado!",
+                description: "Números copiados para a área de transferência.",
+              });
+            }}
+            disabled={generatedGame.length === 0}
+            className="h-12 rounded-xl bg-white border-purple-100 text-zinc-900 hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200 font-black text-[10px] uppercase tracking-widest transition-all disabled:opacity-50"
+          >
              Copiar
            </Button>
         </div>
