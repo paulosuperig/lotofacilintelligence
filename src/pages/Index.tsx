@@ -19,7 +19,8 @@ import {
   ShieldCheck,
   Trash2,
   Flame,
-  Snowflake
+  Snowflake,
+  Clover
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { 
@@ -163,8 +164,11 @@ const Index = () => {
               transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
               className="w-full md:w-auto flex flex-col items-center md:items-start text-center md:text-left"
             >
-              <div className="flex items-center gap-2 mb-2 md:mb-4">
-                <span className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.5)] animate-pulse" />
+              <div className="flex flex-col md:flex-row items-center gap-2 mb-2 md:mb-4">
+                <div className="flex items-center gap-2">
+                  <Clover size={14} className="text-purple-600 animate-pulse md:order-last" />
+                  <span className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.5)] animate-pulse hidden md:block" />
+                </div>
                 <span className="text-[9px] md:text-[10px] uppercase font-bold tracking-[0.2em] md:tracking-[0.25em] text-purple-600/60">Membro Premium Intelligence</span>
               </div>
               <h1 className="text-3xl md:text-6xl font-display font-bold tracking-tight leading-[1.1] text-zinc-900">
