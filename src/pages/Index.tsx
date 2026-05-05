@@ -287,8 +287,8 @@ const Index = () => {
                       </div>
                       <p className="text-sm text-zinc-600 mb-8 leading-relaxed">Dezenas que apareceram em mais de 65% dos sorteios desde 2021.</p>
                       <div className="flex flex-wrap gap-3">
-                        {[13, 20, 24, 10, 01, 11, 25, 04].map(num => (
-                          <Ball key={num} number={num} active size="md" />
+                        {[13, 20, 24, 10, 1, 11, 25, 4].map(num => (
+                          <Ball key={num} number={num.toString()} active size="md" />
                         ))}
                       </div>
                     </div>
