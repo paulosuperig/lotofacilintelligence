@@ -562,10 +562,10 @@ const Index = () => {
 const NavIcon = ({ icon, active = false, label, onClick }: { icon: React.ReactNode, active?: boolean, label: string, onClick?: () => void }) => (
   <button 
     onClick={onClick}
-    className="flex h-full flex-1 flex-col items-center justify-center gap-1 group relative outline-none transition-transform active:scale-90 md:h-12 md:w-12 md:flex-none"
+    className="flex h-full flex-1 flex-col items-center justify-center gap-1 group relative outline-none transition-transform active:scale-90 md:h-12 md:w-12 md:flex-none md:p-0"
   >
     <div className={cn(
-      "w-12 h-12 rounded-[1.25rem] flex items-center justify-center transition-all duration-300 md:group-hover:bg-purple-100/50",
+      "w-10 h-10 rounded-[1.15rem] flex items-center justify-center transition-all duration-300 md:w-12 md:h-12 md:rounded-[1.25rem] md:group-hover:bg-purple-100/50",
       active 
         ? "text-purple-600 md:bg-purple-100/50" 
         : "text-zinc-500 hover:text-purple-600"
@@ -581,7 +581,7 @@ const NavIcon = ({ icon, active = false, label, onClick }: { icon: React.ReactNo
     {active && (
       <motion.div 
         layoutId="activeNav"
-        className="hidden md:block absolute -left-3 w-1 h-5 bg-purple-600 rounded-full"
+        className="hidden md:block absolute -left-2 w-1 h-5 bg-purple-600 rounded-full"
         transition={{ type: "spring", stiffness: 400, damping: 30 }}
       />
     )}
