@@ -54,7 +54,7 @@ export const GameGenerator = () => {
               <Zap size={16} fill="currentColor" />
               <span className="text-[10px] uppercase font-black tracking-[0.25em]">Sistemas Pro</span>
             </div>
-            <h2 className="text-2xl md:text-3xl font-display font-black text-white leading-tight">
+            <h2 className="text-2xl md:text-3xl font-display font-black text-zinc-900 leading-tight">
               Gerador<br className="hidden sm:block" /> Inteligente
             </h2>
           </div>
