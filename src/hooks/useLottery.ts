@@ -38,7 +38,7 @@ export const useLottery = () => {
       try {
         const parsed = JSON.parse(saved);
         const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-        setHistory(parsed.filter((g: any) => g.timestamp > sevenDaysAgo));
+        setHistory(parsed.filter((g: any) => g.timestamp > sevenDaysAgo).slice(0, 50));
       } catch (e) {
         console.error(e);
       }
