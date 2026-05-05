@@ -2,9 +2,11 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { 
   History, 
-  Trash2
+  Trash2,
+  Copy
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
