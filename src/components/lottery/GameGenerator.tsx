@@ -120,9 +120,13 @@ export const GameGenerator = () => {
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="grid grid-cols-2 gap-4 mb-10"
+            className="flex flex-col gap-4 mb-10"
           >
-            <StatCard label="Pares/Ímpares" value={`${stats.pairs}p / ${stats.odd}í`} icon={<TrendingUp size={14}/>} />
+            <StatCard 
+              label="Pares / Ímpares" 
+              value={`${stats.pairs} pares e ${stats.odd} ímpares`} 
+              icon={<TrendingUp size={14}/>} 
+            />
             <StatCard label="Soma Total" value={stats.sum} icon={<TrendingUp size={14}/>} />
           </motion.div>
         )}
@@ -166,10 +170,10 @@ const StatCard = ({ label, value, icon, variant = 'default' }: { label: string, 
   <div className="bg-white border border-purple-100 rounded-2xl p-4 shadow-sm min-w-0 flex flex-col justify-center">
     <div className="flex items-center gap-1.5 text-premium-text-muted mb-1.5 min-w-0">
       <span className="shrink-0">{icon}</span>
-      <span className="text-[9px] uppercase font-semibold tracking-tight whitespace-nowrap">{label}</span>
+      <span className="text-[10px] uppercase font-bold tracking-wider whitespace-nowrap">{label}</span>
     </div>
     <div className={cn(
-      "text-2xl font-display font-bold leading-tight whitespace-nowrap",
+      "text-lg md:text-xl font-display font-bold leading-tight",
       variant === 'success' ? "text-emerald-600" : "text-zinc-900"
     )}>
       {value}
