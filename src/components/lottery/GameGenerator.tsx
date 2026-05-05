@@ -174,7 +174,7 @@ export const GameGenerator = () => {
         </div>
       </div>
 
-      <div className="p-8 md:p-12 flex-grow flex flex-col">
+      <div className="p-6 md:p-12 flex-grow flex flex-col">
         {generatedGame.length > 0 && (
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
