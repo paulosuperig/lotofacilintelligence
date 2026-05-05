@@ -13,7 +13,7 @@ export const useAdmin = () => {
     if (savedUsers) {
       setUsers(JSON.parse(savedUsers));
     } else {
-      const initialUsers = [
+      const initialUsers: UserProfile[] = [
         { id: '1', email: 'admin@admin.com.br', role: 'admin', status: 'active', createdAt: new Date().toISOString() },
         { id: '2', email: 'demo@demo.com.br', role: 'demo', status: 'active', createdAt: new Date().toISOString() }
       ];
