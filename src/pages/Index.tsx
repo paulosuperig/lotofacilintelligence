@@ -113,14 +113,14 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-[#f5f3ff] text-zinc-900 selection:bg-purple-500/30 overflow-x-hidden font-sans">
-      {/* Sidebar Navigation - Apple Style */}
-      <aside className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md h-16 bg-white/80 backdrop-blur-xl border border-purple-100 rounded-2xl z-50 flex items-center justify-around px-3 py-2 shadow-xl shadow-purple-500/10 transition-all duration-300 md:bottom-auto md:top-1/2 md:left-8 md:-translate-x-0 md:-translate-y-1/2 md:w-16 md:h-auto md:max-h-none md:flex-col md:items-center md:justify-center md:gap-2 md:rounded-[2rem] md:p-2">
-        <div className="hidden md:flex w-12 h-12 items-center justify-center shrink-0">
+      {/* Sidebar Navigation - Desktop */}
+      <aside className="fixed left-8 top-1/2 -translate-y-1/2 w-16 h-auto max-h-none flex-col items-center justify-center gap-2 rounded-[2rem] p-2 bg-white/80 backdrop-blur-xl border border-purple-100 z-50 shadow-xl shadow-purple-500/10 transition-all duration-300 hidden md:flex">
+        <div className="flex w-12 h-12 items-center justify-center shrink-0">
            <div className="w-12 h-12 rounded-[1.25rem] bg-gradient-to-br from-purple-600 to-fuchsia-600 flex items-center justify-center shadow-lg shadow-purple-500/20 transform hover:rotate-12 transition-transform duration-300">
              <Trophy size={20} className="text-white" />
            </div>
         </div>
-        <div className="flex flex-1 items-center justify-around w-full md:flex-none md:w-12 md:flex-col md:justify-center md:gap-2">
+        <div className="flex flex-col items-center justify-center gap-2 w-12">
           <NavIcon icon={<LayoutDashboard size={20} strokeWidth={1.5} />} active={activeTab === 'home'} label="Home" onClick={() => setActiveTab('home')} />
           <NavIcon icon={<Zap size={20} strokeWidth={1.5} />} active={activeTab === 'gerador'} label="Gerador" onClick={() => {
             setActiveTab('gerador');
@@ -135,27 +135,38 @@ const Index = () => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }} />
         </div>
-        <div className="hidden md:flex w-12 flex-col gap-2 items-center pt-2 border-t border-purple-100/70">
+        <div className="flex w-12 flex-col gap-2 items-center pt-2 border-t border-purple-100/70">
            <NavIcon icon={<Settings size={20} strokeWidth={1.5} />} active={activeTab === 'ajustes'} label="Ajustes" onClick={() => setActiveTab('ajustes')} />
            <NavIcon icon={<LogOut size={20} strokeWidth={1.5} />} label="Sair" onClick={() => toast({ title: "Sair", description: "Encerrando sessão..." })} />
         </div>
       </aside>
 
-      <main className="pb-32 md:pb-12 md:pl-32">
-        <div className="max-w-[1400px] mx-auto p-6 md:p-12 lg:p-16">
+      {/* Bottom Navigation - Mobile */}
+      <nav className="fixed bottom-4 left-4 right-4 h-16 bg-white/90 backdrop-blur-xl border border-purple-100 rounded-2xl z-50 flex items-center justify-around px-2 shadow-xl shadow-purple-500/10 md:hidden">
+        <NavIcon icon={<LayoutDashboard size={20} strokeWidth={1.5} />} active={activeTab === 'home'} label="Início" onClick={() => setActiveTab('home')} />
+        <NavIcon icon={<Zap size={20} strokeWidth={1.5} />} active={activeTab === 'gerador'} label="Gerar" onClick={() => {
+          setActiveTab('gerador');
+          document.getElementById('generator-section')?.scrollIntoView({ behavior: 'smooth' });
+        }} />
+        <NavIcon icon={<History size={20} strokeWidth={1.5} />} active={activeTab === 'historico'} label="Jogos" onClick={() => setActiveTab('historico')} />
+        <NavIcon icon={<Settings size={20} strokeWidth={1.5} />} active={activeTab === 'ajustes'} label="Menu" onClick={() => setActiveTab('ajustes')} />
+      </nav>
+
+      <main className="pb-24 md:pb-12 md:pl-32">
+        <div className="max-w-[1400px] mx-auto p-4 sm:p-6 md:p-12 lg:p-16">
           
           {/* Top Header - Minimalist */}
-          <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-8 relative">
+          <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 md:mb-16 gap-6 md:gap-8 relative">
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
             >
-              <div className="flex items-center gap-3 mb-4">
-                <span className="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.5)] animate-pulse" />
-                <span className="text-[10px] uppercase font-bold tracking-[0.25em] text-purple-600/60">Membro Premium Intelligence</span>
+              <div className="flex items-center gap-2 mb-2 md:mb-4">
+                <span className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.5)] animate-pulse" />
+                <span className="text-[9px] md:text-[10px] uppercase font-bold tracking-[0.2em] md:tracking-[0.25em] text-purple-600/60">Membro Premium Intelligence</span>
               </div>
-              <h1 className="text-4xl md:text-6xl font-display font-bold tracking-tight leading-[1.1] text-zinc-900">
+              <h1 className="text-3xl md:text-6xl font-display font-bold tracking-tight leading-[1.1] text-zinc-900">
                 Lotofácil <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-fuchsia-600">Intelligence</span>
               </h1>
             </motion.div>
@@ -194,11 +205,11 @@ const Index = () => {
                 exit={{ opacity: 0, x: -20 }}
                 className="grid grid-cols-1 gap-6"
               >
-                <div className="bg-white border border-purple-200 rounded-[2rem] p-8 md:p-12 shadow-xl shadow-purple-500/5">
-                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-10 gap-4">
+                <div className="bg-white border border-purple-200 rounded-3xl md:rounded-[2rem] p-6 md:p-12 shadow-xl shadow-purple-500/5">
+                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 md:mb-10 gap-4">
                     <div>
-                      <h2 className="text-3xl font-display font-bold text-zinc-900 mb-2">Seu Histórico</h2>
-                      <p className="text-zinc-500 text-sm">Jogos salvos nos últimos 7 dias</p>
+                      <h2 className="text-2xl md:text-3xl font-display font-bold text-zinc-900 mb-1 md:mb-2">Seu Histórico</h2>
+                      <p className="text-zinc-500 text-xs">Jogos salvos nos últimos 7 dias</p>
                     </div>
                     <div className="flex items-center gap-3">
                       {history.length > 0 && (
@@ -297,11 +308,11 @@ const Index = () => {
                 exit={{ opacity: 0, x: -20 }}
                 className="grid grid-cols-1 gap-6"
               >
-                <div className="bg-white border border-purple-200 rounded-[2rem] p-8 md:p-12 shadow-xl shadow-purple-500/5">
-                  <div className="flex items-center justify-between mb-10">
+                <div className="bg-white border border-purple-200 rounded-3xl md:rounded-[2rem] p-6 md:p-12 shadow-xl shadow-purple-500/5">
+                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 md:mb-10 gap-4">
                     <div>
-                      <h2 className="text-3xl font-display font-bold text-zinc-900 mb-2">Fechamentos PRO</h2>
-                      <p className="text-zinc-500 text-sm">Modelos matemáticos exclusivos para aumentar suas chances</p>
+                      <h2 className="text-2xl md:text-3xl font-display font-bold text-zinc-900 mb-1 md:mb-2">Fechamentos PRO</h2>
+                      <p className="text-zinc-500 text-xs">Modelos matemáticos exclusivos</p>
                     </div>
                     <Button 
                       variant="outline" 
@@ -463,8 +474,8 @@ const Index = () => {
                 
                 {/* Generator Bento - Main Focus */}
                 <motion.div id="generator-section" variants={itemVariants} className="lg:col-span-8 lg:row-span-3">
-                  <div className="h-full bg-white border border-purple-200 rounded-[2rem] p-0 flex flex-col shadow-xl shadow-purple-500/5 relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:rotate-12 transition-transform duration-1000 text-purple-900 pointer-events-none">
+                  <div className="h-full bg-white border border-purple-200 rounded-3xl md:rounded-[2rem] p-0 flex flex-col shadow-xl shadow-purple-500/5 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:rotate-12 transition-transform duration-1000 text-purple-900 pointer-events-none hidden md:block">
                       <Zap size={200} strokeWidth={0.5} />
                     </div>
                     <GameGenerator />
@@ -472,25 +483,25 @@ const Index = () => {
                 </motion.div>
 
                 {/* Official Result Bento - Secondary Focus */}
-                <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-2 bg-white/50 border border-purple-100 rounded-[2rem] p-8 relative group overflow-hidden shadow-sm hover:bg-white transition-colors duration-500">
-                  <div className="absolute top-0 right-0 p-8 opacity-[0.02] group-hover:scale-110 transition-transform duration-1000 text-purple-900">
+                <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-2 bg-white/50 border border-purple-100 rounded-3xl md:rounded-[2rem] p-6 md:p-8 relative group overflow-hidden shadow-sm hover:bg-white transition-colors duration-500">
+                  <div className="absolute top-0 right-0 p-8 opacity-[0.02] group-hover:scale-110 transition-transform duration-1000 text-purple-900 hidden md:block">
                     <Trophy size={180} strokeWidth={0.5} />
                   </div>
                   
                   <div className="relative z-10 h-full flex flex-col">
-                    <div className="mb-6">
-                      <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-600 text-[8px] font-bold mb-4 uppercase tracking-widest">
-                        <History size={10} /> Último Sorteio
+                    <div className="mb-4 md:mb-6">
+                      <div className="inline-flex items-center gap-2 px-2 py-0.5 md:px-2.5 md:py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-600 text-[8px] font-bold mb-3 md:mb-4 uppercase tracking-widest">
+                        <History size={10} /> Sorteio
                       </div>
-                      <h2 className="text-4xl font-display font-bold text-zinc-900 mb-2">
+                      <h2 className="text-3xl md:text-4xl font-display font-bold text-zinc-900 mb-1 md:mb-2">
                         Nº {latestResult?.concurso || "---"}
                       </h2>
-                      <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider flex items-center gap-2">
+                      <p className="text-zinc-500 text-[9px] md:text-[10px] font-bold uppercase tracking-wider flex items-center gap-2">
                         <Calendar size={12} strokeWidth={2} /> {latestResult ? latestResult.data : "---"}
                       </p>
                     </div>
 
-                    <div className="grid grid-cols-5 gap-2 mb-8">
+                    <div className="grid grid-cols-5 gap-1.5 md:gap-2 mb-6 md:mb-8">
                       {isLoading ? (
                         Array(15).fill(0).map((_, i) => (
                           <div key={i} className="aspect-square rounded-full bg-purple-100/50 animate-pulse" />
@@ -525,19 +536,19 @@ const Index = () => {
                 </motion.div>
 
                 {/* Frequência Bento */}
-                <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-1 bg-white border border-purple-100 rounded-[2rem] p-7 flex flex-col group overflow-hidden relative shadow-sm">
-                  <div className="absolute -right-6 -bottom-6 opacity-[0.04] group-hover:scale-110 transition-transform duration-700 text-purple-900 pointer-events-none">
+                <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-1 bg-white border border-purple-100 rounded-3xl md:rounded-[2rem] p-6 md:p-7 flex flex-col group overflow-hidden relative shadow-sm">
+                  <div className="absolute -right-6 -bottom-6 opacity-[0.04] group-hover:scale-110 transition-transform duration-700 text-purple-900 pointer-events-none hidden md:block">
                     <PieChart size={160} strokeWidth={1} />
                   </div>
 
-                  <div className="flex items-start justify-between mb-5 relative z-10">
+                  <div className="flex items-start justify-between mb-4 md:mb-5 relative z-10">
                     <div>
-                      <h3 className="text-xl font-display font-bold mb-1 flex items-center gap-2.5">
+                      <h3 className="text-lg md:text-xl font-display font-bold mb-1 flex items-center gap-2">
                         <Target size={18} className="text-purple-600" /> Tendências
                       </h3>
-                      <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider">Análise dos últimos 10 jogos</p>
+                      <p className="text-zinc-500 text-[9px] md:text-[10px] font-bold uppercase tracking-wider">Últimos 10 jogos</p>
                     </div>
-                    <span className="text-[8px] font-bold text-purple-600 bg-purple-50 px-2 py-1 rounded-full uppercase tracking-wider border border-purple-100">
+                    <span className="text-[8px] font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full uppercase tracking-wider border border-purple-100">
                       Live
                     </span>
                   </div>
