@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useToast } from './use-toast';
 import { validateEmail, generateSecureId, hashData } from '@/lib/security/utils';
+import { supabase } from '@/integrations/supabase/client';
+import { UserProfile } from '@/types/lottery';
 
 export const useAdmin = () => {
   const { toast } = useToast();
