@@ -125,72 +125,66 @@ const Index = () => {
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 auto-rows-[minmax(180px,auto)]"
           >
             
-            {/* Main Result Bento - Large */}
-            <motion.div variants={itemVariants} className="lg:col-span-8 lg:row-span-2 bg-white border border-purple-100 rounded-[2rem] p-8 md:p-10 relative group overflow-hidden shadow-sm">
-              <div className="absolute top-0 right-0 p-12 opacity-[0.03] group-hover:scale-110 transition-transform duration-1000 text-purple-900">
-                <Trophy size={280} strokeWidth={0.5} />
+            {/* Generator Bento - Main Focus */}
+            <motion.div variants={itemVariants} className="lg:col-span-8 lg:row-span-3">
+              <div className="h-full bg-white border border-purple-200 rounded-[2rem] p-0 flex flex-col shadow-xl shadow-purple-500/5 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:rotate-12 transition-transform duration-1000 text-purple-900 pointer-events-none">
+                  <Zap size={200} strokeWidth={0.5} />
+                </div>
+                <GameGenerator />
+              </div>
+            </motion.div>
+
+            {/* Official Result Bento - Secondary Focus */}
+            <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-2 bg-white/50 border border-purple-100 rounded-[2rem] p-8 relative group overflow-hidden shadow-sm hover:bg-white transition-colors duration-500">
+              <div className="absolute top-0 right-0 p-8 opacity-[0.02] group-hover:scale-110 transition-transform duration-1000 text-purple-900">
+                <Trophy size={180} strokeWidth={0.5} />
               </div>
               
               <div className="relative z-10 h-full flex flex-col">
-                <div className="flex flex-wrap justify-between items-start gap-6 mb-12">
-                  <div>
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-600 text-[9px] font-bold mb-6 uppercase tracking-widest">
-                      <History size={10} /> Resultado Oficial
-                    </div>
-                    <h2 className="text-5xl md:text-7xl font-display font-bold text-zinc-900 mb-6">
-                      {latestResult?.concurso || "---"}
-                    </h2>
-                    <div className="flex items-center gap-6 text-zinc-500 text-[11px] font-bold uppercase tracking-wider">
-                      <span className="flex items-center gap-2"><Calendar size={14} strokeWidth={2} /> {latestResult ? latestResult.data : "---"}</span>
-                      <span className="w-1 h-1 rounded-full bg-purple-500/30" />
-                      <span className="flex items-center gap-2"><ShieldCheck size={14} strokeWidth={2} /> Verificado</span>
-                    </div>
+                <div className="mb-6">
+                  <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-600 text-[8px] font-bold mb-4 uppercase tracking-widest">
+                    <History size={10} /> Último Sorteio
                   </div>
-                  
-                  <div className="bg-purple-50/50 p-6 md:p-8 rounded-[1.5rem] border border-purple-100 backdrop-blur-xl">
-                    <p className="text-[9px] text-zinc-500 uppercase font-bold tracking-[0.2em] mb-2">Próximo Prêmio</p>
-                    <p className="text-3xl md:text-4xl font-display font-bold text-emerald-400">
-                      {latestResult ? formatCurrency(latestResult.valorEstimadoProximoConcurso || 0) : "R$ ---"}
-                    </p>
-                  </div>
+                  <h2 className="text-4xl font-display font-bold text-zinc-900 mb-2">
+                    Nº {latestResult?.concurso || "---"}
+                  </h2>
+                  <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider flex items-center gap-2">
+                    <Calendar size={12} strokeWidth={2} /> {latestResult ? latestResult.data : "---"}
+                  </p>
                 </div>
 
-                <div className="flex flex-wrap gap-4 md:gap-5 mb-12">
+                <div className="grid grid-cols-5 gap-2 mb-8">
                   {isLoading ? (
                     Array(15).fill(0).map((_, i) => (
-                      <div key={i} className="w-12 h-12 rounded-full bg-purple-100/50 animate-pulse" />
+                      <div key={i} className="aspect-square rounded-full bg-purple-100/50 animate-pulse" />
                     ))
                   ) : (
-                    latestResult?.dezenas.map((num, i) => (
-                      <Ball key={num} number={num} active size="lg" />
+                    latestResult?.dezenas.map((num) => (
+                      <Ball key={num} number={num} active size="sm" />
                     ))
                   )}
                 </div>
 
-                <div className="mt-auto pt-8 border-t border-purple-50 flex flex-wrap gap-8 md:gap-12 items-center">
-                  <StatDetail label="Pares" value={latestResult ? latestResult.dezenas.filter(n => parseInt(n) % 2 === 0).length.toString().padStart(2, '0') : "00"} percentage={latestResult ? (latestResult.dezenas.filter(n => parseInt(n) % 2 === 0).length / 15) * 100 : 0} color="from-purple-500 to-purple-400" />
-                  <StatDetail label="Ímpares" value={latestResult ? latestResult.dezenas.filter(n => parseInt(n) % 2 !== 0).length.toString().padStart(2, '0') : "00"} percentage={latestResult ? (latestResult.dezenas.filter(n => parseInt(n) % 2 !== 0).length / 15) * 100 : 0} color="from-purple-400 to-fuchsia-400" />
+                <div className="mt-auto space-y-4 pt-6 border-t border-purple-50">
+                  <div className="bg-emerald-50/50 p-4 rounded-2xl border border-emerald-100/50">
+                    <p className="text-[8px] text-emerald-600/70 uppercase font-bold tracking-[0.2em] mb-1">Próximo Prêmio</p>
+                    <p className="text-2xl font-display font-bold text-emerald-500">
+                      {latestResult ? formatCurrency(latestResult.valorEstimadoProximoConcurso || 0) : "R$ ---"}
+                    </p>
+                  </div>
                   
-                  <Button 
-                    variant="ghost" 
-                    onClick={() => {
-                      toast({
-                        title: "Em breve",
-                        description: "A análise detalhada estará disponível na próxima atualização.",
-                      });
-                    }}
-                    className="ml-auto text-zinc-500 hover:text-purple-700 hover:bg-purple-100/50 transition-all gap-2 group text-[10px] font-bold uppercase tracking-widest disabled:opacity-50"
-                  >
-                    Explorar Dados <ArrowUpRight size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                  </Button>
+                  <div className="flex gap-4">
+                    <div className="flex-1">
+                      <p className="text-[8px] text-zinc-400 uppercase font-bold tracking-widest mb-1">Pares</p>
+                      <p className="text-lg font-display font-bold text-zinc-800">{latestResult ? latestResult.dezenas.filter(n => parseInt(n) % 2 === 0).length : "0"}</p>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-[8px] text-zinc-400 uppercase font-bold tracking-widest mb-1">Ímpares</p>
+                      <p className="text-lg font-display font-bold text-zinc-800">{latestResult ? latestResult.dezenas.filter(n => parseInt(n) % 2 !== 0).length : "0"}</p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-
-            {/* Generator Bento */}
-            <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-3">
-              <div className="h-full bg-white border border-purple-100 rounded-[2rem] p-0 flex flex-col shadow-sm">
-                <GameGenerator />
               </div>
             </motion.div>
 
