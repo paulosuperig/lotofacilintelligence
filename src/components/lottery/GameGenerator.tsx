@@ -126,10 +126,31 @@ export const GameGenerator = () => {
         )}
 
         <div className="mt-auto grid grid-cols-1 sm:grid-cols-2 gap-4">
-           <Button variant="outline" className="h-12 rounded-xl bg-white border-purple-100 text-zinc-900 hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200 font-black text-[10px] uppercase tracking-widest transition-all disabled:opacity-50">
+           <Button 
+            variant="outline" 
+            onClick={() => {
+              // Simulação de salvar, pois não há backend
+              const toast = (window as any).toast;
+              if (toast) toast.success("Jogo salvo com sucesso!");
+              else alert("Jogo salvo com sucesso!");
+            }}
+            disabled={generatedGame.length === 0}
+            className="h-12 rounded-xl bg-white border-purple-100 text-zinc-900 hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200 font-black text-[10px] uppercase tracking-widest transition-all disabled:opacity-50"
+          >
              <Save className="mr-3" size={16} /> Salvar Jogo
            </Button>
-           <Button variant="outline" className="h-12 rounded-xl bg-white border-purple-100 text-zinc-900 hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200 font-black text-[10px] uppercase tracking-widest transition-all disabled:opacity-50">
+           <Button 
+            variant="outline" 
+            onClick={() => {
+              const text = generatedGame.map(n => n.toString().padStart(2, '0')).join(' ');
+              navigator.clipboard.writeText(text);
+              const toast = (window as any).toast;
+              if (toast) toast.success("Números copiados!");
+              else alert("Números copiados!");
+            }}
+            disabled={generatedGame.length === 0}
+            className="h-12 rounded-xl bg-white border-purple-100 text-zinc-900 hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200 font-black text-[10px] uppercase tracking-widest transition-all disabled:opacity-50"
+          >
              Copiar
            </Button>
         </div>
