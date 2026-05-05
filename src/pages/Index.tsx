@@ -138,7 +138,8 @@ const Index = () => {
       Lembre-se: jogos de loteria são baseados em sorte, use termos como "probabilidades", "tendências" e "estatísticas".
       
       IMPORTANTE: Sempre que você sugerir jogos/números (sequências de 15 a 20 números), formate-os em blocos de código ou listas claras.
-      Se o usuário pedir para gerar um jogo, sugira 15 números formatados como: 01, 02, 03...`;
+      Se o usuário pedir para gerar jogos, sugira de 1 a 3 opções de 15 números formatados como: 01, 02, 03...
+      Sempre explique o "porquê" das sugestões (ex: "baseado na frequência do concurso anterior" ou "equilíbrio de quadrantes").`;
 
       const response = await fetch('https://api.deepseek.com/chat/completions', {
         method: 'POST',
@@ -175,35 +176,44 @@ const Index = () => {
   };
 
   const saveAiGameToHistory = (content: string) => {
-    // Tenta extrair números do conteúdo (ex: 01, 02, 03... ou 01-02-03...)
-    const numbers = content.match(/\b\d{2}\b/g);
+    // Tenta extrair todas as sequências de números do conteúdo
+    const allNumbers = content.match(/\b\d{2}\b/g);
     
-    if (numbers && (numbers.length >= 15 && numbers.length <= 20)) {
-      const uniqueNumbers = [...new Set(numbers)].sort((a, b) => parseInt(a) - parseInt(b)).slice(0, 15);
-      
-      const newGame = {
-        id: Math.random().toString(36).substr(2, 9),
-        numbers: uniqueNumbers,
-        timestamp: Date.now(),
-        type: 'IA Insight'
-      };
+    if (allNumbers && allNumbers.length >= 15) {
+      const gamesToSave = [];
+      for (let i = 0; i < allNumbers.length; i += 15) {
+        if (i + 15 <= allNumbers.length) {
+          const gameNumbers = allNumbers.slice(i, i + 15).sort((a, b) => parseInt(a) - parseInt(b));
+          gamesToSave.push(gameNumbers);
+        }
+      }
 
-      const existingHistory = JSON.parse(localStorage.getItem('lottery_history') || '[]');
-      const updatedHistory = [newGame, ...existingHistory];
-      localStorage.setItem('lottery_history', JSON.stringify(updatedHistory));
-      setHistory(updatedHistory);
-      
-      toast({
-        title: "Jogo salvo!",
-        description: "Os números sugeridos pela IA foram adicionados ao seu histórico.",
-      });
-    } else {
-      toast({
-        title: "Não foi possível salvar",
-        description: "Não identificamos uma sequência válida de 15 dezenas no texto.",
-        variant: "destructive"
-      });
+      if (gamesToSave.length > 0) {
+        const existingHistory = JSON.parse(localStorage.getItem('lottery_history') || '[]');
+        const newGames = gamesToSave.map(nums => ({
+          id: Math.random().toString(36).substr(2, 9),
+          numbers: nums,
+          timestamp: Date.now(),
+          type: 'IA Insight'
+        }));
+
+        const updatedHistory = [...newGames, ...existingHistory];
+        localStorage.setItem('lottery_history', JSON.stringify(updatedHistory));
+        setHistory(updatedHistory);
+        
+        toast({
+          title: gamesToSave.length === 1 ? "Jogo salvo!" : `${gamesToSave.length} jogos salvos!`,
+          description: "As sugestões da IA foram adicionadas ao seu histórico.",
+        });
+        return;
+      }
     }
+    
+    toast({
+      title: "Não foi possível salvar",
+      description: "Não identificamos uma sequência válida de 15 dezenas no texto.",
+      variant: "destructive"
+    });
   };
 
   useEffect(() => {
