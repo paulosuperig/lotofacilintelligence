@@ -902,9 +902,40 @@ const Index = () => {
                         ))
                       )}
                       {isAiLoading && (
-                        <div className="flex items-center gap-2 text-purple-600 animate-pulse">
-                          <Loader2 size={16} className="animate-spin" />
-                          <span className="text-xs font-bold uppercase tracking-widest">Analisando dados...</span>
+                        <div className="flex flex-col items-center justify-center py-6 space-y-3">
+                          <div className="relative">
+                            <motion.div 
+                              animate={{ 
+                                scale: [1, 1.2, 1],
+                                rotate: [0, 180, 360],
+                                borderRadius: ["20%", "50%", "20%"]
+                              }}
+                              transition={{ 
+                                duration: 2, 
+                                repeat: Infinity,
+                                ease: "easeInOut"
+                              }}
+                              className="w-12 h-12 bg-gradient-to-tr from-purple-500 to-fuchsia-500 opacity-20"
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <Loader2 size={24} className="animate-spin text-purple-600" />
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-center">
+                            <span className="text-xs font-bold uppercase tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-fuchsia-600 animate-pulse">
+                              Inteligência Analisando
+                            </span>
+                            <div className="flex gap-1 mt-1">
+                              {[0, 1, 2].map((i) => (
+                                <motion.div
+                                  key={i}
+                                  animate={{ opacity: [0, 1, 0] }}
+                                  transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
+                                  className="w-1 h-1 rounded-full bg-purple-400"
+                                />
+                              ))}
+                            </div>
+                          </div>
                         </div>
                       )}
                     </div>
