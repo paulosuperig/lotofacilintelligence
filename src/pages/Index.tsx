@@ -82,26 +82,28 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-[#f5f3ff] text-zinc-900 selection:bg-purple-500/30 overflow-x-hidden font-sans">
       {/* Sidebar Navigation - Apple Style */}
-      <aside className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md h-16 bg-white/80 backdrop-blur-xl border border-purple-100 rounded-2xl z-50 md:top-1/2 md:left-8 md:-translate-x-0 md:-translate-y-1/2 md:w-20 md:h-[600px] md:flex-col md:rounded-3xl flex items-center justify-around md:justify-center md:gap-8 py-4 px-6 md:px-0 shadow-xl shadow-purple-500/10">
-        <div className="hidden md:flex flex-col items-center mb-8">
-           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-fuchsia-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
-             <Trophy size={20} className="text-white" />
+      <aside className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md h-16 bg-white/80 backdrop-blur-xl border border-purple-100 rounded-2xl z-50 md:top-1/2 md:left-8 md:-translate-x-0 md:-translate-y-1/2 md:w-20 md:h-[600px] md:flex-col md:rounded-[2.5rem] flex items-center justify-around md:justify-start md:gap-8 py-4 px-6 md:px-0 md:py-10 shadow-xl shadow-purple-500/10 transition-all duration-300">
+        <div className="hidden md:flex flex-col items-center mb-4">
+           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-600 to-fuchsia-600 flex items-center justify-center shadow-lg shadow-purple-500/20 transform hover:rotate-12 transition-transform duration-300">
+             <Trophy size={22} className="text-white" />
            </div>
         </div>
-        <NavIcon icon={<LayoutDashboard size={22} strokeWidth={1.5} />} active={activeTab === 'home'} label="Home" onClick={() => setActiveTab('home')} />
-        <NavIcon icon={<Zap size={22} strokeWidth={1.5} />} active={activeTab === 'gerador'} label="Gerador" onClick={() => {
-          setActiveTab('gerador');
-          document.getElementById('generator-section')?.scrollIntoView({ behavior: 'smooth' });
-        }} />
-        <NavIcon icon={<TrendingUp size={22} strokeWidth={1.5} />} active={activeTab === 'stats'} label="Stats" onClick={() => {
-          setActiveTab('stats');
-          toast({ title: "Módulo de Estatísticas", description: "Carregando análises detalhadas..." });
-        }} />
-        <NavIcon icon={<History size={22} strokeWidth={1.5} />} active={activeTab === 'historico'} label="Histórico" onClick={() => {
-          setActiveTab('historico');
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }} />
-        <div className="hidden md:flex flex-col gap-8 mt-auto mb-4 pt-8 border-t border-white/5">
+        <div className="flex items-center justify-around w-full md:flex-col md:gap-8">
+          <NavIcon icon={<LayoutDashboard size={22} strokeWidth={1.5} />} active={activeTab === 'home'} label="Home" onClick={() => setActiveTab('home')} />
+          <NavIcon icon={<Zap size={22} strokeWidth={1.5} />} active={activeTab === 'gerador'} label="Gerador" onClick={() => {
+            setActiveTab('gerador');
+            document.getElementById('generator-section')?.scrollIntoView({ behavior: 'smooth' });
+          }} />
+          <NavIcon icon={<TrendingUp size={22} strokeWidth={1.5} />} active={activeTab === 'stats'} label="Stats" onClick={() => {
+            setActiveTab('stats');
+            toast({ title: "Módulo de Estatísticas", description: "Carregando análises detalhadas..." });
+          }} />
+          <NavIcon icon={<History size={22} strokeWidth={1.5} />} active={activeTab === 'historico'} label="Histórico" onClick={() => {
+            setActiveTab('historico');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }} />
+        </div>
+        <div className="hidden md:flex flex-col gap-8 mt-auto mb-2 pt-8 border-t border-purple-50 w-full items-center">
            <NavIcon icon={<Settings size={22} strokeWidth={1.5} />} active={activeTab === 'ajustes'} label="Ajustes" onClick={() => setActiveTab('ajustes')} />
            <NavIcon icon={<LogOut size={22} strokeWidth={1.5} />} label="Sair" onClick={() => toast({ title: "Sair", description: "Encerrando sessão..." })} />
         </div>
