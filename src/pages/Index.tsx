@@ -347,6 +347,8 @@ const Index = () => {
               </motion.div>
 
             ) : (
+              <motion.div 
+                key="home-page"
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
