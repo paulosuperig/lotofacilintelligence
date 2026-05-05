@@ -363,26 +363,24 @@ const Index = () => {
                   </div>
                 </motion.div>
 
-                {/* Fechamentos Card - Elegant Action */}
-                <motion.div 
-                  variants={itemVariants} 
-                  onClick={() => {
-                    toast({
-                      title: "Fechamentos Pro",
-                      description: "Acesse modelos matemáticos na aba Stats.",
-                    });
-                  }}
-                  className="lg:col-span-4 lg:row-span-1 bg-white border border-purple-100 rounded-[2rem] p-8 flex items-center gap-6 group cursor-pointer hover:bg-purple-50/50 transition-all shadow-sm"
-                >
-                  <div className="w-16 h-16 rounded-3xl bg-purple-500/10 border border-purple-100 flex items-center justify-center text-purple-600 group-hover:scale-110 transition-transform duration-500">
-                    <ShieldCheck size={32} />
-                  </div>
-                  <div>
-                    <h4 className="text-lg font-display font-bold text-zinc-900">Fechamentos Pro</h4>
-                    <p className="text-sm text-premium-text-muted">Acesse 42 modelos matemáticos exclusivos.</p>
-                  </div>
-                  <ArrowUpRight size={20} className="ml-auto text-premium-text-muted group-hover:text-purple-600 transition-colors" />
-                </motion.div>
+            {/* Fechamentos Card - Elegant Action */}
+            <motion.div 
+              variants={itemVariants} 
+              onClick={() => {
+                setActiveTab('stats');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="lg:col-span-4 lg:row-span-1 bg-white border border-purple-100 rounded-[2rem] p-8 flex items-center gap-6 group cursor-pointer hover:bg-purple-50/50 transition-all shadow-sm"
+            >
+              <div className="w-16 h-16 rounded-3xl bg-purple-500/10 border border-purple-100 flex items-center justify-center text-purple-600 group-hover:scale-110 transition-transform duration-500">
+                <ShieldCheck size={32} />
+              </div>
+              <div>
+                <h4 className="text-lg font-display font-bold text-zinc-900">Fechamentos Pro</h4>
+                <p className="text-sm text-premium-text-muted">Acesse 42 modelos matemáticos exclusivos.</p>
+              </div>
+              <ArrowUpRight size={20} className="ml-auto text-premium-text-muted group-hover:text-purple-600 transition-colors" />
+            </motion.div>
 
                 {/* Smart Alerts */}
                 <motion.div 
