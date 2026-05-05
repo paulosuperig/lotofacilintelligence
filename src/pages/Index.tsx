@@ -156,7 +156,7 @@ const Index = () => {
                 <div className="flex flex-wrap gap-4 md:gap-5 mb-12">
                   {isLoading ? (
                     Array(15).fill(0).map((_, i) => (
-                      <div key={i} className="w-14 h-14 rounded-full bg-white/[0.03] premium-border animate-pulse" />
+                      <div key={i} className="w-12 h-12 rounded-full bg-white/5 border border-white/5 animate-pulse" />
                     ))
                   ) : (
                     latestResult?.dezenas.map((num, i) => (
@@ -289,7 +289,7 @@ const StatDetail = ({ label, value, percentage, color }: { label: string, value:
       <span className="text-[10px] text-premium-text-muted uppercase font-bold tracking-[0.2em]">{label}</span>
       <span className="text-2xl font-display font-bold text-white">{value}</span>
     </div>
-    <div className="w-24 h-1.5 bg-white/[0.03] rounded-full premium-border overflow-hidden">
+    <div className="w-20 h-1 bg-white/5 rounded-full overflow-hidden">
       <motion.div 
         initial={{ width: 0 }}
         animate={{ width: `${percentage}%` }}
