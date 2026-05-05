@@ -156,7 +156,7 @@ const Index = () => {
                 <div className="flex flex-wrap gap-4 md:gap-5 mb-12">
                   {isLoading ? (
                     Array(15).fill(0).map((_, i) => (
-                      <div key={i} className="w-12 h-12 rounded-full bg-white/5 border border-white/5 animate-pulse" />
+                      <div key={i} className="w-12 h-12 rounded-full bg-purple-100/50 animate-pulse" />
                     ))
                   ) : (
                     latestResult?.dezenas.map((num, i) => (
