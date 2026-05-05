@@ -4,6 +4,7 @@ import { useLottery } from '@/hooks/useLottery';
 import { useAiAssistant } from '@/hooks/useAiAssistant';
 import { useAdmin } from '@/hooks/useAdmin';
 import { AnimatePresence } from 'framer-motion';
+import { generateSecureId } from '@/lib/security/utils';
 
 import { Sidebar, MobileNav } from '@/components/layout/Navigation';
 import { Header } from '@/components/layout/Header';
