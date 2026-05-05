@@ -138,7 +138,7 @@ export const BentoGrid = ({
       </motion.div>
 
       {/* Tendências Bento */}
-      <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-1 bg-white border border-purple-100 rounded-3xl md:rounded-[2rem] p-6 md:p-7 flex flex-col group overflow-hidden relative shadow-sm">
+      <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-1 bg-white dark:bg-zinc-900 border border-purple-100 dark:border-zinc-800 rounded-3xl md:rounded-[2rem] p-6 md:p-7 flex flex-col group overflow-hidden relative shadow-sm">
         <div className="absolute -right-6 -bottom-6 opacity-[0.04] group-hover:scale-110 transition-transform duration-700 text-purple-900 pointer-events-none hidden md:block">
           <PieChart size={160} strokeWidth={1} />
         </div>
