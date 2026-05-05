@@ -30,6 +30,7 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('home');
   const [history, setHistory] = useState<any[]>([]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem('lottery_history');
@@ -45,17 +46,25 @@ const Index = () => {
   }, [activeTab]);
   const { toast } = useToast();
 
+  const fetchData = async () => {
+    setIsRefreshing(true);
+    try {
+      const data = await getLatestResult();
+      setLatestResult(data);
+    } catch (error) {
+      console.error("Error fetching latest result:", error);
+      toast({
+        title: "Erro ao atualizar",
+        description: "Não foi possível carregar os últimos resultados.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await getLatestResult();
-        setLatestResult(data);
-      } catch (error) {
-        console.error("Error fetching latest result:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
     fetchData();
   }, []);
 
@@ -113,7 +122,7 @@ const Index = () => {
         <div className="max-w-[1400px] mx-auto p-6 md:p-12 lg:p-16">
           
           {/* Top Header - Minimalist */}
-          <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-8">
+          <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-8 relative">
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -131,14 +140,23 @@ const Index = () => {
             <motion.div 
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="flex items-center gap-6"
+              className="flex items-center gap-4"
             >
+              <button 
+                onClick={fetchData}
+                disabled={isRefreshing}
+                className="w-10 h-10 rounded-xl bg-white border border-purple-100 flex items-center justify-center text-purple-600 hover:border-purple-300 transition-all active:scale-95 disabled:opacity-50"
+              >
+                <motion.div animate={isRefreshing ? { rotate: 360 } : {}} transition={isRefreshing ? { repeat: Infinity, duration: 1, ease: "linear" } : {}}>
+                  <Sparkles size={18} />
+                </motion.div>
+              </button>
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-bold text-zinc-200">João Silva</p>
-                <p className="text-[10px] uppercase tracking-widest text-zinc-500">Pro Analyst</p>
+                <p className="text-sm font-bold text-zinc-900">Membro VIP</p>
+                <p className="text-[10px] uppercase tracking-widest text-zinc-500">Acesso Vitalício</p>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-white border border-purple-100 flex items-center justify-center text-sm font-display font-bold group cursor-pointer hover:border-purple-500/50 transition-all duration-300 shadow-sm">
-                <span className="group-hover:scale-110 transition-transform duration-500 text-purple-700">JS</span>
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-600 to-fuchsia-600 border border-purple-100 flex items-center justify-center text-sm font-display font-bold text-white group cursor-pointer hover:shadow-lg hover:shadow-purple-500/20 transition-all duration-300">
+                <span className="group-hover:scale-110 transition-transform duration-500">VIP</span>
               </div>
             </motion.div>
           </header>
@@ -349,27 +367,30 @@ const Index = () => {
                     </div>
                   </div>
 
-                  <div className="mt-8 p-8 bg-zinc-900 rounded-[2.5rem] text-white">
+                  <div className="mt-8 p-8 bg-zinc-900 rounded-[2.5rem] text-white overflow-hidden relative group">
+                    <div className="absolute -right-10 -bottom-10 text-white/5 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-1000">
+                      <Target size={200} />
+                    </div>
                     <h3 className="text-xl font-bold mb-4 flex items-center gap-3">
                       <Sparkles className="text-purple-400" /> Insight Premium
                     </h3>
                     <p className="text-zinc-400 text-sm leading-relaxed mb-6">
                       A análise histórica mostra que jogos com soma entre 180 e 210 representam 72% dos ganhadores da faixa principal nos últimos 5 anos. Evite jogos com soma inferior a 150 ou superior a 240.
                     </p>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                      <div className="text-center">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 relative z-10">
+                      <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
                         <p className="text-[10px] text-zinc-500 uppercase font-bold mb-1">Pares Ideal</p>
                         <p className="text-lg font-bold">7 ou 8</p>
                       </div>
-                      <div className="text-center">
+                      <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
                         <p className="text-[10px] text-zinc-500 uppercase font-bold mb-1">Primos Ideal</p>
                         <p className="text-lg font-bold">5 ou 6</p>
                       </div>
-                      <div className="text-center">
+                      <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
                         <p className="text-[10px] text-zinc-500 uppercase font-bold mb-1">Repetidos</p>
                         <p className="text-lg font-bold">9 ou 10</p>
                       </div>
-                      <div className="text-center">
+                      <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
                         <p className="text-[10px] text-zinc-500 uppercase font-bold mb-1">Moldura</p>
                         <p className="text-lg font-bold">10 ou 11</p>
                       </div>
