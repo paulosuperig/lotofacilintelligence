@@ -276,7 +276,7 @@ const NavIcon = ({ icon, active = false, label }: { icon: React.ReactNode, activ
     {active && (
       <motion.div 
         layoutId="activeNav"
-        className="hidden md:block absolute -left-4 w-1 h-5 bg-indigo-500 rounded-full"
+        className="hidden md:block absolute -left-4 w-1 h-5 bg-purple-600 rounded-full"
         transition={{ type: "spring", stiffness: 400, damping: 30 }}
       />
     )}
