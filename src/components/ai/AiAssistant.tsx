@@ -63,7 +63,7 @@ export const AiAssistant = ({
         </Button>
       </div>
 
-      <div className="flex-grow flex flex-col bg-purple-50/30 rounded-[2rem] border border-purple-100 overflow-hidden relative">
+      <div className="flex-grow flex flex-col bg-purple-50/30 dark:bg-zinc-950/30 rounded-[2rem] border border-purple-100 dark:border-zinc-800 overflow-hidden relative">
         {!deepSeekKey && role === 'admin' ? (
           <div className="absolute inset-0 z-10 bg-white/60 backdrop-blur-sm flex items-center justify-center p-8 text-center">
             <div className="max-w-md">
