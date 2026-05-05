@@ -178,7 +178,7 @@ const Index = () => {
 
             {/* Generator Bento */}
             <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-3">
-              <div className="h-full glass-morphism premium-border rounded-[2rem] p-0 flex flex-col">
+              <div className="h-full bg-white border border-purple-100 rounded-[2rem] p-0 flex flex-col shadow-sm">
                 <GameGenerator />
               </div>
             </motion.div>
