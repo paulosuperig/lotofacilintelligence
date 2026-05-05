@@ -32,14 +32,14 @@ export const TipsPanel = ({ onBack }: TipsPanelProps) => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="p-8 bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-100 rounded-[2.5rem]">
+          <div className="p-8 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-zinc-800 dark:to-zinc-900 border border-purple-100 dark:border-zinc-700 rounded-[2.5rem]">
             <div className="flex items-center gap-4 mb-6">
               <div className="w-12 h-12 rounded-2xl bg-purple-600 flex items-center justify-center text-white shadow-lg">
                 <Target size={24} />
               </div>
-              <h3 className="text-xl font-bold text-zinc-900">Números "Quentes" (5 Anos)</h3>
+              <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">Números "Quentes" (5 Anos)</h3>
             </div>
-            <p className="text-sm text-zinc-600 mb-8 leading-relaxed">Dezenas que apareceram em mais de 65% dos sorteios desde 2021.</p>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-8 leading-relaxed">Dezenas que apareceram em mais de 65% dos sorteios desde 2021.</p>
             <div className="flex flex-wrap gap-3">
               {[13, 20, 24, 10, 1, 11, 25, 4].map(num => (
                 <Ball key={num} number={num.toString()} active size="md" />
