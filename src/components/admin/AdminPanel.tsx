@@ -185,10 +185,10 @@ export const AdminPanel = ({
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-purple-100">
+      <div className="overflow-x-auto rounded-2xl border border-purple-100 dark:border-zinc-800">
         <table className="w-full text-left border-collapse min-w-[600px]">
           <thead>
-            <tr className="bg-purple-50/50">
+            <tr className="bg-purple-50/50 dark:bg-zinc-800/50">
               <th className="px-6 py-4 text-[10px] font-bold text-purple-400 uppercase tracking-widest border-b border-purple-100">Usuário</th>
               <th className="px-6 py-4 text-[10px] font-bold text-purple-400 uppercase tracking-widest border-b border-purple-100">Perfil</th>
               <th className="px-6 py-4 text-[10px] font-bold text-purple-400 uppercase tracking-widest border-b border-purple-100">Status</th>
