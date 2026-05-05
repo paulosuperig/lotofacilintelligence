@@ -189,7 +189,7 @@ export const BentoGrid = ({
       </motion.div>
 
       {/* Quick Insights Bento */}
-      <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-1 bg-white border border-purple-100 rounded-[2rem] p-8 flex flex-col justify-between group transition-all duration-300 hover:bg-purple-50/50 shadow-sm relative">
+      <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-1 bg-white dark:bg-zinc-900 border border-purple-100 dark:border-zinc-800 rounded-[2rem] p-8 flex flex-col justify-between group transition-all duration-300 hover:bg-purple-50/50 dark:hover:bg-zinc-800/50 shadow-sm relative">
         <div className="flex justify-between items-start">
           <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
             <TrendingUp size={24} />
