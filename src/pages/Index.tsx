@@ -95,8 +95,8 @@ const Index = () => {
                 <span className="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.5)] animate-pulse" />
                 <span className="text-[10px] uppercase font-bold tracking-[0.25em] text-purple-600/60">Membro Premium Intelligence</span>
               </div>
-              <h1 className="text-4xl md:text-6xl font-display font-black tracking-tight leading-[1.1]">
-                Lotofácil <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-indigo-200 to-white/50">Intelligence</span>
+              <h1 className="text-4xl md:text-6xl font-display font-black tracking-tight leading-[1.1] text-zinc-900">
+                Lotofácil <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-fuchsia-600">Intelligence</span>
               </h1>
             </motion.div>
             
