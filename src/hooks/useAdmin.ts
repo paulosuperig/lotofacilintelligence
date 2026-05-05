@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useToast } from './use-toast';
+import { validateEmail, generateSecureId, hashData } from '@/lib/security/utils';
 
 export const useAdmin = () => {
   const { toast } = useToast();
@@ -24,15 +25,27 @@ export const useAdmin = () => {
     localStorage.setItem('intelligence_system_users', JSON.stringify(updatedUsers));
   };
 
-  const createOrUpdateUser = (userData: any, editingUser: any = null) => {
+  const createOrUpdateUser = async (userData: any, editingUser: any = null) => {
+    if (!validateEmail(userData.email)) {
+      toast({ 
+        title: "Erro de validação", 
+        description: "Por favor, insira um e-mail válido.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (editingUser) {
       const updated = users.map(u => u.id === editingUser.id ? { ...u, ...userData } : u);
       saveUsers(updated);
       toast({ title: "Usuário atualizado", description: "As alterações foram salvas com sucesso." });
     } else {
+      // Securely hash password before storing (simulated with hashData utility)
+      const hashedPassword = await hashData(userData.password);
       const newUser = {
         ...userData,
-        id: Math.random().toString(36).substr(2, 9),
+        password: hashedPassword,
+        id: generateSecureId(),
         createdAt: new Date().toISOString()
       };
       saveUsers([...users, newUser]);

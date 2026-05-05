@@ -14,7 +14,8 @@ import {
   Eye,
   EyeOff,
   Cpu,
-  Target
+  Target,
+  ShieldAlert
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -55,6 +56,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
+import { maskSensitiveData } from '@/lib/security/utils';
 
 interface AdminPanelProps {
   users: any[];
@@ -205,9 +207,9 @@ export const AdminPanel = ({
                       {u.role === 'admin' ? <ShieldCheck size={16} /> : <Sparkles size={16} />}
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-zinc-900">{u.email}</p>
+                      <p className="text-sm font-bold text-zinc-900">{maskSensitiveData(u.email)}</p>
                       <p className="text-[10px] text-zinc-500">
-                        Cadastrado em {new Date(u.createdAt).toLocaleDateString('pt-BR')}
+                        ID: {u.id.substring(0, 8)}... | Cadastrado em {new Date(u.createdAt).toLocaleDateString('pt-BR')}
                       </p>
                     </div>
                   </div>
@@ -337,12 +339,12 @@ export const AdminPanel = ({
 
       <div className="mt-8 p-6 bg-amber-50 border border-amber-100 rounded-2xl flex items-start gap-4">
         <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center text-white shrink-0 shadow-lg shadow-amber-500/20">
-          <Target size={20} />
+          <ShieldAlert size={20} />
         </div>
         <div>
-          <h4 className="text-sm font-bold text-amber-900 mb-1">Painel de Controle</h4>
+          <h4 className="text-sm font-bold text-amber-900 mb-1">Proteção de Dados Intelligence</h4>
           <p className="text-xs text-amber-700 leading-relaxed">
-            Como administrador, você tem acesso total às estatísticas e pode visualizar todos os usuários cadastrados no sistema.
+            Este painel opera sob diretrizes de <strong>Zero Trust</strong>. Dados sensíveis como e-mails são mascarados e senhas são criptografadas com SHA-256 antes do armazenamento local.
           </p>
         </div>
       </div>

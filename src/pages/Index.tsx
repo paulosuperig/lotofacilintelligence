@@ -4,6 +4,7 @@ import { useLottery } from '@/hooks/useLottery';
 import { useAiAssistant } from '@/hooks/useAiAssistant';
 import { useAdmin } from '@/hooks/useAdmin';
 import { AnimatePresence } from 'framer-motion';
+import { generateSecureId } from '@/lib/security/utils';
 
 import { Sidebar, MobileNav } from '@/components/layout/Navigation';
 import { Header } from '@/components/layout/Header';
@@ -83,7 +84,7 @@ const Index = () => {
 
       if (gamesToSave.length > 0) {
         const newGames = gamesToSave.map(nums => ({
-          id: Math.random().toString(36).substr(2, 9),
+          id: generateSecureId(),
           numbers: nums,
           timestamp: Date.now(),
           type: 'IA Insight'

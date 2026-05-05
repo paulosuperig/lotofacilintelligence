@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { ShieldCheck } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { useToast } from '@/hooks/use-toast';
+import { generateSecureId } from '@/lib/security/utils';
 
 interface FechamentosPanelProps {
   onBack: () => void;
@@ -31,7 +32,7 @@ export const FechamentosPanel = ({ onBack, onSaveGame }: FechamentosPanelProps) 
     const sorted = numbers.sort((a, b) => a - b);
     
     onSaveGame({ 
-      id: Math.random().toString(36).substr(2, 9),
+      id: generateSecureId(),
       numbers: sorted, 
       timestamp: Date.now(), 
       model: model.title,
