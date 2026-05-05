@@ -126,10 +126,10 @@ export const GameGenerator = () => {
         )}
 
         <div className="mt-auto grid grid-cols-1 sm:grid-cols-2 gap-4">
-           <Button variant="outline" className="h-12 rounded-xl bg-white/5 border-white/5 text-zinc-100 hover:bg-white/10 font-black text-[10px] uppercase tracking-widest transition-all">
+           <Button variant="outline" className="h-12 rounded-xl bg-white border-purple-100 text-zinc-900 hover:bg-purple-50 font-black text-[10px] uppercase tracking-widest transition-all">
              <Save className="mr-3" size={16} /> Salvar Jogo
            </Button>
-           <Button variant="outline" className="h-12 rounded-xl bg-white/5 border-white/5 text-zinc-100 hover:bg-white/10 font-black text-[10px] uppercase tracking-widest transition-all">
+           <Button variant="outline" className="h-12 rounded-xl bg-white border-purple-100 text-zinc-900 hover:bg-purple-50 font-black text-[10px] uppercase tracking-widest transition-all">
              Copiar
            </Button>
         </div>
