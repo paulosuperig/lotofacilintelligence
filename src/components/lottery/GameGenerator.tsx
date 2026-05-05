@@ -48,24 +48,24 @@ export const GameGenerator = () => {
   return (
     <div className="flex flex-col h-full">
       <div className="p-8 md:p-12 border-b border-white/5">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+        <div className="flex flex-col gap-6 mb-8">
           <div>
             <div className="flex items-center gap-2 text-indigo-400 mb-3">
               <Zap size={16} fill="currentColor" />
               <span className="text-[10px] uppercase font-black tracking-[0.25em]">Sistemas Pro</span>
             </div>
-            <h2 className="text-3xl font-display font-black text-white">
-              Gerador Inteligente
+            <h2 className="text-2xl md:text-3xl font-display font-black text-white leading-tight">
+              Gerador<br className="hidden sm:block" /> Inteligente
             </h2>
           </div>
           
           <Button 
             onClick={generateGame} 
             disabled={isGenerating}
-            className="w-full md:w-auto bg-white text-black hover:bg-zinc-200 font-display font-black text-[11px] uppercase tracking-widest h-12 px-8 rounded-xl shadow-xl shadow-white/5 transition-all active:scale-95"
+            className="w-full bg-white text-black hover:bg-zinc-200 font-display font-black text-[11px] uppercase tracking-widest h-12 px-6 rounded-xl shadow-xl shadow-white/5 transition-all active:scale-95"
           >
-            {isGenerating ? <RefreshCcw className="animate-spin mr-3" size={16} /> : <Zap className="mr-3" size={16} fill="currentColor" />}
-            GERAR JOGO
+            {isGenerating ? <RefreshCcw className="animate-spin mr-2" size={14} /> : <Zap className="mr-2" size={14} fill="currentColor" />}
+            Gerar Jogo
           </Button>
         </div>
 
