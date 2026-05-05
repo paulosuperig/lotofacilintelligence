@@ -6,7 +6,7 @@ import { UserProfile } from '@/types/lottery';
 
 export const useAdmin = () => {
   const { toast } = useToast();
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<UserProfile[]>([]);
 
   useEffect(() => {
     const savedUsers = localStorage.getItem('intelligence_system_users');
