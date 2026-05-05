@@ -223,7 +223,7 @@ export const AiAssistant = ({
           )}
         </div>
 
-        <form onSubmit={(e) => { e.preventDefault(); onSendMessage(); }} className="p-4 bg-white border-t border-purple-100 flex gap-2">
+        <form onSubmit={(e) => { e.preventDefault(); onSendMessage(); }} className="p-4 bg-white dark:bg-zinc-900 border-t border-purple-100 dark:border-zinc-800 flex gap-2">
           <Input 
             placeholder="Pergunte ao especialista..." 
             value={aiMessage}
