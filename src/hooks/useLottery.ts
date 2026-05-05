@@ -29,7 +29,10 @@ export const useLottery = () => {
     }
   };
 
-  const loadHistory = () => {
+  const loadHistory = async () => {
+    // Preparação para Supabase:
+    // const { data, error } = await supabase.from('games_history').select('*').order('created_at', { ascending: false });
+    
     const saved = localStorage.getItem('lottery_history');
     if (saved) {
       try {
@@ -42,7 +45,10 @@ export const useLottery = () => {
     }
   };
 
-  const clearHistory = () => {
+  const clearHistory = async () => {
+    // Preparação para Supabase:
+    // await supabase.from('games_history').delete().match({ user_id: currentUserId });
+
     localStorage.removeItem('lottery_history');
     setHistory([]);
     toast({
@@ -51,7 +57,10 @@ export const useLottery = () => {
     });
   };
 
-  const saveToHistory = (newGames: any[]) => {
+  const saveToHistory = async (newGames: SavedGame[]) => {
+    // Preparação para Supabase:
+    // await supabase.from('games_history').insert(newGames.map(g => ({ ...g, user_id: userId })));
+
     const existingHistory = JSON.parse(localStorage.getItem('lottery_history') || '[]');
     const updatedHistory = [...newGames, ...existingHistory].slice(0, 100);
     localStorage.setItem('lottery_history', JSON.stringify(updatedHistory));
