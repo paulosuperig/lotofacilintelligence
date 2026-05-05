@@ -32,9 +32,9 @@ module.exports = {
           accent: "#7c3aed",
           muted: "#f3f4f6",
           text: {
-            primary: "#FFFFFF",
-            secondary: "#A1A1AA",
-            muted: "#71717A",
+            primary: "#1f2937",
+            secondary: "#4b5563",
+            muted: "#6b7280",
           }
         },
         primary: {
