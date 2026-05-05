@@ -1,15 +1,18 @@
 export interface LotteryResult {
+  loteria: string;
   concurso: number;
   data: string;
   dezenas: string[];
-  premiacao: {
+  premiacoes: {
     descricao: string;
-    quantidade_ganhadores: number;
-    valor_total: number;
+    ganhadores: number;
+    valorPremio: number;
   }[];
-  estimativa_proximo_concurso: number;
-  data_proximo_concurso: string;
-  valor_estimado_proximo_concurso: number;
+  acumulou: boolean;
+  proximoConcurso: number;
+  dataProximoConcurso: string;
+  valorEstimadoProximoConcurso: number;
+  valorAcumuladoProximoConcurso?: number;
 }
 
 export interface SavedGame {
