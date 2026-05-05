@@ -74,13 +74,22 @@ const Index = () => {
              <Trophy size={20} className="text-white" />
            </div>
         </div>
-        <NavIcon icon={<LayoutDashboard size={22} strokeWidth={1.5} />} active label="Home" />
-        <NavIcon icon={<Zap size={22} strokeWidth={1.5} />} label="Gerador" />
-        <NavIcon icon={<TrendingUp size={22} strokeWidth={1.5} />} label="Stats" />
-        <NavIcon icon={<History size={22} strokeWidth={1.5} />} label="Histórico" />
+        <NavIcon icon={<LayoutDashboard size={22} strokeWidth={1.5} />} active={activeTab === 'home'} label="Home" onClick={() => setActiveTab('home')} />
+        <NavIcon icon={<Zap size={22} strokeWidth={1.5} />} active={activeTab === 'gerador'} label="Gerador" onClick={() => {
+          setActiveTab('gerador');
+          document.getElementById('generator-section')?.scrollIntoView({ behavior: 'smooth' });
+        }} />
+        <NavIcon icon={<TrendingUp size={22} strokeWidth={1.5} />} active={activeTab === 'stats'} label="Stats" onClick={() => {
+          setActiveTab('stats');
+          toast({ title: "Módulo de Estatísticas", description: "Carregando análises detalhadas..." });
+        }} />
+        <NavIcon icon={<History size={22} strokeWidth={1.5} />} active={activeTab === 'historico'} label="Histórico" onClick={() => {
+          setActiveTab('historico');
+          toast({ title: "Histórico", description: "Acesse seus jogos salvos em breve." });
+        }} />
         <div className="hidden md:flex flex-col gap-8 mt-auto mb-4 pt-8 border-t border-white/5">
-           <NavIcon icon={<Settings size={22} strokeWidth={1.5} />} label="Ajustes" />
-           <NavIcon icon={<LogOut size={22} strokeWidth={1.5} />} label="Sair" />
+           <NavIcon icon={<Settings size={22} strokeWidth={1.5} />} active={activeTab === 'ajustes'} label="Ajustes" onClick={() => setActiveTab('ajustes')} />
+           <NavIcon icon={<LogOut size={22} strokeWidth={1.5} />} label="Sair" onClick={() => toast({ title: "Sair", description: "Encerrando sessão..." })} />
         </div>
       </aside>
 
