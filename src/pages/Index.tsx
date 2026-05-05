@@ -18,6 +18,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Ball } from "@/components/lottery/Ball";
 import { getLatestResult } from "@/services/lotteryApi";
 import { LotteryResult } from "@/types/lottery";
+import { GameGenerator } from "@/components/lottery/GameGenerator";
 import { cn, formatDate, formatCurrency } from "@/lib/utils";
 
 const Index = () => {
