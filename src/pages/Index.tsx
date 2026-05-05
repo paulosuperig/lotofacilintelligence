@@ -175,7 +175,7 @@ const Index = () => {
             <motion.div 
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="flex items-center gap-4"
+              className="flex items-center gap-4 w-full md:w-auto justify-center md:justify-end"
             >
               <button 
                 onClick={fetchData}
