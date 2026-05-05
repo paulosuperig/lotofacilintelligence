@@ -63,9 +63,9 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-premium-dark bg-mesh-gradient text-premium-text-primary selection:bg-premium-accent/30 overflow-x-hidden">
+    <div className="min-h-screen bg-[#0a0a0a] text-zinc-100 selection:bg-indigo-500/30 overflow-x-hidden font-sans">
       {/* Sidebar Navigation - Apple Style */}
-      <aside className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md h-16 glass-morphism premium-border rounded-full z-50 md:top-1/2 md:left-6 md:-translate-x-0 md:-translate-y-1/2 md:w-20 md:h-[600px] md:flex-col md:rounded-3xl flex items-center justify-around md:justify-center md:gap-8 py-4 px-6 md:px-0">
+      <aside className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md h-16 glass-morphism premium-border rounded-2xl z-50 md:top-1/2 md:left-8 md:-translate-x-0 md:-translate-y-1/2 md:w-20 md:h-[600px] md:flex-col md:rounded-3xl flex items-center justify-around md:justify-center md:gap-8 py-4 px-6 md:px-0 shadow-2xl shadow-black/50">
         <div className="hidden md:flex flex-col items-center mb-8">
            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-premium-accent to-indigo-600 flex items-center justify-center shadow-lg shadow-premium-accent/20">
              <Trophy size={20} className="text-white" />
@@ -259,26 +259,26 @@ const Index = () => {
 };
 
 const NavIcon = ({ icon, active = false, label }: { icon: React.ReactNode, active?: boolean, label: string }) => (
-  <button className="flex flex-col items-center gap-1 group relative outline-none">
+  <button className="flex flex-col items-center gap-1 group relative outline-none transition-transform active:scale-90">
     <div className={cn(
-      "p-3.5 rounded-2xl transition-all duration-500 md:group-hover:bg-white/[0.05]",
+      "p-3 rounded-xl transition-all duration-300 md:group-hover:bg-white/5",
       active 
-        ? "text-premium-accent shadow-[0_0_15px_rgba(124,58,237,0.2)] md:bg-white/[0.05]" 
-        : "text-premium-text-muted hover:text-premium-text-primary"
+        ? "text-indigo-400 md:bg-white/5" 
+        : "text-zinc-500 hover:text-zinc-200"
     )}>
       {icon}
     </div>
     <span className={cn(
-      "text-[9px] font-bold uppercase tracking-[0.15em] mt-1 md:hidden",
-      active ? "text-premium-accent" : "text-premium-text-muted"
+      "text-[9px] font-bold uppercase tracking-[0.1em] mt-1 md:hidden",
+      active ? "text-indigo-400" : "text-zinc-500"
     )}>
       {label}
     </span>
     {active && (
       <motion.div 
         layoutId="activeNav"
-        className="hidden md:block absolute -left-4 w-1 h-6 bg-premium-accent rounded-full"
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        className="hidden md:block absolute -left-4 w-1 h-5 bg-indigo-500 rounded-full"
+        transition={{ type: "spring", stiffness: 400, damping: 30 }}
       />
     )}
   </button>
