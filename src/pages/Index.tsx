@@ -161,6 +161,7 @@ const Index = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+              className="w-full md:w-auto flex flex-col items-center md:items-start text-center md:text-left"
             >
               <div className="flex items-center gap-2 mb-2 md:mb-4">
                 <span className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.5)] animate-pulse" />
@@ -174,7 +175,7 @@ const Index = () => {
             <motion.div 
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="flex items-center gap-4"
+              className="flex items-center gap-4 w-full md:w-auto justify-center md:justify-end"
             >
               <button 
                 onClick={fetchData}
@@ -206,8 +207,8 @@ const Index = () => {
                 className="grid grid-cols-1 gap-6"
               >
                 <div className="bg-white border border-purple-200 rounded-3xl md:rounded-[2rem] p-6 md:p-12 shadow-xl shadow-purple-500/5">
-                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 md:mb-10 gap-4">
-                    <div>
+                  <div className="flex flex-col md:flex-row items-center md:items-center justify-between mb-8 md:mb-10 gap-4 text-center md:text-left">
+                    <div className="flex flex-col items-center md:items-start">
                       <h2 className="text-2xl md:text-3xl font-display font-bold text-zinc-900 mb-1 md:mb-2">Seu Histórico</h2>
                       <p className="text-zinc-500 text-xs">Jogos salvos nos últimos 7 dias</p>
                     </div>
@@ -309,8 +310,8 @@ const Index = () => {
                 className="grid grid-cols-1 gap-6"
               >
                 <div className="bg-white border border-purple-200 rounded-3xl md:rounded-[2rem] p-6 md:p-12 shadow-xl shadow-purple-500/5">
-                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 md:mb-10 gap-4">
-                    <div>
+                  <div className="flex flex-col md:flex-row items-center md:items-center justify-between mb-8 md:mb-10 gap-4 text-center md:text-left">
+                    <div className="flex flex-col items-center md:items-start">
                       <h2 className="text-2xl md:text-3xl font-display font-bold text-zinc-900 mb-1 md:mb-2">Fechamentos PRO</h2>
                       <p className="text-zinc-500 text-xs">Modelos matemáticos exclusivos</p>
                     </div>
@@ -376,8 +377,8 @@ const Index = () => {
                 className="grid grid-cols-1 gap-6"
               >
                 <div className="bg-white border border-purple-200 rounded-[2rem] p-8 md:p-12 shadow-xl shadow-purple-500/5">
-                  <div className="flex items-center justify-between mb-10">
-                    <div>
+                  <div className="flex flex-col md:flex-row items-center md:items-center justify-between mb-10 gap-4 text-center md:text-left">
+                    <div className="flex flex-col items-center md:items-start">
                       <h2 className="text-3xl font-display font-bold text-zinc-900 mb-2">Dicas do Especialista</h2>
                       <p className="text-zinc-500 text-sm">Análises estratégicas baseadas nos últimos 5 anos de resultados</p>
                     </div>
@@ -541,8 +542,8 @@ const Index = () => {
                     <PieChart size={160} strokeWidth={1} />
                   </div>
 
-                  <div className="flex items-start justify-between mb-4 md:mb-5 relative z-10">
-                    <div>
+                  <div className="flex flex-col items-center justify-between mb-4 md:mb-5 relative z-10 text-center md:text-left md:flex-row md:items-start">
+                    <div className="flex flex-col items-center md:items-start">
                       <h3 className="text-lg md:text-xl font-display font-bold mb-1 flex items-center gap-2">
                         <Target size={18} className="text-purple-600" /> Tendências
                       </h3>
