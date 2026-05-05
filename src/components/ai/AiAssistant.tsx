@@ -100,9 +100,9 @@ export const AiAssistant = ({
               <div className="w-full max-w-2xl grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                 <button 
                   onClick={() => onSendMessage(undefined, "Pode gerar 3 sugestões de jogos baseadas nas dezenas mais quentes e tendências atuais?")}
-                  className="p-4 bg-white border border-purple-100 rounded-2xl text-left hover:border-purple-300 hover:shadow-md hover:shadow-purple-500/5 transition-all group"
+                  className="p-4 bg-white dark:bg-zinc-800 border border-purple-100 dark:border-zinc-700 rounded-2xl text-left hover:border-purple-300 dark:hover:border-purple-500 hover:shadow-md hover:shadow-purple-500/5 transition-all group"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-orange-50 text-orange-500 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                  <div className="w-8 h-8 rounded-lg bg-orange-50 dark:bg-orange-900/20 text-orange-500 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                     <Sparkles size={18} />
                   </div>
                   <p className="text-[11px] font-bold text-zinc-700 uppercase tracking-wider mb-1">Múltiplos Jogos IA</p>
