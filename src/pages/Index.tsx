@@ -135,7 +135,7 @@ const Index = () => {
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-600 text-[9px] font-bold mb-6 uppercase tracking-widest">
                       <History size={10} /> Resultado Oficial
                     </div>
-                    <h2 className="text-5xl md:text-7xl font-display font-black text-white mb-6">
+                    <h2 className="text-5xl md:text-7xl font-display font-black text-zinc-900 mb-6">
                       {latestResult?.concurso || "---"}
                     </h2>
                     <div className="flex items-center gap-6 text-zinc-500 text-[11px] font-bold uppercase tracking-wider">
