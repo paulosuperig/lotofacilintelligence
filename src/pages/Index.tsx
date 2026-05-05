@@ -165,13 +165,12 @@ const Index = () => {
                   )}
                 </div>
 
-                <div className="mt-auto pt-10 border-t border-white/5 flex flex-wrap gap-12 items-center">
-                  <StatDetail label="Pares" value={latestResult ? latestResult.dezenas.filter(n => parseInt(n) % 2 === 0).length.toString().padStart(2, '0') : "00"} percentage={latestResult ? (latestResult.dezenas.filter(n => parseInt(n) % 2 === 0).length / 15) * 100 : 0} color="from-premium-accent to-indigo-500" />
+                <div className="mt-auto pt-8 border-t border-white/5 flex flex-wrap gap-8 md:gap-12 items-center">
+                  <StatDetail label="Pares" value={latestResult ? latestResult.dezenas.filter(n => parseInt(n) % 2 === 0).length.toString().padStart(2, '0') : "00"} percentage={latestResult ? (latestResult.dezenas.filter(n => parseInt(n) % 2 === 0).length / 15) * 100 : 0} color="from-indigo-500 to-indigo-400" />
                   <StatDetail label="Ímpares" value={latestResult ? latestResult.dezenas.filter(n => parseInt(n) % 2 !== 0).length.toString().padStart(2, '0') : "00"} percentage={latestResult ? (latestResult.dezenas.filter(n => parseInt(n) % 2 !== 0).length / 15) * 100 : 0} color="from-indigo-400 to-cyan-400" />
-                  <StatDetail label="Primos" value={latestResult ? latestResult.dezenas.filter(n => [2, 3, 5, 7, 11, 13, 17, 19, 23].includes(parseInt(n))).length.toString().padStart(2, '0') : "00"} percentage={latestResult ? (latestResult.dezenas.filter(n => [2, 3, 5, 7, 11, 13, 17, 19, 23].includes(parseInt(n))).length / 15) * 100 : 0} color="from-emerald-400 to-teal-400" />
                   
-                  <Button variant="ghost" className="ml-auto text-premium-text-muted hover:text-white transition-all gap-2 group text-xs font-bold uppercase tracking-widest">
-                    Relatório Detalhado <ArrowUpRight size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                  <Button variant="ghost" className="ml-auto text-zinc-500 hover:text-white transition-all gap-2 group text-[10px] font-black uppercase tracking-widest">
+                    Explorar Dados <ArrowUpRight size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                   </Button>
                 </div>
               </div>
@@ -179,13 +178,13 @@ const Index = () => {
 
             {/* Generator Bento */}
             <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-3">
-              <div className="h-full glass-morphism premium-border rounded-[2.5rem] p-0 flex flex-col">
+              <div className="h-full glass-morphism premium-border rounded-[2rem] p-0 flex flex-col">
                 <GameGenerator />
               </div>
             </motion.div>
 
             {/* Frequência Bento */}
-            <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-1 glass-morphism premium-border rounded-[2.5rem] p-8 flex flex-col justify-between group overflow-hidden relative">
+            <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-1 glass-morphism premium-border rounded-[2rem] p-8 flex flex-col justify-between group overflow-hidden relative">
               <div className="absolute -right-4 -bottom-4 opacity-[0.05] group-hover:scale-110 transition-transform duration-700">
                 <PieChart size={140} strokeWidth={1} />
               </div>
