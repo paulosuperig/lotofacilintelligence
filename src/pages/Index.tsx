@@ -29,6 +29,20 @@ const Index = () => {
   const [latestResult, setLatestResult] = useState<LotteryResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('home');
+  const [history, setHistory] = useState<any[]>([]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('lottery_history');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+        setHistory(parsed.filter((g: any) => g.timestamp > sevenDaysAgo));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }, [activeTab]);
   const { toast } = useToast();
 
   useEffect(() => {
