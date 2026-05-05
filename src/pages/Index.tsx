@@ -715,7 +715,7 @@ const Index = () => {
                   <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
                     <div className="flex flex-col items-center md:items-start">
                       <h2 className="text-2xl md:text-3xl font-display font-bold text-zinc-900 mb-1">Lotofácil Intelligence AI</h2>
-                      <p className="text-zinc-500 text-xs">Especialista em análises e probabilidades (Powered by DeepSeek)</p>
+                      <p className="text-zinc-500 text-xs">Especialista em análises e probabilidades</p>
                     </div>
                     <Button 
                       variant="outline" 
