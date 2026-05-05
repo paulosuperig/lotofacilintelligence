@@ -221,7 +221,7 @@ const Index = () => {
             {/* Fechamentos Card - Elegant Action */}
             <motion.div 
               variants={itemVariants} 
-              className="lg:col-span-4 lg:row-span-1 glass-morphism premium-border rounded-[2rem] p-8 flex items-center gap-6 group cursor-pointer hover:bg-white/[0.03] transition-all"
+              className="lg:col-span-4 lg:row-span-1 bg-white border border-purple-100 rounded-[2rem] p-8 flex items-center gap-6 group cursor-pointer hover:bg-purple-50/50 transition-all shadow-sm"
             >
               <div className="w-16 h-16 rounded-3xl bg-indigo-500/10 premium-border flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform duration-500">
                 <ShieldCheck size={32} />
