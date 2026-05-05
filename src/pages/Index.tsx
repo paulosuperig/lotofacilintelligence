@@ -91,13 +91,13 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-[#f5f3ff] text-zinc-900 selection:bg-purple-500/30 overflow-x-hidden font-sans">
       {/* Sidebar Navigation - Apple Style */}
-      <aside className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md h-16 bg-white/80 backdrop-blur-xl border border-purple-100 rounded-2xl z-50 md:top-1/2 md:left-8 md:-translate-x-0 md:-translate-y-1/2 md:w-[72px] md:h-auto md:max-h-[90vh] md:flex-col md:rounded-[1.75rem] flex items-center justify-around md:justify-start md:gap-3 py-2 px-4 md:p-3 shadow-xl shadow-purple-500/10 transition-all duration-300">
+      <aside className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md h-16 bg-white/80 backdrop-blur-xl border border-purple-100 rounded-2xl z-50 flex items-center justify-around px-3 py-2 shadow-xl shadow-purple-500/10 transition-all duration-300 md:bottom-auto md:top-1/2 md:left-8 md:-translate-x-0 md:-translate-y-1/2 md:w-16 md:h-auto md:max-h-none md:flex-col md:items-center md:justify-center md:gap-2 md:rounded-[2rem] md:p-2">
         <div className="hidden md:flex w-12 h-12 items-center justify-center shrink-0">
            <div className="w-12 h-12 rounded-[1.25rem] bg-gradient-to-br from-purple-600 to-fuchsia-600 flex items-center justify-center shadow-lg shadow-purple-500/20 transform hover:rotate-12 transition-transform duration-300">
              <Trophy size={20} className="text-white" />
            </div>
         </div>
-        <div className="flex items-center justify-around w-full md:w-12 md:flex-col md:gap-3">
+        <div className="flex flex-1 items-center justify-around w-full md:flex-none md:w-12 md:flex-col md:justify-center md:gap-2">
           <NavIcon icon={<LayoutDashboard size={20} strokeWidth={1.5} />} active={activeTab === 'home'} label="Home" onClick={() => setActiveTab('home')} />
           <NavIcon icon={<Zap size={20} strokeWidth={1.5} />} active={activeTab === 'gerador'} label="Gerador" onClick={() => {
             setActiveTab('gerador');
@@ -112,7 +112,7 @@ const Index = () => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }} />
         </div>
-        <div className="hidden md:flex w-12 flex-col gap-3 items-center">
+        <div className="hidden md:flex w-12 flex-col gap-2 items-center pt-2 border-t border-purple-100/70">
            <NavIcon icon={<Settings size={20} strokeWidth={1.5} />} active={activeTab === 'ajustes'} label="Ajustes" onClick={() => setActiveTab('ajustes')} />
            <NavIcon icon={<LogOut size={20} strokeWidth={1.5} />} label="Sair" onClick={() => toast({ title: "Sair", description: "Encerrando sessão..." })} />
         </div>
