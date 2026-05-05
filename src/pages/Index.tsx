@@ -109,8 +109,8 @@ const Index = () => {
                 <p className="text-sm font-bold text-zinc-200">João Silva</p>
                 <p className="text-[10px] uppercase tracking-widest text-zinc-500">Pro Analyst</p>
               </div>
-              <div className="w-12 h-12 rounded-xl glass-morphism premium-border flex items-center justify-center text-sm font-display font-bold group cursor-pointer hover:border-indigo-500/50 transition-all duration-300">
-                <span className="group-hover:scale-110 transition-transform duration-500 text-zinc-300">JS</span>
+              <div className="w-12 h-12 rounded-xl bg-white border border-purple-100 flex items-center justify-center text-sm font-display font-bold group cursor-pointer hover:border-purple-500/50 transition-all duration-300 shadow-sm">
+                <span className="group-hover:scale-110 transition-transform duration-500 text-purple-700">JS</span>
               </div>
             </motion.div>
           </header>
