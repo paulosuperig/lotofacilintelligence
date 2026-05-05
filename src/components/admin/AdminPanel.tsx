@@ -14,7 +14,8 @@ import {
   Eye,
   EyeOff,
   Cpu,
-  Target
+  Target,
+  ShieldAlert
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -55,6 +56,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
+import { maskSensitiveData } from '@/lib/security/utils';
 
 interface AdminPanelProps {
   users: any[];
