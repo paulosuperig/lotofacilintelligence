@@ -32,8 +32,8 @@ export const HistoryPanel = ({
   onClearHistory, 
   onGoToGenerator 
 }: HistoryPanelProps) => {
-  const shareAllOnWhatsApp = () => {
-    if (history.length === 0) return;
+  const generateAllGamesText = () => {
+    if (history.length === 0) return "";
     
     let text = `🔥 *Histórico de Jogos Intelligence* 🔥\n\n`;
     
@@ -44,8 +44,24 @@ export const HistoryPanel = ({
     });
     
     text += `\n🍀 Boa sorte!\nGerado em: ${window.location.origin}`;
-    
+    return text;
+  };
+
+  const shareAllOnWhatsApp = () => {
+    const text = generateAllGamesText();
+    if (!text) return;
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+  };
+
+  const copyAllToClipboard = () => {
+    const text = generateAllGamesText();
+    if (!text) return;
+    
+    navigator.clipboard.writeText(text).then(() => {
+      toast.success("Todos os jogos foram copiados para a área de transferência!");
+    }).catch(() => {
+      toast.error("Falha ao copiar jogos.");
+    });
   };
 
   return (
