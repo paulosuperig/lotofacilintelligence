@@ -236,7 +236,7 @@ const Index = () => {
              {/* Smart Alerts */}
              <motion.div 
               variants={itemVariants} 
-              className="lg:col-span-4 lg:row-span-1 bg-gradient-to-br from-indigo-600 to-indigo-900 premium-border rounded-[2rem] p-8 flex flex-col justify-between text-white relative overflow-hidden group shadow-xl shadow-indigo-500/10"
+              className="lg:col-span-4 lg:row-span-1 bg-gradient-to-br from-purple-600 to-indigo-700 border border-purple-500 rounded-[2rem] p-8 flex flex-col justify-between text-white relative overflow-hidden group shadow-xl shadow-purple-500/10"
             >
               <div className="absolute top-0 right-0 p-6 opacity-20 group-hover:rotate-12 transition-transform duration-700">
                 <Sparkles size={80} />
