@@ -806,18 +806,29 @@ const Index = () => {
                       </div>
                     ) : null}
 
-                    <div className="flex-grow overflow-y-auto p-6 space-y-4 max-h-[450px]">
+                    <div className="flex-grow overflow-y-auto p-4 md:p-6 space-y-4 max-h-[500px] scrollbar-thin scrollbar-thumb-purple-100">
                       {aiChat.length === 0 ? (
                         <div className="h-full flex flex-col items-center justify-center text-center py-6">
-                          <div className="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center text-purple-400 mb-4">
+                          <div className="w-16 h-16 bg-white rounded-3xl shadow-sm flex items-center justify-center text-purple-400 mb-6 border border-purple-50">
                             <Cpu size={32} />
                           </div>
                           <p className="text-sm text-zinc-500 max-w-xs mb-8">Olá! Eu sou seu assistente inteligente. Como posso ajudar com suas análises hoje?</p>
                           
                           <div className="w-full max-w-2xl grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                             <button 
+                              onClick={() => handleSendAiMessage(undefined, "Pode gerar 3 sugestões de jogos baseadas nas dezenas mais quentes e tendências atuais?")}
+                              className="p-4 bg-white border border-purple-100 rounded-2xl text-left hover:border-purple-300 hover:shadow-md hover:shadow-purple-500/5 transition-all group"
+                            >
+                              <div className="w-8 h-8 rounded-lg bg-orange-50 text-orange-500 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                                <Sparkles size={18} />
+                              </div>
+                              <p className="text-[11px] font-bold text-zinc-700 uppercase tracking-wider mb-1">Múltiplos Jogos IA</p>
+                              <p className="text-[10px] text-zinc-400">Geração de várias opções com análise técnica</p>
+                            </button>
+
+                            <button 
                               onClick={() => handleSendAiMessage(undefined, "Quais são as dezenas mais quentes para o próximo concurso?")}
-                              className="p-4 bg-white border border-purple-100 rounded-2xl text-left hover:border-purple-300 transition-all group"
+                              className="p-4 bg-white border border-purple-100 rounded-2xl text-left hover:border-purple-300 hover:shadow-md hover:shadow-purple-500/5 transition-all group"
                             >
                               <div className="w-8 h-8 rounded-lg bg-orange-50 text-orange-500 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                                 <Flame size={18} />
@@ -827,19 +838,8 @@ const Index = () => {
                             </button>
 
                             <button 
-                              onClick={() => handleSendAiMessage(undefined, "Pode gerar uma sugestão de jogo com 15 dezenas baseada em tendências?")}
-                              className="p-4 bg-white border border-purple-100 rounded-2xl text-left hover:border-purple-300 transition-all group"
-                            >
-                              <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-500 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                                <Sparkles size={18} />
-                              </div>
-                              <p className="text-[11px] font-bold text-zinc-700 uppercase tracking-wider mb-1">Gerar com IA</p>
-                              <p className="text-[10px] text-zinc-400">Criação de jogos baseada em lógica matemática</p>
-                            </button>
-
-                            <button 
                               onClick={() => handleSendAiMessage(undefined, "Quais são os padrões de pares e ímpares que mais saem?")}
-                              className="p-4 bg-white border border-purple-100 rounded-2xl text-left hover:border-purple-300 transition-all group"
+                              className="p-4 bg-white border border-purple-100 rounded-2xl text-left hover:border-purple-300 hover:shadow-md hover:shadow-purple-500/5 transition-all group"
                             >
                               <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                                 <PieChart size={18} />
@@ -850,7 +850,7 @@ const Index = () => {
 
                             <button 
                               onClick={() => handleSendAiMessage(undefined, "Explique os melhores fechamentos para quem quer garantir 14 pontos")}
-                              className="p-4 bg-white border border-purple-100 rounded-2xl text-left hover:border-purple-300 transition-all group"
+                              className="p-4 bg-white border border-purple-100 rounded-2xl text-left hover:border-purple-300 hover:shadow-md hover:shadow-purple-500/5 transition-all group"
                             >
                               <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-500 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                                 <ShieldCheck size={18} />
