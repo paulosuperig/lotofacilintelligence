@@ -79,6 +79,8 @@ import { LotteryResult } from "@/types/lottery";
 import { GameGenerator } from "@/components/lottery/GameGenerator";
 import { cn, formatDate, formatCurrency } from "@/lib/utils";
 import Login from '@/components/Login';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 const Index = () => {
   const [user, setUser] = useState<{ email: string, role: 'admin' | 'demo' } | null>(null);
