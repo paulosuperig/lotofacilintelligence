@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useToast } from './use-toast';
 import { getLatestResult } from '@/services/lotteryApi';
-import { LotteryResult } from '@/types/lottery';
+import { LotteryResult, SavedGame } from '@/types/lottery';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useLottery = () => {
   const { toast } = useToast();
   const [latestResult, setLatestResult] = useState<LotteryResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [history, setHistory] = useState<any[]>([]);
+  const [history, setHistory] = useState<SavedGame[]>([]);
 
   const fetchLatestResult = async () => {
     setIsRefreshing(true);
