@@ -1,17 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useToast } from './use-toast';
 import { validateEmail, generateSecureId, hashData } from '@/lib/security/utils';
+import { supabase } from '@/integrations/supabase/client';
+import { UserProfile } from '@/types/lottery';
 
 export const useAdmin = () => {
   const { toast } = useToast();
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<UserProfile[]>([]);
 
   useEffect(() => {
     const savedUsers = localStorage.getItem('intelligence_system_users');
     if (savedUsers) {
       setUsers(JSON.parse(savedUsers));
     } else {
-      const initialUsers = [
+      const initialUsers: UserProfile[] = [
         { id: '1', email: 'admin@admin.com.br', role: 'admin', status: 'active', createdAt: new Date().toISOString() },
         { id: '2', email: 'demo@demo.com.br', role: 'demo', status: 'active', createdAt: new Date().toISOString() }
       ];
