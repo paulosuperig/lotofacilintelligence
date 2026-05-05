@@ -179,7 +179,7 @@ const Index = () => {
                         description: "A análise detalhada estará disponível na próxima atualização.",
                       });
                     }}
-                    className="ml-auto text-zinc-500 hover:text-purple-700 hover:bg-purple-100/50 transition-all gap-2 group text-[10px] font-black uppercase tracking-widest disabled:opacity-50"
+                    className="ml-auto text-zinc-500 hover:text-purple-700 hover:bg-purple-100/50 transition-all gap-2 group text-[10px] font-bold uppercase tracking-widest disabled:opacity-50"
                   >
                     Explorar Dados <ArrowUpRight size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                   </Button>
