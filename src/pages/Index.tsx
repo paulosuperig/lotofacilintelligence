@@ -11,10 +11,13 @@ import {
   ChevronRight,
   Trophy,
   Calendar,
-  Sparkles
+  Sparkles,
+  ArrowUpRight,
+  PieChart,
+  Target,
+  ShieldCheck
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Ball } from "@/components/lottery/Ball";
 import { getLatestResult } from "@/services/lotteryApi";
 import { LotteryResult } from "@/types/lottery";
@@ -39,228 +42,211 @@ const Index = () => {
     fetchData();
   }, []);
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] }
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-premium-gradient text-slate-100 font-sans selection:bg-purple-500/30">
-      {/* Sidebar Desktop / Bottom Nav Mobile */}
-      <aside className="fixed bottom-0 left-0 w-full h-16 bg-slate-900/80 backdrop-blur-xl border-t border-white/10 z-50 md:top-0 md:left-0 md:w-24 md:h-full md:border-r md:border-t-0 flex md:flex-col items-center justify-around md:justify-center gap-8 py-4">
-        <div className="hidden md:flex absolute top-8 left-0 w-full justify-center">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
-            <Trophy className="text-white" size={24} />
-          </div>
-        </div>
-        
-        <NavIcon icon={<LayoutDashboard size={24} />} active label="Home" />
-        <NavIcon icon={<Zap size={24} />} label="Gerador" />
-        <NavIcon icon={<TrendingUp size={24} />} label="Stats" />
-        <NavIcon icon={<History size={24} />} label="Histórico" />
-        
-        <div className="hidden md:flex flex-col gap-6 mt-auto mb-8">
-           <NavIcon icon={<Settings size={24} />} label="Ajustes" />
-           <NavIcon icon={<LogOut size={24} />} label="Sair" />
+    <div className="min-h-screen bg-premium-dark bg-mesh-gradient text-premium-text-primary selection:bg-premium-accent/30 overflow-x-hidden">
+      {/* Sidebar Navigation - Apple Style */}
+      <aside className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md h-16 glass-morphism premium-border rounded-full z-50 md:top-1/2 md:left-8 md:-translate-x-0 md:-translate-y-1/2 md:w-20 md:h-auto md:flex-col md:rounded-3xl flex items-center justify-around md:justify-center md:gap-8 py-4 px-6 md:px-0">
+        <NavIcon icon={<LayoutDashboard size={22} strokeWidth={1.5} />} active label="Home" />
+        <NavIcon icon={<Zap size={22} strokeWidth={1.5} />} label="Gerador" />
+        <NavIcon icon={<TrendingUp size={22} strokeWidth={1.5} />} label="Stats" />
+        <NavIcon icon={<History size={22} strokeWidth={1.5} />} label="Histórico" />
+        <div className="hidden md:flex flex-col gap-8 mt-12 pt-8 border-t border-white/5">
+           <NavIcon icon={<Settings size={22} strokeWidth={1.5} />} label="Ajustes" />
+           <NavIcon icon={<LogOut size={22} strokeWidth={1.5} />} label="Sair" />
         </div>
       </aside>
 
-      <main className="pb-24 md:pb-8 md:pl-24 transition-all duration-300">
-        <div className="max-w-7xl mx-auto p-6 md:p-10">
+      <main className="pb-32 md:pb-12 md:pl-32">
+        <div className="max-w-[1400px] mx-auto p-6 md:p-12 lg:p-16">
           
-          {/* Header */}
-          <header className="flex justify-between items-center mb-10">
+          {/* Top Header - Minimalist */}
+          <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-8">
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
             >
-              <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-                Olá, <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-400">Apostador Premium</span>
+              <div className="flex items-center gap-3 mb-2">
+                <span className="w-2 h-2 rounded-full bg-premium-accent animate-pulse" />
+                <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-premium-text-muted">Status: Membro Premium</span>
+              </div>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-black tracking-tight leading-tight">
+                Lotofácil <span className="text-transparent bg-clip-text bg-gradient-to-r from-premium-accent to-indigo-400">Intelligence</span>
               </h1>
-              <p className="text-slate-400 text-sm mt-1">Bem-vindo à sua central de inteligência Lotofácil.</p>
             </motion.div>
             
-            <div className="flex items-center gap-4">
-              <button className="relative p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors border border-white/10">
-                <BellIcon size={20} className="text-slate-300" />
-                <span className="absolute top-2 right-2 w-2 h-2 bg-purple-500 rounded-full ring-2 ring-slate-900" />
-              </button>
-              <div className="hidden sm:flex items-center gap-3 pl-4 border-l border-white/10">
-                <div className="text-right">
-                  <p className="text-xs font-medium text-slate-300">João Silva</p>
-                  <p className="text-[10px] text-purple-400 font-bold uppercase tracking-wider">Membro Pro</p>
-                </div>
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 border border-white/10 flex items-center justify-center text-sm font-bold"> JS </div>
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="flex items-center gap-6"
+            >
+              <div className="text-right hidden sm:block">
+                <p className="text-sm font-medium text-premium-text-primary">João Silva</p>
+                <p className="text-xs text-premium-text-muted">Pro Analytics Dashboard</p>
               </div>
-            </div>
+              <div className="w-14 h-14 rounded-2xl glass-morphism premium-border flex items-center justify-center text-lg font-display font-bold group cursor-pointer hover:border-premium-accent/50 transition-colors">
+                <span className="group-hover:scale-110 transition-transform duration-500">JS</span>
+              </div>
+            </motion.div>
           </header>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Bento Grid Layout */}
+          <motion.div 
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 auto-rows-[minmax(180px,auto)]"
+          >
             
-            {/* Main Result Card */}
-            <div className="lg:col-span-8 space-y-8">
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-              >
-                <Card className="bg-slate-900/40 border-white/5 backdrop-blur-md overflow-hidden relative">
-                  <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
-                    <Trophy size={120} />
+            {/* Main Result Bento - Large */}
+            <motion.div variants={itemVariants} className="lg:col-span-8 lg:row-span-2 glass-morphism premium-border rounded-[2.5rem] p-10 relative group overflow-hidden">
+              <div className="absolute top-0 right-0 p-12 opacity-[0.03] group-hover:scale-110 transition-transform duration-1000">
+                <Trophy size={280} strokeWidth={1} />
+              </div>
+              
+              <div className="relative z-10 h-full flex flex-col">
+                <div className="flex flex-wrap justify-between items-start gap-6 mb-12">
+                  <div>
+                    <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-premium-accent/10 premium-border text-premium-accent text-[10px] font-bold mb-4 uppercase tracking-widest">
+                      <History size={12} /> Resultado Oficial
+                    </div>
+                    <h2 className="text-5xl md:text-6xl font-display font-black text-white mb-4">
+                      {latestResult?.concurso || "---"}
+                    </h2>
+                    <div className="flex items-center gap-6 text-premium-text-muted text-sm font-medium">
+                      <span className="flex items-center gap-2"><Calendar size={16} strokeWidth={1.5} /> {latestResult ? formatDate(latestResult.data) : "---"}</span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-premium-accent/30" />
+                      <span className="flex items-center gap-2"><ShieldCheck size={16} strokeWidth={1.5} /> Dados Verificados</span>
+                    </div>
                   </div>
-                  <CardContent className="p-8">
-                    <div className="flex flex-wrap justify-between items-start gap-4 mb-8">
-                      <div>
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-bold mb-3 uppercase tracking-wider">
-                          <History size={12} /> Último Concurso
-                        </div>
-                        <h2 className="text-4xl font-black text-white">
-                          Concurso {latestResult?.concurso || "---"}
-                        </h2>
-                        <div className="flex items-center gap-4 mt-2 text-slate-400 text-sm">
-                          <span className="flex items-center gap-1.5"><Calendar size={14} /> {latestResult ? formatDate(latestResult.data) : "---"}</span>
-                          <span className="w-1 h-1 rounded-full bg-slate-700" />
-                          <span className="text-indigo-400 font-medium">Sorteio Oficial Caixa</span>
-                        </div>
-                      </div>
-                      
-                      <div className="text-right bg-white/5 p-4 rounded-2xl border border-white/5 backdrop-blur-md">
-                        <p className="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-1">Prêmio Estimado</p>
-                        <p className="text-2xl font-bold text-emerald-400">
-                          {latestResult ? formatCurrency(latestResult.valor_estimado_proximo_concurso) : "R$ ---"}
-                        </p>
-                      </div>
-                    </div>
+                  
+                  <div className="bg-white/[0.03] p-6 rounded-[2rem] premium-border backdrop-blur-xl">
+                    <p className="text-[10px] text-premium-text-muted uppercase font-bold tracking-[0.2em] mb-2">Prêmio Estimado</p>
+                    <p className="text-3xl font-display font-black text-emerald-400">
+                      {latestResult ? formatCurrency(latestResult.valor_estimado_proximo_concurso) : "R$ ---"}
+                    </p>
+                  </div>
+                </div>
 
-                    <div className="flex flex-wrap gap-3 md:gap-4 mb-8">
-                      {isLoading ? (
-                        Array(15).fill(0).map((_, i) => (
-                          <div key={i} className="w-12 h-12 rounded-full bg-white/5 animate-pulse" />
-                        ))
-                      ) : (
-                        latestResult?.dezenas.map((num, i) => (
-                          <motion.div
-                            key={num}
-                            initial={{ scale: 0, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            transition={{ delay: i * 0.05 }}
-                          >
-                            <Ball number={num} active size="lg" />
-                          </motion.div>
-                        ))
-                      )}
-                    </div>
+                <div className="flex flex-wrap gap-4 md:gap-5 mb-12">
+                  {isLoading ? (
+                    Array(15).fill(0).map((_, i) => (
+                      <div key={i} className="w-14 h-14 rounded-full bg-white/[0.03] premium-border animate-pulse" />
+                    ))
+                  ) : (
+                    latestResult?.dezenas.map((num, i) => (
+                      <Ball key={num} number={num} active size="lg" />
+                    ))
+                  )}
+                </div>
 
-                    <div className="pt-6 border-t border-white/5 flex flex-wrap gap-6 items-center justify-between">
-                      <div className="flex gap-4">
-                        <StatBrief label="Pares" value="08" />
-                        <StatBrief label="Ímpares" value="07" />
-                        <StatBrief label="Primos" value="05" />
-                      </div>
-                      <Button variant="ghost" className="text-slate-400 hover:text-white hover:bg-white/5 gap-2 group">
-                        Ver detalhes completos <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-
-              {/* Quick Actions & Generator */}
-              <div className="space-y-8">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  <GameGenerator />
-                </motion.div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                   <ActionCard 
-                      title="Conferidor Automático"
-                      desc="Suba seus jogos e deixe que o sistema valide cada acerto instantaneamente."
-                      icon={<Sparkles className="text-indigo-400" />}
-                      gradient="from-indigo-500/10 to-purple-500/10"
-                      borderColor="border-indigo-500/20"
-                   />
-                   <ActionCard 
-                      title="Fechamentos Matemáticos"
-                      desc="Aumente suas chances usando técnicas de desdobramentos profissionais."
-                      icon={<Trophy className="text-emerald-400" />}
-                      gradient="from-emerald-500/10 to-teal-500/10"
-                      borderColor="border-emerald-500/20"
-                   />
+                <div className="mt-auto pt-10 border-t border-white/5 flex flex-wrap gap-12 items-center">
+                  <StatDetail label="Pares" value="08" percentage={53} color="from-premium-accent to-indigo-500" />
+                  <StatDetail label="Ímpares" value="07" percentage={47} color="from-indigo-400 to-cyan-400" />
+                  <StatDetail label="Primos" value="05" percentage={33} color="from-emerald-400 to-teal-400" />
+                  
+                  <Button variant="ghost" className="ml-auto text-premium-text-muted hover:text-white transition-all gap-2 group text-xs font-bold uppercase tracking-widest">
+                    Relatório Detalhado <ArrowUpRight size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                  </Button>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
-            {/* Sidebar Stats */}
-            <div className="lg:col-span-4 space-y-8">
-               <motion.div
-                 initial={{ opacity: 0, x: 20 }}
-                 animate={{ opacity: 1, x: 0 }}
-                 transition={{ delay: 0.3 }}
-               >
-                 <Card className="bg-slate-900/40 border-white/5 backdrop-blur-md">
-                    <CardContent className="p-6">
-                      <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
-                        <TrendingUp size={20} className="text-purple-400" /> Frequência Quente
-                      </h3>
-                      
-                      <div className="space-y-4">
-                        {[
-                          { num: "20", freq: 154, color: "bg-emerald-500" },
-                          { num: "10", freq: 148, color: "bg-emerald-500/80" },
-                          { num: "25", freq: 142, color: "bg-emerald-500/60" },
-                          { num: "01", freq: 139, color: "bg-emerald-500/40" },
-                        ].map((item, idx) => (
-                          <div key={idx} className="flex items-center gap-4">
-                            <Ball number={item.num} active size="sm" />
-                            <div className="flex-1">
-                              <div className="flex justify-between text-xs mb-1.5">
-                                <span className="text-slate-400">Sorteado {item.freq} vezes</span>
-                                <span className="text-slate-200 font-bold">{Math.round((item.freq/3150)*100)}%</span>
-                              </div>
-                              <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                                <motion.div 
-                                  initial={{ width: 0 }}
-                                  animate={{ width: `${(item.freq/160)*100}%` }}
-                                  className={cn("h-full rounded-full", item.color)} 
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      
-                      <Button className="w-full mt-8 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300">
-                        Ver Relatório Completo
-                      </Button>
-                    </CardContent>
-                 </Card>
-               </motion.div>
+            {/* Generator Bento */}
+            <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-3">
+              <div className="h-full glass-morphism premium-border rounded-[2.5rem] p-0 flex flex-col">
+                <GameGenerator />
+              </div>
+            </motion.div>
 
-               {/* Upcoming Draw */}
-               <motion.div
-                 initial={{ opacity: 0, x: 20 }}
-                 animate={{ opacity: 1, x: 0 }}
-                 transition={{ delay: 0.4 }}
-               >
-                 <Card className="bg-gradient-to-br from-indigo-600 to-purple-700 border-none shadow-xl shadow-purple-900/20 text-white overflow-hidden relative group">
-                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-500">
-                      <Zap size={80} />
-                    </div>
-                    <CardContent className="p-6 flex flex-col items-center text-center">
-                      <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center mb-4">
-                        <Zap size={24} />
-                      </div>
-                      <h3 className="text-xl font-bold mb-2">Gerador Inteligente</h3>
-                      <p className="text-indigo-100/70 text-sm mb-6">
-                        Crie agora 5 jogos competitivos baseados no fechamento matemático atual.
-                      </p>
-                      <Button className="w-full bg-white text-indigo-700 hover:bg-indigo-50 font-bold py-6 rounded-xl shadow-lg shadow-indigo-950/20">
-                        CRIAR MEUS JOGOS
-                      </Button>
-                    </CardContent>
-                 </Card>
-               </motion.div>
-            </div>
-          </div>
+            {/* Frequência Bento */}
+            <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-1 glass-morphism premium-border rounded-[2.5rem] p-8 flex flex-col justify-between group overflow-hidden relative">
+              <div className="absolute -right-4 -bottom-4 opacity-[0.05] group-hover:scale-110 transition-transform duration-700">
+                <PieChart size={140} strokeWidth={1} />
+              </div>
+              <div>
+                <h3 className="text-xl font-display font-bold mb-2 flex items-center gap-3">
+                  <Target size={20} className="text-premium-accent" /> Tendências Atuais
+                </h3>
+                <p className="text-premium-text-muted text-sm">Os números que mais se repetiram nos últimos 10 concursos.</p>
+              </div>
+              <div className="flex gap-3 mt-6">
+                {["20", "10", "25", "01", "13"].map(num => (
+                  <Ball key={num} number={num} active size="sm" />
+                ))}
+              </div>
+            </motion.div>
+
+            {/* Quick Insights Bento */}
+            <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-1 glass-morphism premium-border rounded-[2.5rem] p-8 flex flex-col justify-between group">
+              <div className="flex justify-between items-start">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 premium-border flex items-center justify-center text-emerald-400">
+                  <TrendingUp size={24} />
+                </div>
+                <div className="text-right">
+                  <p className="text-[10px] font-bold text-premium-text-muted uppercase tracking-widest">Consistência</p>
+                  <p className="text-2xl font-display font-bold text-white">94.2%</p>
+                </div>
+              </div>
+              <div>
+                <h4 className="font-bold text-white mb-1">Índice de Acertos</h4>
+                <p className="text-xs text-premium-text-muted">Seu desempenho está acima de 85% dos usuários Pro.</p>
+              </div>
+            </motion.div>
+
+            {/* Fechamentos Card - Elegant Action */}
+            <motion.div 
+              variants={itemVariants} 
+              className="lg:col-span-4 lg:row-span-1 glass-morphism premium-border rounded-[2.5rem] p-8 flex items-center gap-6 group cursor-pointer hover:bg-white/[0.03] transition-all"
+            >
+              <div className="w-16 h-16 rounded-3xl bg-indigo-500/10 premium-border flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform duration-500">
+                <ShieldCheck size={32} />
+              </div>
+              <div>
+                <h4 className="text-lg font-display font-bold text-white">Fechamentos Pro</h4>
+                <p className="text-sm text-premium-text-muted">Acesse 42 modelos matemáticos exclusivos.</p>
+              </div>
+              <ArrowUpRight size={20} className="ml-auto text-premium-text-muted group-hover:text-white transition-colors" />
+            </motion.div>
+
+             {/* Smart Alerts */}
+             <motion.div 
+              variants={itemVariants} 
+              className="lg:col-span-4 lg:row-span-1 bg-gradient-to-br from-premium-accent/80 to-indigo-600/80 premium-border rounded-[2.5rem] p-8 flex flex-col justify-between text-white relative overflow-hidden group"
+            >
+              <div className="absolute top-0 right-0 p-6 opacity-20 group-hover:rotate-12 transition-transform duration-700">
+                <Sparkles size={80} />
+              </div>
+              <p className="text-xs font-bold uppercase tracking-widest text-white/70">Dica do Especialista</p>
+              <h4 className="text-xl font-display font-bold leading-tight mt-2 mb-4">
+                "Ciclo das dezenas prestes a fechar. Foque no número 08 e 22."
+              </h4>
+              <button className="w-full py-4 bg-white text-premium-dark font-display font-black text-xs uppercase tracking-widest rounded-2xl shadow-xl shadow-black/20 hover:scale-[1.02] transition-transform active:scale-95">
+                Ver Análise Completa
+              </button>
+            </motion.div>
+
+          </motion.div>
         </div>
       </main>
     </div>
@@ -268,53 +254,46 @@ const Index = () => {
 };
 
 const NavIcon = ({ icon, active = false, label }: { icon: React.ReactNode, active?: boolean, label: string }) => (
-  <button className="flex flex-col items-center gap-1 group relative">
+  <button className="flex flex-col items-center gap-1 group relative outline-none">
     <div className={cn(
-      "p-3 rounded-2xl transition-all duration-300",
+      "p-3.5 rounded-2xl transition-all duration-500 md:group-hover:bg-white/[0.05]",
       active 
-        ? "bg-purple-500/10 text-purple-400 border border-purple-500/20 shadow-[0_0_20px_rgba(168,85,247,0.15)]" 
-        : "text-slate-500 hover:text-slate-300 hover:bg-white/5"
+        ? "text-premium-accent shadow-[0_0_15px_rgba(124,58,237,0.2)] md:bg-white/[0.05]" 
+        : "text-premium-text-muted hover:text-premium-text-primary"
     )}>
       {icon}
     </div>
     <span className={cn(
-      "text-[10px] font-bold uppercase tracking-widest mt-1 md:hidden",
-      active ? "text-purple-400" : "text-slate-500"
+      "text-[9px] font-bold uppercase tracking-[0.15em] mt-1 md:hidden",
+      active ? "text-premium-accent" : "text-premium-text-muted"
     )}>
       {label}
     </span>
     {active && (
       <motion.div 
         layoutId="activeNav"
-        className="hidden md:block absolute -left-1 w-1 h-8 bg-purple-500 rounded-r-full"
+        className="hidden md:block absolute -left-4 w-1 h-6 bg-premium-accent rounded-full"
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
       />
     )}
   </button>
 );
 
-const StatBrief = ({ label, value }: { label: string, value: string }) => (
-  <div className="flex flex-col">
-    <span className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">{label}</span>
-    <span className="text-lg font-bold text-slate-200">{value}</span>
+const StatDetail = ({ label, value, percentage, color }: { label: string, value: string, percentage: number, color: string }) => (
+  <div className="flex flex-col gap-2">
+    <div className="flex items-baseline gap-2">
+      <span className="text-[10px] text-premium-text-muted uppercase font-bold tracking-[0.2em]">{label}</span>
+      <span className="text-2xl font-display font-bold text-white">{value}</span>
+    </div>
+    <div className="w-24 h-1.5 bg-white/[0.03] rounded-full premium-border overflow-hidden">
+      <motion.div 
+        initial={{ width: 0 }}
+        animate={{ width: `${percentage}%` }}
+        transition={{ duration: 1.5, ease: "easeOut" }}
+        className={cn("h-full rounded-full bg-gradient-to-r", color)}
+      />
+    </div>
   </div>
-);
-
-const ActionCard = ({ title, desc, icon, gradient, borderColor }: { title: string, desc: string, icon: React.ReactNode, gradient: string, borderColor: string }) => (
-  <motion.div whileHover={{ y: -5 }} className="cursor-pointer h-full">
-    <Card className={cn("bg-slate-900/40 border-white/5 backdrop-blur-md hover:border-white/10 transition-all h-full overflow-hidden relative")}>
-      <div className={cn("absolute inset-0 bg-gradient-to-br opacity-50", gradient)} />
-      <CardContent className="p-6 relative z-10 flex flex-col h-full">
-        <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center mb-4 border bg-slate-900/50", borderColor)}>
-          {icon}
-        </div>
-        <h3 className="text-lg font-bold mb-2 text-white">{title}</h3>
-        <p className="text-slate-400 text-sm mb-6 flex-grow">{desc}</p>
-        <div className="flex items-center gap-2 text-xs font-bold text-indigo-400 uppercase tracking-wider group">
-          Explorar ferramenta <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
-        </div>
-      </CardContent>
-    </Card>
-  </motion.div>
 );
 
 export default Index;
