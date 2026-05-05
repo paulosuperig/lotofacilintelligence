@@ -111,9 +111,9 @@ export const AiAssistant = ({
 
                 <button 
                   onClick={() => onSendMessage(undefined, "Quais são as dezenas mais quentes para o próximo concurso?")}
-                  className="p-4 bg-white border border-purple-100 rounded-2xl text-left hover:border-purple-300 hover:shadow-md hover:shadow-purple-500/5 transition-all group"
+                  className="p-4 bg-white dark:bg-zinc-800 border border-purple-100 dark:border-zinc-700 rounded-2xl text-left hover:border-purple-300 dark:hover:border-purple-500 hover:shadow-md hover:shadow-purple-500/5 transition-all group"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-orange-50 text-orange-500 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                  <div className="w-8 h-8 rounded-lg bg-orange-50 dark:bg-orange-900/20 text-orange-500 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                     <Flame size={18} />
                   </div>
                   <p className="text-[11px] font-bold text-zinc-700 uppercase tracking-wider mb-1">Dezenas Quentes</p>
