@@ -161,6 +161,7 @@ const Index = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+              className="w-full md:w-auto flex flex-col items-center md:items-start text-center md:text-left"
             >
               <div className="flex items-center gap-2 mb-2 md:mb-4">
                 <span className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.5)] animate-pulse" />
