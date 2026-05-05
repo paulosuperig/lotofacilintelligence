@@ -523,20 +523,71 @@ const Index = () => {
                 </motion.div>
 
                 {/* Frequência Bento */}
-                <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-1 bg-white border border-purple-100 rounded-[2rem] p-8 flex flex-col justify-between group overflow-hidden relative shadow-sm">
-                  <div className="absolute -right-4 -bottom-4 opacity-[0.05] group-hover:scale-110 transition-transform duration-700 text-purple-900">
-                    <PieChart size={140} strokeWidth={1} />
+                <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-1 bg-white border border-purple-100 rounded-[2rem] p-7 flex flex-col group overflow-hidden relative shadow-sm">
+                  <div className="absolute -right-6 -bottom-6 opacity-[0.04] group-hover:scale-110 transition-transform duration-700 text-purple-900 pointer-events-none">
+                    <PieChart size={160} strokeWidth={1} />
                   </div>
-                  <div>
-                    <h3 className="text-xl font-display font-bold mb-1 flex items-center gap-3">
-                      <Target size={18} className="text-purple-600" /> Tendências
-                    </h3>
-                    <p className="text-zinc-500 text-[11px] font-bold uppercase tracking-wider">Top 5 frequentes (10 jogos)</p>
+
+                  <div className="flex items-start justify-between mb-5 relative z-10">
+                    <div>
+                      <h3 className="text-xl font-display font-bold mb-1 flex items-center gap-2.5">
+                        <Target size={18} className="text-purple-600" /> Tendências
+                      </h3>
+                      <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider">Análise dos últimos 10 jogos</p>
+                    </div>
+                    <span className="text-[8px] font-bold text-purple-600 bg-purple-50 px-2 py-1 rounded-full uppercase tracking-wider border border-purple-100">
+                      Live
+                    </span>
                   </div>
-                  <div className="flex gap-3 mt-6">
-                    {["20", "10", "25", "01", "13"].map(num => (
-                      <Ball key={num} number={num} active size="sm" />
-                    ))}
+
+                  <div className="space-y-4 relative z-10">
+                    {/* Quentes */}
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[9px] font-bold text-rose-500 uppercase tracking-widest flex items-center gap-1.5">
+                          <Flame size={10} /> Mais Quentes
+                        </span>
+                        <span className="text-[9px] font-bold text-zinc-400">↑ Frequência alta</span>
+                      </div>
+                      <div className="flex gap-2">
+                        {["20", "10", "25", "01", "13"].map(num => (
+                          <Ball key={`hot-${num}`} number={num} active size="sm" />
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Frias */}
+                    <div className="pt-3 border-t border-purple-50">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[9px] font-bold text-sky-500 uppercase tracking-widest flex items-center gap-1.5">
+                          <Snowflake size={10} /> Mais Frias
+                        </span>
+                        <span className="text-[9px] font-bold text-zinc-400">↓ Atrasadas</span>
+                      </div>
+                      <div className="flex gap-2">
+                        {["04", "07", "12", "18", "22"].map(num => (
+                          <span key={`cold-${num}`} className="w-8 h-8 flex items-center justify-center rounded-full bg-sky-50 border border-sky-100 text-sky-700 text-[11px] font-bold">
+                            {num}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Stats */}
+                    <div className="pt-3 border-t border-purple-50 grid grid-cols-3 gap-2">
+                      <div className="text-center">
+                        <p className="text-[8px] text-zinc-400 uppercase font-bold tracking-wider mb-1">Pares</p>
+                        <p className="text-base font-display font-bold text-purple-700">53%</p>
+                      </div>
+                      <div className="text-center border-x border-purple-50">
+                        <p className="text-[8px] text-zinc-400 uppercase font-bold tracking-wider mb-1">Primos</p>
+                        <p className="text-base font-display font-bold text-purple-700">27%</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-[8px] text-zinc-400 uppercase font-bold tracking-wider mb-1">Soma Méd.</p>
+                        <p className="text-base font-display font-bold text-purple-700">194</p>
+                      </div>
+                    </div>
                   </div>
                 </motion.div>
 
