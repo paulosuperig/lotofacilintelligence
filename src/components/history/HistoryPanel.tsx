@@ -78,7 +78,7 @@ export const HistoryPanel = ({
       {history.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {history.map((item, idx) => (
-            <div key={idx} className="p-6 bg-purple-50/50 border border-purple-100 rounded-2xl flex flex-col gap-4">
+            <div key={idx} className="p-6 bg-purple-50/50 dark:bg-zinc-800/50 border border-purple-100 dark:border-zinc-700 rounded-2xl flex flex-col gap-4">
               <div className="flex justify-between items-center">
                 <span className="text-[10px] font-bold text-purple-400 uppercase tracking-widest">
                   {new Date(item.timestamp).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
