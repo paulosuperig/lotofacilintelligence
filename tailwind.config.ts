@@ -27,10 +27,10 @@ module.exports = {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         premium: {
-          dark: "#050505",
-          card: "#0A0A0A",
-          accent: "#7C3AED",
-          muted: "#1A1A1A",
+          dark: "#4c1d95",
+          card: "#ffffff",
+          accent: "#7c3aed",
+          muted: "#f3f4f6",
           text: {
             primary: "#FFFFFF",
             secondary: "#A1A1AA",
