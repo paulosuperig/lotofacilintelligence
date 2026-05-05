@@ -169,7 +169,7 @@ const Index = () => {
                   <StatDetail label="Pares" value={latestResult ? latestResult.dezenas.filter(n => parseInt(n) % 2 === 0).length.toString().padStart(2, '0') : "00"} percentage={latestResult ? (latestResult.dezenas.filter(n => parseInt(n) % 2 === 0).length / 15) * 100 : 0} color="from-purple-500 to-purple-400" />
                   <StatDetail label="Ímpares" value={latestResult ? latestResult.dezenas.filter(n => parseInt(n) % 2 !== 0).length.toString().padStart(2, '0') : "00"} percentage={latestResult ? (latestResult.dezenas.filter(n => parseInt(n) % 2 !== 0).length / 15) * 100 : 0} color="from-purple-400 to-fuchsia-400" />
                   
-                  <Button variant="ghost" className="ml-auto text-zinc-500 hover:text-white transition-all gap-2 group text-[10px] font-black uppercase tracking-widest">
+                  <Button variant="ghost" className="ml-auto text-zinc-500 hover:text-purple-600 transition-all gap-2 group text-[10px] font-black uppercase tracking-widest">
                     Explorar Dados <ArrowUpRight size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                   </Button>
                 </div>
