@@ -673,20 +673,22 @@ const Index = () => {
                     setActiveTab('dicas');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
-                  className="lg:col-span-4 lg:row-span-1 bg-gradient-to-br from-purple-600 to-indigo-700 border border-purple-500 rounded-[2rem] p-8 flex flex-col justify-between text-white relative overflow-hidden group shadow-xl shadow-purple-500/10 cursor-pointer"
+                  className="lg:col-span-4 lg:row-span-1 bg-gradient-to-br from-purple-600 to-indigo-700 border border-purple-500 rounded-3xl md:rounded-[2rem] p-6 md:p-8 flex flex-col justify-between text-white relative overflow-hidden group shadow-xl shadow-purple-500/10 cursor-pointer"
                 >
                   <div className="absolute top-0 right-0 p-6 opacity-20 group-hover:rotate-12 transition-transform duration-700">
                     <Sparkles size={80} />
                   </div>
-                  <p className="text-xs font-bold uppercase tracking-widest text-white/70">Dica do Especialista</p>
-                  <h4 className="text-xl font-display font-bold leading-tight mt-2 mb-4">
-                    "Ciclo das dezenas prestes a fechar. Foque no número 08 e 22."
-                  </h4>
-                  <button 
-                    className="w-full py-4 bg-white text-purple-900 font-display font-bold text-xs uppercase tracking-widest rounded-2xl shadow-xl shadow-black/10 hover:bg-purple-50 transition-colors active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
-                  >
-                    Ver Análise Completa
-                  </button>
+                  <div className="relative z-10 text-center md:text-left">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-white/70 mb-2 md:mb-1">Dica do Especialista</p>
+                    <h4 className="text-lg md:text-xl font-display font-bold leading-tight mb-6">
+                      "Ciclo das dezenas prestes a fechar. Foque no número 08 e 22."
+                    </h4>
+                    <button 
+                      className="w-full py-3.5 md:py-4 bg-white text-purple-900 font-display font-bold text-[10px] md:text-xs uppercase tracking-widest rounded-2xl shadow-xl shadow-black/10 hover:bg-purple-50 transition-colors active:scale-95"
+                    >
+                      Ver Análise Completa
+                    </button>
+                  </div>
                 </motion.div>
 
               </motion.div>
