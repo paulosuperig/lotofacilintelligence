@@ -359,7 +359,7 @@ const Index = () => {
           document.getElementById('generator-section')?.scrollIntoView({ behavior: 'smooth' });
         }} />
         <NavIcon icon={<History size={20} strokeWidth={1.5} />} active={activeTab === 'historico'} label="Jogos" onClick={() => setActiveTab('historico')} />
-        {user.role === 'admin' && <NavIcon icon={<Cpu size={20} strokeWidth={1.5} />} active={activeTab === 'ia'} label="IA" onClick={() => setActiveTab('ia')} />}
+        <NavIcon icon={<Cpu size={20} strokeWidth={1.5} />} active={activeTab === 'ia'} label="IA" onClick={() => setActiveTab('ia')} />
         {user.role === 'admin' && (
           <NavIcon icon={<Settings size={20} strokeWidth={1.5} />} active={activeTab === 'ajustes'} label="Ajustes" onClick={() => setActiveTab('ajustes')} />
         )}
