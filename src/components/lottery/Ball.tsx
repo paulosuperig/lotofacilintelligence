@@ -30,8 +30,8 @@ export const Ball: React.FC<BallProps> = ({
       className={cn(
         "rounded-full flex items-center justify-center font-display font-bold transition-all duration-500 cursor-default select-none premium-border",
         active 
-          ? "bg-gradient-to-br from-premium-accent to-indigo-600 text-white shadow-[0_0_20px_rgba(124,58,237,0.3)] border-white/20" 
-          : "bg-premium-muted/50 text-premium-text-secondary hover:text-white hover:bg-premium-muted hover:border-white/10",
+          ? "bg-gradient-to-br from-indigo-500 to-indigo-700 text-white shadow-[0_0_15px_rgba(99,102,241,0.2)] border-white/20" 
+          : "bg-white/[0.03] text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.08] hover:border-white/10",
         sizeClasses[size],
         onClick && "cursor-pointer",
         className

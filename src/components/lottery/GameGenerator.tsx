@@ -47,12 +47,12 @@ export const GameGenerator = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="p-8 md:p-10 border-b border-white/5">
+      <div className="p-8 md:p-12 border-b border-white/5">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
           <div>
-            <div className="flex items-center gap-2 text-premium-accent mb-2">
-              <Zap size={18} fill="currentColor" />
-              <span className="text-[10px] uppercase font-bold tracking-[0.2em]">Sistemas de Elite</span>
+            <div className="flex items-center gap-2 text-indigo-400 mb-3">
+              <Zap size={16} fill="currentColor" />
+              <span className="text-[10px] uppercase font-black tracking-[0.25em]">Sistemas Pro</span>
             </div>
             <h2 className="text-3xl font-display font-black text-white">
               Gerador Inteligente
@@ -62,14 +62,14 @@ export const GameGenerator = () => {
           <Button 
             onClick={generateGame} 
             disabled={isGenerating}
-            className="w-full md:w-auto bg-white text-premium-dark hover:bg-white/90 font-display font-black text-xs uppercase tracking-widest h-14 px-10 rounded-2xl shadow-xl shadow-white/5 transition-all active:scale-95"
+            className="w-full md:w-auto bg-white text-black hover:bg-zinc-200 font-display font-black text-[11px] uppercase tracking-widest h-12 px-8 rounded-xl shadow-xl shadow-white/5 transition-all active:scale-95"
           >
             {isGenerating ? <RefreshCcw className="animate-spin mr-3" size={16} /> : <Zap className="mr-3" size={16} fill="currentColor" />}
             GERAR JOGO
           </Button>
         </div>
 
-        <div className="min-h-[220px] flex flex-wrap justify-center content-center gap-4 bg-white/[0.02] rounded-[2rem] p-10 premium-border relative overflow-hidden group">
+        <div className="min-h-[220px] flex flex-wrap justify-center content-center gap-4 bg-[#0d0d0d] rounded-[1.5rem] p-8 md:p-10 premium-border relative overflow-hidden group">
           <AnimatePresence mode="wait">
             {generatedGame.length > 0 ? (
               <motion.div 
@@ -113,7 +113,7 @@ export const GameGenerator = () => {
         </div>
       </div>
 
-      <div className="p-8 md:p-10 flex-grow flex flex-col">
+      <div className="p-8 md:p-12 flex-grow flex flex-col">
         {generatedGame.length > 0 && (
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
@@ -126,11 +126,11 @@ export const GameGenerator = () => {
         )}
 
         <div className="mt-auto grid grid-cols-1 sm:grid-cols-2 gap-4">
-           <Button variant="outline" className="h-14 rounded-2xl bg-white/[0.03] border-white/5 text-premium-text-primary hover:bg-white/[0.08] font-bold text-xs uppercase tracking-widest">
-             <Save className="mr-3" size={18} /> Salvar Jogo
+           <Button variant="outline" className="h-12 rounded-xl bg-white/5 border-white/5 text-zinc-100 hover:bg-white/10 font-black text-[10px] uppercase tracking-widest transition-all">
+             <Save className="mr-3" size={16} /> Salvar Jogo
            </Button>
-           <Button variant="outline" className="h-14 rounded-2xl bg-white/[0.03] border-white/5 text-premium-text-primary hover:bg-white/[0.08] font-bold text-xs uppercase tracking-widest">
-             Copiar Dados
+           <Button variant="outline" className="h-12 rounded-xl bg-white/5 border-white/5 text-zinc-100 hover:bg-white/10 font-black text-[10px] uppercase tracking-widest transition-all">
+             Copiar
            </Button>
         </div>
       </div>
