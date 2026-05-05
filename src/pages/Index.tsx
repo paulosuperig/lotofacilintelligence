@@ -501,19 +501,19 @@ const Index = () => {
                     </div>
 
                     <div className="mt-auto space-y-4 pt-6 border-t border-purple-50">
-                      <div className="bg-emerald-50/50 p-4 rounded-2xl border border-emerald-100/50">
-                        <p className="text-[8px] text-emerald-600/70 uppercase font-bold tracking-[0.2em] mb-1">Próximo Prêmio</p>
-                        <p className="text-2xl font-display font-bold text-emerald-500">
+                      <div className="bg-emerald-50/50 px-4 py-3 rounded-2xl border border-emerald-100/50 text-center">
+                        <p className="text-[8px] text-emerald-600/70 uppercase font-bold tracking-[0.2em] mb-1.5">Próximo Prêmio</p>
+                        <p className="text-xl font-display font-bold text-emerald-500 tabular-nums leading-none whitespace-nowrap">
                           {latestResult ? formatCurrency(latestResult.valorEstimadoProximoConcurso || 0) : "R$ ---"}
                         </p>
                       </div>
-                      
-                      <div className="flex gap-4">
-                        <div className="flex-1">
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="text-center px-2">
                           <p className="text-[8px] text-zinc-400 uppercase font-bold tracking-widest mb-1">Pares</p>
                           <p className="text-lg font-display font-bold text-zinc-800">{latestResult ? latestResult.dezenas.filter(n => parseInt(n) % 2 === 0).length : "0"}</p>
                         </div>
-                        <div className="flex-1">
+                        <div className="text-center px-2">
                           <p className="text-[8px] text-zinc-400 uppercase font-bold tracking-widest mb-1">Ímpares</p>
                           <p className="text-lg font-display font-bold text-zinc-800">{latestResult ? latestResult.dezenas.filter(n => parseInt(n) % 2 !== 0).length : "0"}</p>
                         </div>
