@@ -146,7 +146,7 @@ const StatCard = ({ label, value, icon, variant = 'default' }: { label: string, 
     </div>
     <div className={cn(
       "text-2xl font-display font-bold",
-      variant === 'success' ? "text-emerald-400" : "text-white"
+      variant === 'success' ? "text-emerald-600" : "text-zinc-900"
     )}>
       {value}
     </div>
