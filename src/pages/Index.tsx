@@ -112,9 +112,11 @@ const Index = () => {
     });
   };
 
-  const handleSendAiMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!aiMessage.trim()) return;
+  const handleSendAiMessage = async (e?: React.FormEvent, customMessage?: string) => {
+    if (e) e.preventDefault();
+    const messageToSend = customMessage || aiMessage;
+    
+    if (!messageToSend.trim()) return;
     if (!deepSeekKey) {
       toast({
         title: "API Key Ausente",
@@ -124,9 +126,9 @@ const Index = () => {
       return;
     }
 
-    const newMessage = { role: 'user' as const, content: aiMessage };
+    const newMessage = { role: 'user' as const, content: messageToSend };
     setAiChat(prev => [...prev, newMessage]);
-    setAiMessage('');
+    if (!customMessage) setAiMessage('');
     setIsAiLoading(true);
 
     try {
@@ -134,7 +136,9 @@ const Index = () => {
       Seu objetivo é ajudar usuários a analisar tendências, sugerir números baseados em lógica matemática e fornecer insights sobre fechamentos.
       Sempre mantenha um tom profissional, técnico e encorajador. 
       Lembre-se: jogos de loteria são baseados em sorte, use termos como "probabilidades", "tendências" e "estatísticas".
-      Sempre que sugerir números, formate-os de forma clara (ex: 01, 05, 10...).`;
+      
+      IMPORTANTE: Sempre que você sugerir jogos/números (sequências de 15 a 20 números), formate-os em blocos de código ou listas claras.
+      Se o usuário pedir para gerar um jogo, sugira 15 números formatados como: 01, 02, 03...`;
 
       const response = await fetch('https://api.deepseek.com/chat/completions', {
         method: 'POST',
@@ -167,6 +171,38 @@ const Index = () => {
       });
     } finally {
       setIsAiLoading(false);
+    }
+  };
+
+  const saveAiGameToHistory = (content: string) => {
+    // Tenta extrair números do conteúdo (ex: 01, 02, 03... ou 01-02-03...)
+    const numbers = content.match(/\b\d{2}\b/g);
+    
+    if (numbers && (numbers.length >= 15 && numbers.length <= 20)) {
+      const uniqueNumbers = [...new Set(numbers)].sort((a, b) => parseInt(a) - parseInt(b)).slice(0, 15);
+      
+      const newGame = {
+        id: Math.random().toString(36).substr(2, 9),
+        numbers: uniqueNumbers,
+        timestamp: Date.now(),
+        type: 'IA Insight'
+      };
+
+      const existingHistory = JSON.parse(localStorage.getItem('lottery_history') || '[]');
+      const updatedHistory = [newGame, ...existingHistory];
+      localStorage.setItem('lottery_history', JSON.stringify(updatedHistory));
+      setHistory(updatedHistory);
+      
+      toast({
+        title: "Jogo salvo!",
+        description: "Os números sugeridos pela IA foram adicionados ao seu histórico.",
+      });
+    } else {
+      toast({
+        title: "Não foi possível salvar",
+        description: "Não identificamos uma sequência válida de 15 dezenas no texto.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -713,11 +749,16 @@ const Index = () => {
                 exit={{ opacity: 0, x: -20 }}
                 className="grid grid-cols-1 gap-6"
               >
-                <div className="bg-white border border-purple-200 rounded-3xl md:rounded-[2rem] p-6 md:p-12 shadow-xl shadow-purple-500/5 min-h-[600px] flex flex-col">
-                  <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
+                <div className="bg-white border border-purple-200 rounded-3xl md:rounded-[2rem] p-4 md:p-8 shadow-xl shadow-purple-500/5 min-h-[600px] flex flex-col">
+                  <div className="flex flex-col md:flex-row items-center justify-between mb-6 gap-4">
                     <div className="flex flex-col items-center md:items-start">
-                      <h2 className="text-2xl md:text-3xl font-display font-bold text-zinc-900 mb-1">Lotofácil Intelligence AI</h2>
-                      <p className="text-zinc-500 text-xs">Especialista em análises e probabilidades</p>
+                      <div className="flex items-center gap-3 mb-1">
+                        <div className="w-10 h-10 rounded-xl bg-purple-600 flex items-center justify-center text-white shadow-lg shadow-purple-600/20">
+                          <Cpu size={20} />
+                        </div>
+                        <h2 className="text-2xl md:text-3xl font-display font-bold text-zinc-900">Intelligence AI</h2>
+                      </div>
+                      <p className="text-zinc-500 text-[10px] uppercase font-bold tracking-[0.2em] ml-1">Análises & Probabilidades em Tempo Real</p>
                     </div>
                     <Button 
                       variant="outline" 
@@ -754,46 +795,88 @@ const Index = () => {
                       </div>
                     ) : null}
 
-                    <div className="flex-grow overflow-y-auto p-6 space-y-4 max-h-[400px]">
+                    <div className="flex-grow overflow-y-auto p-6 space-y-4 max-h-[450px]">
                       {aiChat.length === 0 ? (
-                        <div className="h-full flex flex-col items-center justify-center text-center py-10">
+                        <div className="h-full flex flex-col items-center justify-center text-center py-6">
                           <div className="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center text-purple-400 mb-4">
                             <Cpu size={32} />
                           </div>
-                          <p className="text-sm text-zinc-500 max-w-xs">Olá! Eu sou seu assistente inteligente. Como posso ajudar com suas análises hoje?</p>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-6">
-                            {[
-                              "Analise as tendências para o próximo sorteio",
-                              "Quais as dezenas mais prováveis?",
-                              "Explique o fechamento R7",
-                              "Sugira um jogo baseado em soma"
-                            ].map((suggestion, i) => (
-                              <button 
-                                key={i}
-                                onClick={() => setAiMessage(suggestion)}
-                                className="px-4 py-2 bg-white border border-purple-100 rounded-xl text-[11px] text-zinc-600 hover:border-purple-300 transition-colors"
-                              >
-                                {suggestion}
-                              </button>
-                            ))}
+                          <p className="text-sm text-zinc-500 max-w-xs mb-8">Olá! Eu sou seu assistente inteligente. Como posso ajudar com suas análises hoje?</p>
+                          
+                          <div className="w-full max-w-2xl grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                            <button 
+                              onClick={() => handleSendAiMessage(undefined, "Quais são as dezenas mais quentes para o próximo concurso?")}
+                              className="p-4 bg-white border border-purple-100 rounded-2xl text-left hover:border-purple-300 transition-all group"
+                            >
+                              <div className="w-8 h-8 rounded-lg bg-orange-50 text-orange-500 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                                <Flame size={18} />
+                              </div>
+                              <p className="text-[11px] font-bold text-zinc-700 uppercase tracking-wider mb-1">Dezenas Quentes</p>
+                              <p className="text-[10px] text-zinc-400">Análise de frequência dos últimos 10 concursos</p>
+                            </button>
+
+                            <button 
+                              onClick={() => handleSendAiMessage(undefined, "Pode gerar uma sugestão de jogo com 15 dezenas baseada em tendências?")}
+                              className="p-4 bg-white border border-purple-100 rounded-2xl text-left hover:border-purple-300 transition-all group"
+                            >
+                              <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-500 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                                <Sparkles size={18} />
+                              </div>
+                              <p className="text-[11px] font-bold text-zinc-700 uppercase tracking-wider mb-1">Gerar com IA</p>
+                              <p className="text-[10px] text-zinc-400">Criação de jogos baseada em lógica matemática</p>
+                            </button>
+
+                            <button 
+                              onClick={() => handleSendAiMessage(undefined, "Quais são os padrões de pares e ímpares que mais saem?")}
+                              className="p-4 bg-white border border-purple-100 rounded-2xl text-left hover:border-purple-300 transition-all group"
+                            >
+                              <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                                <PieChart size={18} />
+                              </div>
+                              <p className="text-[11px] font-bold text-zinc-700 uppercase tracking-wider mb-1">Padrões e Somas</p>
+                              <p className="text-[10px] text-zinc-400">Verificação de equilíbrio e comportamento estatístico</p>
+                            </button>
+
+                            <button 
+                              onClick={() => handleSendAiMessage(undefined, "Explique os melhores fechamentos para quem quer garantir 14 pontos")}
+                              className="p-4 bg-white border border-purple-100 rounded-2xl text-left hover:border-purple-300 transition-all group"
+                            >
+                              <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-500 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                                <ShieldCheck size={18} />
+                              </div>
+                              <p className="text-[11px] font-bold text-zinc-700 uppercase tracking-wider mb-1">Dicas de Fechamento</p>
+                              <p className="text-[10px] text-zinc-400">Estratégias avançadas para aumentar as chances</p>
+                            </button>
                           </div>
                         </div>
                       ) : (
                         aiChat.map((msg, i) => (
                           <div key={i} className={cn(
-                            "flex flex-col max-w-[85%]",
+                            "flex flex-col max-w-[90%] md:max-w-[85%]",
                             msg.role === 'user' ? "ml-auto items-end" : "mr-auto items-start"
                           )}>
                             <div className={cn(
-                              "p-4 rounded-2xl text-sm leading-relaxed shadow-sm",
+                              "p-4 rounded-2xl text-sm leading-relaxed shadow-sm relative group/msg",
                               msg.role === 'user' 
                                 ? "bg-purple-600 text-white rounded-tr-none" 
                                 : "bg-white text-zinc-700 border border-purple-100 rounded-tl-none"
                             )}>
                               {msg.role === 'assistant' ? (
-                                <div className="prose prose-sm max-w-none prose-headings:font-bold prose-headings:text-zinc-900 prose-h1:text-base prose-h2:text-base prose-h3:text-sm prose-h4:text-sm prose-p:my-2 prose-p:leading-relaxed prose-strong:text-purple-700 prose-strong:font-bold prose-ul:my-2 prose-ol:my-2 prose-li:my-0.5 prose-hr:my-3 prose-hr:border-purple-100 prose-code:text-purple-700 prose-code:bg-purple-50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none">
-                                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
-                                </div>
+                                <>
+                                  <div className="prose prose-sm max-w-none prose-headings:font-bold prose-headings:text-zinc-900 prose-h1:text-base prose-h2:text-base prose-h3:text-sm prose-h4:text-sm prose-p:my-2 prose-p:leading-relaxed prose-strong:text-purple-700 prose-strong:font-bold prose-ul:my-2 prose-ol:my-2 prose-li:my-0.5 prose-hr:my-3 prose-hr:border-purple-100 prose-code:text-purple-700 prose-code:bg-purple-50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none">
+                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+                                  </div>
+                                  <div className="flex justify-end mt-2 pt-2 border-t border-purple-50">
+                                    <Button 
+                                      variant="ghost" 
+                                      size="sm" 
+                                      className="h-7 px-2 text-[10px] text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg gap-1.5"
+                                      onClick={() => saveAiGameToHistory(msg.content)}
+                                    >
+                                      <History size={12} /> Salvar Jogo
+                                    </Button>
+                                  </div>
+                                </>
                               ) : (
                                 msg.content
                               )}
