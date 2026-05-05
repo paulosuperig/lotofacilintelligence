@@ -69,7 +69,7 @@ export const GameGenerator = () => {
           </Button>
         </div>
 
-        <div className="min-h-[220px] flex flex-wrap justify-center content-center gap-4 bg-[#0d0d0d] rounded-[1.5rem] p-8 md:p-10 premium-border relative overflow-hidden group">
+        <div className="min-h-[220px] flex flex-wrap justify-center content-center gap-4 bg-purple-50/50 rounded-[1.5rem] p-8 md:p-10 border border-purple-100 relative overflow-hidden group shadow-inner">
           <AnimatePresence mode="wait">
             {generatedGame.length > 0 ? (
               <motion.div 
