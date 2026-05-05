@@ -92,8 +92,8 @@ const Index = () => {
               transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
             >
               <div className="flex items-center gap-3 mb-4">
-                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)] animate-pulse" />
-                <span className="text-[10px] uppercase font-bold tracking-[0.25em] text-zinc-500">Membro Premium Intelligence</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.5)] animate-pulse" />
+                <span className="text-[10px] uppercase font-bold tracking-[0.25em] text-purple-600/60">Membro Premium Intelligence</span>
               </div>
               <h1 className="text-4xl md:text-6xl font-display font-black tracking-tight leading-[1.1]">
                 Lotofácil <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-indigo-200 to-white/50">Intelligence</span>
