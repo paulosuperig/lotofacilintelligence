@@ -160,22 +160,32 @@ const Index = () => {
                 </Card>
               </motion.div>
 
-              {/* Quick Actions / Featured */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                 <ActionCard 
-                    title="Simulador de Inteligência"
-                    desc="Gere jogos baseados em tendências e estatísticas avançadas de paridade."
-                    icon={<Zap className="text-amber-400" />}
-                    gradient="from-amber-500/10 to-orange-500/10"
-                    borderColor="border-amber-500/20"
-                 />
-                 <ActionCard 
-                    title="Conferidor Automático"
-                    desc="Suba seus jogos e deixe que o sistema valide cada acerto instantaneamente."
-                    icon={<Sparkles className="text-indigo-400" />}
-                    gradient="from-indigo-500/10 to-purple-500/10"
-                    borderColor="border-indigo-500/20"
-                 />
+              {/* Quick Actions & Generator */}
+              <div className="space-y-8">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <GameGenerator />
+                </motion.div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                   <ActionCard 
+                      title="Conferidor Automático"
+                      desc="Suba seus jogos e deixe que o sistema valide cada acerto instantaneamente."
+                      icon={<Sparkles className="text-indigo-400" />}
+                      gradient="from-indigo-500/10 to-purple-500/10"
+                      borderColor="border-indigo-500/20"
+                   />
+                   <ActionCard 
+                      title="Fechamentos Matemáticos"
+                      desc="Aumente suas chances usando técnicas de desdobramentos profissionais."
+                      icon={<Trophy className="text-emerald-400" />}
+                      gradient="from-emerald-500/10 to-teal-500/10"
+                      borderColor="border-emerald-500/20"
+                   />
+                </div>
               </div>
             </div>
 
