@@ -156,17 +156,17 @@ const Index = () => {
         <div className="max-w-[1400px] mx-auto p-4 sm:p-6 md:p-12 lg:p-16">
           
           {/* Top Header - Minimalist */}
-          <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-8 relative">
+          <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 md:mb-16 gap-6 md:gap-8 relative">
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
             >
-              <div className="flex items-center gap-3 mb-4">
-                <span className="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.5)] animate-pulse" />
-                <span className="text-[10px] uppercase font-bold tracking-[0.25em] text-purple-600/60">Membro Premium Intelligence</span>
+              <div className="flex items-center gap-2 mb-2 md:mb-4">
+                <span className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.5)] animate-pulse" />
+                <span className="text-[9px] md:text-[10px] uppercase font-bold tracking-[0.2em] md:tracking-[0.25em] text-purple-600/60">Membro Premium Intelligence</span>
               </div>
-              <h1 className="text-4xl md:text-6xl font-display font-bold tracking-tight leading-[1.1] text-zinc-900">
+              <h1 className="text-3xl md:text-6xl font-display font-bold tracking-tight leading-[1.1] text-zinc-900">
                 Lotofácil <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-fuchsia-600">Intelligence</span>
               </h1>
             </motion.div>
