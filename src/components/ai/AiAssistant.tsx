@@ -92,10 +92,10 @@ export const AiAssistant = ({
         <div className="flex-grow overflow-y-auto p-4 md:p-6 space-y-4 max-h-[500px] scrollbar-thin scrollbar-thumb-purple-100">
           {aiChat.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center py-6">
-              <div className="w-16 h-16 bg-white rounded-3xl shadow-sm flex items-center justify-center text-purple-400 mb-6 border border-purple-50">
+              <div className="w-16 h-16 bg-white dark:bg-zinc-800 rounded-3xl shadow-sm flex items-center justify-center text-purple-400 dark:text-purple-300 mb-6 border border-purple-50 dark:border-zinc-700">
                 <Cpu size={32} />
               </div>
-              <p className="text-sm text-zinc-500 max-w-xs mb-8">Olá! Eu sou seu assistente inteligente. Como posso ajudar com suas análises hoje?</p>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-xs mb-8">Olá! Eu sou seu assistente inteligente. Como posso ajudar com suas análises hoje?</p>
               
               <div className="w-full max-w-2xl grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                 <button 
