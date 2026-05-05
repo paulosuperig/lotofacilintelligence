@@ -234,7 +234,7 @@ export const GameGenerator = () => {
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col gap-4 mb-10"
+            className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-10"
           >
             <StatCard 
               label="Pares / Ímpares" 
