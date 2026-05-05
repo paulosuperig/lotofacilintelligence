@@ -142,7 +142,7 @@ const Index = () => {
       </aside>
 
       {/* Bottom Navigation - Mobile */}
-      <nav className="fixed bottom-4 left-4 right-4 h-16 bg-white/90 backdrop-blur-xl border border-purple-100 rounded-2xl z-50 flex items-center justify-around px-2 shadow-xl shadow-purple-500/10 md:hidden">
+      <nav className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-4 right-4 h-16 bg-white/90 backdrop-blur-xl border border-purple-100 rounded-2xl z-50 flex items-center justify-around px-2 shadow-xl shadow-purple-500/10 md:hidden">
         <NavIcon icon={<LayoutDashboard size={20} strokeWidth={1.5} />} active={activeTab === 'home'} label="Início" onClick={() => setActiveTab('home')} />
         <NavIcon icon={<Zap size={20} strokeWidth={1.5} />} active={activeTab === 'gerador'} label="Gerar" onClick={() => {
           setActiveTab('gerador');
