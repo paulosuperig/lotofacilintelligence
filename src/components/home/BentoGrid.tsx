@@ -76,7 +76,7 @@ export const BentoGrid = ({
     >
       {/* Generator Bento */}
       <motion.div id="generator-section" variants={itemVariants} className="lg:col-span-8 lg:row-span-3">
-        <div className="h-full bg-white border border-purple-200 rounded-3xl md:rounded-[2rem] p-0 flex flex-col shadow-xl shadow-purple-500/5 relative overflow-hidden group">
+        <div className="h-full bg-white dark:bg-zinc-900 border border-purple-200 dark:border-zinc-800 rounded-3xl md:rounded-[2rem] p-0 flex flex-col shadow-xl shadow-purple-500/5 relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:rotate-12 transition-transform duration-1000 text-purple-900 pointer-events-none hidden md:block">
             <Zap size={200} strokeWidth={0.5} />
           </div>
@@ -85,7 +85,7 @@ export const BentoGrid = ({
       </motion.div>
 
       {/* Official Result Bento */}
-      <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-2 bg-white/50 border border-purple-100 rounded-3xl md:rounded-[2rem] p-6 md:p-8 relative group overflow-hidden shadow-sm hover:bg-white transition-colors duration-500">
+      <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-2 bg-white/50 dark:bg-zinc-900/50 border border-purple-100 dark:border-zinc-800 rounded-3xl md:rounded-[2rem] p-6 md:p-8 relative group overflow-hidden shadow-sm hover:bg-white dark:hover:bg-zinc-900 transition-colors duration-500">
         <div className="absolute top-0 right-0 p-8 opacity-[0.02] group-hover:scale-110 transition-transform duration-1000 text-purple-900 hidden md:block">
           <Trophy size={180} strokeWidth={0.5} />
         </div>
@@ -95,10 +95,10 @@ export const BentoGrid = ({
             <div className="inline-flex items-center gap-2 px-2 py-0.5 md:px-2.5 md:py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-600 text-[8px] font-bold mb-3 md:mb-4 uppercase tracking-widest">
               <History size={10} /> Sorteio
             </div>
-            <h2 className="text-3xl md:text-4xl font-display font-bold text-zinc-900 mb-1 md:mb-2">
+            <h2 className="text-3xl md:text-4xl font-display font-bold text-zinc-900 dark:text-zinc-100 mb-1 md:mb-2">
               Nº {latestResult?.concurso || "---"}
             </h2>
-            <p className="text-zinc-500 text-[9px] md:text-[10px] font-bold uppercase tracking-wider flex items-center gap-2">
+            <p className="text-zinc-500 dark:text-zinc-400 text-[9px] md:text-[10px] font-bold uppercase tracking-wider flex items-center gap-2">
               <Calendar size={12} strokeWidth={2} /> {latestResult ? latestResult.data : "---"}
             </p>
           </div>
@@ -116,8 +116,8 @@ export const BentoGrid = ({
           </div>
 
           <div className="mt-auto space-y-4 pt-6 border-t border-purple-50">
-            <div className="bg-emerald-50/50 px-4 py-3 rounded-2xl border border-emerald-100/50 text-center">
-              <p className="text-[8px] text-emerald-600/70 uppercase font-bold tracking-[0.2em] mb-1.5">Próximo Prêmio</p>
+            <div className="bg-emerald-50/50 dark:bg-emerald-900/20 px-4 py-3 rounded-2xl border border-emerald-100/50 dark:border-emerald-800/50 text-center">
+              <p className="text-[8px] text-emerald-600/70 dark:text-emerald-400/70 uppercase font-bold tracking-[0.2em] mb-1.5">Próximo Prêmio</p>
               <p className="text-xl font-display font-bold text-emerald-500 tabular-nums leading-none whitespace-nowrap">
                 {latestResult ? formatCurrency(latestResult.valorEstimadoProximoConcurso || 0) : "R$ ---"}
               </p>
@@ -126,11 +126,11 @@ export const BentoGrid = ({
             <div className="grid grid-cols-2 gap-3">
               <div className="text-center px-2">
                 <p className="text-[8px] text-zinc-400 uppercase font-bold tracking-widest mb-1">Pares</p>
-                <p className="text-lg font-display font-bold text-zinc-800">{latestResult ? latestResult.dezenas.filter(n => parseInt(n) % 2 === 0).length : "0"}</p>
+                <p className="text-lg font-display font-bold text-zinc-800 dark:text-zinc-200">{latestResult ? latestResult.dezenas.filter(n => parseInt(n) % 2 === 0).length : "0"}</p>
               </div>
               <div className="text-center px-2">
                 <p className="text-[8px] text-zinc-400 uppercase font-bold tracking-widest mb-1">Ímpares</p>
-                <p className="text-lg font-display font-bold text-zinc-800">{latestResult ? latestResult.dezenas.filter(n => parseInt(n) % 2 !== 0).length : "0"}</p>
+                <p className="text-lg font-display font-bold text-zinc-800 dark:text-zinc-200">{latestResult ? latestResult.dezenas.filter(n => parseInt(n) % 2 !== 0).length : "0"}</p>
               </div>
             </div>
           </div>
@@ -138,7 +138,7 @@ export const BentoGrid = ({
       </motion.div>
 
       {/* Tendências Bento */}
-      <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-1 bg-white border border-purple-100 rounded-3xl md:rounded-[2rem] p-6 md:p-7 flex flex-col group overflow-hidden relative shadow-sm">
+      <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-1 bg-white dark:bg-zinc-900 border border-purple-100 dark:border-zinc-800 rounded-3xl md:rounded-[2rem] p-6 md:p-7 flex flex-col group overflow-hidden relative shadow-sm">
         <div className="absolute -right-6 -bottom-6 opacity-[0.04] group-hover:scale-110 transition-transform duration-700 text-purple-900 pointer-events-none hidden md:block">
           <PieChart size={160} strokeWidth={1} />
         </div>
@@ -189,7 +189,7 @@ export const BentoGrid = ({
       </motion.div>
 
       {/* Quick Insights Bento */}
-      <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-1 bg-white border border-purple-100 rounded-[2rem] p-8 flex flex-col justify-between group transition-all duration-300 hover:bg-purple-50/50 shadow-sm relative">
+      <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-1 bg-white dark:bg-zinc-900 border border-purple-100 dark:border-zinc-800 rounded-[2rem] p-8 flex flex-col justify-between group transition-all duration-300 hover:bg-purple-50/50 dark:hover:bg-zinc-800/50 shadow-sm relative">
         <div className="flex justify-between items-start">
           <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
             <TrendingUp size={24} />
@@ -221,8 +221,8 @@ export const BentoGrid = ({
           </div>
         </div>
         <div>
-          <h4 className="font-bold text-zinc-900 mb-1">Status do Histórico</h4>
-          <p className="text-xs text-zinc-500">
+          <h4 className="font-bold text-zinc-900 dark:text-zinc-100 mb-1">Status do Histórico</h4>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">
             {historyLength > 0 
               ? `Você possui ${historyLength} ${historyLength === 1 ? 'jogo salvo' : 'jogos salvos'} no histórico.`
               : "Nenhum jogo salvo recentemente."}
@@ -234,14 +234,14 @@ export const BentoGrid = ({
       <motion.div 
         variants={itemVariants} 
         onClick={() => onNavigate('stats')}
-        className="lg:col-span-4 lg:row-span-1 bg-white border border-purple-100 rounded-[2rem] p-8 flex items-center gap-6 group cursor-pointer hover:bg-purple-50/50 transition-all shadow-sm"
+        className="lg:col-span-4 lg:row-span-1 bg-white dark:bg-zinc-900 border border-purple-100 dark:border-zinc-800 rounded-[2rem] p-8 flex items-center gap-6 group cursor-pointer hover:bg-purple-50/50 dark:hover:bg-zinc-800/50 transition-all shadow-sm"
       >
         <div className="w-16 h-16 rounded-3xl bg-purple-500/10 border border-purple-100 flex items-center justify-center text-purple-600 group-hover:scale-110 transition-transform duration-500">
           <ShieldCheck size={32} />
         </div>
         <div>
-          <h4 className="text-lg font-display font-bold text-zinc-900">Fechamentos Pro</h4>
-          <p className="text-sm text-zinc-500">Acesse modelos matemáticos exclusivos.</p>
+          <h4 className="text-lg font-display font-bold text-zinc-900 dark:text-zinc-100">Fechamentos Pro</h4>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">Acesse modelos matemáticos exclusivos.</p>
         </div>
         <ArrowUpRight size={20} className="ml-auto text-zinc-400 group-hover:text-purple-600 transition-colors" />
       </motion.div>

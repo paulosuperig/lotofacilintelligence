@@ -31,11 +31,11 @@ export const HistoryPanel = ({
   onGoToGenerator 
 }: HistoryPanelProps) => {
   return (
-    <div className="bg-white border border-purple-200 rounded-3xl md:rounded-[2rem] p-6 md:p-12 shadow-xl shadow-purple-500/5">
+    <div className="bg-white dark:bg-zinc-900 border border-purple-200 dark:border-zinc-800 rounded-3xl md:rounded-[2rem] p-6 md:p-12 shadow-xl shadow-purple-500/5">
       <div className="flex flex-col md:flex-row items-center md:items-center justify-between mb-8 md:mb-10 gap-4 text-center md:text-left">
         <div className="flex flex-col items-center md:items-start">
-          <h2 className="text-2xl md:text-3xl font-display font-bold text-zinc-900 mb-1 md:mb-2">Seu Histórico</h2>
-          <p className="text-zinc-500 text-xs">Jogos salvos nos últimos 7 dias</p>
+          <h2 className="text-2xl md:text-3xl font-display font-bold text-zinc-900 dark:text-zinc-100 mb-1 md:mb-2">Seu Histórico</h2>
+          <p className="text-zinc-500 dark:text-zinc-400 text-xs">Jogos salvos nos últimos 7 dias</p>
         </div>
         <div className="flex items-center gap-3">
           {history.length > 0 && (
@@ -78,7 +78,7 @@ export const HistoryPanel = ({
       {history.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {history.map((item, idx) => (
-            <div key={idx} className="p-6 bg-purple-50/50 border border-purple-100 rounded-2xl flex flex-col gap-4">
+            <div key={idx} className="p-6 bg-purple-50/50 dark:bg-zinc-800/50 border border-purple-100 dark:border-zinc-700 rounded-2xl flex flex-col gap-4">
               <div className="flex justify-between items-center">
                 <span className="text-[10px] font-bold text-purple-400 uppercase tracking-widest">
                   {new Date(item.timestamp).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
@@ -101,7 +101,7 @@ export const HistoryPanel = ({
               </div>
               <div className="flex flex-wrap gap-2">
                 {item.numbers.map((num: number, i: number) => (
-                  <span key={i} className="w-8 h-8 rounded-lg bg-white border border-purple-100 flex items-center justify-center text-xs font-bold text-purple-700 shadow-sm">
+                  <span key={i} className="w-8 h-8 rounded-lg bg-white dark:bg-zinc-800 border border-purple-100 dark:border-zinc-700 flex items-center justify-center text-xs font-bold text-purple-700 dark:text-purple-300 shadow-sm">
                     {num.toString().padStart(2, '0')}
                   </span>
                 ))}

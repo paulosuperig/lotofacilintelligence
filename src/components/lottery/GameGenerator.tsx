@@ -115,15 +115,15 @@ export const GameGenerator = () => {
 
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="p-6 md:p-12 border-b border-purple-50">
+    <div className="flex flex-col h-full bg-white dark:bg-zinc-900">
+      <div className="p-6 md:p-12 border-b border-purple-50 dark:border-zinc-800">
         <div className="flex flex-col gap-6 mb-8">
           <div>
-            <div className="flex items-center gap-2 text-purple-600 mb-2 md:mb-3">
+            <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 mb-2 md:mb-3">
               <Zap size={14} className="md:w-4 md:h-4" fill="currentColor" />
               <span className="text-[9px] md:text-[10px] uppercase font-bold tracking-[0.2em] md:tracking-[0.25em]">Sistemas Pro</span>
             </div>
-            <h2 className="text-2xl md:text-3xl font-display font-bold text-zinc-900 leading-tight">
+            <h2 className="text-2xl md:text-3xl font-display font-bold text-zinc-900 dark:text-zinc-100 leading-tight">
               Gerador<br className="hidden sm:block" /> Inteligente
             </h2>
           </div>
@@ -131,14 +131,14 @@ export const GameGenerator = () => {
           <Button 
             onClick={generateGame} 
             disabled={isGenerating}
-            className="w-full bg-purple-600 text-white hover:bg-purple-700 disabled:bg-purple-300 disabled:cursor-not-allowed font-display font-bold text-[11px] uppercase tracking-widest h-12 px-6 rounded-xl shadow-xl shadow-purple-500/20 transition-all active:scale-95"
+            className="w-full bg-purple-600 text-white hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-600 disabled:bg-purple-300 dark:disabled:bg-zinc-800 disabled:cursor-not-allowed font-display font-bold text-[11px] uppercase tracking-widest h-12 px-6 rounded-xl shadow-xl shadow-purple-500/20 transition-all active:scale-95"
           >
             {isGenerating ? <RefreshCcw className="animate-spin mr-2" size={14} /> : <Zap className="mr-2" size={14} fill="currentColor" />}
             Gerar Jogo
           </Button>
         </div>
 
-        <div className="min-h-[180px] md:min-h-[220px] flex flex-wrap justify-center content-center gap-2 md:gap-4 bg-purple-50/50 rounded-3xl md:rounded-[1.5rem] p-6 md:p-10 border border-purple-100 relative overflow-hidden group shadow-inner">
+        <div className="min-h-[180px] md:min-h-[220px] flex flex-wrap justify-center content-center gap-2 md:gap-4 bg-purple-50/50 dark:bg-zinc-950/50 rounded-3xl md:rounded-[1.5rem] p-6 md:p-10 border border-purple-100 dark:border-zinc-800 relative overflow-hidden group shadow-inner">
           <AnimatePresence mode="wait">
             {generatedGame.length > 0 ? (
               <motion.div 
@@ -208,7 +208,7 @@ export const GameGenerator = () => {
               });
             }}
             disabled={generatedGame.length === 0}
-            className="h-12 rounded-xl bg-white border-purple-100 text-zinc-900 hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200 font-bold text-[10px] uppercase tracking-widest transition-all disabled:opacity-50"
+            className="h-12 rounded-xl bg-white dark:bg-zinc-800 border-purple-100 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 hover:bg-purple-50 dark:hover:bg-zinc-700 hover:text-purple-700 dark:hover:text-purple-400 hover:border-purple-200 dark:hover:border-purple-800 font-bold text-[10px] uppercase tracking-widest transition-all disabled:opacity-50"
           >
              <Save className="mr-3" size={16} /> Salvar Jogo
            </Button>
@@ -223,7 +223,7 @@ export const GameGenerator = () => {
               });
             }}
             disabled={generatedGame.length === 0}
-            className="h-12 rounded-xl bg-white border-purple-100 text-zinc-900 hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200 font-bold text-[10px] uppercase tracking-widest transition-all disabled:opacity-50"
+            className="h-12 rounded-xl bg-white dark:bg-zinc-800 border-purple-100 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 hover:bg-purple-50 dark:hover:bg-zinc-700 hover:text-purple-700 dark:hover:text-purple-400 hover:border-purple-200 dark:hover:border-purple-800 font-bold text-[10px] uppercase tracking-widest transition-all disabled:opacity-50"
           >
              Copiar
            </Button>
@@ -249,18 +249,18 @@ export const GameGenerator = () => {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 20 }}
-                    className="flex items-center justify-between p-4 bg-white border border-purple-50 rounded-xl shadow-sm hover:border-purple-200 transition-all group"
+                    className="flex items-center justify-between p-4 bg-white dark:bg-zinc-800 border border-purple-50 dark:border-zinc-700 rounded-xl shadow-sm hover:border-purple-200 dark:hover:border-purple-600 transition-all group"
                   >
                     <div className="flex flex-col gap-2 w-[80%]">
                       <div className="flex items-center gap-2">
-                        <Calendar size={10} className="text-zinc-400" />
-                        <span className="text-[9px] font-bold text-zinc-400 uppercase">
+                        <Calendar size={10} className="text-zinc-400 dark:text-zinc-500" />
+                        <span className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase">
                           {new Date(item.timestamp).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
                       <div className="flex flex-wrap gap-1.5">
                         {item.numbers.map((num, i) => (
-                          <span key={i} className="text-[11px] font-bold text-purple-700 bg-purple-50 w-6 h-6 flex items-center justify-center rounded-md">
+                          <span key={i} className="text-[11px] font-bold text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/30 w-6 h-6 flex items-center justify-center rounded-md">
                             {num.toString().padStart(2, '0')}
                           </span>
                         ))}
@@ -289,14 +289,14 @@ export const GameGenerator = () => {
 
 
 const StatCard = ({ label, value, icon, variant = 'default' }: { label: string, value: string | number, icon: React.ReactNode, variant?: 'default' | 'success' }) => (
-  <div className="bg-white border border-purple-100 rounded-2xl p-4 shadow-sm min-w-0 flex flex-col justify-center">
-    <div className="flex items-center gap-1.5 text-premium-text-muted mb-1.5 min-w-0">
+  <div className="bg-white dark:bg-zinc-800 border border-purple-100 dark:border-zinc-700 rounded-2xl p-4 shadow-sm min-w-0 flex flex-col justify-center">
+    <div className="flex items-center gap-1.5 text-premium-text-muted dark:text-zinc-400 mb-1.5 min-w-0">
       <span className="shrink-0">{icon}</span>
       <span className="text-[10px] uppercase font-bold tracking-wider whitespace-nowrap">{label}</span>
     </div>
     <div className={cn(
       "text-lg md:text-xl font-display font-bold leading-tight",
-      variant === 'success' ? "text-emerald-600" : "text-zinc-900"
+      variant === 'success' ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-900 dark:text-zinc-100"
     )}>
       {value}
     </div>

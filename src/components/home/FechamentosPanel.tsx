@@ -52,11 +52,11 @@ export const FechamentosPanel = ({ onBack, onSaveGame }: FechamentosPanelProps) 
       exit={{ opacity: 0, x: -20 }}
       className="grid grid-cols-1 gap-6"
     >
-      <div className="bg-white border border-purple-200 rounded-3xl md:rounded-[2rem] p-6 md:p-12 shadow-xl shadow-purple-500/5">
+      <div className="bg-white dark:bg-zinc-900 border border-purple-200 dark:border-zinc-800 rounded-3xl md:rounded-[2rem] p-6 md:p-12 shadow-xl shadow-purple-500/5">
         <div className="flex flex-col md:flex-row items-center md:items-center justify-between mb-8 md:mb-10 gap-4 text-center md:text-left">
           <div className="flex flex-col items-center md:items-start">
-            <h2 className="text-2xl md:text-3xl font-display font-bold text-zinc-900 mb-1 md:mb-2">Fechamentos PRO</h2>
-            <p className="text-zinc-500 text-xs">Modelos matemáticos exclusivos</p>
+            <h2 className="text-2xl md:text-3xl font-display font-bold text-zinc-900 dark:text-zinc-100 mb-1 md:mb-2">Fechamentos PRO</h2>
+            <p className="text-zinc-500 dark:text-zinc-400 text-xs">Modelos matemáticos exclusivos</p>
           </div>
           <Button 
             variant="outline" 
@@ -69,12 +69,12 @@ export const FechamentosPanel = ({ onBack, onSaveGame }: FechamentosPanelProps) 
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {models.map((model, i) => (
-            <div key={i} className="p-8 bg-purple-50/50 border border-purple-100 rounded-[2rem] hover:border-purple-300 transition-all group flex flex-col">
-              <div className="w-12 h-12 rounded-2xl bg-white border border-purple-100 flex items-center justify-center text-purple-600 mb-6 group-hover:scale-110 transition-transform shrink-0">
+            <div key={i} className="p-8 bg-purple-50/50 dark:bg-zinc-800/50 border border-purple-100 dark:border-zinc-700 rounded-[2rem] hover:border-purple-300 dark:hover:border-purple-500 transition-all group flex flex-col">
+              <div className="w-12 h-12 rounded-2xl bg-white dark:bg-zinc-800 border border-purple-100 dark:border-zinc-700 flex items-center justify-center text-purple-600 dark:text-purple-400 mb-6 group-hover:scale-110 transition-transform shrink-0">
                 <ShieldCheck size={24} />
               </div>
-              <h4 className="text-lg font-bold text-zinc-900 mb-2 leading-tight min-h-[3.5rem]">{model.title}</h4>
-              <p className="text-xs text-zinc-500 mb-6 leading-relaxed flex-grow">{model.desc}</p>
+              <h4 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 mb-2 leading-tight min-h-[3.5rem]">{model.title}</h4>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-6 leading-relaxed flex-grow">{model.desc}</p>
               <div className="flex flex-col gap-3 mt-auto pt-4 border-t border-purple-100">
                 <span className="text-[10px] font-bold text-purple-400 uppercase tracking-widest">{model.numbers} Dezenas</span>
                 <Button 

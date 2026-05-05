@@ -43,16 +43,16 @@ export const AiAssistant = ({
   role
 }: AiAssistantProps) => {
   return (
-    <div className="bg-white border border-purple-200 rounded-3xl md:rounded-[2rem] p-4 md:p-8 shadow-xl shadow-purple-500/5 min-h-[600px] flex flex-col">
+    <div className="bg-white dark:bg-zinc-900 border border-purple-200 dark:border-zinc-800 rounded-3xl md:rounded-[2rem] p-4 md:p-8 shadow-xl shadow-purple-500/5 min-h-[600px] flex flex-col">
       <div className="flex flex-col md:flex-row items-center justify-between mb-6 gap-4">
         <div className="flex flex-col items-center md:items-start">
           <div className="flex items-center gap-3 mb-1">
-            <div className="w-10 h-10 rounded-xl bg-purple-600 flex items-center justify-center text-white shadow-lg shadow-purple-600/20">
+            <div className="w-10 h-10 rounded-xl bg-purple-600 dark:bg-purple-700 flex items-center justify-center text-white shadow-lg shadow-purple-600/20">
               <Cpu size={20} />
             </div>
-            <h2 className="text-2xl md:text-3xl font-display font-bold text-zinc-900">Intelligence AI</h2>
+            <h2 className="text-2xl md:text-3xl font-display font-bold text-zinc-900 dark:text-zinc-100">Intelligence AI</h2>
           </div>
-          <p className="text-zinc-500 text-[10px] uppercase font-bold tracking-[0.2em] ml-1">Análises & Probabilidades em Tempo Real</p>
+          <p className="text-zinc-500 dark:text-zinc-400 text-[10px] uppercase font-bold tracking-[0.2em] ml-1">Análises & Probabilidades em Tempo Real</p>
         </div>
         <Button 
           variant="outline" 
@@ -63,7 +63,7 @@ export const AiAssistant = ({
         </Button>
       </div>
 
-      <div className="flex-grow flex flex-col bg-purple-50/30 rounded-[2rem] border border-purple-100 overflow-hidden relative">
+      <div className="flex-grow flex flex-col bg-purple-50/30 dark:bg-zinc-950/30 rounded-[2rem] border border-purple-100 dark:border-zinc-800 overflow-hidden relative">
         {!deepSeekKey && role === 'admin' ? (
           <div className="absolute inset-0 z-10 bg-white/60 backdrop-blur-sm flex items-center justify-center p-8 text-center">
             <div className="max-w-md">
@@ -92,17 +92,17 @@ export const AiAssistant = ({
         <div className="flex-grow overflow-y-auto p-4 md:p-6 space-y-4 max-h-[500px] scrollbar-thin scrollbar-thumb-purple-100">
           {aiChat.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center py-6">
-              <div className="w-16 h-16 bg-white rounded-3xl shadow-sm flex items-center justify-center text-purple-400 mb-6 border border-purple-50">
+              <div className="w-16 h-16 bg-white dark:bg-zinc-800 rounded-3xl shadow-sm flex items-center justify-center text-purple-400 dark:text-purple-300 mb-6 border border-purple-50 dark:border-zinc-700">
                 <Cpu size={32} />
               </div>
-              <p className="text-sm text-zinc-500 max-w-xs mb-8">Olá! Eu sou seu assistente inteligente. Como posso ajudar com suas análises hoje?</p>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-xs mb-8">Olá! Eu sou seu assistente inteligente. Como posso ajudar com suas análises hoje?</p>
               
               <div className="w-full max-w-2xl grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                 <button 
                   onClick={() => onSendMessage(undefined, "Pode gerar 3 sugestões de jogos baseadas nas dezenas mais quentes e tendências atuais?")}
-                  className="p-4 bg-white border border-purple-100 rounded-2xl text-left hover:border-purple-300 hover:shadow-md hover:shadow-purple-500/5 transition-all group"
+                  className="p-4 bg-white dark:bg-zinc-800 border border-purple-100 dark:border-zinc-700 rounded-2xl text-left hover:border-purple-300 dark:hover:border-purple-500 hover:shadow-md hover:shadow-purple-500/5 transition-all group"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-orange-50 text-orange-500 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                  <div className="w-8 h-8 rounded-lg bg-orange-50 dark:bg-orange-900/20 text-orange-500 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                     <Sparkles size={18} />
                   </div>
                   <p className="text-[11px] font-bold text-zinc-700 uppercase tracking-wider mb-1">Múltiplos Jogos IA</p>
@@ -111,9 +111,9 @@ export const AiAssistant = ({
 
                 <button 
                   onClick={() => onSendMessage(undefined, "Quais são as dezenas mais quentes para o próximo concurso?")}
-                  className="p-4 bg-white border border-purple-100 rounded-2xl text-left hover:border-purple-300 hover:shadow-md hover:shadow-purple-500/5 transition-all group"
+                  className="p-4 bg-white dark:bg-zinc-800 border border-purple-100 dark:border-zinc-700 rounded-2xl text-left hover:border-purple-300 dark:hover:border-purple-500 hover:shadow-md hover:shadow-purple-500/5 transition-all group"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-orange-50 text-orange-500 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                  <div className="w-8 h-8 rounded-lg bg-orange-50 dark:bg-orange-900/20 text-orange-500 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                     <Flame size={18} />
                   </div>
                   <p className="text-[11px] font-bold text-zinc-700 uppercase tracking-wider mb-1">Dezenas Quentes</p>
@@ -122,9 +122,9 @@ export const AiAssistant = ({
 
                 <button 
                   onClick={() => onSendMessage(undefined, "Quais são os padrões de pares e ímpares que mais saem?")}
-                  className="p-4 bg-white border border-purple-100 rounded-2xl text-left hover:border-purple-300 hover:shadow-md hover:shadow-purple-500/5 transition-all group"
+                  className="p-4 bg-white dark:bg-zinc-800 border border-purple-100 dark:border-zinc-700 rounded-2xl text-left hover:border-purple-300 dark:hover:border-purple-500 hover:shadow-md hover:shadow-purple-500/5 transition-all group"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                  <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-500 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                     <PieChart size={18} />
                   </div>
                   <p className="text-[11px] font-bold text-zinc-700 uppercase tracking-wider mb-1">Padrões e Somas</p>
@@ -133,9 +133,9 @@ export const AiAssistant = ({
 
                 <button 
                   onClick={() => onSendMessage(undefined, "Explique os melhores fechamentos para quem quer garantir 14 pontos")}
-                  className="p-4 bg-white border border-purple-100 rounded-2xl text-left hover:border-purple-300 hover:shadow-md hover:shadow-purple-500/5 transition-all group"
+                  className="p-4 bg-white dark:bg-zinc-800 border border-purple-100 dark:border-zinc-700 rounded-2xl text-left hover:border-purple-300 dark:hover:border-purple-500 hover:shadow-md hover:shadow-purple-500/5 transition-all group"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-500 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                     <ShieldCheck size={18} />
                   </div>
                   <p className="text-[11px] font-bold text-zinc-700 uppercase tracking-wider mb-1">Dicas de Fechamento</p>
@@ -153,11 +153,11 @@ export const AiAssistant = ({
                   "p-4 rounded-2xl text-sm leading-relaxed shadow-sm relative group/msg",
                   msg.role === 'user' 
                     ? "bg-purple-600 text-white rounded-tr-none" 
-                    : "bg-white text-zinc-700 border border-purple-100 rounded-tl-none"
+                    : "bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 border border-purple-100 dark:border-zinc-700 rounded-tl-none"
                 )}>
                   {msg.role === 'assistant' ? (
                     <>
-                      <div className="prose prose-sm max-w-none prose-headings:font-bold prose-headings:text-zinc-900 prose-h1:text-base prose-h2:text-base prose-h3:text-sm prose-h4:text-sm prose-p:my-2 prose-p:leading-relaxed prose-strong:text-purple-700 prose-strong:font-bold prose-ul:my-2 prose-ol:my-2 prose-li:my-0.5 prose-hr:my-3 prose-hr:border-purple-100 prose-code:text-purple-700 prose-code:bg-purple-50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none">
+                      <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:font-bold prose-headings:text-zinc-900 dark:prose-headings:text-zinc-100 prose-h1:text-base prose-h2:text-base prose-h3:text-sm prose-h4:text-sm prose-p:my-2 prose-p:leading-relaxed prose-strong:text-purple-700 dark:prose-strong:text-purple-400 prose-strong:font-bold prose-ul:my-2 prose-ol:my-2 prose-li:my-0.5 prose-hr:my-3 prose-hr:border-purple-100 dark:prose-hr:border-zinc-700 prose-code:text-purple-700 dark:prose-code:text-purple-300 prose-code:bg-purple-50 dark:prose-code:bg-purple-900/30 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none">
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
                       </div>
                       <div className="flex justify-between items-center mt-3 pt-3 border-t border-purple-50">
@@ -223,7 +223,7 @@ export const AiAssistant = ({
           )}
         </div>
 
-        <form onSubmit={(e) => { e.preventDefault(); onSendMessage(); }} className="p-4 bg-white border-t border-purple-100 flex gap-2">
+        <form onSubmit={(e) => { e.preventDefault(); onSendMessage(); }} className="p-4 bg-white dark:bg-zinc-900 border-t border-purple-100 dark:border-zinc-800 flex gap-2">
           <Input 
             placeholder="Pergunte ao especialista..." 
             value={aiMessage}

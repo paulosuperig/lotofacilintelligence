@@ -92,11 +92,11 @@ export const AdminPanel = ({
   };
 
   return (
-    <div className="bg-white border border-purple-200 rounded-3xl md:rounded-[2rem] p-6 md:p-12 shadow-xl shadow-purple-500/5">
+    <div className="bg-white dark:bg-zinc-900 border border-purple-200 dark:border-zinc-800 rounded-3xl md:rounded-[2rem] p-6 md:p-12 shadow-xl shadow-purple-500/5">
       <div className="flex flex-col md:flex-row items-center md:items-center justify-between mb-8 md:mb-10 gap-4 text-center md:text-left">
         <div className="flex flex-col items-center md:items-start">
-          <h2 className="text-2xl md:text-3xl font-display font-bold text-zinc-900 mb-1 md:mb-2">Configurações do Sistema</h2>
-          <p className="text-zinc-500 text-xs">Gerenciamento de usuários e acessos</p>
+          <h2 className="text-2xl md:text-3xl font-display font-bold text-zinc-900 dark:text-zinc-100 mb-1 md:mb-2">Configurações do Sistema</h2>
+          <p className="text-zinc-500 dark:text-zinc-400 text-xs">Gerenciamento de usuários e acessos</p>
         </div>
         <div className="flex items-center gap-3">
           <Dialog open={isUserDialogOpen} onOpenChange={(open) => {
@@ -185,10 +185,10 @@ export const AdminPanel = ({
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-purple-100">
+      <div className="overflow-x-auto rounded-2xl border border-purple-100 dark:border-zinc-800">
         <table className="w-full text-left border-collapse min-w-[600px]">
           <thead>
-            <tr className="bg-purple-50/50">
+            <tr className="bg-purple-50/50 dark:bg-zinc-800/50">
               <th className="px-6 py-4 text-[10px] font-bold text-purple-400 uppercase tracking-widest border-b border-purple-100">Usuário</th>
               <th className="px-6 py-4 text-[10px] font-bold text-purple-400 uppercase tracking-widest border-b border-purple-100">Perfil</th>
               <th className="px-6 py-4 text-[10px] font-bold text-purple-400 uppercase tracking-widest border-b border-purple-100">Status</th>
@@ -197,18 +197,18 @@ export const AdminPanel = ({
           </thead>
           <tbody className="divide-y divide-purple-50">
             {users.map((u) => (
-              <tr key={u.id} className="hover:bg-purple-50/30 transition-colors">
+              <tr key={u.id} className="hover:bg-purple-50/30 dark:hover:bg-zinc-800/30 transition-colors">
                 <td className="px-6 py-5">
                   <div className="flex items-center gap-3">
                     <div className={cn(
                       "w-8 h-8 rounded-full flex items-center justify-center",
-                      u.role === 'admin' ? "bg-purple-100 text-purple-600" : "bg-zinc-100 text-zinc-500"
+                      u.role === 'admin' ? "bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400"
                     )}>
                       {u.role === 'admin' ? <ShieldCheck size={16} /> : <Sparkles size={16} />}
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-zinc-900">{maskSensitiveData(u.email)}</p>
-                      <p className="text-[10px] text-zinc-500">
+                      <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{maskSensitiveData(u.email)}</p>
+                      <p className="text-[10px] text-zinc-500 dark:text-zinc-400">
                         ID: {u.id.substring(0, 8)}... | Cadastrado em {new Date(u.createdAt).toLocaleDateString('pt-BR')}
                       </p>
                     </div>
@@ -291,14 +291,14 @@ export const AdminPanel = ({
         </table>
       </div>
 
-      <div className="mt-8 p-8 border-t border-purple-100">
+      <div className="mt-8 p-8 border-t border-purple-100 dark:border-zinc-800">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 rounded-xl bg-indigo-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
             <Cpu size={20} />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-zinc-900 leading-none">Integração DeepSeek AI</h3>
-            <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest mt-1">Configuração de Inteligência Artificial</p>
+            <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 leading-none">Integração DeepSeek AI</h3>
+            <p className="text-[10px] text-zinc-500 dark:text-zinc-400 uppercase font-bold tracking-widest mt-1">Configuração de Inteligência Artificial</p>
           </div>
         </div>
         
@@ -337,13 +337,13 @@ export const AdminPanel = ({
         </div>
       </div>
 
-      <div className="mt-8 p-6 bg-amber-50 border border-amber-100 rounded-2xl flex items-start gap-4">
+      <div className="mt-8 p-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800/50 rounded-2xl flex items-start gap-4">
         <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center text-white shrink-0 shadow-lg shadow-amber-500/20">
           <ShieldAlert size={20} />
         </div>
         <div>
-          <h4 className="text-sm font-bold text-amber-900 mb-1">Proteção de Dados Intelligence</h4>
-          <p className="text-xs text-amber-700 leading-relaxed">
+          <h4 className="text-sm font-bold text-amber-900 dark:text-amber-400 mb-1">Proteção de Dados Intelligence</h4>
+          <p className="text-xs text-amber-700 dark:text-amber-500 leading-relaxed">
             Este painel opera sob diretrizes de <strong>Zero Trust</strong>. Dados sensíveis como e-mails são mascarados e senhas são criptografadas com SHA-256 antes do armazenamento local.
           </p>
         </div>
