@@ -62,10 +62,12 @@ export const GameGenerator = () => {
   };
 
   const shareOnWhatsApp = (game: number[]) => {
-    const text = `Confira meu jogo gerado no Gerador Inteligente:\n\n${game.map(n => n.toString().padStart(2, '0')).join(' ')}\n\n🍀 Boa sorte!`;
+    const gameText = game.map(n => n.toString().padStart(2, '0')).join(' ');
+    const text = `🔥 *Gerador Inteligente* 🔥\n\nConfira meu novo jogo:\n✅ *${gameText}*\n\nGerado em: ${window.location.origin}\n\n🍀 Boa sorte!`;
     const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
   };
+
 
 
   return (
