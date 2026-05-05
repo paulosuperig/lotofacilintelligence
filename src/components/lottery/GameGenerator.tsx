@@ -103,7 +103,7 @@ export const GameGenerator = () => {
               >
                 <div className="flex gap-2">
                    {Array(8).fill(0).map((_, i) => (
-                     <div key={i} className="w-1.5 h-1.5 rounded-full bg-white/[0.05]" />
+                     <div key={i} className="w-1.5 h-1.5 rounded-full bg-purple-200" />
                    ))}
                 </div>
                 <p className="text-sm font-medium tracking-wide">Aguardando comando de geração...</p>
