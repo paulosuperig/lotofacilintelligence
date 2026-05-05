@@ -23,19 +23,22 @@ export const Ball: React.FC<BallProps> = ({
   };
 
   return (
-    <div 
+    <motion.div 
+      whileHover={{ scale: 1.1, y: -2 }}
+      whileTap={{ scale: 0.95 }}
       onClick={onClick}
       className={cn(
-        "rounded-full flex items-center justify-center font-bold transition-all duration-300 cursor-default select-none shadow-lg",
+        "rounded-full flex items-center justify-center font-display font-bold transition-all duration-500 cursor-default select-none premium-border",
         active 
-          ? "bg-gradient-to-br from-purple-500 to-indigo-600 text-white scale-110 ring-2 ring-purple-300/50" 
-          : "bg-slate-800/80 border border-slate-700 text-slate-300 hover:border-indigo-500/50",
+          ? "bg-gradient-to-br from-premium-accent to-indigo-600 text-white shadow-[0_0_20px_rgba(124,58,237,0.3)] border-white/20" 
+          : "bg-premium-muted/50 text-premium-text-secondary hover:text-white hover:bg-premium-muted hover:border-white/10",
         sizeClasses[size],
-        onClick && "cursor-pointer hover:scale-105 active:scale-95",
+        onClick && "cursor-pointer",
         className
       )}
     >
-      {number.toString().padStart(2, '0')}
-    </div>
+      <span className="relative z-10">{number.toString().padStart(2, '0')}</span>
+    </motion.div>
   );
 };
+import { motion } from 'framer-motion';

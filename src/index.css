@@ -96,21 +96,42 @@ All colors MUST be HSL.
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-white/5;
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-premium-dark text-premium-text-primary selection:bg-premium-accent/30;
     font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display tracking-tight;
   }
 }
 
 @layer utilities {
   .glass {
-    @apply bg-white/5 backdrop-blur-md border border-white/10;
+    @apply bg-white/[0.02] backdrop-blur-2xl border border-white/[0.05];
   }
   
-  .glass-dark {
-    @apply bg-black/20 backdrop-blur-xl border border-white/5;
+  .glass-morphism {
+    @apply relative overflow-hidden before:absolute before:inset-0 before:-z-10 before:bg-white/[0.01] before:backdrop-blur-xl after:absolute after:inset-0 after:-z-10 after:bg-gradient-to-br after:from-white/[0.05] after:to-transparent;
   }
+
+  .premium-border {
+    @apply border border-white/[0.08] relative after:absolute after:inset-0 after:pointer-events-none after:rounded-[inherit] after:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)];
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
