@@ -179,7 +179,12 @@ const Index = () => {
         }} />
         <NavIcon icon={<History size={20} strokeWidth={1.5} />} active={activeTab === 'historico'} label="Jogos" onClick={() => setActiveTab('historico')} />
         <NavIcon icon={<LogOut size={20} strokeWidth={1.5} />} label="Sair" onClick={handleLogout} />
-      </nav>
+      {user.role === 'demo' && (
+        <div className="fixed top-0 left-0 right-0 bg-amber-500/90 backdrop-blur-sm text-white text-[10px] font-bold uppercase tracking-[0.2em] py-1.5 text-center z-[100] shadow-sm">
+          Modo de Demonstração — Algumas funcionalidades podem estar limitadas
+        </div>
+      )}
+
 
 
       <main className="pb-24 md:pb-12 md:pl-32">
