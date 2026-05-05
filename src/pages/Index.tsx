@@ -33,7 +33,8 @@ import {
   Loader2,
   Eye,
   EyeOff,
-  Key
+  Key,
+  Save
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { 
@@ -138,7 +139,8 @@ const Index = () => {
       Lembre-se: jogos de loteria são baseados em sorte, use termos como "probabilidades", "tendências" e "estatísticas".
       
       IMPORTANTE: Sempre que você sugerir jogos/números (sequências de 15 a 20 números), formate-os em blocos de código ou listas claras.
-      Se o usuário pedir para gerar um jogo, sugira 15 números formatados como: 01, 02, 03...`;
+      Se o usuário pedir para gerar jogos, sugira de 1 a 3 opções de 15 números formatados como: 01, 02, 03...
+      Sempre explique o "porquê" das sugestões (ex: "baseado na frequência do concurso anterior" ou "equilíbrio de quadrantes").`;
 
       const response = await fetch('https://api.deepseek.com/chat/completions', {
         method: 'POST',
@@ -175,35 +177,44 @@ const Index = () => {
   };
 
   const saveAiGameToHistory = (content: string) => {
-    // Tenta extrair números do conteúdo (ex: 01, 02, 03... ou 01-02-03...)
-    const numbers = content.match(/\b\d{2}\b/g);
+    // Tenta extrair todas as sequências de números do conteúdo
+    const allNumbers = content.match(/\b\d{2}\b/g);
     
-    if (numbers && (numbers.length >= 15 && numbers.length <= 20)) {
-      const uniqueNumbers = [...new Set(numbers)].sort((a, b) => parseInt(a) - parseInt(b)).slice(0, 15);
-      
-      const newGame = {
-        id: Math.random().toString(36).substr(2, 9),
-        numbers: uniqueNumbers,
-        timestamp: Date.now(),
-        type: 'IA Insight'
-      };
+    if (allNumbers && allNumbers.length >= 15) {
+      const gamesToSave = [];
+      for (let i = 0; i < allNumbers.length; i += 15) {
+        if (i + 15 <= allNumbers.length) {
+          const gameNumbers = allNumbers.slice(i, i + 15).sort((a, b) => parseInt(a) - parseInt(b));
+          gamesToSave.push(gameNumbers);
+        }
+      }
 
-      const existingHistory = JSON.parse(localStorage.getItem('lottery_history') || '[]');
-      const updatedHistory = [newGame, ...existingHistory];
-      localStorage.setItem('lottery_history', JSON.stringify(updatedHistory));
-      setHistory(updatedHistory);
-      
-      toast({
-        title: "Jogo salvo!",
-        description: "Os números sugeridos pela IA foram adicionados ao seu histórico.",
-      });
-    } else {
-      toast({
-        title: "Não foi possível salvar",
-        description: "Não identificamos uma sequência válida de 15 dezenas no texto.",
-        variant: "destructive"
-      });
+      if (gamesToSave.length > 0) {
+        const existingHistory = JSON.parse(localStorage.getItem('lottery_history') || '[]');
+        const newGames = gamesToSave.map(nums => ({
+          id: Math.random().toString(36).substr(2, 9),
+          numbers: nums,
+          timestamp: Date.now(),
+          type: 'IA Insight'
+        }));
+
+        const updatedHistory = [...newGames, ...existingHistory];
+        localStorage.setItem('lottery_history', JSON.stringify(updatedHistory));
+        setHistory(updatedHistory);
+        
+        toast({
+          title: gamesToSave.length === 1 ? "Jogo salvo!" : `${gamesToSave.length} jogos salvos!`,
+          description: "As sugestões da IA foram adicionadas ao seu histórico.",
+        });
+        return;
+      }
     }
+    
+    toast({
+      title: "Não foi possível salvar",
+      description: "Não identificamos uma sequência válida de 15 dezenas no texto.",
+      variant: "destructive"
+    });
   };
 
   useEffect(() => {
@@ -795,18 +806,29 @@ const Index = () => {
                       </div>
                     ) : null}
 
-                    <div className="flex-grow overflow-y-auto p-6 space-y-4 max-h-[450px]">
+                    <div className="flex-grow overflow-y-auto p-4 md:p-6 space-y-4 max-h-[500px] scrollbar-thin scrollbar-thumb-purple-100">
                       {aiChat.length === 0 ? (
                         <div className="h-full flex flex-col items-center justify-center text-center py-6">
-                          <div className="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center text-purple-400 mb-4">
+                          <div className="w-16 h-16 bg-white rounded-3xl shadow-sm flex items-center justify-center text-purple-400 mb-6 border border-purple-50">
                             <Cpu size={32} />
                           </div>
                           <p className="text-sm text-zinc-500 max-w-xs mb-8">Olá! Eu sou seu assistente inteligente. Como posso ajudar com suas análises hoje?</p>
                           
                           <div className="w-full max-w-2xl grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                             <button 
+                              onClick={() => handleSendAiMessage(undefined, "Pode gerar 3 sugestões de jogos baseadas nas dezenas mais quentes e tendências atuais?")}
+                              className="p-4 bg-white border border-purple-100 rounded-2xl text-left hover:border-purple-300 hover:shadow-md hover:shadow-purple-500/5 transition-all group"
+                            >
+                              <div className="w-8 h-8 rounded-lg bg-orange-50 text-orange-500 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                                <Sparkles size={18} />
+                              </div>
+                              <p className="text-[11px] font-bold text-zinc-700 uppercase tracking-wider mb-1">Múltiplos Jogos IA</p>
+                              <p className="text-[10px] text-zinc-400">Geração de várias opções com análise técnica</p>
+                            </button>
+
+                            <button 
                               onClick={() => handleSendAiMessage(undefined, "Quais são as dezenas mais quentes para o próximo concurso?")}
-                              className="p-4 bg-white border border-purple-100 rounded-2xl text-left hover:border-purple-300 transition-all group"
+                              className="p-4 bg-white border border-purple-100 rounded-2xl text-left hover:border-purple-300 hover:shadow-md hover:shadow-purple-500/5 transition-all group"
                             >
                               <div className="w-8 h-8 rounded-lg bg-orange-50 text-orange-500 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                                 <Flame size={18} />
@@ -816,19 +838,8 @@ const Index = () => {
                             </button>
 
                             <button 
-                              onClick={() => handleSendAiMessage(undefined, "Pode gerar uma sugestão de jogo com 15 dezenas baseada em tendências?")}
-                              className="p-4 bg-white border border-purple-100 rounded-2xl text-left hover:border-purple-300 transition-all group"
-                            >
-                              <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-500 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                                <Sparkles size={18} />
-                              </div>
-                              <p className="text-[11px] font-bold text-zinc-700 uppercase tracking-wider mb-1">Gerar com IA</p>
-                              <p className="text-[10px] text-zinc-400">Criação de jogos baseada em lógica matemática</p>
-                            </button>
-
-                            <button 
                               onClick={() => handleSendAiMessage(undefined, "Quais são os padrões de pares e ímpares que mais saem?")}
-                              className="p-4 bg-white border border-purple-100 rounded-2xl text-left hover:border-purple-300 transition-all group"
+                              className="p-4 bg-white border border-purple-100 rounded-2xl text-left hover:border-purple-300 hover:shadow-md hover:shadow-purple-500/5 transition-all group"
                             >
                               <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                                 <PieChart size={18} />
@@ -839,7 +850,7 @@ const Index = () => {
 
                             <button 
                               onClick={() => handleSendAiMessage(undefined, "Explique os melhores fechamentos para quem quer garantir 14 pontos")}
-                              className="p-4 bg-white border border-purple-100 rounded-2xl text-left hover:border-purple-300 transition-all group"
+                              className="p-4 bg-white border border-purple-100 rounded-2xl text-left hover:border-purple-300 hover:shadow-md hover:shadow-purple-500/5 transition-all group"
                             >
                               <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-500 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                                 <ShieldCheck size={18} />
@@ -866,15 +877,18 @@ const Index = () => {
                                   <div className="prose prose-sm max-w-none prose-headings:font-bold prose-headings:text-zinc-900 prose-h1:text-base prose-h2:text-base prose-h3:text-sm prose-h4:text-sm prose-p:my-2 prose-p:leading-relaxed prose-strong:text-purple-700 prose-strong:font-bold prose-ul:my-2 prose-ol:my-2 prose-li:my-0.5 prose-hr:my-3 prose-hr:border-purple-100 prose-code:text-purple-700 prose-code:bg-purple-50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none">
                                     <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
                                   </div>
-                                  <div className="flex justify-end mt-2 pt-2 border-t border-purple-50">
-                                    <Button 
-                                      variant="ghost" 
-                                      size="sm" 
-                                      className="h-7 px-2 text-[10px] text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg gap-1.5"
-                                      onClick={() => saveAiGameToHistory(msg.content)}
-                                    >
-                                      <History size={12} /> Salvar Jogo
-                                    </Button>
+                                  <div className="flex justify-between items-center mt-3 pt-3 border-t border-purple-50">
+                                    <span className="text-[10px] text-zinc-400 font-medium italic">Extraído da análise DeepSeek</span>
+                                    <div className="flex gap-2">
+                                      <Button 
+                                        variant="ghost" 
+                                        size="sm" 
+                                        className="h-8 px-3 text-[10px] text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg gap-2 border border-purple-100/50"
+                                        onClick={() => saveAiGameToHistory(msg.content)}
+                                      >
+                                        <Save size={12} /> Salvar Tudo
+                                      </Button>
+                                    </div>
                                   </div>
                                 </>
                               ) : (
