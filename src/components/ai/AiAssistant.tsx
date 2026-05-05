@@ -43,11 +43,11 @@ export const AiAssistant = ({
   role
 }: AiAssistantProps) => {
   return (
-    <div className="bg-white border border-purple-200 rounded-3xl md:rounded-[2rem] p-4 md:p-8 shadow-xl shadow-purple-500/5 min-h-[600px] flex flex-col">
+    <div className="bg-white dark:bg-zinc-900 border border-purple-200 dark:border-zinc-800 rounded-3xl md:rounded-[2rem] p-4 md:p-8 shadow-xl shadow-purple-500/5 min-h-[600px] flex flex-col">
       <div className="flex flex-col md:flex-row items-center justify-between mb-6 gap-4">
         <div className="flex flex-col items-center md:items-start">
           <div className="flex items-center gap-3 mb-1">
-            <div className="w-10 h-10 rounded-xl bg-purple-600 flex items-center justify-center text-white shadow-lg shadow-purple-600/20">
+            <div className="w-10 h-10 rounded-xl bg-purple-600 dark:bg-purple-700 flex items-center justify-center text-white shadow-lg shadow-purple-600/20">
               <Cpu size={20} />
             </div>
             <h2 className="text-2xl md:text-3xl font-display font-bold text-zinc-900">Intelligence AI</h2>
