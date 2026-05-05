@@ -169,7 +169,7 @@ const Index = () => {
                   <StatDetail label="Pares" value={latestResult ? latestResult.dezenas.filter(n => parseInt(n) % 2 === 0).length.toString().padStart(2, '0') : "00"} percentage={latestResult ? (latestResult.dezenas.filter(n => parseInt(n) % 2 === 0).length / 15) * 100 : 0} color="from-purple-500 to-purple-400" />
                   <StatDetail label="Ímpares" value={latestResult ? latestResult.dezenas.filter(n => parseInt(n) % 2 !== 0).length.toString().padStart(2, '0') : "00"} percentage={latestResult ? (latestResult.dezenas.filter(n => parseInt(n) % 2 !== 0).length / 15) * 100 : 0} color="from-purple-400 to-fuchsia-400" />
                   
-                  <Button variant="ghost" className="ml-auto text-zinc-500 hover:text-purple-600 transition-all gap-2 group text-[10px] font-black uppercase tracking-widest">
+                  <Button variant="ghost" className="ml-auto text-zinc-500 hover:text-purple-700 hover:bg-purple-100/50 transition-all gap-2 group text-[10px] font-black uppercase tracking-widest disabled:opacity-50">
                     Explorar Dados <ArrowUpRight size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                   </Button>
                 </div>
@@ -245,7 +245,7 @@ const Index = () => {
               <h4 className="text-xl font-display font-bold leading-tight mt-2 mb-4">
                 "Ciclo das dezenas prestes a fechar. Foque no número 08 e 22."
               </h4>
-              <button className="w-full py-4 bg-white text-premium-dark font-display font-black text-xs uppercase tracking-widest rounded-2xl shadow-xl shadow-black/20 hover:scale-[1.02] transition-transform active:scale-95">
+              <button className="w-full py-4 bg-white text-purple-900 font-display font-black text-xs uppercase tracking-widest rounded-2xl shadow-xl shadow-black/10 hover:bg-purple-50 transition-colors active:scale-95 disabled:opacity-50 disabled:pointer-events-none">
                 Ver Análise Completa
               </button>
             </motion.div>

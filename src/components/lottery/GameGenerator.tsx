@@ -62,7 +62,7 @@ export const GameGenerator = () => {
           <Button 
             onClick={generateGame} 
             disabled={isGenerating}
-            className="w-full bg-purple-600 text-white hover:bg-purple-700 font-display font-black text-[11px] uppercase tracking-widest h-12 px-6 rounded-xl shadow-xl shadow-purple-500/20 transition-all active:scale-95"
+            className="w-full bg-purple-600 text-white hover:bg-purple-700 disabled:bg-purple-300 disabled:cursor-not-allowed font-display font-black text-[11px] uppercase tracking-widest h-12 px-6 rounded-xl shadow-xl shadow-purple-500/20 transition-all active:scale-95"
           >
             {isGenerating ? <RefreshCcw className="animate-spin mr-2" size={14} /> : <Zap className="mr-2" size={14} fill="currentColor" />}
             Gerar Jogo
@@ -126,10 +126,10 @@ export const GameGenerator = () => {
         )}
 
         <div className="mt-auto grid grid-cols-1 sm:grid-cols-2 gap-4">
-           <Button variant="outline" className="h-12 rounded-xl bg-white border-purple-100 text-zinc-900 hover:bg-purple-50 font-black text-[10px] uppercase tracking-widest transition-all">
+           <Button variant="outline" className="h-12 rounded-xl bg-white border-purple-100 text-zinc-900 hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200 font-black text-[10px] uppercase tracking-widest transition-all disabled:opacity-50">
              <Save className="mr-3" size={16} /> Salvar Jogo
            </Button>
-           <Button variant="outline" className="h-12 rounded-xl bg-white border-purple-100 text-zinc-900 hover:bg-purple-50 font-black text-[10px] uppercase tracking-widest transition-all">
+           <Button variant="outline" className="h-12 rounded-xl bg-white border-purple-100 text-zinc-900 hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200 font-black text-[10px] uppercase tracking-widest transition-all disabled:opacity-50">
              Copiar
            </Button>
         </div>
