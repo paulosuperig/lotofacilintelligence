@@ -180,7 +180,7 @@ const Index = () => {
               <button 
                 onClick={fetchData}
                 disabled={isRefreshing}
-                className="w-10 h-10 rounded-xl bg-white border border-purple-100 flex items-center justify-center text-purple-600 hover:border-purple-300 transition-all active:scale-95 disabled:opacity-50"
+                className="hidden md:flex w-10 h-10 rounded-xl bg-white border border-purple-100 items-center justify-center text-purple-600 hover:border-purple-300 transition-all active:scale-95 disabled:opacity-50"
               >
                 <motion.div animate={isRefreshing ? { rotate: 360 } : {}} transition={isRefreshing ? { repeat: Infinity, duration: 1, ease: "linear" } : {}}>
                   <Sparkles size={18} />
