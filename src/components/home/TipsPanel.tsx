@@ -16,11 +16,11 @@ export const TipsPanel = ({ onBack }: TipsPanelProps) => {
       exit={{ opacity: 0, x: -20 }}
       className="grid grid-cols-1 gap-6"
     >
-      <div className="bg-white border border-purple-200 rounded-[2rem] p-8 md:p-12 shadow-xl shadow-purple-500/5">
+      <div className="bg-white dark:bg-zinc-900 border border-purple-200 dark:border-zinc-800 rounded-[2rem] p-8 md:p-12 shadow-xl shadow-purple-500/5">
         <div className="flex flex-col md:flex-row items-center md:items-center justify-between mb-10 gap-4 text-center md:text-left">
           <div className="flex flex-col items-center md:items-start">
-            <h2 className="text-3xl font-display font-bold text-zinc-900 mb-2">Dicas do Especialista</h2>
-            <p className="text-zinc-500 text-sm">Análises estratégicas baseadas nos últimos 5 anos de resultados</p>
+            <h2 className="text-3xl font-display font-bold text-zinc-900 dark:text-zinc-100 mb-2">Dicas do Especialista</h2>
+            <p className="text-zinc-500 dark:text-zinc-400 text-sm">Análises estratégicas baseadas nos últimos 5 anos de resultados</p>
           </div>
           <Button 
             variant="outline" 
