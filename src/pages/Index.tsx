@@ -749,11 +749,16 @@ const Index = () => {
                 exit={{ opacity: 0, x: -20 }}
                 className="grid grid-cols-1 gap-6"
               >
-                <div className="bg-white border border-purple-200 rounded-3xl md:rounded-[2rem] p-6 md:p-12 shadow-xl shadow-purple-500/5 min-h-[600px] flex flex-col">
-                  <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
+                <div className="bg-white border border-purple-200 rounded-3xl md:rounded-[2rem] p-4 md:p-8 shadow-xl shadow-purple-500/5 min-h-[600px] flex flex-col">
+                  <div className="flex flex-col md:flex-row items-center justify-between mb-6 gap-4">
                     <div className="flex flex-col items-center md:items-start">
-                      <h2 className="text-2xl md:text-3xl font-display font-bold text-zinc-900 mb-1">Lotofácil Intelligence AI</h2>
-                      <p className="text-zinc-500 text-xs">Especialista em análises e probabilidades</p>
+                      <div className="flex items-center gap-3 mb-1">
+                        <div className="w-10 h-10 rounded-xl bg-purple-600 flex items-center justify-center text-white shadow-lg shadow-purple-600/20">
+                          <Cpu size={20} />
+                        </div>
+                        <h2 className="text-2xl md:text-3xl font-display font-bold text-zinc-900">Intelligence AI</h2>
+                      </div>
+                      <p className="text-zinc-500 text-[10px] uppercase font-bold tracking-[0.2em] ml-1">Análises & Probabilidades em Tempo Real</p>
                     </div>
                     <Button 
                       variant="outline" 
