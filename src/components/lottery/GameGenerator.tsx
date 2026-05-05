@@ -79,9 +79,14 @@ export const GameGenerator = () => {
       const numbers: number[] = [];
       const pool = Array.from({ length: 25 }, (_, i) => i + 1);
       
+      // Criar um novo pool local para garantir unicidade em cada geração
+      const localPool = [...pool];
+      
       for (let i = 0; i < 15; i++) {
-        const randomIndex = Math.floor(Math.random() * pool.length);
-        numbers.push(pool.splice(randomIndex, 1)[0]);
+        if (localPool.length === 0) break;
+        const randomIndex = Math.floor(Math.random() * localPool.length);
+        const selectedNumber = localPool.splice(randomIndex, 1)[0];
+        numbers.push(selectedNumber);
       }
 
       const sortedNumbers = numbers.sort((a, b) => a - b);
