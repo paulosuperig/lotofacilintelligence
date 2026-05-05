@@ -18,8 +18,18 @@ export interface LotteryResult {
 export interface SavedGame {
   id: string;
   numbers: number[];
+  timestamp: number;
+  type?: string;
+  model?: string;
+  userId?: string;
+}
+
+export interface UserProfile {
+  id: string;
+  email: string;
+  role: 'admin' | 'demo';
+  status: 'active' | 'blocked';
   createdAt: string;
-  userId: string;
 }
 
 export interface Statistics {
