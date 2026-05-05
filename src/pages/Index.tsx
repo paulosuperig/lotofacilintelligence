@@ -260,10 +260,10 @@ const Index = () => {
 const NavIcon = ({ icon, active = false, label }: { icon: React.ReactNode, active?: boolean, label: string }) => (
   <button className="flex flex-col items-center gap-1 group relative outline-none transition-transform active:scale-90">
     <div className={cn(
-      "p-3 rounded-xl transition-all duration-300 md:group-hover:bg-white/5",
+      "p-3 rounded-xl transition-all duration-300 md:group-hover:bg-purple-100/50",
       active 
-        ? "text-indigo-400 md:bg-white/5" 
-        : "text-zinc-500 hover:text-zinc-200"
+        ? "text-purple-600 md:bg-purple-100/50" 
+        : "text-zinc-500 hover:text-purple-600"
     )}>
       {icon}
     </div>
