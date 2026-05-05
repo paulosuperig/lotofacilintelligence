@@ -238,10 +238,13 @@ export const GameGenerator = () => {
           >
             <StatCard 
               label="Pares / Ímpares" 
-              value={`${stats.pairs} pares e ${stats.odd} ímpares`} 
+              value={`${stats.pairs}P / ${stats.odd}Í`} 
               icon={<TrendingUp size={14}/>} 
             />
             <StatCard label="Soma Total" value={stats.sum} icon={<TrendingUp size={14}/>} />
+            <StatCard label="Moldura" value={stats.mold} icon={<TrendingUp size={14}/>} />
+            <StatCard label="Primos" value={stats.primes} icon={<TrendingUp size={14}/>} />
+            <StatCard label="Maior Seq." value={stats.sequence} icon={<TrendingUp size={14}/>} />
           </motion.div>
         )}
 
