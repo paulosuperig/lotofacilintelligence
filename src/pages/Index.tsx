@@ -141,7 +141,7 @@ const Index = () => {
                       {latestResult?.concurso || "---"}
                     </h2>
                     <div className="flex items-center gap-6 text-zinc-500 text-[11px] font-bold uppercase tracking-wider">
-                      <span className="flex items-center gap-2"><Calendar size={14} strokeWidth={2} /> {latestResult ? formatDate(latestResult.data) : "---"}</span>
+                      <span className="flex items-center gap-2"><Calendar size={14} strokeWidth={2} /> {latestResult ? latestResult.data : "---"}</span>
                       <span className="w-1 h-1 rounded-full bg-purple-500/30" />
                       <span className="flex items-center gap-2"><ShieldCheck size={14} strokeWidth={2} /> Verificado</span>
                     </div>
@@ -150,7 +150,7 @@ const Index = () => {
                   <div className="bg-purple-50/50 p-6 md:p-8 rounded-[1.5rem] border border-purple-100 backdrop-blur-xl">
                     <p className="text-[9px] text-zinc-500 uppercase font-bold tracking-[0.2em] mb-2">Próximo Prêmio</p>
                     <p className="text-3xl md:text-4xl font-display font-bold text-emerald-400">
-                      {latestResult ? formatCurrency(latestResult.valor_estimado_proximo_concurso || latestResult.estimativa_proximo_concurso || 0) : "R$ ---"}
+                      {latestResult ? formatCurrency(latestResult.valorEstimadoProximoConcurso || 0) : "R$ ---"}
                     </p>
                   </div>
                 </div>
