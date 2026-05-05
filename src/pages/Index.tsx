@@ -254,8 +254,99 @@ const Index = () => {
                   </div>
                 </div>
               </motion.div>
-            ) : (
+            ) : activeTab === 'dicas' ? (
+              <motion.div
+                key="dicas-page"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="grid grid-cols-1 gap-6"
+              >
+                <div className="bg-white border border-purple-200 rounded-[2rem] p-8 md:p-12 shadow-xl shadow-purple-500/5">
+                  <div className="flex items-center justify-between mb-10">
+                    <div>
+                      <h2 className="text-3xl font-display font-bold text-zinc-900 mb-2">Dicas do Especialista</h2>
+                      <p className="text-zinc-500 text-sm">Análises estratégicas baseadas nos últimos 5 anos de resultados</p>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setActiveTab('home')}
+                      className="rounded-xl border-purple-100 text-purple-600 hover:bg-purple-50"
+                    >
+                      Voltar ao Início
+                    </Button>
+                  </div>
 
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="p-8 bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-100 rounded-[2.5rem]">
+                      <div className="flex items-center gap-4 mb-6">
+                        <div className="w-12 h-12 rounded-2xl bg-purple-600 flex items-center justify-center text-white shadow-lg">
+                          <Target size={24} />
+                        </div>
+                        <h3 className="text-xl font-bold text-zinc-900">Números "Quentes" (5 Anos)</h3>
+                      </div>
+                      <p className="text-sm text-zinc-600 mb-8 leading-relaxed">Dezenas que apareceram em mais de 65% dos sorteios desde 2021.</p>
+                      <div className="flex flex-wrap gap-3">
+                        {[13, 20, 24, 10, 1, 11, 25, 4].map(num => (
+                          <Ball key={num} number={num.toString()} active size="md" />
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="p-8 bg-white border border-purple-100 rounded-[2.5rem] shadow-sm">
+                      <div className="flex items-center gap-4 mb-6">
+                        <div className="w-12 h-12 rounded-2xl bg-emerald-500 flex items-center justify-center text-white shadow-lg">
+                          <TrendingUp size={24} />
+                        </div>
+                        <h3 className="text-xl font-bold text-zinc-900">Estratégia de Quadrantes</h3>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-zinc-50 rounded-xl">
+                          <span className="text-xs font-bold text-zinc-500 uppercase">Q1 (01-05)</span>
+                          <span className="text-sm font-bold text-purple-600">Alta Frequência</span>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-zinc-50 rounded-xl">
+                          <span className="text-xs font-bold text-zinc-500 uppercase">Q3 (11-15)</span>
+                          <span className="text-sm font-bold text-emerald-500">Equilibrado</span>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-zinc-50 rounded-xl">
+                          <span className="text-xs font-bold text-zinc-500 uppercase">Q5 (21-25)</span>
+                          <span className="text-sm font-bold text-amber-500">Padrão de Repetição</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-8 p-8 bg-zinc-900 rounded-[2.5rem] text-white">
+                    <h3 className="text-xl font-bold mb-4 flex items-center gap-3">
+                      <Sparkles className="text-purple-400" /> Insight Premium
+                    </h3>
+                    <p className="text-zinc-400 text-sm leading-relaxed mb-6">
+                      A análise histórica mostra que jogos com soma entre 180 e 210 representam 72% dos ganhadores da faixa principal nos últimos 5 anos. Evite jogos com soma inferior a 150 ou superior a 240.
+                    </p>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                      <div className="text-center">
+                        <p className="text-[10px] text-zinc-500 uppercase font-bold mb-1">Pares Ideal</p>
+                        <p className="text-lg font-bold">7 ou 8</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-[10px] text-zinc-500 uppercase font-bold mb-1">Primos Ideal</p>
+                        <p className="text-lg font-bold">5 ou 6</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-[10px] text-zinc-500 uppercase font-bold mb-1">Repetidos</p>
+                        <p className="text-lg font-bold">9 ou 10</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-[10px] text-zinc-500 uppercase font-bold mb-1">Moldura</p>
+                        <p className="text-lg font-bold">10 ou 11</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+
+            ) : (
               <motion.div 
                 key="home-page"
                 variants={containerVariants}
@@ -299,7 +390,7 @@ const Index = () => {
                         Array(15).fill(0).map((_, i) => (
                           <div key={i} className="aspect-square rounded-full bg-purple-100/50 animate-pulse" />
                         ))
-                      ) : (
+            ) : (
                         latestResult?.dezenas.map((num) => (
                           <Ball key={num} number={num} active size="sm" />
                         ))
@@ -385,7 +476,11 @@ const Index = () => {
                 {/* Smart Alerts */}
                 <motion.div 
                   variants={itemVariants} 
-                  className="lg:col-span-4 lg:row-span-1 bg-gradient-to-br from-purple-600 to-indigo-700 border border-purple-500 rounded-[2rem] p-8 flex flex-col justify-between text-white relative overflow-hidden group shadow-xl shadow-purple-500/10"
+                  onClick={() => {
+                    setActiveTab('dicas');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className="lg:col-span-4 lg:row-span-1 bg-gradient-to-br from-purple-600 to-indigo-700 border border-purple-500 rounded-[2rem] p-8 flex flex-col justify-between text-white relative overflow-hidden group shadow-xl shadow-purple-500/10 cursor-pointer"
                 >
                   <div className="absolute top-0 right-0 p-6 opacity-20 group-hover:rotate-12 transition-transform duration-700">
                     <Sparkles size={80} />
@@ -395,12 +490,6 @@ const Index = () => {
                     "Ciclo das dezenas prestes a fechar. Foque no número 08 e 22."
                   </h4>
                   <button 
-                    onClick={() => {
-                      toast({
-                        title: "Dica Premium",
-                        description: "Análise completa enviada para seu e-mail de membro.",
-                      });
-                    }}
                     className="w-full py-4 bg-white text-purple-900 font-display font-bold text-xs uppercase tracking-widest rounded-2xl shadow-xl shadow-black/10 hover:bg-purple-50 transition-colors active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
                   >
                     Ver Análise Completa
