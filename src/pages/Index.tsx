@@ -190,7 +190,7 @@ const Index = () => {
               </div>
               <div>
                 <h3 className="text-xl font-display font-black mb-1 flex items-center gap-3">
-                  <Target size={18} className="text-indigo-400" /> Tendências
+                  <Target size={18} className="text-purple-600" /> Tendências
                 </h3>
                 <p className="text-zinc-500 text-[11px] font-bold uppercase tracking-wider">Top 5 frequentes (10 jogos)</p>
               </div>
