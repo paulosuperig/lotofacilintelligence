@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { cn } from "@/lib/utils";
 
 interface BallProps {
@@ -41,4 +42,3 @@ export const Ball: React.FC<BallProps> = ({
     </motion.div>
   );
 };
-import { motion } from 'framer-motion';
