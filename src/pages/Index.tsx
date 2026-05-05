@@ -230,7 +230,7 @@ const Index = () => {
                 <h4 className="text-lg font-display font-bold text-zinc-900">Fechamentos Pro</h4>
                 <p className="text-sm text-premium-text-muted">Acesse 42 modelos matemáticos exclusivos.</p>
               </div>
-              <ArrowUpRight size={20} className="ml-auto text-premium-text-muted group-hover:text-white transition-colors" />
+              <ArrowUpRight size={20} className="ml-auto text-premium-text-muted group-hover:text-purple-600 transition-colors" />
             </motion.div>
 
              {/* Smart Alerts */}
