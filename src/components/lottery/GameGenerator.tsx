@@ -54,9 +54,9 @@ export const GameGenerator = () => {
           <div>
             <div className="flex items-center gap-2 text-purple-600 mb-3">
               <Zap size={16} fill="currentColor" />
-              <span className="text-[10px] uppercase font-black tracking-[0.25em]">Sistemas Pro</span>
+              <span className="text-[10px] uppercase font-bold tracking-[0.25em]">Sistemas Pro</span>
             </div>
-            <h2 className="text-2xl md:text-3xl font-display font-black text-zinc-900 leading-tight">
+            <h2 className="text-2xl md:text-3xl font-display font-bold text-zinc-900 leading-tight">
               Gerador<br className="hidden sm:block" /> Inteligente
             </h2>
           </div>
@@ -64,7 +64,7 @@ export const GameGenerator = () => {
           <Button 
             onClick={generateGame} 
             disabled={isGenerating}
-            className="w-full bg-purple-600 text-white hover:bg-purple-700 disabled:bg-purple-300 disabled:cursor-not-allowed font-display font-black text-[11px] uppercase tracking-widest h-12 px-6 rounded-xl shadow-xl shadow-purple-500/20 transition-all active:scale-95"
+            className="w-full bg-purple-600 text-white hover:bg-purple-700 disabled:bg-purple-300 disabled:cursor-not-allowed font-display font-bold text-[11px] uppercase tracking-widest h-12 px-6 rounded-xl shadow-xl shadow-purple-500/20 transition-all active:scale-95"
           >
             {isGenerating ? <RefreshCcw className="animate-spin mr-2" size={14} /> : <Zap className="mr-2" size={14} fill="currentColor" />}
             Gerar Jogo
@@ -137,7 +137,7 @@ export const GameGenerator = () => {
               });
             }}
             disabled={generatedGame.length === 0}
-            className="h-12 rounded-xl bg-white border-purple-100 text-zinc-900 hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200 font-black text-[10px] uppercase tracking-widest transition-all disabled:opacity-50"
+            className="h-12 rounded-xl bg-white border-purple-100 text-zinc-900 hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200 font-bold text-[10px] uppercase tracking-widest transition-all disabled:opacity-50"
           >
              <Save className="mr-3" size={16} /> Salvar Jogo
            </Button>
@@ -152,7 +152,7 @@ export const GameGenerator = () => {
               });
             }}
             disabled={generatedGame.length === 0}
-            className="h-12 rounded-xl bg-white border-purple-100 text-zinc-900 hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200 font-black text-[10px] uppercase tracking-widest transition-all disabled:opacity-50"
+            className="h-12 rounded-xl bg-white border-purple-100 text-zinc-900 hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200 font-bold text-[10px] uppercase tracking-widest transition-all disabled:opacity-50"
           >
              Copiar
            </Button>

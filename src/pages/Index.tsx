@@ -97,7 +97,7 @@ const Index = () => {
                 <span className="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.5)] animate-pulse" />
                 <span className="text-[10px] uppercase font-bold tracking-[0.25em] text-purple-600/60">Membro Premium Intelligence</span>
               </div>
-              <h1 className="text-4xl md:text-6xl font-display font-black tracking-tight leading-[1.1] text-zinc-900">
+              <h1 className="text-4xl md:text-6xl font-display font-bold tracking-tight leading-[1.1] text-zinc-900">
                 Lotofácil <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-fuchsia-600">Intelligence</span>
               </h1>
             </motion.div>
@@ -137,7 +137,7 @@ const Index = () => {
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-600 text-[9px] font-bold mb-6 uppercase tracking-widest">
                       <History size={10} /> Resultado Oficial
                     </div>
-                    <h2 className="text-5xl md:text-7xl font-display font-black text-zinc-900 mb-6">
+                    <h2 className="text-5xl md:text-7xl font-display font-bold text-zinc-900 mb-6">
                       {latestResult?.concurso || "---"}
                     </h2>
                     <div className="flex items-center gap-6 text-zinc-500 text-[11px] font-bold uppercase tracking-wider">
@@ -148,8 +148,8 @@ const Index = () => {
                   </div>
                   
                   <div className="bg-purple-50/50 p-6 md:p-8 rounded-[1.5rem] border border-purple-100 backdrop-blur-xl">
-                    <p className="text-[9px] text-zinc-500 uppercase font-black tracking-[0.2em] mb-2">Próximo Prêmio</p>
-                    <p className="text-3xl md:text-4xl font-display font-black text-emerald-400">
+                    <p className="text-[9px] text-zinc-500 uppercase font-bold tracking-[0.2em] mb-2">Próximo Prêmio</p>
+                    <p className="text-3xl md:text-4xl font-display font-bold text-emerald-400">
                       {latestResult ? formatCurrency(latestResult.valor_estimado_proximo_concurso || latestResult.estimativa_proximo_concurso || 0) : "R$ ---"}
                     </p>
                   </div>
@@ -179,7 +179,7 @@ const Index = () => {
                         description: "A análise detalhada estará disponível na próxima atualização.",
                       });
                     }}
-                    className="ml-auto text-zinc-500 hover:text-purple-700 hover:bg-purple-100/50 transition-all gap-2 group text-[10px] font-black uppercase tracking-widest disabled:opacity-50"
+                    className="ml-auto text-zinc-500 hover:text-purple-700 hover:bg-purple-100/50 transition-all gap-2 group text-[10px] font-bold uppercase tracking-widest disabled:opacity-50"
                   >
                     Explorar Dados <ArrowUpRight size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                   </Button>
@@ -200,7 +200,7 @@ const Index = () => {
                 <PieChart size={140} strokeWidth={1} />
               </div>
               <div>
-                <h3 className="text-xl font-display font-black mb-1 flex items-center gap-3">
+                <h3 className="text-xl font-display font-bold mb-1 flex items-center gap-3">
                   <Target size={18} className="text-purple-600" /> Tendências
                 </h3>
                 <p className="text-zinc-500 text-[11px] font-bold uppercase tracking-wider">Top 5 frequentes (10 jogos)</p>
@@ -269,7 +269,7 @@ const Index = () => {
                     description: "Análise completa enviada para seu e-mail de membro.",
                   });
                 }}
-                className="w-full py-4 bg-white text-purple-900 font-display font-black text-xs uppercase tracking-widest rounded-2xl shadow-xl shadow-black/10 hover:bg-purple-50 transition-colors active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
+                className="w-full py-4 bg-white text-purple-900 font-display font-bold text-xs uppercase tracking-widest rounded-2xl shadow-xl shadow-black/10 hover:bg-purple-50 transition-colors active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
               >
                 Ver Análise Completa
               </button>
