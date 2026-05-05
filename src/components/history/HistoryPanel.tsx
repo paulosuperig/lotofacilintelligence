@@ -101,7 +101,7 @@ export const HistoryPanel = ({
               </div>
               <div className="flex flex-wrap gap-2">
                 {item.numbers.map((num: number, i: number) => (
-                  <span key={i} className="w-8 h-8 rounded-lg bg-white border border-purple-100 flex items-center justify-center text-xs font-bold text-purple-700 shadow-sm">
+                  <span key={i} className="w-8 h-8 rounded-lg bg-white dark:bg-zinc-800 border border-purple-100 dark:border-zinc-700 flex items-center justify-center text-xs font-bold text-purple-700 dark:text-purple-300 shadow-sm">
                     {num.toString().padStart(2, '0')}
                   </span>
                 ))}
