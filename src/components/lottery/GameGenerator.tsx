@@ -170,10 +170,10 @@ const StatCard = ({ label, value, icon, variant = 'default' }: { label: string, 
   <div className="bg-white border border-purple-100 rounded-2xl p-4 shadow-sm min-w-0 flex flex-col justify-center">
     <div className="flex items-center gap-1.5 text-premium-text-muted mb-1.5 min-w-0">
       <span className="shrink-0">{icon}</span>
-      <span className="text-[9px] uppercase font-semibold tracking-tight whitespace-nowrap">{label}</span>
+      <span className="text-[10px] uppercase font-bold tracking-wider whitespace-nowrap">{label}</span>
     </div>
     <div className={cn(
-      "text-2xl font-display font-bold leading-tight whitespace-nowrap",
+      "text-lg md:text-xl font-display font-bold leading-tight",
       variant === 'success' ? "text-emerald-600" : "text-zinc-900"
     )}>
       {value}
