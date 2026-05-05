@@ -5,8 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Zap, RefreshCcw, Save, TrendingUp, History, MessageCircle, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { generateSecureId } from '@/lib/security/utils';
 
 interface SavedGame {
+  id: string;
   numbers: number[];
   timestamp: number;
 }
