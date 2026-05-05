@@ -132,22 +132,22 @@ const Index = () => {
               <div className="relative z-10 h-full flex flex-col">
                 <div className="flex flex-wrap justify-between items-start gap-6 mb-12">
                   <div>
-                    <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-premium-accent/10 premium-border text-premium-accent text-[10px] font-bold mb-4 uppercase tracking-widest">
-                      <History size={12} /> Resultado Oficial
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[9px] font-bold mb-6 uppercase tracking-widest">
+                      <History size={10} /> Resultado Oficial
                     </div>
-                    <h2 className="text-5xl md:text-6xl font-display font-black text-white mb-4">
+                    <h2 className="text-5xl md:text-7xl font-display font-black text-white mb-6">
                       {latestResult?.concurso || "---"}
                     </h2>
-                    <div className="flex items-center gap-6 text-premium-text-muted text-sm font-medium">
-                      <span className="flex items-center gap-2"><Calendar size={16} strokeWidth={1.5} /> {latestResult ? formatDate(latestResult.data) : "---"}</span>
-                      <span className="w-1.5 h-1.5 rounded-full bg-premium-accent/30" />
-                      <span className="flex items-center gap-2"><ShieldCheck size={16} strokeWidth={1.5} /> Dados Verificados</span>
+                    <div className="flex items-center gap-6 text-zinc-500 text-[11px] font-bold uppercase tracking-wider">
+                      <span className="flex items-center gap-2"><Calendar size={14} strokeWidth={2} /> {latestResult ? formatDate(latestResult.data) : "---"}</span>
+                      <span className="w-1 h-1 rounded-full bg-indigo-500/30" />
+                      <span className="flex items-center gap-2"><ShieldCheck size={14} strokeWidth={2} /> Verificado</span>
                     </div>
                   </div>
                   
-                  <div className="bg-white/[0.03] p-6 rounded-[2rem] premium-border backdrop-blur-xl">
-                    <p className="text-[10px] text-premium-text-muted uppercase font-bold tracking-[0.2em] mb-2">Prêmio Estimado</p>
-                    <p className="text-3xl font-display font-black text-emerald-400">
+                  <div className="bg-white/5 p-6 md:p-8 rounded-[1.5rem] premium-border backdrop-blur-xl">
+                    <p className="text-[9px] text-zinc-500 uppercase font-black tracking-[0.2em] mb-2">Próximo Prêmio</p>
+                    <p className="text-3xl md:text-4xl font-display font-black text-emerald-400">
                       {latestResult ? formatCurrency(latestResult.valor_estimado_proximo_concurso || latestResult.estimativa_proximo_concurso || 0) : "R$ ---"}
                     </p>
                   </div>
