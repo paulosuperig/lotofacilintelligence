@@ -536,19 +536,19 @@ const Index = () => {
                 </motion.div>
 
                 {/* Frequência Bento */}
-                <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-1 bg-white border border-purple-100 rounded-[2rem] p-7 flex flex-col group overflow-hidden relative shadow-sm">
-                  <div className="absolute -right-6 -bottom-6 opacity-[0.04] group-hover:scale-110 transition-transform duration-700 text-purple-900 pointer-events-none">
+                <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-1 bg-white border border-purple-100 rounded-3xl md:rounded-[2rem] p-6 md:p-7 flex flex-col group overflow-hidden relative shadow-sm">
+                  <div className="absolute -right-6 -bottom-6 opacity-[0.04] group-hover:scale-110 transition-transform duration-700 text-purple-900 pointer-events-none hidden md:block">
                     <PieChart size={160} strokeWidth={1} />
                   </div>
 
-                  <div className="flex items-start justify-between mb-5 relative z-10">
+                  <div className="flex items-start justify-between mb-4 md:mb-5 relative z-10">
                     <div>
-                      <h3 className="text-xl font-display font-bold mb-1 flex items-center gap-2.5">
+                      <h3 className="text-lg md:text-xl font-display font-bold mb-1 flex items-center gap-2">
                         <Target size={18} className="text-purple-600" /> Tendências
                       </h3>
-                      <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider">Análise dos últimos 10 jogos</p>
+                      <p className="text-zinc-500 text-[9px] md:text-[10px] font-bold uppercase tracking-wider">Últimos 10 jogos</p>
                     </div>
-                    <span className="text-[8px] font-bold text-purple-600 bg-purple-50 px-2 py-1 rounded-full uppercase tracking-wider border border-purple-100">
+                    <span className="text-[8px] font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full uppercase tracking-wider border border-purple-100">
                       Live
                     </span>
                   </div>
