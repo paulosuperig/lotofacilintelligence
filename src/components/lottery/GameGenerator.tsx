@@ -4,11 +4,13 @@ import { Ball } from './Ball';
 import { Button } from '@/components/ui/button';
 import { Zap, RefreshCcw, Save, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 export const GameGenerator = () => {
   const [generatedGame, setGeneratedGame] = useState<number[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [stats, setStats] = useState({ pairs: 0, odd: 0, primes: 0, sum: 0 });
+  const { toast } = useToast();
 
   const calculateStats = useCallback((nums: number[]) => {
     const primes = [2, 3, 5, 7, 11, 13, 17, 19, 23];
@@ -129,10 +131,10 @@ export const GameGenerator = () => {
            <Button 
             variant="outline" 
             onClick={() => {
-              // Simulação de salvar, pois não há backend
-              const toast = (window as any).toast;
-              if (toast) toast.success("Jogo salvo com sucesso!");
-              else alert("Jogo salvo com sucesso!");
+              toast({
+                title: "Jogo salvo!",
+                description: "Seu jogo foi armazenado no histórico.",
+              });
             }}
             disabled={generatedGame.length === 0}
             className="h-12 rounded-xl bg-white border-purple-100 text-zinc-900 hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200 font-black text-[10px] uppercase tracking-widest transition-all disabled:opacity-50"
@@ -144,9 +146,10 @@ export const GameGenerator = () => {
             onClick={() => {
               const text = generatedGame.map(n => n.toString().padStart(2, '0')).join(' ');
               navigator.clipboard.writeText(text);
-              const toast = (window as any).toast;
-              if (toast) toast.success("Números copiados!");
-              else alert("Números copiados!");
+              toast({
+                title: "Copiado!",
+                description: "Números copiados para a área de transferência.",
+              });
             }}
             disabled={generatedGame.length === 0}
             className="h-12 rounded-xl bg-white border-purple-100 text-zinc-900 hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200 font-black text-[10px] uppercase tracking-widest transition-all disabled:opacity-50"
