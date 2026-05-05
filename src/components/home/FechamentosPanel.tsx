@@ -32,7 +32,7 @@ export const FechamentosPanel = ({ onBack, onSaveGame }: FechamentosPanelProps) 
     const sorted = numbers.sort((a, b) => a - b);
     
     onSaveGame({ 
-      id: Math.random().toString(36).substr(2, 9),
+      id: generateSecureId(),
       numbers: sorted, 
       timestamp: Date.now(), 
       model: model.title,
