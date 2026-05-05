@@ -108,12 +108,12 @@ export const GameGenerator = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="p-8 md:p-12 border-b border-purple-50">
+      <div className="p-6 md:p-12 border-b border-purple-50">
         <div className="flex flex-col gap-6 mb-8">
           <div>
-            <div className="flex items-center gap-2 text-purple-600 mb-3">
-              <Zap size={16} fill="currentColor" />
-              <span className="text-[10px] uppercase font-bold tracking-[0.25em]">Sistemas Pro</span>
+            <div className="flex items-center gap-2 text-purple-600 mb-2 md:mb-3">
+              <Zap size={14} className="md:w-4 md:h-4" fill="currentColor" />
+              <span className="text-[9px] md:text-[10px] uppercase font-bold tracking-[0.2em] md:tracking-[0.25em]">Sistemas Pro</span>
             </div>
             <h2 className="text-2xl md:text-3xl font-display font-bold text-zinc-900 leading-tight">
               Gerador<br className="hidden sm:block" /> Inteligente
@@ -130,7 +130,7 @@ export const GameGenerator = () => {
           </Button>
         </div>
 
-        <div className="min-h-[220px] flex flex-wrap justify-center content-center gap-4 bg-purple-50/50 rounded-[1.5rem] p-8 md:p-10 border border-purple-100 relative overflow-hidden group shadow-inner">
+        <div className="min-h-[180px] md:min-h-[220px] flex flex-wrap justify-center content-center gap-2 md:gap-4 bg-purple-50/50 rounded-3xl md:rounded-[1.5rem] p-6 md:p-10 border border-purple-100 relative overflow-hidden group shadow-inner">
           <AnimatePresence mode="wait">
             {generatedGame.length > 0 ? (
               <motion.div 
