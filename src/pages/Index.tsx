@@ -136,7 +136,7 @@ const Index = () => {
           >
             
             {/* Generator Bento - Main Focus */}
-            <motion.div variants={itemVariants} className="lg:col-span-8 lg:row-span-3">
+            <motion.div id="generator-section" variants={itemVariants} className="lg:col-span-8 lg:row-span-3">
               <div className="h-full bg-white border border-purple-200 rounded-[2rem] p-0 flex flex-col shadow-xl shadow-purple-500/5 relative overflow-hidden group">
                 <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:rotate-12 transition-transform duration-1000 text-purple-900 pointer-events-none">
                   <Zap size={200} strokeWidth={0.5} />
