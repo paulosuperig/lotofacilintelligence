@@ -189,10 +189,10 @@ const Index = () => {
                 <PieChart size={140} strokeWidth={1} />
               </div>
               <div>
-                <h3 className="text-xl font-display font-bold mb-2 flex items-center gap-3">
-                  <Target size={20} className="text-premium-accent" /> Tendências Atuais
+                <h3 className="text-xl font-display font-black mb-1 flex items-center gap-3">
+                  <Target size={18} className="text-indigo-400" /> Tendências
                 </h3>
-                <p className="text-premium-text-muted text-sm">Os números que mais se repetiram nos últimos 10 concursos.</p>
+                <p className="text-zinc-500 text-[11px] font-bold uppercase tracking-wider">Top 5 frequentes (10 jogos)</p>
               </div>
               <div className="flex gap-3 mt-6">
                 {["20", "10", "25", "01", "13"].map(num => (
@@ -202,7 +202,7 @@ const Index = () => {
             </motion.div>
 
             {/* Quick Insights Bento */}
-            <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-1 glass-morphism premium-border rounded-[2.5rem] p-8 flex flex-col justify-between group">
+            <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-1 glass-morphism premium-border rounded-[2rem] p-8 flex flex-col justify-between group transition-all duration-300 hover:bg-white/[0.03]">
               <div className="flex justify-between items-start">
                 <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 premium-border flex items-center justify-center text-emerald-400">
                   <TrendingUp size={24} />
@@ -221,7 +221,7 @@ const Index = () => {
             {/* Fechamentos Card - Elegant Action */}
             <motion.div 
               variants={itemVariants} 
-              className="lg:col-span-4 lg:row-span-1 glass-morphism premium-border rounded-[2.5rem] p-8 flex items-center gap-6 group cursor-pointer hover:bg-white/[0.03] transition-all"
+              className="lg:col-span-4 lg:row-span-1 glass-morphism premium-border rounded-[2rem] p-8 flex items-center gap-6 group cursor-pointer hover:bg-white/[0.03] transition-all"
             >
               <div className="w-16 h-16 rounded-3xl bg-indigo-500/10 premium-border flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform duration-500">
                 <ShieldCheck size={32} />
@@ -236,7 +236,7 @@ const Index = () => {
              {/* Smart Alerts */}
              <motion.div 
               variants={itemVariants} 
-              className="lg:col-span-4 lg:row-span-1 bg-gradient-to-br from-premium-accent/80 to-indigo-600/80 premium-border rounded-[2.5rem] p-8 flex flex-col justify-between text-white relative overflow-hidden group"
+              className="lg:col-span-4 lg:row-span-1 bg-gradient-to-br from-indigo-600 to-indigo-900 premium-border rounded-[2rem] p-8 flex flex-col justify-between text-white relative overflow-hidden group shadow-xl shadow-indigo-500/10"
             >
               <div className="absolute top-0 right-0 p-6 opacity-20 group-hover:rotate-12 transition-transform duration-700">
                 <Sparkles size={80} />
