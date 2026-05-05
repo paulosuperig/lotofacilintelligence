@@ -47,14 +47,14 @@ export const GameGenerator = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="p-8 md:p-12 border-b border-white/5">
+      <div className="p-8 md:p-12 border-b border-purple-50">
         <div className="flex flex-col gap-6 mb-8">
           <div>
-            <div className="flex items-center gap-2 text-indigo-400 mb-3">
+            <div className="flex items-center gap-2 text-purple-600 mb-3">
               <Zap size={16} fill="currentColor" />
               <span className="text-[10px] uppercase font-black tracking-[0.25em]">Sistemas Pro</span>
             </div>
-            <h2 className="text-2xl md:text-3xl font-display font-black text-white leading-tight">
+            <h2 className="text-2xl md:text-3xl font-display font-black text-zinc-900 leading-tight">
               Gerador<br className="hidden sm:block" /> Inteligente
             </h2>
           </div>
@@ -62,14 +62,14 @@ export const GameGenerator = () => {
           <Button 
             onClick={generateGame} 
             disabled={isGenerating}
-            className="w-full bg-white text-black hover:bg-zinc-200 font-display font-black text-[11px] uppercase tracking-widest h-12 px-6 rounded-xl shadow-xl shadow-white/5 transition-all active:scale-95"
+            className="w-full bg-purple-600 text-white hover:bg-purple-700 font-display font-black text-[11px] uppercase tracking-widest h-12 px-6 rounded-xl shadow-xl shadow-purple-500/20 transition-all active:scale-95"
           >
             {isGenerating ? <RefreshCcw className="animate-spin mr-2" size={14} /> : <Zap className="mr-2" size={14} fill="currentColor" />}
             Gerar Jogo
           </Button>
         </div>
 
-        <div className="min-h-[220px] flex flex-wrap justify-center content-center gap-4 bg-[#0d0d0d] rounded-[1.5rem] p-8 md:p-10 premium-border relative overflow-hidden group">
+        <div className="min-h-[220px] flex flex-wrap justify-center content-center gap-4 bg-purple-50/50 rounded-[1.5rem] p-8 md:p-10 border border-purple-100 relative overflow-hidden group shadow-inner">
           <AnimatePresence mode="wait">
             {generatedGame.length > 0 ? (
               <motion.div 
@@ -103,7 +103,7 @@ export const GameGenerator = () => {
               >
                 <div className="flex gap-2">
                    {Array(8).fill(0).map((_, i) => (
-                     <div key={i} className="w-1.5 h-1.5 rounded-full bg-white/[0.05]" />
+                     <div key={i} className="w-1.5 h-1.5 rounded-full bg-purple-200" />
                    ))}
                 </div>
                 <p className="text-sm font-medium tracking-wide">Aguardando comando de geração...</p>
@@ -126,10 +126,10 @@ export const GameGenerator = () => {
         )}
 
         <div className="mt-auto grid grid-cols-1 sm:grid-cols-2 gap-4">
-           <Button variant="outline" className="h-12 rounded-xl bg-white/5 border-white/5 text-zinc-100 hover:bg-white/10 font-black text-[10px] uppercase tracking-widest transition-all">
+           <Button variant="outline" className="h-12 rounded-xl bg-white border-purple-100 text-zinc-900 hover:bg-purple-50 font-black text-[10px] uppercase tracking-widest transition-all">
              <Save className="mr-3" size={16} /> Salvar Jogo
            </Button>
-           <Button variant="outline" className="h-12 rounded-xl bg-white/5 border-white/5 text-zinc-100 hover:bg-white/10 font-black text-[10px] uppercase tracking-widest transition-all">
+           <Button variant="outline" className="h-12 rounded-xl bg-white border-purple-100 text-zinc-900 hover:bg-purple-50 font-black text-[10px] uppercase tracking-widest transition-all">
              Copiar
            </Button>
         </div>
@@ -139,14 +139,14 @@ export const GameGenerator = () => {
 };
 
 const StatCard = ({ label, value, icon, variant = 'default' }: { label: string, value: string | number, icon: React.ReactNode, variant?: 'default' | 'success' }) => (
-  <div className="bg-white/[0.02] premium-border rounded-2xl p-5">
+  <div className="bg-white border border-purple-100 rounded-2xl p-5 shadow-sm">
     <div className="flex items-center gap-2 text-premium-text-muted mb-2">
       {icon}
       <span className="text-[10px] uppercase font-bold tracking-widest">{label}</span>
     </div>
     <div className={cn(
       "text-2xl font-display font-bold",
-      variant === 'success' ? "text-emerald-400" : "text-white"
+      variant === 'success' ? "text-emerald-600" : "text-zinc-900"
     )}>
       {value}
     </div>
