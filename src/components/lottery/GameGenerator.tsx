@@ -139,7 +139,7 @@ export const GameGenerator = () => {
 };
 
 const StatCard = ({ label, value, icon, variant = 'default' }: { label: string, value: string | number, icon: React.ReactNode, variant?: 'default' | 'success' }) => (
-  <div className="bg-white/[0.02] premium-border rounded-2xl p-5">
+  <div className="bg-white border border-purple-100 rounded-2xl p-5 shadow-sm">
     <div className="flex items-center gap-2 text-premium-text-muted mb-2">
       {icon}
       <span className="text-[10px] uppercase font-bold tracking-widest">{label}</span>
