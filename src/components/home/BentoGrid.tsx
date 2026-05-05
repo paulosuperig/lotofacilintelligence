@@ -116,8 +116,8 @@ export const BentoGrid = ({
           </div>
 
           <div className="mt-auto space-y-4 pt-6 border-t border-purple-50">
-            <div className="bg-emerald-50/50 px-4 py-3 rounded-2xl border border-emerald-100/50 text-center">
-              <p className="text-[8px] text-emerald-600/70 uppercase font-bold tracking-[0.2em] mb-1.5">Próximo Prêmio</p>
+            <div className="bg-emerald-50/50 dark:bg-emerald-900/20 px-4 py-3 rounded-2xl border border-emerald-100/50 dark:border-emerald-800/50 text-center">
+              <p className="text-[8px] text-emerald-600/70 dark:text-emerald-400/70 uppercase font-bold tracking-[0.2em] mb-1.5">Próximo Prêmio</p>
               <p className="text-xl font-display font-bold text-emerald-500 tabular-nums leading-none whitespace-nowrap">
                 {latestResult ? formatCurrency(latestResult.valorEstimadoProximoConcurso || 0) : "R$ ---"}
               </p>
