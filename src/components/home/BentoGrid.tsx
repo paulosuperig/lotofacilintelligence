@@ -221,8 +221,8 @@ export const BentoGrid = ({
           </div>
         </div>
         <div>
-          <h4 className="font-bold text-zinc-900 mb-1">Status do Histórico</h4>
-          <p className="text-xs text-zinc-500">
+          <h4 className="font-bold text-zinc-900 dark:text-zinc-100 mb-1">Status do Histórico</h4>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">
             {historyLength > 0 
               ? `Você possui ${historyLength} ${historyLength === 1 ? 'jogo salvo' : 'jogos salvos'} no histórico.`
               : "Nenhum jogo salvo recentemente."}
