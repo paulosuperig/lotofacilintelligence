@@ -207,9 +207,9 @@ export const AdminPanel = ({
                       {u.role === 'admin' ? <ShieldCheck size={16} /> : <Sparkles size={16} />}
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-zinc-900">{u.email}</p>
+                      <p className="text-sm font-bold text-zinc-900">{maskSensitiveData(u.email)}</p>
                       <p className="text-[10px] text-zinc-500">
-                        Cadastrado em {new Date(u.createdAt).toLocaleDateString('pt-BR')}
+                        ID: {u.id.substring(0, 8)}... | Cadastrado em {new Date(u.createdAt).toLocaleDateString('pt-BR')}
                       </p>
                     </div>
                   </div>
