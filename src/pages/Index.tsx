@@ -16,9 +16,21 @@ import {
   ArrowUpRight,
   PieChart,
   Target,
-  ShieldCheck
+  ShieldCheck,
+  Trash2
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Ball } from "@/components/lottery/Ball";
 import { getLatestResult } from "@/services/lotteryApi";
 import { LotteryResult } from "@/types/lottery";
@@ -62,6 +74,15 @@ const Index = () => {
       setIsLoading(false);
       setIsRefreshing(false);
     }
+  };
+
+  const clearHistory = () => {
+    localStorage.removeItem('lottery_history');
+    setHistory([]);
+    toast({
+      title: "Histórico limpo",
+      description: "Todos os seus jogos salvos foram removidos com sucesso.",
+    });
   };
 
   useEffect(() => {
@@ -172,18 +193,47 @@ const Index = () => {
                 className="grid grid-cols-1 gap-6"
               >
                 <div className="bg-white border border-purple-200 rounded-[2rem] p-8 md:p-12 shadow-xl shadow-purple-500/5">
-                  <div className="flex items-center justify-between mb-10">
+                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-10 gap-4">
                     <div>
                       <h2 className="text-3xl font-display font-bold text-zinc-900 mb-2">Seu Histórico</h2>
                       <p className="text-zinc-500 text-sm">Jogos salvos nos últimos 7 dias</p>
                     </div>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => setActiveTab('home')}
-                      className="rounded-xl border-purple-100 text-purple-600 hover:bg-purple-50"
-                    >
-                      Voltar ao Início
-                    </Button>
+                    <div className="flex items-center gap-3">
+                      {history.length > 0 && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              className="text-red-500 hover:text-red-600 hover:bg-red-50 rounded-xl"
+                            >
+                              <Trash2 size={18} className="mr-2" />
+                              Limpar Histórico
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Limpar histórico?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Esta ação não pode ser desfeita. Todos os seus jogos salvos serão removidos permanentemente.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction onClick={clearHistory} className="bg-red-500 hover:bg-red-600 text-white">
+                                Limpar
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setActiveTab('home')}
+                        className="rounded-xl border-purple-100 text-purple-600 hover:bg-purple-50"
+                      >
+                        Voltar ao Início
+                      </Button>
+                    </div>
                   </div>
 
                   {history.length > 0 ? (
@@ -491,19 +541,44 @@ const Index = () => {
                 </motion.div>
 
                 {/* Quick Insights Bento */}
-                <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-1 bg-white border border-purple-100 rounded-[2rem] p-8 flex flex-col justify-between group transition-all duration-300 hover:bg-purple-50/50 shadow-sm">
+                <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-1 bg-white border border-purple-100 rounded-[2rem] p-8 flex flex-col justify-between group transition-all duration-300 hover:bg-purple-50/50 shadow-sm relative">
                   <div className="flex justify-between items-start">
                     <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 premium-border flex items-center justify-center text-emerald-400">
                       <TrendingUp size={24} />
                     </div>
                     <div className="text-right">
-                      <p className="text-[10px] font-bold text-premium-text-muted uppercase tracking-widest">Consistência</p>
-                      <p className="text-2xl font-display font-bold text-zinc-900">94.2%</p>
+                      {history.length > 0 && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <button className="p-2 text-zinc-400 hover:text-red-500 transition-colors" title="Limpar Histórico">
+                              <Trash2 size={16} />
+                            </button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Limpar histórico?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Deseja apagar todos os seus jogos salvos do histórico?
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction onClick={clearHistory} className="bg-red-500 hover:bg-red-600 text-white">
+                                Limpar
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
                     </div>
                   </div>
                   <div>
-                    <h4 className="font-bold text-zinc-900 mb-1">Índice de Acertos</h4>
-                    <p className="text-xs text-premium-text-muted">Seu desempenho está acima de 85% dos usuários Pro.</p>
+                    <h4 className="font-bold text-zinc-900 mb-1">Status do Histórico</h4>
+                    <p className="text-xs text-premium-text-muted">
+                      {history.length > 0 
+                        ? `Você possui ${history.length} ${history.length === 1 ? 'jogo salvo' : 'jogos salvos'} no histórico.`
+                        : "Nenhum jogo salvo recentemente."}
+                    </p>
                   </div>
                 </motion.div>
 
