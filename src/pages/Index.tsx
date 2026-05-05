@@ -20,7 +20,14 @@ import {
   Trash2,
   Flame,
   Snowflake,
-  Clover
+  Clover,
+  Edit,
+  UserPlus,
+  Ban,
+  CheckCircle,
+  MoreVertical,
+  Mail,
+  Lock
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { 
@@ -34,6 +41,32 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Ball } from "@/components/lottery/Ball";
 import { getLatestResult } from "@/services/lotteryApi";
 import { LotteryResult } from "@/types/lottery";
@@ -43,11 +76,15 @@ import Login from '@/components/Login';
 
 const Index = () => {
   const [user, setUser] = useState<{ email: string, role: 'admin' | 'demo' } | null>(null);
+  const [users, setUsers] = useState<any[]>([]);
   const [latestResult, setLatestResult] = useState<LotteryResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('home');
   const [history, setHistory] = useState<any[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<any>(null);
+  const [userFormData, setUserFormData] = useState({ email: '', password: '', role: 'demo', status: 'active' });
 
   useEffect(() => {
     const savedUser = localStorage.getItem('intelligence_user');
@@ -55,6 +92,65 @@ const Index = () => {
       setUser(JSON.parse(savedUser));
     }
   }, []);
+  useEffect(() => {
+    const savedUsers = localStorage.getItem('intelligence_system_users');
+    if (savedUsers) {
+      setUsers(JSON.parse(savedUsers));
+    } else {
+      const initialUsers = [
+        { id: '1', email: 'admin@admin.com.br', role: 'admin', status: 'active', createdAt: new Date().toISOString() },
+        { id: '2', email: 'demo@demo.com.br', role: 'demo', status: 'active', createdAt: new Date().toISOString() }
+      ];
+      setUsers(initialUsers);
+      localStorage.setItem('intelligence_system_users', JSON.stringify(initialUsers));
+    }
+  }, []);
+
+  const saveUsers = (updatedUsers: any[]) => {
+    setUsers(updatedUsers);
+    localStorage.setItem('intelligence_system_users', JSON.stringify(updatedUsers));
+  };
+
+  const handleCreateOrUpdateUser = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingUser) {
+      const updated = users.map(u => u.id === editingUser.id ? { ...u, ...userFormData } : u);
+      saveUsers(updated);
+      toast({ title: "Usuário atualizado", description: "As alterações foram salvas com sucesso." });
+    } else {
+      const newUser = {
+        ...userFormData,
+        id: Math.random().toString(36).substr(2, 9),
+        createdAt: new Date().toISOString()
+      };
+      saveUsers([...users, newUser]);
+      toast({ title: "Usuário criado", description: "O novo usuário foi cadastrado com sucesso." });
+    }
+    setIsUserDialogOpen(false);
+    setEditingUser(null);
+    setUserFormData({ email: '', password: '', role: 'demo', status: 'active' });
+  };
+
+  const handleDeleteUser = (userId: string) => {
+    const updated = users.filter(u => u.id !== userId);
+    saveUsers(updated);
+    toast({ title: "Usuário excluído", description: "O usuário foi removido do sistema." });
+  };
+
+  const toggleUserStatus = (userId: string) => {
+    const updated = users.map(u => {
+      if (u.id === userId) {
+        const newStatus = u.status === 'active' ? 'blocked' : 'active';
+        toast({ 
+          title: newStatus === 'active' ? "Usuário desbloqueado" : "Usuário bloqueado", 
+          description: `O acesso para ${u.email} foi ${newStatus === 'active' ? 'restaurado' : 'suspenso'}.` 
+        });
+        return { ...u, status: newStatus };
+      }
+      return u;
+    });
+    saveUsers(updated);
+  };
 
   const handleLogin = (userData: { email: string, role: 'admin' | 'demo' }) => {
     setUser(userData);
@@ -524,73 +620,195 @@ const Index = () => {
                       <h2 className="text-2xl md:text-3xl font-display font-bold text-zinc-900 mb-1 md:mb-2">Configurações do Sistema</h2>
                       <p className="text-zinc-500 text-xs">Gerenciamento de usuários e acessos</p>
                     </div>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => setActiveTab('home')}
-                      className="rounded-xl border-purple-100 text-purple-600 hover:bg-purple-50"
-                    >
-                      Voltar ao Início
-                    </Button>
+                    <div className="flex items-center gap-3">
+                      <Dialog open={isUserDialogOpen} onOpenChange={(open) => {
+                        setIsUserDialogOpen(open);
+                        if (!open) {
+                          setEditingUser(null);
+                          setUserFormData({ email: '', password: '', role: 'demo', status: 'active' });
+                        }
+                      }}>
+                        <DialogTrigger asChild>
+                          <Button className="bg-purple-600 hover:bg-purple-700 text-white rounded-xl">
+                            <UserPlus size={18} className="mr-2" />
+                            Novo Usuário
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px] rounded-3xl">
+                          <DialogHeader>
+                            <DialogTitle>{editingUser ? 'Editar Usuário' : 'Criar Novo Usuário'}</DialogTitle>
+                            <DialogDescription>
+                              Preencha os dados do usuário abaixo.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <form onSubmit={handleCreateOrUpdateUser} className="space-y-4 py-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="email">E-mail</Label>
+                              <div className="relative">
+                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
+                                <Input 
+                                  id="email" 
+                                  type="email" 
+                                  className="pl-10 rounded-xl"
+                                  placeholder="email@exemplo.com"
+                                  value={userFormData.email}
+                                  onChange={(e) => setUserFormData({...userFormData, email: e.target.value})}
+                                  required
+                                />
+                              </div>
+                            </div>
+                            {!editingUser && (
+                              <div className="space-y-2">
+                                <Label htmlFor="password">Senha Temporária</Label>
+                                <div className="relative">
+                                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
+                                  <Input 
+                                    id="password" 
+                                    type="password" 
+                                    className="pl-10 rounded-xl"
+                                    placeholder="••••••••"
+                                    value={userFormData.password}
+                                    onChange={(e) => setUserFormData({...userFormData, password: e.target.value})}
+                                    required={!editingUser}
+                                  />
+                                </div>
+                              </div>
+                            )}
+                            <div className="space-y-2">
+                              <Label htmlFor="role">Perfil de Acesso</Label>
+                              <Select 
+                                value={userFormData.role} 
+                                onValueChange={(value: any) => setUserFormData({...userFormData, role: value})}
+                              >
+                                <SelectTrigger className="rounded-xl">
+                                  <SelectValue placeholder="Selecione o perfil" />
+                                </SelectTrigger>
+                                <SelectContent className="rounded-xl">
+                                  <SelectItem value="admin">Administrador</SelectItem>
+                                  <SelectItem value="demo">Demonstrativo (VIP)</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <DialogFooter className="pt-4">
+                              <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700 text-white rounded-xl h-12">
+                                {editingUser ? 'Salvar Alterações' : 'Criar Usuário'}
+                              </Button>
+                            </DialogFooter>
+                          </form>
+                        </DialogContent>
+                      </Dialog>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setActiveTab('home')}
+                        className="rounded-xl border-purple-100 text-purple-600 hover:bg-purple-50"
+                      >
+                        Voltar
+                      </Button>
+                    </div>
                   </div>
 
-                  <div className="overflow-hidden rounded-2xl border border-purple-100">
-                    <table className="w-full text-left border-collapse">
+                  <div className="overflow-x-auto rounded-2xl border border-purple-100">
+                    <table className="w-full text-left border-collapse min-w-[600px]">
                       <thead>
                         <tr className="bg-purple-50/50">
                           <th className="px-6 py-4 text-[10px] font-bold text-purple-400 uppercase tracking-widest border-b border-purple-100">Usuário</th>
                           <th className="px-6 py-4 text-[10px] font-bold text-purple-400 uppercase tracking-widest border-b border-purple-100">Perfil</th>
                           <th className="px-6 py-4 text-[10px] font-bold text-purple-400 uppercase tracking-widest border-b border-purple-100">Status</th>
+                          <th className="px-6 py-4 text-[10px] font-bold text-purple-400 uppercase tracking-widest border-b border-purple-100 text-right">Ações</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-purple-50">
-                        <tr>
-                          <td className="px-6 py-5">
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
-                                <ShieldCheck size={16} />
+                        {users.map((u) => (
+                          <tr key={u.id} className="hover:bg-purple-50/30 transition-colors">
+                            <td className="px-6 py-5">
+                              <div className="flex items-center gap-3">
+                                <div className={cn(
+                                  "w-8 h-8 rounded-full flex items-center justify-center",
+                                  u.role === 'admin' ? "bg-purple-100 text-purple-600" : "bg-zinc-100 text-zinc-500"
+                                )}>
+                                  {u.role === 'admin' ? <ShieldCheck size={16} /> : <Sparkles size={16} />}
+                                </div>
+                                <div>
+                                  <p className="text-sm font-bold text-zinc-900">{u.email}</p>
+                                  <p className="text-[10px] text-zinc-500">
+                                    Cadastrado em {new Date(u.createdAt).toLocaleDateString('pt-BR')}
+                                  </p>
+                                </div>
                               </div>
-                              <div>
-                                <p className="text-sm font-bold text-zinc-900">admin@admin.com.br</p>
-                                <p className="text-[10px] text-zinc-500">Administrador Master</p>
+                            </td>
+                            <td className="px-6 py-5">
+                              <span className={cn(
+                                "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider",
+                                u.role === 'admin' ? "bg-purple-100 text-purple-700" : "bg-zinc-100 text-zinc-700"
+                              )}>
+                                {u.role === 'admin' ? 'Admin' : 'Demo'}
+                              </span>
+                            </td>
+                            <td className="px-6 py-5">
+                              <div className="flex items-center gap-2">
+                                <span className={cn(
+                                  "w-2 h-2 rounded-full",
+                                  u.status === 'active' ? "bg-emerald-500" : "bg-red-500"
+                                )}></span>
+                                <span className="text-[10px] font-bold text-zinc-600 uppercase">
+                                  {u.status === 'active' ? 'Ativo' : 'Bloqueado'}
+                                </span>
                               </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-5">
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 text-[10px] font-bold uppercase tracking-wider">
-                              Admin
-                            </span>
-                          </td>
-                          <td className="px-6 py-5">
-                            <div className="flex items-center gap-2">
-                              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                              <span className="text-[10px] font-bold text-zinc-600 uppercase">Ativo</span>
-                            </div>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className="px-6 py-5">
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500">
-                                <Sparkles size={16} />
-                              </div>
-                              <div>
-                                <p className="text-sm font-bold text-zinc-900">demo@demo.com.br</p>
-                                <p className="text-[10px] text-zinc-500">Usuário Demonstrativo</p>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-5">
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-700 text-[10px] font-bold uppercase tracking-wider">
-                              Demo
-                            </span>
-                          </td>
-                          <td className="px-6 py-5">
-                            <div className="flex items-center gap-2">
-                              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                              <span className="text-[10px] font-bold text-zinc-600 uppercase">Ativo</span>
-                            </div>
-                          </td>
-                        </tr>
+                            </td>
+                            <td className="px-6 py-5 text-right">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                    <MoreVertical size={16} />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="rounded-xl w-48">
+                                  <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem onClick={() => {
+                                    setEditingUser(u);
+                                    setUserFormData({ email: u.email, password: '', role: u.role, status: u.status });
+                                    setIsUserDialogOpen(true);
+                                  }} className="cursor-pointer">
+                                    <Edit size={14} className="mr-2" /> Editar
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => toggleUserStatus(u.id)} className="cursor-pointer">
+                                    {u.status === 'active' ? (
+                                      <><Ban size={14} className="mr-2 text-amber-500" /> Bloquear</>
+                                    ) : (
+                                      <><CheckCircle size={14} className="mr-2 text-emerald-500" /> Desbloquear</>
+                                    )}
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                      <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-600 cursor-pointer">
+                                        <Trash2 size={14} className="mr-2" /> Excluir
+                                      </DropdownMenuItem>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent className="rounded-3xl">
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle>Excluir usuário?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                          Esta ação não pode ser desfeita. O usuário {u.email} perderá acesso imediato ao sistema.
+                                        </AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
+                                        <AlertDialogAction 
+                                          onClick={() => handleDeleteUser(u.id)}
+                                          className="bg-red-500 hover:bg-red-600 text-white rounded-xl"
+                                        >
+                                          Confirmar Exclusão
+                                        </AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </td>
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   </div>
