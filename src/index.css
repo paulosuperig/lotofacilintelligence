@@ -100,7 +100,7 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-premium-dark text-premium-text-primary selection:bg-premium-accent/30;
+    @apply bg-[#0a0a0a] text-zinc-100 selection:bg-indigo-500/30;
     font-feature-settings: "rlig" 1, "calt" 1;
     -webkit-font-smoothing: antialiased;
   }
@@ -112,7 +112,7 @@ All colors MUST be HSL.
 
 @layer utilities {
   .glass {
-    @apply bg-white/[0.02] backdrop-blur-2xl border border-white/[0.05];
+    @apply bg-zinc-900/50 backdrop-blur-2xl border border-white/5;
   }
   
   .glass-morphism {
@@ -120,7 +120,7 @@ All colors MUST be HSL.
   }
 
   .premium-border {
-    @apply border border-white/[0.08] relative after:absolute after:inset-0 after:pointer-events-none after:rounded-[inherit] after:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)];
+    @apply border border-white/5 relative after:absolute after:inset-0 after:pointer-events-none after:rounded-[inherit] after:shadow-[inset_0_1px_1px_rgba(255,255,255,0.02)];
   }
 
   .text-balance {
