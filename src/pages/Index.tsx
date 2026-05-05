@@ -476,7 +476,11 @@ const Index = () => {
                 {/* Smart Alerts */}
                 <motion.div 
                   variants={itemVariants} 
-                  className="lg:col-span-4 lg:row-span-1 bg-gradient-to-br from-purple-600 to-indigo-700 border border-purple-500 rounded-[2rem] p-8 flex flex-col justify-between text-white relative overflow-hidden group shadow-xl shadow-purple-500/10"
+                  onClick={() => {
+                    setActiveTab('dicas');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className="lg:col-span-4 lg:row-span-1 bg-gradient-to-br from-purple-600 to-indigo-700 border border-purple-500 rounded-[2rem] p-8 flex flex-col justify-between text-white relative overflow-hidden group shadow-xl shadow-purple-500/10 cursor-pointer"
                 >
                   <div className="absolute top-0 right-0 p-6 opacity-20 group-hover:rotate-12 transition-transform duration-700">
                     <Sparkles size={80} />
@@ -486,12 +490,6 @@ const Index = () => {
                     "Ciclo das dezenas prestes a fechar. Foque no número 08 e 22."
                   </h4>
                   <button 
-                    onClick={() => {
-                      toast({
-                        title: "Dica Premium",
-                        description: "Análise completa enviada para seu e-mail de membro.",
-                      });
-                    }}
                     className="w-full py-4 bg-white text-purple-900 font-display font-bold text-xs uppercase tracking-widest rounded-2xl shadow-xl shadow-black/10 hover:bg-purple-50 transition-colors active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
                   >
                     Ver Análise Completa
