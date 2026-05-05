@@ -47,7 +47,7 @@ export const GameGenerator = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="p-8 md:p-12 border-b border-white/5">
+      <div className="p-8 md:p-12 border-b border-purple-50">
         <div className="flex flex-col gap-6 mb-8">
           <div>
             <div className="flex items-center gap-2 text-indigo-400 mb-3">
