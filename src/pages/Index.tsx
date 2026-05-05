@@ -542,8 +542,8 @@ const Index = () => {
                     <PieChart size={160} strokeWidth={1} />
                   </div>
 
-                  <div className="flex items-start justify-between mb-4 md:mb-5 relative z-10">
-                    <div>
+                  <div className="flex flex-col items-center justify-between mb-4 md:mb-5 relative z-10 text-center md:text-left md:flex-row md:items-start">
+                    <div className="flex flex-col items-center md:items-start">
                       <h3 className="text-lg md:text-xl font-display font-bold mb-1 flex items-center gap-2">
                         <Target size={18} className="text-purple-600" /> Tendências
                       </h3>
