@@ -112,7 +112,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f3ff] text-zinc-900 selection:bg-purple-500/30 overflow-x-hidden font-sans">
+    <div className="min-h-screen bg-[#f5f3ff] text-zinc-900 selection:bg-purple-500/30 overflow-x-hidden font-sans pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
       {/* Sidebar Navigation - Desktop */}
       <aside className="fixed left-8 top-1/2 -translate-y-1/2 w-16 h-auto max-h-none flex-col items-center justify-center gap-2 rounded-[2rem] p-2 bg-white/80 backdrop-blur-xl border border-purple-100 z-50 shadow-xl shadow-purple-500/10 transition-all duration-300 hidden md:flex">
         <div className="flex w-12 h-12 items-center justify-center shrink-0">
@@ -142,7 +142,7 @@ const Index = () => {
       </aside>
 
       {/* Bottom Navigation - Mobile */}
-      <nav className="fixed bottom-4 left-4 right-4 h-16 bg-white/90 backdrop-blur-xl border border-purple-100 rounded-2xl z-50 flex items-center justify-around px-2 shadow-xl shadow-purple-500/10 md:hidden">
+      <nav className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-4 right-4 h-16 bg-white/90 backdrop-blur-xl border border-purple-100 rounded-2xl z-50 flex items-center justify-around px-2 shadow-xl shadow-purple-500/10 md:hidden">
         <NavIcon icon={<LayoutDashboard size={20} strokeWidth={1.5} />} active={activeTab === 'home'} label="Início" onClick={() => setActiveTab('home')} />
         <NavIcon icon={<Zap size={20} strokeWidth={1.5} />} active={activeTab === 'gerador'} label="Gerar" onClick={() => {
           setActiveTab('gerador');
