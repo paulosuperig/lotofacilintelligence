@@ -50,9 +50,9 @@ export const AiAssistant = ({
             <div className="w-10 h-10 rounded-xl bg-purple-600 dark:bg-purple-700 flex items-center justify-center text-white shadow-lg shadow-purple-600/20">
               <Cpu size={20} />
             </div>
-            <h2 className="text-2xl md:text-3xl font-display font-bold text-zinc-900">Intelligence AI</h2>
+            <h2 className="text-2xl md:text-3xl font-display font-bold text-zinc-900 dark:text-zinc-100">Intelligence AI</h2>
           </div>
-          <p className="text-zinc-500 text-[10px] uppercase font-bold tracking-[0.2em] ml-1">Análises & Probabilidades em Tempo Real</p>
+          <p className="text-zinc-500 dark:text-zinc-400 text-[10px] uppercase font-bold tracking-[0.2em] ml-1">Análises & Probabilidades em Tempo Real</p>
         </div>
         <Button 
           variant="outline" 
