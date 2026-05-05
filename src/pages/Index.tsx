@@ -112,9 +112,11 @@ const Index = () => {
     });
   };
 
-  const handleSendAiMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!aiMessage.trim()) return;
+  const handleSendAiMessage = async (e?: React.FormEvent, customMessage?: string) => {
+    if (e) e.preventDefault();
+    const messageToSend = customMessage || aiMessage;
+    
+    if (!messageToSend.trim()) return;
     if (!deepSeekKey) {
       toast({
         title: "API Key Ausente",
@@ -124,9 +126,9 @@ const Index = () => {
       return;
     }
 
-    const newMessage = { role: 'user' as const, content: aiMessage };
+    const newMessage = { role: 'user' as const, content: messageToSend };
     setAiChat(prev => [...prev, newMessage]);
-    setAiMessage('');
+    if (!customMessage) setAiMessage('');
     setIsAiLoading(true);
 
     try {
@@ -134,7 +136,9 @@ const Index = () => {
       Seu objetivo é ajudar usuários a analisar tendências, sugerir números baseados em lógica matemática e fornecer insights sobre fechamentos.
       Sempre mantenha um tom profissional, técnico e encorajador. 
       Lembre-se: jogos de loteria são baseados em sorte, use termos como "probabilidades", "tendências" e "estatísticas".
-      Sempre que sugerir números, formate-os de forma clara (ex: 01, 05, 10...).`;
+      
+      IMPORTANTE: Sempre que você sugerir jogos/números (sequências de 15 a 20 números), formate-os em blocos de código ou listas claras.
+      Se o usuário pedir para gerar um jogo, sugira 15 números formatados como: 01, 02, 03...`;
 
       const response = await fetch('https://api.deepseek.com/chat/completions', {
         method: 'POST',
@@ -167,6 +171,38 @@ const Index = () => {
       });
     } finally {
       setIsAiLoading(false);
+    }
+  };
+
+  const saveAiGameToHistory = (content: string) => {
+    // Tenta extrair números do conteúdo (ex: 01, 02, 03... ou 01-02-03...)
+    const numbers = content.match(/\b\d{2}\b/g);
+    
+    if (numbers && (numbers.length >= 15 && numbers.length <= 20)) {
+      const uniqueNumbers = [...new Set(numbers)].sort((a, b) => parseInt(a) - parseInt(b)).slice(0, 15);
+      
+      const newGame = {
+        id: Math.random().toString(36).substr(2, 9),
+        numbers: uniqueNumbers,
+        timestamp: Date.now(),
+        type: 'IA Insight'
+      };
+
+      const existingHistory = JSON.parse(localStorage.getItem('lottery_history') || '[]');
+      const updatedHistory = [newGame, ...existingHistory];
+      localStorage.setItem('lottery_history', JSON.stringify(updatedHistory));
+      setHistory(updatedHistory);
+      
+      toast({
+        title: "Jogo salvo!",
+        description: "Os números sugeridos pela IA foram adicionados ao seu histórico.",
+      });
+    } else {
+      toast({
+        title: "Não foi possível salvar",
+        description: "Não identificamos uma sequência válida de 15 dezenas no texto.",
+        variant: "destructive"
+      });
     }
   };
 
