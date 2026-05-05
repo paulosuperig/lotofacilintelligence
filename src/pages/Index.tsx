@@ -141,7 +141,7 @@ const Index = () => {
                       {latestResult?.concurso || "---"}
                     </h2>
                     <div className="flex items-center gap-6 text-zinc-500 text-[11px] font-bold uppercase tracking-wider">
-                      <span className="flex items-center gap-2"><Calendar size={14} strokeWidth={2} /> {latestResult ? formatDate(latestResult.data) : "---"}</span>
+                      <span className="flex items-center gap-2"><Calendar size={14} strokeWidth={2} /> {latestResult ? latestResult.data : "---"}</span>
                       <span className="w-1 h-1 rounded-full bg-purple-500/30" />
                       <span className="flex items-center gap-2"><ShieldCheck size={14} strokeWidth={2} /> Verificado</span>
                     </div>
