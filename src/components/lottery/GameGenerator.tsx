@@ -289,14 +289,14 @@ export const GameGenerator = () => {
 
 
 const StatCard = ({ label, value, icon, variant = 'default' }: { label: string, value: string | number, icon: React.ReactNode, variant?: 'default' | 'success' }) => (
-  <div className="bg-white border border-purple-100 rounded-2xl p-4 shadow-sm min-w-0 flex flex-col justify-center">
-    <div className="flex items-center gap-1.5 text-premium-text-muted mb-1.5 min-w-0">
+  <div className="bg-white dark:bg-zinc-800 border border-purple-100 dark:border-zinc-700 rounded-2xl p-4 shadow-sm min-w-0 flex flex-col justify-center">
+    <div className="flex items-center gap-1.5 text-premium-text-muted dark:text-zinc-400 mb-1.5 min-w-0">
       <span className="shrink-0">{icon}</span>
       <span className="text-[10px] uppercase font-bold tracking-wider whitespace-nowrap">{label}</span>
     </div>
     <div className={cn(
       "text-lg md:text-xl font-display font-bold leading-tight",
-      variant === 'success' ? "text-emerald-600" : "text-zinc-900"
+      variant === 'success' ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-900 dark:text-zinc-100"
     )}>
       {value}
     </div>
