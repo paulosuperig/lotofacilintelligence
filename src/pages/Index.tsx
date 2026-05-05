@@ -881,7 +881,7 @@ const Index = () => {
                                     <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
                                   </div>
                                   <div className="flex justify-between items-center mt-3 pt-3 border-t border-purple-50">
-                                    <span className="text-[10px] text-zinc-400 font-medium italic">Extraído da análise DeepSeek</span>
+                                    <span className="text-[10px] text-zinc-400 font-medium italic">Extraído da análise Intelligence AI</span>
                                     <div className="flex gap-2">
                                       <Button 
                                         variant="ghost" 
