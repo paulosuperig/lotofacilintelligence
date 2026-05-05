@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useToast } from './use-toast';
+import { sanitizeString } from '@/lib/security/utils';
 
 export const useAiAssistant = () => {
   const { toast } = useToast();
@@ -14,8 +15,9 @@ export const useAiAssistant = () => {
   }, []);
 
   const saveDeepSeekKey = (key: string) => {
-    localStorage.setItem('deepseek_api_key', key);
-    setDeepSeekKey(key);
+    const sanitizedKey = sanitizeString(key.trim());
+    localStorage.setItem('deepseek_api_key', sanitizedKey);
+    setDeepSeekKey(sanitizedKey);
     toast({
       title: "Configuração Salva",
       description: "A chave da API DeepSeek foi armazenada com sucesso.",
@@ -23,7 +25,9 @@ export const useAiAssistant = () => {
   };
 
   const sendMessage = async (messageToSend: string) => {
-    if (!messageToSend.trim()) return;
+    const sanitizedMessage = sanitizeString(messageToSend.trim());
+    if (!sanitizedMessage) return;
+    
     if (!deepSeekKey) {
       toast({
         title: "API Key Ausente",
@@ -33,7 +37,7 @@ export const useAiAssistant = () => {
       return;
     }
 
-    const newMessage = { role: 'user' as const, content: messageToSend };
+    const newMessage = { role: 'user' as const, content: sanitizedMessage };
     setAiChat(prev => [...prev, newMessage]);
     setAiMessage('');
     setIsAiLoading(true);
