@@ -95,10 +95,10 @@ export const BentoGrid = ({
             <div className="inline-flex items-center gap-2 px-2 py-0.5 md:px-2.5 md:py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-600 text-[8px] font-bold mb-3 md:mb-4 uppercase tracking-widest">
               <History size={10} /> Sorteio
             </div>
-            <h2 className="text-3xl md:text-4xl font-display font-bold text-zinc-900 mb-1 md:mb-2">
+            <h2 className="text-3xl md:text-4xl font-display font-bold text-zinc-900 dark:text-zinc-100 mb-1 md:mb-2">
               Nº {latestResult?.concurso || "---"}
             </h2>
-            <p className="text-zinc-500 text-[9px] md:text-[10px] font-bold uppercase tracking-wider flex items-center gap-2">
+            <p className="text-zinc-500 dark:text-zinc-400 text-[9px] md:text-[10px] font-bold uppercase tracking-wider flex items-center gap-2">
               <Calendar size={12} strokeWidth={2} /> {latestResult ? latestResult.data : "---"}
             </p>
           </div>
