@@ -39,13 +39,37 @@ import { getLatestResult } from "@/services/lotteryApi";
 import { LotteryResult } from "@/types/lottery";
 import { GameGenerator } from "@/components/lottery/GameGenerator";
 import { cn, formatDate, formatCurrency } from "@/lib/utils";
+import Login from '@/components/Login';
 
 const Index = () => {
+  const [user, setUser] = useState<{ email: string, role: 'admin' | 'demo' } | null>(null);
   const [latestResult, setLatestResult] = useState<LotteryResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('home');
   const [history, setHistory] = useState<any[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem('intelligence_user');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+  }, []);
+
+  const handleLogin = (userData: { email: string, role: 'admin' | 'demo' }) => {
+    setUser(userData);
+    localStorage.setItem('intelligence_user', JSON.stringify(userData));
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem('intelligence_user');
+    toast({
+      title: "Sessão encerrada",
+      description: "Você saiu do sistema com sucesso.",
+    });
+  };
+
 
   useEffect(() => {
     const saved = localStorage.getItem('lottery_history');
@@ -112,6 +136,10 @@ const Index = () => {
     }
   };
 
+  if (!user) {
+    return <Login onLogin={handleLogin} />;
+  }
+
   return (
     <div className="min-h-screen bg-[#f5f3ff] text-zinc-900 selection:bg-purple-500/30 overflow-x-hidden font-sans pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
       {/* Sidebar Navigation - Desktop */}
@@ -138,7 +166,7 @@ const Index = () => {
         </div>
         <div className="flex w-12 flex-col gap-2 items-center pt-2 border-t border-purple-100/70">
            <NavIcon icon={<Settings size={20} strokeWidth={1.5} />} active={activeTab === 'ajustes'} label="Ajustes" onClick={() => setActiveTab('ajustes')} />
-           <NavIcon icon={<LogOut size={20} strokeWidth={1.5} />} label="Sair" onClick={() => toast({ title: "Sair", description: "Encerrando sessão..." })} />
+           <NavIcon icon={<LogOut size={20} strokeWidth={1.5} />} label="Sair" onClick={handleLogout} />
         </div>
       </aside>
 
@@ -150,8 +178,17 @@ const Index = () => {
           document.getElementById('generator-section')?.scrollIntoView({ behavior: 'smooth' });
         }} />
         <NavIcon icon={<History size={20} strokeWidth={1.5} />} active={activeTab === 'historico'} label="Jogos" onClick={() => setActiveTab('historico')} />
-        <NavIcon icon={<Settings size={20} strokeWidth={1.5} />} active={activeTab === 'ajustes'} label="Menu" onClick={() => setActiveTab('ajustes')} />
+        <NavIcon icon={<LogOut size={20} strokeWidth={1.5} />} label="Sair" onClick={handleLogout} />
       </nav>
+
+      {user.role === 'demo' && (
+        <div className="fixed top-0 left-0 right-0 bg-amber-500/90 backdrop-blur-sm text-white text-[10px] font-bold uppercase tracking-[0.2em] py-1.5 text-center z-[100] shadow-sm">
+          Modo de Demonstração — Algumas funcionalidades podem estar limitadas
+        </div>
+      )}
+
+
+
 
       <main className="pb-24 md:pb-12 md:pl-32">
         <div className="max-w-[1400px] mx-auto p-4 sm:p-6 md:p-12 lg:p-16">
@@ -191,8 +228,9 @@ const Index = () => {
                 </motion.div>
               </button>
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-bold text-zinc-900">Membro VIP</p>
-                <p className="text-[10px] uppercase tracking-widest text-zinc-500">Acesso Vitalício</p>
+                <p className="text-sm font-bold text-zinc-900">{user.role === 'admin' ? 'Administrador' : 'Membro VIP'}</p>
+                <p className="text-[10px] uppercase tracking-widest text-zinc-500">{user.role === 'admin' ? 'Acesso Total' : 'Acesso Demonstrativo'}</p>
+
               </div>
               <div className="hidden md:flex w-12 h-12 rounded-xl bg-gradient-to-br from-purple-600 to-fuchsia-600 border border-purple-100 items-center justify-center text-sm font-display font-bold text-white group cursor-pointer hover:shadow-lg hover:shadow-purple-500/20 transition-all duration-300">
                 <span className="group-hover:scale-110 transition-transform duration-500">VIP</span>
