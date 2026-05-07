@@ -136,11 +136,10 @@ export const MobileNav = ({ activeTab, setActiveTab, role, onLogout }: SidebarPr
         onClick={() => setActiveTab('ia')} 
         highlight
       />
-      {role === 'admin' ? (
+      {role === 'admin' && (
         <NavIcon icon={<Settings size={22} />} active={activeTab === 'ajustes'} label="Ajustes" onClick={() => setActiveTab('ajustes')} />
-      ) : (
-        <NavIcon icon={<LogOut size={22} />} label="Sair" onClick={onLogout} />
       )}
+      <NavIcon icon={<LogOut size={22} />} label="Sair" onClick={onLogout} />
     </nav>
   );
 };
