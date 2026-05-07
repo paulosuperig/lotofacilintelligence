@@ -122,7 +122,7 @@ const Index = () => {
         </div>
       )}
 
-      <main className="flex-grow w-full md:pl-[5rem] pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-12 min-h-screen">
+      <main className="flex-grow w-full md:pl-[5rem] pb-[calc(7rem+env(safe-area-inset-bottom))] md:pb-12 min-h-screen">
         <div className="w-full max-w-[min(1600px,95%)] mx-auto p-4 sm:p-6 lg:p-10 transition-all duration-300">
           <Header role={user.role} isRefreshing={isRefreshing} onRefresh={fetchLatestResult} />
 
