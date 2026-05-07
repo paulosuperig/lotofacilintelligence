@@ -41,7 +41,7 @@ export const useLottery = () => {
 
   const loadHistory = useCallback(async () => {
     // Priority 1: Supabase (Cloud)
-    if (isSupabaseEnabled()) {
+    if (isSupabaseEnabled() && supabase) {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const { data, error } = await supabase
@@ -85,7 +85,7 @@ export const useLottery = () => {
 
   const clearHistory = async () => {
     try {
-      if (isSupabaseEnabled()) {
+      if (isSupabaseEnabled() && supabase) {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
           await supabase
@@ -155,7 +155,7 @@ export const useLottery = () => {
         .sort((a, b) => b.timestamp - a.timestamp);
       
       // Persistence: Cloud Sync (Supabase) if available
-      if (isSupabaseEnabled()) {
+      if (isSupabaseEnabled() && supabase) {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
           const gamesToInsert = securedGames.map(game => ({
