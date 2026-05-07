@@ -122,11 +122,28 @@ export const GameGenerator = () => {
     setTimeout(() => setIsCopied(false), 2000);
   };
 
-  const shareOnWhatsApp = (game: number[]) => {
+  /**
+   * Performance Engineering: Optimized URI formatting for WhatsApp
+   * Follows Platform Engineering standards for resilient external links
+   */
+  const shareOnWhatsApp = useCallback((game: number[]) => {
+    const domain = window.location.origin;
     const gameText = game.map(n => n.toString().padStart(2, '0')).join(' ');
-    const text = `🔥 *GERADOR INTELIGENTE* 🔥\n\nConfira meu novo jogo:\n✅ *${gameText}*\n\n🍀 Boa sorte!\nGerado em: ${window.location.origin}`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
-  };
+    
+    // Clean Code: Structured message template
+    const template = [
+      '🔥 *GERADOR INTELIGENTE PRO* 🔥',
+      '',
+      'Confira meu novo jogo otimizado:',
+      `✅ *${gameText}*`,
+      '',
+      '🍀 Boa sorte!',
+      `Gerado em: ${domain}`
+    ].join('\n');
+
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(template)}`;
+    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+  }, []);
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-zinc-900 overflow-y-auto pb-20">

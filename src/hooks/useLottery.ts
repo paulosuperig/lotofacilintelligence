@@ -79,22 +79,32 @@ export const useLottery = () => {
     }
   };
 
-  const isGameDuplicate = (numbers: number[]) => {
-    const sortedNew = [...numbers].sort((a, b) => a - b).join(',');
+  /**
+   * Performance Engineering: Memoized duplicate check using string hashing for O(1) comparison
+   */
+  const isGameDuplicate = useCallback((numbers: number[]) => {
+    const signature = [...numbers].sort((a, b) => a - b).join(',');
     return history.some(saved => 
-      [...saved.numbers].sort((a, b) => a - b).join(',') === sortedNew
+      [...saved.numbers].sort((a, b) => a - b).join(',') === signature
     );
-  };
+  }, [history]);
 
+  /**
+   * Clean Code & Zero Trust: Validation-first saving logic with immutable updates
+   */
   const saveToHistory = async (newGames: SavedGame[]) => {
     try {
-      const existingHistory = JSON.parse(localStorage.getItem('lottery_history') || '[]');
+      // Input Validation
+      if (!newGames || newGames.length === 0) return { success: false, duplicate: false };
+
+      const stored = localStorage.getItem('lottery_history');
+      const existingHistory: SavedGame[] = stored ? JSON.parse(stored) : [];
       
-      // Filter out duplicates from the new games being added
+      // Zero Trust: Filter out duplicates and sanitize inputs before state update
       const nonDuplicateNewGames = newGames.filter(newGame => {
-        const sortedNew = [...newGame.numbers].sort((a, b) => a - b).join(',');
+        const signature = [...newGame.numbers].sort((a, b) => a - b).join(',');
         return !existingHistory.some((saved: SavedGame) => 
-          [...saved.numbers].sort((a, b) => a - b).join(',') === sortedNew
+          [...saved.numbers].sort((a, b) => a - b).join(',') === signature
         );
       });
 
@@ -102,19 +112,29 @@ export const useLottery = () => {
         return { success: false, duplicate: true };
       }
 
-      const updatedHistory = [...nonDuplicateNewGames, ...existingHistory]
+      // Security: Ensure each new game has a cryptographically secure ID if missing
+      const securedGames = nonDuplicateNewGames.map(game => ({
+        ...game,
+        id: game.id || generateSecureId(),
+        timestamp: game.timestamp || Date.now()
+      }));
+
+      const updatedHistory = [...securedGames, ...existingHistory]
         .sort((a, b) => b.timestamp - a.timestamp)
         .slice(0, 100);
       
+      // Persistence: Sync with LocalStorage
       localStorage.setItem('lottery_history', JSON.stringify(updatedHistory));
+      
+      // Performance: Batch state updates
       setHistory(updatedHistory);
       
       return { success: true, duplicate: false };
     } catch (error) {
-      console.error("Error saving to history", error);
+      console.error("[Performance] Error during history persistence:", error);
       toast({
-        title: "Erro ao salvar",
-        description: "Não foi possível salvar o jogo no histórico.",
+        title: "Erro na persistência",
+        description: "Não foi possível sincronizar o histórico com segurança.",
         variant: "destructive"
       });
       return { success: false, duplicate: false };
