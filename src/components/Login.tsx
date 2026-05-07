@@ -181,9 +181,19 @@ const Login = ({ onLogin }: LoginProps) => {
                     "Acessar Sistema"
                   )}
                 </Button>
+
+                <div className="pt-4 text-center">
+                  <button 
+                    type="button"
+                    onClick={() => setView('register')}
+                    className="text-xs font-bold text-zinc-400 uppercase tracking-widest hover:text-purple-600 transition-colors"
+                  >
+                    Não tem uma conta? <span className="text-purple-600">Solicite acesso</span>
+                  </button>
+                </div>
               </form>
             </motion.div>
-          ) : (
+          ) : view === 'forgot-password' ? (
             <motion.div
               key="forgot-password"
               initial={{ opacity: 0, x: 20 }}
