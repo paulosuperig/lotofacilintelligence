@@ -125,7 +125,7 @@ export const Sidebar = ({ activeTab, setActiveTab, role, onLogout }: SidebarProp
 
 export const MobileNav = ({ activeTab, setActiveTab, role, onLogout }: SidebarProps) => {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 h-[calc(4rem+env(safe-area-inset-bottom))] bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl border-t border-purple-100 dark:border-zinc-800 z-50 flex items-center justify-around px-2 pb-[env(safe-area-inset-bottom)] shadow-[0_-10px_25px_-5px_rgba(168,85,247,0.1)] md:hidden">
+    <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md h-16 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl border border-purple-100/50 dark:border-zinc-800/50 z-50 flex items-center justify-around px-2 rounded-[2rem] shadow-[0_10px_30px_-10px_rgba(168,85,247,0.3)] md:hidden">
       <NavIcon icon={<LayoutDashboard size={22} />} active={activeTab === 'home'} label="Início" onClick={() => setActiveTab('home')} />
       <NavIcon icon={<Zap size={22} />} active={activeTab === 'gerador'} label="Gerar" onClick={() => setActiveTab('gerador')} />
       <NavIcon icon={<History size={22} />} active={activeTab === 'historico'} label="Histórico" onClick={() => setActiveTab('historico')} />
