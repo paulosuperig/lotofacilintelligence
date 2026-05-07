@@ -4,6 +4,7 @@ import { Clover, Lock, User, Eye, EyeOff, LogIn, ArrowLeft, Mail, UserPlus, Phon
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from '@/hooks/use-toast';
+import { hashData } from '@/lib/security/utils';
 
 interface LoginProps {
   onLogin: (user: { email: string; role: 'admin' | 'demo' }) => void;
