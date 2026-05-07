@@ -213,9 +213,12 @@ const Login = ({ onLogin }: LoginProps) => {
           )}
         </AnimatePresence>
 
-        <div className="mt-10 pt-8 border-t border-purple-50 text-center">
+        <div className="mt-10 pt-8 border-t border-purple-50 text-center space-y-3">
           <p className="text-xs text-zinc-400 uppercase tracking-[0.2em] font-bold">
             Membro Premium Intelligence
+          </p>
+          <p className="text-[10px] text-zinc-300 font-medium italic">
+            Desenvolvido por: Paulo H. Santos
           </p>
         </div>
       </motion.div>
