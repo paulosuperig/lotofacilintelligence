@@ -89,6 +89,7 @@ export const GameGenerator = () => {
     
     const newGame = generateSmartGame();
     setCurrentResult(newGame);
+    await saveToHistory([newGame]);
     setIsGenerating(false);
   };
 
