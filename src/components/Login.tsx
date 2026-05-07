@@ -112,7 +112,7 @@ const Login = ({ onLogin }: LoginProps) => {
                 >
                   <Clover className="text-white w-7 h-7 md:w-8 md:h-8" />
                 </motion.div>
-                <h1 className="text-2xl md:text-3xl font-display font-bold text-zinc-900 mb-2 tracking-tight">
+                <h1 className="text-xl md:text-2xl font-display font-bold text-zinc-900 mb-2 tracking-tight">
                   Lotofácil <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-fuchsia-600">Intelligence</span>
                 </h1>
                 <p className="text-zinc-500 text-xs md:text-sm">Faça login para acessar sua conta premium</p>
@@ -128,7 +128,7 @@ const Login = ({ onLogin }: LoginProps) => {
                       placeholder="seu@email.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="pl-12 h-14 rounded-2xl border-purple-100 focus:ring-purple-500 focus:border-purple-500 bg-purple-50/30"
+                      className="pl-12 h-14 rounded-2xl border-purple-100 focus:ring-purple-500 focus:border-purple-500 bg-purple-50/30 text-sm"
                       required
                     />
                   </div>
@@ -152,7 +152,7 @@ const Login = ({ onLogin }: LoginProps) => {
                       placeholder="••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="pl-12 pr-12 h-14 rounded-2xl border-purple-100 focus:ring-purple-500 focus:border-purple-500 bg-purple-50/30"
+                      className="pl-12 pr-12 h-14 rounded-2xl border-purple-100 focus:ring-purple-500 focus:border-purple-500 bg-purple-50/30 text-sm"
                       required
                     />
                     <button
@@ -168,7 +168,7 @@ const Login = ({ onLogin }: LoginProps) => {
                 <Button 
                   type="submit" 
                   disabled={isLoading}
-                  className="w-full h-14 rounded-2xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white font-bold text-lg shadow-lg shadow-purple-500/25 transition-all active:scale-[0.98]"
+                  className="w-full h-14 rounded-2xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white font-bold text-base shadow-lg shadow-purple-500/25 transition-all active:scale-[0.98]"
                 >
                   {isLoading ? (
                     <motion.div 

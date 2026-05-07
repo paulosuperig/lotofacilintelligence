@@ -95,7 +95,7 @@ export const BentoGrid = ({
             <div className="inline-flex items-center gap-2 px-2 py-0.5 md:px-2.5 md:py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-600 text-[8px] font-bold mb-3 md:mb-4 uppercase tracking-widest">
               <History size={10} /> Sorteio
             </div>
-            <h2 className="text-3xl md:text-4xl font-display font-bold text-zinc-900 dark:text-zinc-100 mb-1 md:mb-2">
+            <h2 className="text-2xl md:text-3xl font-display font-bold text-zinc-900 dark:text-zinc-100 mb-1 md:mb-2">
               Nº {latestResult?.concurso || "---"}
             </h2>
             <p className="text-zinc-500 dark:text-zinc-400 text-[9px] md:text-[10px] font-bold uppercase tracking-wider flex items-center gap-2">
@@ -118,7 +118,7 @@ export const BentoGrid = ({
           <div className="mt-auto space-y-4 pt-6 border-t border-purple-50">
             <div className="bg-emerald-50/50 dark:bg-emerald-900/20 px-4 py-3 rounded-2xl border border-emerald-100/50 dark:border-emerald-800/50 text-center">
               <p className="text-[8px] text-emerald-600/70 dark:text-emerald-400/70 uppercase font-bold tracking-[0.2em] mb-1.5">Próximo Prêmio</p>
-              <p className="text-xl font-display font-bold text-emerald-500 tabular-nums leading-none whitespace-nowrap">
+              <p className="text-lg font-display font-bold text-emerald-500 tabular-nums leading-none whitespace-nowrap">
                 {latestResult ? formatCurrency(latestResult.valorEstimadoProximoConcurso || 0) : "R$ ---"}
               </p>
             </div>
@@ -240,8 +240,8 @@ export const BentoGrid = ({
           <ShieldCheck size={32} />
         </div>
         <div>
-          <h4 className="text-lg font-display font-bold text-zinc-900 dark:text-zinc-100">Fechamentos Pro</h4>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">Acesse modelos matemáticos exclusivos.</p>
+          <h4 className="text-base font-display font-bold text-zinc-900 dark:text-zinc-100">Fechamentos Pro</h4>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">Modelos matemáticos exclusivos.</p>
         </div>
         <ArrowUpRight size={20} className="ml-auto text-zinc-400 group-hover:text-purple-600 transition-colors" />
       </motion.div>
