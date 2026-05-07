@@ -1,23 +1,18 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Ball } from './Ball';
 import { Button } from '@/components/ui/button';
-import { Zap, RefreshCcw, Save, TrendingUp, History, MessageCircle, Calendar } from 'lucide-react';
+import { Zap, RefreshCcw, Save, TrendingUp, History, Copy, Calendar, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import { generateSecureId } from '@/lib/security/utils';
-
-interface SavedGame {
-  id: string;
-  numbers: number[];
-  timestamp: number;
-}
+import { useLottery } from '@/hooks/useLottery';
+import { SavedGame } from '@/types/lottery';
 
 const WhatsAppIcon = () => (
   <svg 
     viewBox="0 0 24 24" 
-    width="20" 
-    height="20" 
+    width="18" 
+    height="18" 
     fill="currentColor"
     xmlns="http://www.w3.org/2000/svg"
   >
@@ -26,47 +21,23 @@ const WhatsAppIcon = () => (
 );
 
 export const GameGenerator = () => {
-  const [generatedGame, setGeneratedGame] = useState<number[]>([]);
-  const [history, setHistory] = useState<SavedGame[]>([]);
+  const { history, saveToHistory, generateSmartGame } = useLottery();
+  const [currentResult, setCurrentResult] = useState<SavedGame | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [stats, setStats] = useState({ pairs: 0, odd: 0, primes: 0, sum: 0, mold: 0, sequence: 0 });
+  const [isCopied, setIsCopied] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
-    const saved = localStorage.getItem('lottery_history');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved) as SavedGame[];
-        const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-        const filtered = parsed.filter(game => game.timestamp > sevenDaysAgo);
-        setHistory(filtered);
-        
-        if (filtered.length !== parsed.length) {
-          localStorage.setItem('lottery_history', JSON.stringify(filtered));
-        }
-      } catch (e) {
-        console.error("Error loading history", e);
-      }
-    }
-  }, []);
-
-  const saveHistory = (newHistory: SavedGame[]) => {
-    setHistory(newHistory);
-    localStorage.setItem('lottery_history', JSON.stringify(newHistory));
-  };
-
-
-
-  const calculateStats = useCallback((nums: number[]) => {
+  const stats = useMemo(() => {
+    if (!currentResult) return null;
+    const nums = currentResult.numbers;
     const primes = [2, 3, 5, 7, 11, 13, 17, 19, 23];
     const moldNumbers = [1, 2, 3, 4, 5, 6, 10, 11, 15, 16, 20, 21, 22, 23, 24, 25];
     
-    const pCount = nums.filter(n => primes.includes(n)).length;
     const evenCount = nums.filter(n => n % 2 === 0).length;
+    const pCount = nums.filter(n => primes.includes(n)).length;
     const moldCount = nums.filter(n => moldNumbers.includes(n)).length;
     const sum = nums.reduce((a, b) => a + b, 0);
     
-    // Calcular maior sequência
     let maxSeq = 1;
     let currentSeq = 1;
     for (let i = 1; i < nums.length; i++) {
@@ -78,133 +49,97 @@ export const GameGenerator = () => {
       }
     }
     
-    setStats({
+    return {
       pairs: evenCount,
       odd: 15 - evenCount,
       primes: pCount,
       sum,
       mold: moldCount,
       sequence: maxSeq
-    });
-  }, []);
+    };
+  }, [currentResult]);
 
-  const generateGame = () => {
+  const handleGenerate = async () => {
     if (isGenerating) return;
     setIsGenerating(true);
+    setIsCopied(false);
     
-    setTimeout(() => {
-      let attempts = 0;
-      let finalGame: number[] = [];
-      let valid = false;
-
-      // Pool de números da Lotofácil (1 a 25)
-      const pool = Array.from({ length: 25 }, (_, i) => i + 1);
-      const primes = [2, 3, 5, 7, 11, 13, 17, 19, 23];
-      const moldNumbers = [1, 2, 3, 4, 5, 6, 10, 11, 15, 16, 20, 21, 22, 23, 24, 25];
-
-      while (!valid && attempts < 100) {
-        attempts++;
-        const numbers: number[] = [];
-        const localPool = [...pool];
-        
-        for (let i = 0; i < 15; i++) {
-          const randomIndex = Math.floor(Math.random() * localPool.length);
-          numbers.push(localPool.splice(randomIndex, 1)[0]);
-        }
-        
-        const sorted = numbers.sort((a, b) => a - b);
-        
-        // Critérios de Tendência (Matemática de Loteria)
-        const evenCount = sorted.filter(n => n % 2 === 0).length;
-        const oddCount = 15 - evenCount;
-        const sum = sorted.reduce((a, b) => a + b, 0);
-        const pCount = sorted.filter(n => primes.includes(n)).length;
-        const moldCount = sorted.filter(n => moldNumbers.includes(n)).length;
-
-        // Tendências Lotofácil:
-        // 1. Pares/Ímpares: Geralmente 7/8 ou 8/7
-        // 2. Primos: Geralmente 5 a 6
-        // 3. Moldura: Geralmente 9 a 11
-        // 4. Soma: Geralmente entre 180 e 210
-        const checkParity = (evenCount === 7 || evenCount === 8);
-        const checkPrimes = (pCount >= 5 && pCount <= 6);
-        const checkMold = (moldCount >= 9 && moldCount <= 11);
-        const checkSum = (sum >= 170 && sum <= 220);
-
-        if ((checkParity && checkPrimes && checkSum) || attempts > 50) {
-          finalGame = sorted;
-          valid = true;
-        }
-      }
-
-      setGeneratedGame(finalGame);
-      
-      const newGame: SavedGame = {
-        id: generateSecureId(),
-        numbers: finalGame,
-        timestamp: Date.now()
-      };
-      saveHistory([newGame, ...history].slice(0, 50));
-      
-      calculateStats(finalGame);
-      setIsGenerating(false);
-    }, 800);
+    // Simulate thinking process for "Smart" feel
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    const newGame = generateSmartGame();
+    setCurrentResult(newGame);
+    setIsGenerating(false);
   };
 
+  const handleSave = async () => {
+    if (!currentResult) return;
+    const success = await saveToHistory([currentResult]);
+    if (success) {
+      toast({
+        title: "Sucesso!",
+        description: "Jogo salvo no seu histórico.",
+      });
+    }
+  };
+
+  const copyToClipboard = () => {
+    if (!currentResult) return;
+    const text = currentResult.numbers.map(n => n.toString().padStart(2, '0')).join(' ');
+    navigator.clipboard.writeText(text);
+    setIsCopied(true);
+    toast({
+      title: "Copiado!",
+      description: "Números copiados com sucesso.",
+    });
+    setTimeout(() => setIsCopied(false), 2000);
+  };
 
   const shareOnWhatsApp = (game: number[]) => {
     const gameText = game.map(n => n.toString().padStart(2, '0')).join(' ');
-    const text = `🔥 *Gerador Inteligente* 🔥\n\nConfira meu novo jogo:\n✅ *${gameText}*\n\nGerado em: ${window.location.origin}\n\n🍀 Boa sorte!`;
-    const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
-    window.open(url, '_blank');
+    const text = `🔥 *Gerador Inteligente Intelligence* 🔥\n\nConfira meu novo jogo:\n✅ *${gameText}*\n\n🍀 Boa sorte!\nGerado em: ${window.location.origin}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
   };
 
-
-
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-zinc-900">
-      <div className="p-6 md:p-12 border-b border-purple-50 dark:border-zinc-800">
+    <div className="flex flex-col h-full bg-white dark:bg-zinc-900 overflow-y-auto pb-20">
+      <div className="p-6 md:p-12 border-b border-purple-50 dark:border-zinc-800/50">
         <div className="flex flex-col gap-6 mb-8">
           <div>
-            <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 mb-2 md:mb-3">
-              <Zap size={14} className="md:w-4 md:h-4" fill="currentColor" />
-              <span className="text-[9px] md:text-[10px] uppercase font-bold tracking-[0.2em] md:tracking-[0.25em]">Sistemas Pro</span>
+            <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 mb-2">
+              <Zap size={14} fill="currentColor" />
+              <span className="text-[10px] uppercase font-bold tracking-[0.25em]">Sistemas Premium</span>
             </div>
-            <h2 className="text-2xl md:text-3xl font-display font-bold text-zinc-900 dark:text-zinc-100 leading-tight">
-              Gerador<br className="hidden sm:block" /> Inteligente
+            <h2 className="text-3xl md:text-4xl font-display font-bold text-zinc-900 dark:text-zinc-100 leading-tight">
+              Gerador Inteligente
             </h2>
           </div>
           
           <Button 
-            onClick={generateGame} 
+            onClick={handleGenerate} 
             disabled={isGenerating}
-            className="w-full bg-purple-600 text-white hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-600 disabled:bg-purple-300 dark:disabled:bg-zinc-800 disabled:cursor-not-allowed font-display font-bold text-[11px] uppercase tracking-widest h-12 px-6 rounded-xl shadow-xl shadow-purple-500/20 transition-all active:scale-95"
+            className="w-full bg-purple-600 text-white hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-600 h-14 rounded-2xl shadow-xl shadow-purple-500/10 font-bold text-sm uppercase tracking-widest transition-all active:scale-95"
           >
-            {isGenerating ? <RefreshCcw className="animate-spin mr-2" size={14} /> : <Zap className="mr-2" size={14} fill="currentColor" />}
-            Gerar Jogo
+            {isGenerating ? <RefreshCcw className="animate-spin mr-3" size={18} /> : <Zap className="mr-3" size={18} fill="currentColor" />}
+            {isGenerating ? "Analisando Tendências..." : "Gerar Jogo Otimizado"}
           </Button>
         </div>
 
-        <div className="min-h-[180px] md:min-h-[220px] flex flex-wrap justify-center content-center gap-2 md:gap-4 bg-purple-50/50 dark:bg-zinc-950/50 rounded-3xl md:rounded-[1.5rem] p-6 md:p-10 border border-purple-100 dark:border-zinc-800 relative overflow-hidden group shadow-inner">
+        <div className="min-h-[200px] flex flex-wrap justify-center content-center gap-3 md:gap-4 bg-zinc-50 dark:bg-zinc-950/50 rounded-[2rem] p-8 md:p-12 border border-zinc-100 dark:border-zinc-800/50 shadow-inner relative overflow-hidden">
           <AnimatePresence mode="wait">
-            {generatedGame.length > 0 ? (
+            {currentResult ? (
               <motion.div 
                 key="game"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="flex flex-wrap justify-center gap-2.5 md:gap-5"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="flex flex-wrap justify-center gap-3 md:gap-5"
               >
-                {generatedGame.map((num, i) => (
+                {currentResult.numbers.map((num, i) => (
                   <motion.div
                     key={`${num}-${i}`}
-                    initial={{ y: 30, opacity: 0, scale: 0.8 }}
-                    animate={{ y: 0, opacity: 1, scale: 1 }}
-                    transition={{ 
-                      type: "spring", 
-                      stiffness: 200, 
-                      damping: 25,
-                      delay: i * 0.05 
-                    }}
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: i * 0.04, type: "spring", stiffness: 300 }}
                   >
                     <Ball number={num} active size="lg" />
                   </motion.div>
@@ -215,14 +150,19 @@ export const GameGenerator = () => {
                 key="placeholder"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="flex flex-col items-center justify-center text-premium-text-muted gap-4"
+                className="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-600 gap-4"
               >
                 <div className="flex gap-2">
-                   {Array(8).fill(0).map((_, i) => (
-                     <div key={i} className="w-1.5 h-1.5 rounded-full bg-purple-200" />
+                   {Array(5).fill(0).map((_, i) => (
+                     <motion.div 
+                        key={i} 
+                        animate={{ opacity: [0.3, 1, 0.3] }}
+                        transition={{ repeat: Infinity, duration: 1.5, delay: i * 0.2 }}
+                        className="w-2 h-2 rounded-full bg-purple-300 dark:bg-purple-900" 
+                      />
                    ))}
                 </div>
-                <p className="text-sm font-medium tracking-wide">Aguardando comando de geração...</p>
+                <p className="text-xs font-medium tracking-widest uppercase">Pronto para gerar</p>
               </motion.div>
             )}
           </AnimatePresence>
@@ -230,87 +170,72 @@ export const GameGenerator = () => {
       </div>
 
       <div className="p-6 md:p-12 flex-grow flex flex-col">
-        {generatedGame.length > 0 && (
+        {stats && (
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-10"
+            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-10"
           >
-            <StatCard 
-              label="Pares / Ímpares" 
-              value={`${stats.pairs}P / ${stats.odd}Í`} 
-              icon={<TrendingUp size={14}/>} 
-            />
+            <StatCard label="Pares/Ímpares" value={`${stats.pairs}/${stats.odd}`} icon={<TrendingUp size={14}/>} />
             <StatCard label="Soma Total" value={stats.sum} icon={<TrendingUp size={14}/>} />
             <StatCard label="Moldura" value={stats.mold} icon={<TrendingUp size={14}/>} />
-            <StatCard label="Primos" value={stats.primes} icon={<TrendingUp size={14}/>} />
+            <StatCard label="Números Primos" value={stats.primes} icon={<TrendingUp size={14}/>} />
             <StatCard label="Maior Seq." value={stats.sequence} icon={<TrendingUp size={14}/>} />
           </motion.div>
         )}
 
-        <div className="mt-auto grid grid-cols-1 sm:grid-cols-2 gap-4">
-           <Button 
-            variant="outline" 
-            onClick={() => {
-              toast({
-                title: "Jogo salvo!",
-                description: "Seu jogo foi armazenado no histórico.",
-              });
-            }}
-            disabled={generatedGame.length === 0}
-            className="h-12 rounded-xl bg-white dark:bg-zinc-800 border-purple-100 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 hover:bg-purple-50 dark:hover:bg-zinc-700 hover:text-purple-700 dark:hover:text-purple-400 hover:border-purple-200 dark:hover:border-purple-800 font-bold text-[10px] uppercase tracking-widest transition-all disabled:opacity-50"
-          >
-             <Save className="mr-3" size={16} /> Salvar Jogo
-           </Button>
-           <Button 
-            variant="outline" 
-            onClick={() => {
-              const text = generatedGame.map(n => n.toString().padStart(2, '0')).join(' ');
-              navigator.clipboard.writeText(text);
-              toast({
-                title: "Copiado!",
-                description: "Números copiados para a área de transferência.",
-              });
-            }}
-            disabled={generatedGame.length === 0}
-            className="h-12 rounded-xl bg-white dark:bg-zinc-800 border-purple-100 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 hover:bg-purple-50 dark:hover:bg-zinc-700 hover:text-purple-700 dark:hover:text-purple-400 hover:border-purple-200 dark:hover:border-purple-800 font-bold text-[10px] uppercase tracking-widest transition-all disabled:opacity-50"
-          >
-             Copiar
-           </Button>
-        </div>
+        {currentResult && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-12">
+            <Button 
+              variant="outline" 
+              onClick={handleSave}
+              className="h-14 rounded-2xl bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 font-bold text-xs uppercase tracking-widest hover:bg-purple-50 dark:hover:bg-purple-950/20 hover:text-purple-600 dark:hover:text-purple-400 transition-all"
+            >
+              <Save className="mr-3" size={18} /> Salvar Jogo
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={copyToClipboard}
+              className="h-14 rounded-2xl bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 font-bold text-xs uppercase tracking-widest hover:bg-purple-50 dark:hover:bg-purple-950/20 hover:text-purple-600 dark:hover:text-purple-400 transition-all"
+            >
+              {isCopied ? <Check className="mr-3 text-emerald-500" size={18} /> : <Copy className="mr-3" size={18} />}
+              {isCopied ? "Copiado!" : "Copiar Números"}
+            </Button>
+          </div>
+        )}
 
         {history.length > 0 && (
-          <div className="mt-12">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-2 text-premium-text-muted">
-                <History size={16} />
-                <h3 className="text-[10px] uppercase font-bold tracking-[0.2em]">Histórico (7 dias)</h3>
+          <div className="space-y-6">
+            <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 pb-4">
+              <div className="flex items-center gap-3">
+                <History size={18} className="text-purple-500" />
+                <h3 className="text-xs uppercase font-bold tracking-widest text-zinc-500">Histórico Recente</h3>
               </div>
-              <span className="text-[9px] font-bold text-purple-400 bg-purple-50 px-2 py-1 rounded-full uppercase tracking-wider">
-                {history.length} jogos
+              <span className="text-[10px] font-bold text-purple-600 bg-purple-50 dark:bg-purple-900/20 px-3 py-1 rounded-full">
+                {history.length} Jogos
               </span>
             </div>
             
-            <div className="space-y-3">
+            <div className="space-y-4">
               <AnimatePresence initial={false}>
-                {history.map((item, idx) => (
+                {history.slice(0, 10).map((item) => (
                   <motion.div
-                    key={`${item.timestamp}-${idx}`}
-                    initial={{ opacity: 0, x: -20 }}
+                    key={item.id}
+                    initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
-                    className="flex items-center justify-between p-4 bg-white dark:bg-zinc-800 border border-purple-50 dark:border-zinc-700 rounded-xl shadow-sm hover:border-purple-200 dark:hover:border-purple-600 transition-all group"
+                    exit={{ opacity: 0, x: 10 }}
+                    className="flex items-center justify-between p-5 bg-white dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800 rounded-2xl shadow-sm hover:border-purple-200 dark:hover:border-purple-900/50 transition-all group"
                   >
-                    <div className="flex flex-col gap-2 w-[80%]">
+                    <div className="flex flex-col gap-3 flex-grow pr-4">
                       <div className="flex items-center gap-2">
-                        <Calendar size={10} className="text-zinc-400 dark:text-zinc-500" />
-                        <span className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase">
-                          {new Date(item.timestamp).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                        <Calendar size={12} className="text-zinc-400" />
+                        <span className="text-[10px] font-bold text-zinc-400 uppercase">
+                          {new Date(item.timestamp).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
-                      <div className="flex flex-wrap gap-1.5">
+                      <div className="flex flex-wrap gap-2">
                         {item.numbers.map((num, i) => (
-                          <span key={i} className="text-[11px] font-bold text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/30 w-6 h-6 flex items-center justify-center rounded-md">
+                          <span key={i} className="text-[11px] font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30 w-7 h-7 flex items-center justify-center rounded-lg border border-purple-100 dark:border-purple-900/50">
                             {num.toString().padStart(2, '0')}
                           </span>
                         ))}
@@ -320,8 +245,8 @@ export const GameGenerator = () => {
                       size="icon"
                       variant="ghost"
                       onClick={() => shareOnWhatsApp(item.numbers)}
-                      className="text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-full transition-colors shrink-0"
-                      title="Compartilhar no WhatsApp"
+                      className="text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 rounded-xl transition-all"
+                      title="WhatsApp"
                     >
                       <WhatsAppIcon />
                     </Button>
@@ -331,23 +256,18 @@ export const GameGenerator = () => {
             </div>
           </div>
         )}
-
       </div>
     </div>
   );
 };
 
-
-const StatCard = ({ label, value, icon, variant = 'default' }: { label: string, value: string | number, icon: React.ReactNode, variant?: 'default' | 'success' }) => (
-  <div className="bg-white dark:bg-zinc-800 border border-purple-100 dark:border-zinc-700 rounded-2xl p-4 shadow-sm min-w-0 flex flex-col justify-center">
-    <div className="flex items-center gap-1.5 text-premium-text-muted dark:text-zinc-400 mb-1.5 min-w-0">
+const StatCard = ({ label, value, icon }: { label: string, value: string | number, icon: React.ReactNode }) => (
+  <div className="bg-white dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-800 rounded-2xl p-5 shadow-sm">
+    <div className="flex items-center gap-2 text-zinc-400 mb-2">
       <span className="shrink-0">{icon}</span>
-      <span className="text-[10px] uppercase font-bold tracking-wider whitespace-nowrap">{label}</span>
+      <span className="text-[9px] uppercase font-bold tracking-widest">{label}</span>
     </div>
-    <div className={cn(
-      "text-lg md:text-xl font-display font-bold leading-tight",
-      variant === 'success' ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-900 dark:text-zinc-100"
-    )}>
+    <div className="text-xl font-display font-bold text-zinc-900 dark:text-zinc-100">
       {value}
     </div>
   </div>
