@@ -226,17 +226,11 @@ const Login = ({ onLogin }: LoginProps) => {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8 }}
         className="mt-auto mb-6 px-4"
-        aria-label="Informações de copyright e autoria"
+        aria-label="Rodapé institucional"
       >
-        <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs text-purple-400/70 uppercase tracking-[0.15em] font-medium text-center">
-          <span><time>{currentYear}</time> © Lotofácil Intelligence</span>
-          <span className="text-purple-300/50 hidden sm:inline">•</span>
-          <span>
-            Crafted by <span className="font-semibold text-purple-500/80">Paulo H. Santos</span>
-          </span>
-          <span className="text-purple-300/50 hidden sm:inline">•</span>
-          <span className="opacity-60">v1.0</span>
-        </div>
+        <p className="text-xs text-purple-400/70 uppercase tracking-[0.15em] font-medium text-center">
+          Lotofácil Intelligence {currentYear} - Desenvolvido por: <span className="font-semibold text-purple-500/80">Paulo H. Santos</span>
+        </p>
       </motion.footer>
     </div>
   );
