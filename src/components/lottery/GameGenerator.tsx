@@ -254,18 +254,11 @@ export const GameGenerator = () => {
         )}
 
         {currentResult && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-12">
-            <Button 
-              variant="outline" 
-              onClick={handleSave}
-              className="h-14 rounded-2xl bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 font-bold text-xs uppercase tracking-widest hover:bg-purple-50 dark:hover:bg-purple-950/20 hover:text-purple-600 dark:hover:text-purple-400 transition-all"
-            >
-              <Save className="mr-3" size={18} /> Salvar Jogo
-            </Button>
+          <div className="flex justify-center mb-12">
             <Button 
               variant="outline" 
               onClick={copyToClipboard}
-              className="h-14 rounded-2xl bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 font-bold text-xs uppercase tracking-widest hover:bg-purple-50 dark:hover:bg-purple-950/20 hover:text-purple-600 dark:hover:text-purple-400 transition-all"
+              className="w-full md:w-auto h-14 px-12 rounded-2xl bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 font-bold text-xs uppercase tracking-widest hover:bg-purple-50 dark:hover:bg-purple-950/20 hover:text-purple-600 dark:hover:text-purple-400 transition-all shadow-sm"
             >
               {isCopied ? <Check className="mr-3 text-emerald-500" size={18} /> : <Copy className="mr-3" size={18} />}
               {isCopied ? "Copiado!" : "Copiar Números"}
