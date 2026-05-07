@@ -43,11 +43,8 @@ export const useLottery = () => {
     if (saved) {
       try {
         const parsed = JSON.parse(saved) as SavedGame[];
-        const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
         const filtered = parsed
-          .filter(g => g.timestamp > sevenDaysAgo)
-          .sort((a, b) => b.timestamp - a.timestamp)
-          .slice(0, 100);
+          .sort((a, b) => b.timestamp - a.timestamp);
         
         setHistory(filtered);
         
@@ -120,8 +117,7 @@ export const useLottery = () => {
       }));
 
       const updatedHistory = [...securedGames, ...existingHistory]
-        .sort((a, b) => b.timestamp - a.timestamp)
-        .slice(0, 100);
+        .sort((a, b) => b.timestamp - a.timestamp);
       
       // Persistence: Sync with LocalStorage
       localStorage.setItem('lottery_history', JSON.stringify(updatedHistory));
