@@ -50,11 +50,11 @@ export const HistoryPanel = ({
   const generateAllGamesText = () => {
     if (history.length === 0) return "";
     
-    let text = `🔥 *Histórico de Jogos Intelligence* 🔥\n\n`;
+    let text = `🔥 *HISTÓRICO DE JOGOS* 🔥\n\n`;
     
     history.forEach((item, idx) => {
       const date = new Date(item.timestamp).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-      const gameNumbers = item.numbers.map((n: number) => n.toString().padStart(2, '0')).join(', ');
+      const gameNumbers = item.numbers.map((n: number) => n.toString().padStart(2, '0')).join(' ');
       text += `${idx + 1}. [${date}] ✅ *${gameNumbers}*\n`;
     });
     
@@ -168,7 +168,7 @@ export const HistoryPanel = ({
                       size="icon"
                       variant="ghost"
                       onClick={() => {
-                        const text = `🔥 *Gerador Intelligence* 🔥\n\nJogo: *${item.numbers.map((n: number) => n.toString().padStart(2, '0')).join(' ')}*\n\n🍀 Boa sorte!`;
+                        const text = `🔥 *GERADOR INTELIGENTE* 🔥\n\nJogo: *${item.numbers.map((n: number) => n.toString().padStart(2, '0')).join(' ')}*\n\n🍀 Boa sorte!`;
                         window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
                       }}
                       className="w-9 h-9 rounded-full bg-emerald-500 text-white hover:bg-emerald-600 shadow-sm transition-transform hover:scale-110"
