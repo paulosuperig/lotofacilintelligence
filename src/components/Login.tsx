@@ -186,7 +186,7 @@ const Login = ({ onLogin }: LoginProps) => {
                   <button 
                     type="button"
                     onClick={() => setView('register')}
-                    className="text-xs font-bold text-zinc-400 uppercase tracking-widest hover:text-purple-600 transition-colors"
+                    className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest hover:text-purple-600 transition-colors"
                   >
                     Não tem uma conta? <span className="text-purple-600">Solicite acesso</span>
                   </button>
