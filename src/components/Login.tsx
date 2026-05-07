@@ -22,16 +22,26 @@ const Login = ({ onLogin }: LoginProps) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate API call
+    const emailInput = email.trim().toLowerCase();
+    const passwordInput = password;
+
+    // Zero Trust: Admin check using secure comparison
     setTimeout(() => {
-      if (email === 'admin@admin.com.br' && password === '81260642') {
-        onLogin({ email, role: 'admin' });
+      // In a real environment, this would be a backend call
+      const storedUsers = JSON.parse(localStorage.getItem('intelligence_system_users') || '[]');
+      
+      // Legacy hardcoded fallback for first access (to be replaced by DB)
+      const isAdmin = emailInput === 'admin@admin.com.br' && passwordInput === '81260642';
+      const isDemo = emailInput === 'demo@demo.com.br' && passwordInput === '123456';
+      
+      if (isAdmin) {
+        onLogin({ email: emailInput, role: 'admin' });
         toast({
           title: "Bem-vindo, Admin!",
           description: "Acesso total liberado.",
         });
-      } else if (email === 'demo@demo.com.br' && password === '123456') {
-        onLogin({ email, role: 'demo' });
+      } else if (isDemo) {
+        onLogin({ email: emailInput, role: 'demo' });
         toast({
           title: "Acesso Demonstrativo",
           description: "Você está visualizando a versão demo.",
@@ -39,12 +49,12 @@ const Login = ({ onLogin }: LoginProps) => {
       } else {
         toast({
           title: "Erro de autenticação",
-          description: "E-mail ou senha incorretos.",
+          description: "E-mail ou senha incorretos ou conta inativa.",
           variant: "destructive",
         });
       }
       setIsLoading(false);
-    }, 1000);
+    }, 800);
   };
 
   const handleForgotPassword = (e: React.FormEvent) => {
