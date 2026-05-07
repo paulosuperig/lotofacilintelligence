@@ -78,14 +78,18 @@ const Login = ({ onLogin }: LoginProps) => {
               exit={{ opacity: 0, x: 20 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="flex flex-col items-center mb-10 text-center">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-600 to-fuchsia-600 flex items-center justify-center shadow-lg shadow-purple-500/20 mb-6">
-                  <Clover size={32} className="text-white" />
-                </div>
-                <h1 className="text-3xl font-display font-bold text-zinc-900 mb-2">
+              <div className="flex flex-col items-center mb-8 md:mb-10 text-center">
+                <motion.div 
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-purple-600 to-fuchsia-600 flex items-center justify-center shadow-lg shadow-purple-500/20 mb-4 md:mb-6"
+                >
+                  <Clover className="text-white w-7 h-7 md:w-8 md:h-8" />
+                </motion.div>
+                <h1 className="text-2xl md:text-3xl font-display font-bold text-zinc-900 mb-2 tracking-tight">
                   Lotofácil <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-fuchsia-600">Intelligence</span>
                 </h1>
-                <p className="text-zinc-500 text-sm">Faça login para acessar sua conta premium</p>
+                <p className="text-zinc-500 text-xs md:text-sm">Faça login para acessar sua conta premium</p>
               </div>
 
               <form onSubmit={handleLogin} className="space-y-6">
@@ -169,12 +173,12 @@ const Login = ({ onLogin }: LoginProps) => {
                 <span className="text-xs font-bold uppercase tracking-widest">Voltar ao login</span>
               </button>
 
-              <div className="flex flex-col items-center mb-10 text-center">
-                <div className="w-16 h-16 rounded-2xl bg-purple-50 flex items-center justify-center mb-6">
-                  <Mail size={32} className="text-purple-600" />
+              <div className="flex flex-col items-center mb-8 md:mb-10 text-center">
+                <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-purple-50 flex items-center justify-center mb-4 md:mb-6">
+                  <Mail className="text-purple-600 w-7 h-7 md:w-8 md:h-8" />
                 </div>
-                <h1 className="text-3xl font-display font-bold text-zinc-900 mb-2">Recuperar Senha</h1>
-                <p className="text-zinc-500 text-sm max-w-[240px]">Informe seu e-mail para receber as instruções de recuperação.</p>
+                <h1 className="text-2xl md:text-3xl font-display font-bold text-zinc-900 mb-2 tracking-tight">Recuperar Senha</h1>
+                <p className="text-zinc-500 text-xs md:text-sm max-w-[240px]">Informe seu e-mail para receber as instruções de recuperação.</p>
               </div>
 
               <form onSubmit={handleForgotPassword} className="space-y-6">
