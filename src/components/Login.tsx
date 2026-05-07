@@ -228,7 +228,7 @@ const Login = ({ onLogin }: LoginProps) => {
         className="mt-auto mb-6 px-4"
         aria-label="Rodapé institucional"
       >
-        <p className="text-xs text-purple-400/70 uppercase tracking-[0.15em] font-medium text-center">
+        <p className="text-[10px] text-purple-400/70 font-medium text-center">
           Lotofácil Intelligence {currentYear} - Desenvolvido por: <span className="font-semibold text-purple-500/80">Paulo H. Santos</span>
         </p>
       </motion.footer>
