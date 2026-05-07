@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useToast } from './use-toast';
 import { getLatestResult } from '@/services/lotteryApi';
 import { LotteryResult, SavedGame } from '@/types/lottery';
-import { supabase } from '@/integrations/supabase/client';
+import { generateSecureId } from '@/lib/security/utils';
 
 export const useLottery = () => {
   const { toast } = useToast();
@@ -16,14 +16,16 @@ export const useLottery = () => {
     try {
       const data = await getLatestResult();
       setLatestResult(data);
-      // Salvar no cache local para carregamento instantâneo no futuro
       localStorage.setItem('latest_lottery_result', JSON.stringify(data));
     } catch (error) {
       console.error("Error fetching latest result:", error);
-      // Tentar carregar do cache se a API falhar
       const cached = localStorage.getItem('latest_lottery_result');
       if (cached) {
-        setLatestResult(JSON.parse(cached));
+        try {
+          setLatestResult(JSON.parse(cached));
+        } catch (e) {
+          console.error("Error parsing cached result", e);
+        }
       }
       toast({
         title: "Erro ao atualizar",
@@ -36,48 +38,118 @@ export const useLottery = () => {
     }
   };
 
-  const loadHistory = async () => {
-    // Preparação para Supabase:
-    // const { data, error } = await supabase.from('games_history').select('*').order('created_at', { ascending: false });
-    
+  const loadHistory = useCallback(() => {
     const saved = localStorage.getItem('lottery_history');
     if (saved) {
       try {
-        const parsed = JSON.parse(saved);
+        const parsed = JSON.parse(saved) as SavedGame[];
         const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-        setHistory(parsed.filter((g: any) => g.timestamp > sevenDaysAgo).slice(0, 50));
+        const filtered = parsed
+          .filter(g => g.timestamp > sevenDaysAgo)
+          .sort((a, b) => b.timestamp - a.timestamp)
+          .slice(0, 100);
+        
+        setHistory(filtered);
+        
+        // Update storage if we filtered old items
+        if (filtered.length !== parsed.length) {
+          localStorage.setItem('lottery_history', JSON.stringify(filtered));
+        }
       } catch (e) {
-        console.error(e);
+        console.error("Error parsing history", e);
+        setHistory([]);
       }
+    }
+  }, []);
+
+  const clearHistory = async () => {
+    try {
+      localStorage.removeItem('lottery_history');
+      setHistory([]);
+      toast({
+        title: "Histórico limpo",
+        description: "Todos os seus jogos salvos foram removidos com sucesso.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível limpar o histórico.",
+        variant: "destructive"
+      });
     }
   };
 
-  const clearHistory = async () => {
-    // Preparação para Supabase:
-    // await supabase.from('games_history').delete().match({ user_id: currentUserId });
-
-    localStorage.removeItem('lottery_history');
-    setHistory([]);
-    toast({
-      title: "Histórico limpo",
-      description: "Todos os seus jogos salvos foram removidos com sucesso.",
-    });
-  };
-
   const saveToHistory = async (newGames: SavedGame[]) => {
-    // Preparação para Supabase:
-    // await supabase.from('games_history').insert(newGames.map(g => ({ ...g, user_id: userId })));
-
-    const existingHistory = JSON.parse(localStorage.getItem('lottery_history') || '[]');
-    const updatedHistory = [...newGames, ...existingHistory].slice(0, 100);
-    localStorage.setItem('lottery_history', JSON.stringify(updatedHistory));
-    setHistory(updatedHistory);
+    try {
+      const existingHistory = JSON.parse(localStorage.getItem('lottery_history') || '[]');
+      const updatedHistory = [...newGames, ...existingHistory]
+        .sort((a, b) => b.timestamp - a.timestamp)
+        .slice(0, 100);
+      
+      localStorage.setItem('lottery_history', JSON.stringify(updatedHistory));
+      setHistory(updatedHistory);
+      
+      return true;
+    } catch (error) {
+      console.error("Error saving to history", error);
+      toast({
+        title: "Erro ao salvar",
+        description: "Não foi possível salvar o jogo no histórico.",
+        variant: "destructive"
+      });
+      return false;
+    }
   };
+
+  const generateSmartGame = useCallback(() => {
+    const pool = Array.from({ length: 25 }, (_, i) => i + 1);
+    const primes = [2, 3, 5, 7, 11, 13, 17, 19, 23];
+    const moldNumbers = [1, 2, 3, 4, 5, 6, 10, 11, 15, 16, 20, 21, 22, 23, 24, 25];
+    
+    let attempts = 0;
+    let finalGame: number[] = [];
+    let valid = false;
+
+    while (!valid && attempts < 150) {
+      attempts++;
+      const numbers: number[] = [];
+      const localPool = [...pool];
+      
+      for (let i = 0; i < 15; i++) {
+        const randomIndex = Math.floor(Math.random() * localPool.length);
+        numbers.push(localPool.splice(randomIndex, 1)[0]);
+      }
+      
+      const sorted = numbers.sort((a, b) => a - b);
+      
+      const evenCount = sorted.filter(n => n % 2 === 0).length;
+      const sum = sorted.reduce((a, b) => a + b, 0);
+      const pCount = sorted.filter(n => primes.includes(n)).length;
+      const moldCount = sorted.filter(n => moldNumbers.includes(n)).length;
+
+      // Lotofácil target trends:
+      const checkParity = (evenCount === 7 || evenCount === 8);
+      const checkPrimes = (pCount >= 5 && pCount <= 6);
+      const checkMold = (moldCount >= 9 && moldCount <= 11);
+      const checkSum = (sum >= 175 && sum <= 215);
+
+      if ((checkParity && checkPrimes && checkSum && checkMold) || attempts > 100) {
+        finalGame = sorted;
+        valid = true;
+      }
+    }
+
+    return {
+      id: generateSecureId(),
+      numbers: finalGame,
+      timestamp: Date.now()
+    };
+  }, []);
 
   useEffect(() => {
     fetchLatestResult();
     loadHistory();
-  }, []);
+  }, [loadHistory]);
 
   return {
     latestResult,
@@ -87,6 +159,7 @@ export const useLottery = () => {
     fetchLatestResult,
     clearHistory,
     loadHistory,
-    saveToHistory
+    saveToHistory,
+    generateSmartGame
   };
 };
