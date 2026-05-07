@@ -63,6 +63,7 @@ export const useLottery = () => {
     try {
       localStorage.removeItem('lottery_history');
       setHistory([]);
+      window.dispatchEvent(new CustomEvent('lottery-history-updated'));
       toast({
         title: "Histórico limpo",
         description: "Todos os seus jogos salvos foram removidos com sucesso.",
@@ -124,6 +125,9 @@ export const useLottery = () => {
       
       // Performance: Batch state updates
       setHistory(updatedHistory);
+      
+      // Cross-instance sync: notify other useLottery instances
+      window.dispatchEvent(new CustomEvent('lottery-history-updated'));
       
       return { success: true, duplicate: false };
     } catch (error) {
