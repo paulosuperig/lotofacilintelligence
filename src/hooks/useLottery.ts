@@ -63,6 +63,7 @@ export const useLottery = () => {
     try {
       localStorage.removeItem('lottery_history');
       setHistory([]);
+      window.dispatchEvent(new CustomEvent('lottery-history-updated'));
       toast({
         title: "Histórico limpo",
         description: "Todos os seus jogos salvos foram removidos com sucesso.",
@@ -124,6 +125,9 @@ export const useLottery = () => {
       
       // Performance: Batch state updates
       setHistory(updatedHistory);
+      
+      // Cross-instance sync: notify other useLottery instances
+      window.dispatchEvent(new CustomEvent('lottery-history-updated'));
       
       return { success: true, duplicate: false };
     } catch (error) {
@@ -206,6 +210,16 @@ export const useLottery = () => {
   useEffect(() => {
     fetchLatestResult();
     loadHistory();
+    
+    // Cross-instance sync: reload history when any instance updates it
+    const handleHistoryUpdate = () => loadHistory();
+    window.addEventListener('lottery-history-updated', handleHistoryUpdate);
+    window.addEventListener('storage', handleHistoryUpdate);
+    
+    return () => {
+      window.removeEventListener('lottery-history-updated', handleHistoryUpdate);
+      window.removeEventListener('storage', handleHistoryUpdate);
+    };
   }, [loadHistory]);
 
   return {
