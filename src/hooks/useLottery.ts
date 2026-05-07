@@ -142,36 +142,56 @@ export const useLottery = () => {
     const primes = [2, 3, 5, 7, 11, 13, 17, 19, 23];
     const moldNumbers = [1, 2, 3, 4, 5, 6, 10, 11, 15, 16, 20, 21, 22, 23, 24, 25];
     
+    // Obter assinaturas do histórico para evitar repetição total
+    const historySignatures = new Set(history.map(g => [...g.numbers].sort((a, b) => a - b).join(',')));
+    
     let attempts = 0;
     let finalGame: number[] = [];
     let valid = false;
 
-    while (!valid && attempts < 150) {
+    while (!valid && attempts < 300) {
       attempts++;
       const numbers: number[] = [];
-      const localPool = [...pool];
       
+      // Uso de Crypto para aleatoriedade superior
+      const randomValues = new Uint32Array(15);
+      window.crypto.getRandomValues(randomValues);
+      
+      const localPool = [...pool];
       for (let i = 0; i < 15; i++) {
-        const randomIndex = Math.floor(Math.random() * localPool.length);
+        const randomIndex = randomValues[i] % localPool.length;
         numbers.push(localPool.splice(randomIndex, 1)[0]);
       }
       
       const sorted = numbers.sort((a, b) => a - b);
+      const signature = sorted.join(',');
+
+      // 1. Garantia de Unicidade: Nunca repete o que já está no histórico
+      if (historySignatures.has(signature)) continue;
       
       const evenCount = sorted.filter(n => n % 2 === 0).length;
       const sum = sorted.reduce((a, b) => a + b, 0);
       const pCount = sorted.filter(n => primes.includes(n)).length;
       const moldCount = sorted.filter(n => moldNumbers.includes(n)).length;
 
-      // Lotofácil target trends:
-      const checkParity = (evenCount === 7 || evenCount === 8);
-      const checkPrimes = (pCount >= 5 && pCount <= 6);
-      const checkMold = (moldCount >= 9 && moldCount <= 11);
-      const checkSum = (sum >= 175 && sum <= 215);
+      // 2. Filtros Matemáticos e Históricos (Baseados em tendências reais)
+      const checkParity = (evenCount >= 7 && evenCount <= 8); // Tendência de 60%
+      const checkPrimes = (pCount >= 5 && pCount <= 6);       // Frequência alta
+      const checkMold = (moldCount >= 9 && moldCount <= 11); // Padrão de borda
+      const checkSum = (sum >= 170 && sum <= 220);           // Faixa central de massa
 
-      if ((checkParity && checkPrimes && checkSum && checkMold) || attempts > 100) {
-        finalGame = sorted;
-        valid = true;
+      // Na primeira metade das tentativas, buscamos o "jogo perfeito"
+      // Se não encontrar, relaxamos levemente os critérios para garantir performance
+      if (attempts < 150) {
+        if (checkParity && checkPrimes && checkSum && checkMold) {
+          finalGame = sorted;
+          valid = true;
+        }
+      } else {
+        if ((checkParity && checkSum) || attempts > 250) {
+          finalGame = sorted;
+          valid = true;
+        }
       }
     }
 
@@ -180,7 +200,7 @@ export const useLottery = () => {
       numbers: finalGame,
       timestamp: Date.now()
     };
-  }, []);
+  }, [history]);
 
   useEffect(() => {
     fetchLatestResult();
