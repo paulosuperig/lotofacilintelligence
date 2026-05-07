@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useToast } from './use-toast';
-import { validateEmail, generateSecureId, hashData } from '@/lib/security/utils';
+import { validateEmail, generateSecureId, hashData, sanitizeString } from '@/lib/security/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { UserProfile } from '@/types/lottery';
 
@@ -28,7 +28,9 @@ export const useAdmin = () => {
   };
 
   const createOrUpdateUser = async (userData: any, editingUser: any = null) => {
-    if (!validateEmail(userData.email)) {
+    const sanitizedEmail = sanitizeString(userData.email);
+    
+    if (!validateEmail(sanitizedEmail)) {
       toast({ 
         title: "Erro de validação", 
         description: "Por favor, insira um e-mail válido.",
@@ -38,14 +40,23 @@ export const useAdmin = () => {
     }
 
     if (editingUser) {
-      const updated = users.map(u => u.id === editingUser.id ? { ...u, ...userData } : u);
+      const updated = users.map(u => u.id === editingUser.id ? { ...u, ...userData, email: sanitizedEmail } : u);
       saveUsers(updated);
       toast({ title: "Usuário atualizado", description: "As alterações foram salvas com sucesso." });
     } else {
-      // Securely hash password before storing (simulated with hashData utility)
+      if (!userData.password || userData.password.length < 6) {
+        toast({ 
+          title: "Senha insegura", 
+          description: "A senha deve ter pelo menos 6 caracteres.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
       const hashedPassword = await hashData(userData.password);
       const newUser = {
         ...userData,
+        email: sanitizedEmail,
         password: hashedPassword,
         id: generateSecureId(),
         createdAt: new Date().toISOString()
