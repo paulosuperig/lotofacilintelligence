@@ -102,9 +102,10 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-[#f5f3ff] text-zinc-900 selection:bg-purple-500/30;
+    @apply bg-[#f5f3ff] text-zinc-900 selection:bg-purple-500/30 text-[0.92rem];
     font-feature-settings: "rlig" 1, "calt" 1;
     -webkit-font-smoothing: antialiased;
+    line-height: 1.6;
   }
 
   h1, h2, h3, h4, h5, h6 {
