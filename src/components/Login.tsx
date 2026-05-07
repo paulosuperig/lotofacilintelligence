@@ -63,7 +63,7 @@ const Login = ({ onLogin }: LoginProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f3ff] flex flex-col items-center justify-center p-4 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
+    <div className="relative min-h-screen bg-[#f5f3ff] flex flex-col items-center justify-center p-4 pt-[env(safe-area-inset-top)] pb-[calc(env(safe-area-inset-bottom)+3rem)]">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -229,7 +229,7 @@ const Login = ({ onLogin }: LoginProps) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8 }}
-        className="mt-auto mb-6 px-4"
+        className="absolute bottom-[calc(env(safe-area-inset-bottom)+1rem)] left-0 right-0 px-4"
         aria-label="Rodapé institucional"
       >
         <p className="text-[10px] text-purple-400/70 font-medium text-center">
