@@ -222,12 +222,12 @@ const Login = ({ onLogin }: LoginProps) => {
       
       <motion.footer 
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-        className="mt-8 text-center"
+        animate={{ opacity: 0.5 }}
+        transition={{ delay: 0.8 }}
+        className="mt-12 mb-4 text-center"
       >
-        <p className="text-[11px] text-zinc-400 font-medium tracking-wide">
-          Desenvolvido por: <span className="text-purple-600 font-bold">Paulo H. Santos</span>
+        <p className="text-[9px] text-zinc-400 uppercase tracking-[0.15em] font-medium">
+          Desenvolvido por: Paulo H. Santos
         </p>
       </motion.footer>
     </div>
