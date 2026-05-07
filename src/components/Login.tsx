@@ -227,7 +227,7 @@ const Login = ({ onLogin }: LoginProps) => {
         className="mt-12 mb-4 text-center"
       >
         <p className="text-[9px] text-zinc-400 uppercase tracking-[0.15em] font-medium">
-          Desenvolvido por: Paulo H. Santos
+          Desenvolvido por: P. H. S.
         </p>
       </motion.footer>
     </div>
