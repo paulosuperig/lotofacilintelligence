@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clover, Lock, User, Eye, EyeOff, LogIn, ArrowLeft, Mail } from 'lucide-react';
+import { Clover, Lock, User, Eye, EyeOff, LogIn, ArrowLeft, Mail, UserPlus, Phone } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from '@/hooks/use-toast';
@@ -15,7 +15,8 @@ const Login = ({ onLogin }: LoginProps) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [view, setView] = useState<'login' | 'forgot-password'>('login');
+  const [view, setView] = useState<'login' | 'forgot-password' | 'register'>('login');
+  const [registerData, setRegisterData] = useState({ name: '', email: '', whatsapp: '' });
   const { toast } = useToast();
 
   const handleLogin = (e: React.FormEvent) => {
@@ -66,6 +67,21 @@ const Login = ({ onLogin }: LoginProps) => {
       toast({
         title: "E-mail enviado",
         description: `As instruções de recuperação foram enviadas para ${email}.`,
+      });
+      setIsLoading(false);
+      setView('login');
+    }, 1500);
+  };
+
+  const handleRegister = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    // Simulate registration
+    setTimeout(() => {
+      toast({
+        title: "Solicitação enviada",
+        description: "Seu cadastro foi recebido. Entraremos em contato via WhatsApp.",
       });
       setIsLoading(false);
       setView('login');
