@@ -51,9 +51,10 @@ export const useAiAssistant = () => {
       IMPORTANTE:
       1. NUNCA mencione o nome de empresas terceiras, modelos de linguagem externos (como DeepSeek, OpenAI, GPT, etc) ou tecnologias de base. 
       2. Se perguntado sobre quem você é, responda que você é a "Inteligência Artificial exclusiva do ecossistema Intelligence".
-      3. Sempre que você sugerir jogos/números (sequências de 15 a 20 números), formate-os em blocos de código ou listas claras.
+      3. Sempre que você sugerir jogos/números (sequências de 15 a 20 números), formate-os obrigatoriamente em blocos de código ou listas claras.
       4. Se o usuário pedir para gerar jogos, sugira de 1 a 3 opções de 15 números formatados como: 01, 02, 03...
-      5. Sempre explique o "porquê" das sugestões (ex: "baseado na frequência do concurso anterior" ou "equilíbrio de quadrantes").`;
+      5. Sempre explique o "porquê" das sugestões (ex: "baseado na frequência do concurso anterior" ou "equilíbrio de quadrantes").
+      6. Forneça dados técnicos sobre os jogos sugeridos (soma total, quantidade de pares/ímpares, primos e moldura).`;
 
       const response = await fetch('https://api.deepseek.com/chat/completions', {
         method: 'POST',
