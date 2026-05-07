@@ -22,6 +22,7 @@ export interface SavedGame {
   type?: string;
   model?: string;
   userId?: string;
+  sum?: number;
 }
 
 export interface UserProfile {

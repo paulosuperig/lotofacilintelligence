@@ -198,7 +198,8 @@ export const useLottery = () => {
     return {
       id: generateSecureId(),
       numbers: finalGame,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      sum: finalGame.reduce((a, b) => a + b, 0)
     };
   }, [history]);
 
