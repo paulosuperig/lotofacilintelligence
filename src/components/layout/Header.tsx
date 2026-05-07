@@ -39,7 +39,7 @@ export const Header = ({ role, isRefreshing, onRefresh }: HeaderProps) => {
       >
         <button 
           onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-          className="flex w-12 h-12 rounded-2xl bg-white dark:bg-zinc-800 border border-purple-100 dark:border-zinc-700 items-center justify-center text-purple-600 dark:text-purple-400 hover:border-purple-300 dark:hover:border-purple-500 hover:shadow-lg transition-all active:scale-95"
+          className="hidden md:flex w-12 h-12 rounded-2xl bg-white dark:bg-zinc-800 border border-purple-100 dark:border-zinc-700 items-center justify-center text-purple-600 dark:text-purple-400 hover:border-purple-300 dark:hover:border-purple-500 hover:shadow-lg transition-all active:scale-95"
           aria-label="Alternar tema"
         >
           {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
@@ -58,7 +58,7 @@ export const Header = ({ role, isRefreshing, onRefresh }: HeaderProps) => {
           <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{role === 'admin' ? 'Administrador' : 'Membro VIP'}</p>
           <p className="text-[10px] uppercase tracking-widest text-zinc-500 dark:text-zinc-400">{role === 'admin' ? 'Acesso Total' : 'Acesso Demonstrativo'}</p>
         </div>
-        <div className="flex w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-600 to-fuchsia-600 border border-purple-100 dark:border-zinc-700 items-center justify-center text-xs font-display font-bold text-white group cursor-pointer hover:shadow-lg hover:shadow-purple-500/20 transition-all duration-300">
+        <div className="hidden md:flex w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-600 to-fuchsia-600 border border-purple-100 dark:border-zinc-700 items-center justify-center text-xs font-display font-bold text-white group cursor-pointer hover:shadow-lg hover:shadow-purple-500/20 transition-all duration-300">
           <span className="group-hover:scale-110 transition-transform duration-500">VIP</span>
         </div>
       </motion.div>
