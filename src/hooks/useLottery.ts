@@ -79,17 +79,37 @@ export const useLottery = () => {
     }
   };
 
+  const isGameDuplicate = (numbers: number[]) => {
+    const sortedNew = [...numbers].sort((a, b) => a - b).join(',');
+    return history.some(saved => 
+      [...saved.numbers].sort((a, b) => a - b).join(',') === sortedNew
+    );
+  };
+
   const saveToHistory = async (newGames: SavedGame[]) => {
     try {
       const existingHistory = JSON.parse(localStorage.getItem('lottery_history') || '[]');
-      const updatedHistory = [...newGames, ...existingHistory]
+      
+      // Filter out duplicates from the new games being added
+      const nonDuplicateNewGames = newGames.filter(newGame => {
+        const sortedNew = [...newGame.numbers].sort((a, b) => a - b).join(',');
+        return !existingHistory.some((saved: SavedGame) => 
+          [...saved.numbers].sort((a, b) => a - b).join(',') === sortedNew
+        );
+      });
+
+      if (nonDuplicateNewGames.length === 0) {
+        return { success: false, duplicate: true };
+      }
+
+      const updatedHistory = [...nonDuplicateNewGames, ...existingHistory]
         .sort((a, b) => b.timestamp - a.timestamp)
         .slice(0, 100);
       
       localStorage.setItem('lottery_history', JSON.stringify(updatedHistory));
       setHistory(updatedHistory);
       
-      return true;
+      return { success: true, duplicate: false };
     } catch (error) {
       console.error("Error saving to history", error);
       toast({
@@ -97,7 +117,7 @@ export const useLottery = () => {
         description: "Não foi possível salvar o jogo no histórico.",
         variant: "destructive"
       });
-      return false;
+      return { success: false, duplicate: false };
     }
   };
 
@@ -160,6 +180,7 @@ export const useLottery = () => {
     clearHistory,
     loadHistory,
     saveToHistory,
-    generateSmartGame
+    generateSmartGame,
+    isGameDuplicate
   };
 };

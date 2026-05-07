@@ -2,7 +2,26 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Ball } from './Ball';
 import { Button } from '@/components/ui/button';
-import { Zap, RefreshCcw, Save, TrendingUp, History, Copy, Calendar, Check } from 'lucide-react';
+import { 
+  Zap, 
+  RefreshCcw, 
+  Save, 
+  TrendingUp, 
+  History, 
+  Copy, 
+  Calendar, 
+  Check,
+  AlertCircle 
+} from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useLottery } from '@/hooks/useLottery';
@@ -21,10 +40,11 @@ const WhatsAppIcon = () => (
 );
 
 export const GameGenerator = () => {
-  const { history, saveToHistory, generateSmartGame } = useLottery();
+  const { history, saveToHistory, generateSmartGame, isGameDuplicate } = useLottery();
   const [currentResult, setCurrentResult] = useState<SavedGame | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const { toast } = useToast();
 
   const stats = useMemo(() => {
@@ -74,8 +94,15 @@ export const GameGenerator = () => {
 
   const handleSave = async () => {
     if (!currentResult) return;
-    const success = await saveToHistory([currentResult]);
-    if (success) {
+    
+    const result = await saveToHistory([currentResult]);
+    
+    if (result.duplicate) {
+      setShowDuplicateModal(true);
+      return;
+    }
+
+    if (result.success) {
       toast({
         title: "Sucesso!",
         description: "Jogo salvo no seu histórico.",
@@ -97,12 +124,36 @@ export const GameGenerator = () => {
 
   const shareOnWhatsApp = (game: number[]) => {
     const gameText = game.map(n => n.toString().padStart(2, '0')).join(' ');
-    const text = `🔥 *Gerador Inteligente Intelligence* 🔥\n\nConfira meu novo jogo:\n✅ *${gameText}*\n\n🍀 Boa sorte!\nGerado em: ${window.location.origin}`;
+    const text = `🔥 *GERADOR INTELIGENTE* 🔥\n\nConfira meu novo jogo:\n✅ *${gameText}*\n\n🍀 Boa sorte!\nGerado em: ${window.location.origin}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
   };
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-zinc-900 overflow-y-auto pb-20">
+      <AlertDialog open={showDuplicateModal} onOpenChange={setShowDuplicateModal}>
+        <AlertDialogContent className="rounded-[2rem] border-zinc-100 dark:border-zinc-800 shadow-2xl">
+          <AlertDialogHeader>
+            <div className="mx-auto w-16 h-16 bg-amber-50 dark:bg-amber-900/20 rounded-full flex items-center justify-center text-amber-500 mb-4">
+              <AlertCircle size={32} />
+            </div>
+            <AlertDialogTitle className="text-2xl font-display font-bold text-center text-zinc-900 dark:text-zinc-100">
+              Jogo Repetido!
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-center text-zinc-500 dark:text-zinc-400 text-base leading-relaxed">
+              Você já possui este jogo salvo em seu histórico. Experimente gerar uma nova combinação otimizada!
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="sm:justify-center mt-6">
+            <AlertDialogAction 
+              onClick={() => setShowDuplicateModal(false)}
+              className="bg-purple-600 hover:bg-purple-700 text-white rounded-2xl h-12 px-8 font-bold uppercase tracking-widest text-xs transition-all active:scale-95"
+            >
+              Entendido
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <div className="p-6 md:p-12 border-b border-purple-50 dark:border-zinc-800/50">
         <div className="flex flex-col gap-6 mb-8">
           <div>
