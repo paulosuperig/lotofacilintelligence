@@ -210,6 +210,16 @@ export const useLottery = () => {
   useEffect(() => {
     fetchLatestResult();
     loadHistory();
+    
+    // Cross-instance sync: reload history when any instance updates it
+    const handleHistoryUpdate = () => loadHistory();
+    window.addEventListener('lottery-history-updated', handleHistoryUpdate);
+    window.addEventListener('storage', handleHistoryUpdate);
+    
+    return () => {
+      window.removeEventListener('lottery-history-updated', handleHistoryUpdate);
+      window.removeEventListener('storage', handleHistoryUpdate);
+    };
   }, [loadHistory]);
 
   return {
