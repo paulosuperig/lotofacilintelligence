@@ -55,7 +55,7 @@ export const FechamentosPanel = ({ onBack, onSaveGame }: FechamentosPanelProps) 
       <div className="bg-white dark:bg-zinc-900 border border-purple-200 dark:border-zinc-800 rounded-3xl md:rounded-[2rem] p-6 md:p-12 shadow-xl shadow-purple-500/5">
         <div className="flex flex-col md:flex-row items-center md:items-center justify-between mb-8 md:mb-10 gap-4 text-center md:text-left">
           <div className="flex flex-col items-center md:items-start">
-            <h2 className="text-xl md:text-2xl font-display font-bold text-zinc-900 dark:text-zinc-100 mb-1 md:mb-2">Fechamentos PRO</h2>
+            <h2 className="text-lg md:text-xl font-display font-bold text-zinc-900 dark:text-zinc-100 mb-1 md:mb-2">Fechamentos PRO</h2>
             <p className="text-zinc-500 dark:text-zinc-400 text-xs">Modelos matemáticos exclusivos</p>
           </div>
           <Button 
