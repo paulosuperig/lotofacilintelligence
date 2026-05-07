@@ -3,6 +3,7 @@ import { useToast } from './use-toast';
 import { getLatestResult } from '@/services/lotteryApi';
 import { LotteryResult, SavedGame } from '@/types/lottery';
 import { generateSecureId } from '@/lib/security/utils';
+import { supabase, isSupabaseEnabled } from '@/lib/supabase';
 
 export const useLottery = () => {
   const { toast } = useToast();
@@ -38,7 +39,31 @@ export const useLottery = () => {
     }
   };
 
-  const loadHistory = useCallback(() => {
+  const loadHistory = useCallback(async () => {
+    // Priority 1: Supabase (Cloud)
+    if (isSupabaseEnabled()) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data, error } = await supabase
+          .from('saved_games')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (!error && data) {
+          const formattedHistory: SavedGame[] = data.map(item => ({
+            id: item.id,
+            numbers: item.numbers,
+            timestamp: new Date(item.created_at).getTime(),
+            sum: item.sum,
+            model: item.model_used
+          }));
+          setHistory(formattedHistory);
+          return;
+        }
+      }
+    }
+
+    // Priority 2: LocalStorage (Fallback/Offline)
     const saved = localStorage.getItem('lottery_history');
     if (saved) {
       try {
@@ -48,7 +73,6 @@ export const useLottery = () => {
         
         setHistory(filtered);
         
-        // Update storage if we filtered old items
         if (filtered.length !== parsed.length) {
           localStorage.setItem('lottery_history', JSON.stringify(filtered));
         }
@@ -61,6 +85,16 @@ export const useLottery = () => {
 
   const clearHistory = async () => {
     try {
+      if (isSupabaseEnabled()) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          await supabase
+            .from('saved_games')
+            .delete()
+            .eq('user_id', user.id);
+        }
+      }
+
       localStorage.removeItem('lottery_history');
       setHistory([]);
       window.dispatchEvent(new CustomEvent('lottery-history-updated'));
@@ -120,7 +154,23 @@ export const useLottery = () => {
       const updatedHistory = [...securedGames, ...existingHistory]
         .sort((a, b) => b.timestamp - a.timestamp);
       
-      // Persistence: Sync with LocalStorage
+      // Persistence: Cloud Sync (Supabase) if available
+      if (isSupabaseEnabled()) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const gamesToInsert = securedGames.map(game => ({
+            user_id: user.id,
+            numbers: game.numbers,
+            sum: game.sum,
+            model_used: game.model,
+            created_at: new Date(game.timestamp).toISOString()
+          }));
+          
+          await supabase.from('saved_games').insert(gamesToInsert);
+        }
+      }
+
+      // Persistence: Local Fallback
       localStorage.setItem('lottery_history', JSON.stringify(updatedHistory));
       
       // Performance: Batch state updates
