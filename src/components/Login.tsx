@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clover, Lock, User, Eye, EyeOff, LogIn, ArrowLeft, Mail } from 'lucide-react';
+import { Clover, Lock, User, Eye, EyeOff, LogIn, ArrowLeft, Mail, UserPlus, Phone } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from '@/hooks/use-toast';
@@ -15,7 +15,8 @@ const Login = ({ onLogin }: LoginProps) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [view, setView] = useState<'login' | 'forgot-password'>('login');
+  const [view, setView] = useState<'login' | 'forgot-password' | 'register'>('login');
+  const [registerData, setRegisterData] = useState({ name: '', email: '', whatsapp: '' });
   const { toast } = useToast();
 
   const handleLogin = (e: React.FormEvent) => {
@@ -66,6 +67,21 @@ const Login = ({ onLogin }: LoginProps) => {
       toast({
         title: "E-mail enviado",
         description: `As instruções de recuperação foram enviadas para ${email}.`,
+      });
+      setIsLoading(false);
+      setView('login');
+    }, 1500);
+  };
+
+  const handleRegister = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    // Simulate registration
+    setTimeout(() => {
+      toast({
+        title: "Solicitação enviada",
+        description: "Seu cadastro foi recebido. Entraremos em contato via WhatsApp.",
       });
       setIsLoading(false);
       setView('login');
@@ -165,9 +181,19 @@ const Login = ({ onLogin }: LoginProps) => {
                     "Acessar Sistema"
                   )}
                 </Button>
+
+                <div className="pt-4 text-center">
+                  <button 
+                    type="button"
+                    onClick={() => setView('register')}
+                    className="text-xs font-bold text-zinc-400 uppercase tracking-widest hover:text-purple-600 transition-colors"
+                  >
+                    Não tem uma conta? <span className="text-purple-600">Solicite acesso</span>
+                  </button>
+                </div>
               </form>
             </motion.div>
-          ) : (
+          ) : view === 'forgot-password' ? (
             <motion.div
               key="forgot-password"
               initial={{ opacity: 0, x: 20 }}
@@ -222,6 +248,83 @@ const Login = ({ onLogin }: LoginProps) => {
                   ) : (
                     "Enviar Instruções"
                   )}
+                </Button>
+              </form>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="register"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <button 
+                onClick={() => setView('login')}
+                className="flex items-center gap-2 text-zinc-400 hover:text-purple-600 transition-colors mb-6 group"
+              >
+                <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
+                <span className="text-xs font-bold uppercase tracking-widest">Voltar ao login</span>
+              </button>
+
+              <div className="flex flex-col items-center mb-6 text-center">
+                <div className="w-14 h-14 rounded-2xl bg-purple-50 flex items-center justify-center mb-4">
+                  <UserPlus className="text-purple-600 w-7 h-7" />
+                </div>
+                <h1 className="text-2xl font-display font-bold text-zinc-900 mb-2 tracking-tight">Criar Conta</h1>
+                <p className="text-zinc-500 text-xs">Preencha os dados para solicitar seu acesso premium</p>
+              </div>
+
+              <form onSubmit={handleRegister} className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Nome Completo</label>
+                  <div className="relative">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
+                    <Input
+                      placeholder="Seu nome"
+                      value={registerData.name}
+                      onChange={(e) => setRegisterData({...registerData, name: e.target.value})}
+                      className="pl-11 h-12 rounded-xl border-purple-100 bg-purple-50/30"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">WhatsApp</label>
+                  <div className="relative">
+                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
+                    <Input
+                      placeholder="(00) 00000-0000"
+                      value={registerData.whatsapp}
+                      onChange={(e) => setRegisterData({...registerData, whatsapp: e.target.value})}
+                      className="pl-11 h-12 rounded-xl border-purple-100 bg-purple-50/30"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">E-mail</label>
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
+                    <Input
+                      type="email"
+                      placeholder="seu@email.com"
+                      value={registerData.email}
+                      onChange={(e) => setRegisterData({...registerData, email: e.target.value})}
+                      className="pl-11 h-12 rounded-xl border-purple-100 bg-purple-50/30"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <Button 
+                  type="submit" 
+                  disabled={isLoading}
+                  className="w-full h-12 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm shadow-lg transition-all active:scale-[0.98] mt-2"
+                >
+                  {isLoading ? "Enviando..." : "Solicitar Acesso Premium"}
                 </Button>
               </form>
             </motion.div>
