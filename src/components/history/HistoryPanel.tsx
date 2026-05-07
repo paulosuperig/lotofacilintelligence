@@ -158,11 +158,19 @@ export const HistoryPanel = ({
                   className="p-6 bg-zinc-50 dark:bg-zinc-800/30 border border-zinc-100 dark:border-zinc-800 rounded-3xl flex flex-col gap-6 group hover:border-purple-200 dark:hover:border-purple-900/50 transition-all shadow-sm"
                 >
                   <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                      <Calendar size={14} className="text-zinc-400" />
-                      <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
-                        {new Date(item.timestamp).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
-                      </span>
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-2">
+                        <Calendar size={12} className="text-zinc-400" />
+                        <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">
+                          {new Date(item.timestamp).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                      {item.sum && (
+                        <div className="flex items-center gap-1.5 bg-purple-50 dark:bg-purple-900/20 px-2 py-0.5 rounded-lg border border-purple-100/50 dark:border-purple-800/30 w-fit">
+                          <span className="text-[8px] font-bold text-purple-400 uppercase tracking-tighter">Soma</span>
+                          <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400 tabular-nums">{item.sum}</span>
+                        </div>
+                      )}
                     </div>
                     <Button 
                       size="icon"
