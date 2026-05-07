@@ -93,7 +93,7 @@ export const HistoryPanel = ({
           </Button>
           <div>
             <h2 className="text-3xl font-display font-bold text-zinc-900 dark:text-zinc-100">Meu Histórico</h2>
-            <p className="text-zinc-500 dark:text-zinc-400 text-xs font-medium tracking-wide uppercase">Últimos 7 dias • {history.length} jogos</p>
+            <p className="text-zinc-500 dark:text-zinc-400 text-xs font-medium tracking-wide uppercase">Histórico Permanente • {history.length} jogos</p>
           </div>
         </div>
 
