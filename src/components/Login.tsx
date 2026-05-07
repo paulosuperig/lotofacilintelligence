@@ -342,8 +342,10 @@ const Login = ({ onLogin }: LoginProps) => {
         className="absolute bottom-[calc(env(safe-area-inset-bottom)+1rem)] left-0 right-0 px-4"
         aria-label="Rodapé institucional"
       >
-        <p className="text-[10px] text-purple-400/70 font-medium text-center">
-          Lotofácil Intelligence {currentYear} - Desenvolvido por: <span className="font-semibold text-purple-500/80">Paulo H. Santos</span>
+        <p className="text-[10px] text-purple-400/70 font-medium text-center flex flex-col gap-1 md:block">
+          <span>Lotofácil Intelligence {currentYear}</span>
+          <span className="hidden md:inline"> - </span>
+          <span>Desenvolvido por: <span className="font-semibold text-purple-500/80">Paulo H. Santos</span></span>
         </p>
       </motion.footer>
     </div>
