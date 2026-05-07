@@ -31,30 +31,42 @@ const Login = ({ onLogin }: LoginProps) => {
       // In a real environment, this would be a backend call
       const storedUsers = JSON.parse(localStorage.getItem('intelligence_system_users') || '[]');
       
-      // Legacy hardcoded fallback for first access (to be replaced by DB)
-      const isAdmin = emailInput === 'admin@admin.com.br' && passwordInput === '81260642';
-      const isDemo = emailInput === 'demo@demo.com.br' && passwordInput === '123456';
-      
-      if (isAdmin) {
-        onLogin({ email: emailInput, role: 'admin' });
-        toast({
-          title: "Bem-vindo, Admin!",
-          description: "Acesso total liberado.",
-        });
-      } else if (isDemo) {
-        onLogin({ email: emailInput, role: 'demo' });
-        toast({
-          title: "Acesso Demonstrativo",
-          description: "Você está visualizando a versão demo.",
-        });
-      } else {
-        toast({
-          title: "Erro de autenticação",
-          description: "E-mail ou senha incorretos ou conta inativa.",
-          variant: "destructive",
-        });
-      }
-      setIsLoading(false);
+      const foundUser = storedUsers.find((u: any) => 
+        u.email.toLowerCase() === emailInput && u.status === 'active'
+      );
+
+      // Secure verification logic
+      const verifyAccess = async () => {
+        // Fallback for first access/recovery
+        if (emailInput === 'admin@admin.com.br' && passwordInput === '81260642') {
+          return { email: emailInput, role: 'admin' as const };
+        }
+        
+        if (foundUser) {
+          const hashedInput = await hashData(passwordInput);
+          if (foundUser.password === hashedInput) {
+            return { email: foundUser.email, role: foundUser.role as 'admin' | 'demo' };
+          }
+        }
+        return null;
+      };
+
+      verifyAccess().then((userSession) => {
+        if (userSession) {
+          onLogin(userSession);
+          toast({
+            title: userSession.role === 'admin' ? "Bem-vindo, Admin!" : "Bem-vindo!",
+            description: userSession.role === 'admin' ? "Acesso total liberado." : "Acesso VIP Intelligence liberado.",
+          });
+        } else {
+          toast({
+            title: "Erro de autenticação",
+            description: "E-mail ou senha incorretos ou conta inativa.",
+            variant: "destructive",
+          });
+        }
+        setIsLoading(false);
+      });
     }, 800);
   };
 

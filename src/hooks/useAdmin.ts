@@ -40,7 +40,12 @@ export const useAdmin = () => {
     }
 
     if (editingUser) {
-      const updated = users.map(u => u.id === editingUser.id ? { ...u, ...userData, email: sanitizedEmail } : u);
+      const updated = users.map(u => u.id === editingUser.id ? { 
+        ...u, 
+        email: sanitizedEmail,
+        role: userData.role || u.role,
+        status: userData.status || u.status
+      } : u);
       saveUsers(updated);
       toast({ title: "Usuário atualizado", description: "As alterações foram salvas com sucesso." });
     } else {
