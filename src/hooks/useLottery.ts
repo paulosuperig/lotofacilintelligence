@@ -71,9 +71,15 @@ export const useLottery = () => {
     if (saved) {
       try {
         // Validation: Defensive schema check
-        const parsed = saved.map(g => SavedGameSchema.parse(g));
+        const parsed = saved.map(g => {
+          const validated = SavedGameSchema.parse(g);
+          return {
+            ...validated,
+            id: validated.id || generateSecureId()
+          } as SavedGame;
+        });
         const filtered = parsed.sort((a, b) => b.timestamp - a.timestamp);
-        
+
         setHistory(filtered);
       } catch (e) {
         console.error("[Security] History schema validation failed:", e);
