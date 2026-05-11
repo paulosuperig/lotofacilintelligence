@@ -19,7 +19,7 @@ import { BentoGrid } from '@/components/home/BentoGrid';
 
 const Index = () => {
   const { toast } = useToast();
-  const [user, setUser] = useState<{ email: string, role: 'admin' | 'demo' } | null>(null);
+  const { user, login, logout, loading, isAdmin } = useAuth();
   const [activeTab, setActiveTab] = useState('home');
 
   const { 
@@ -49,21 +49,12 @@ const Index = () => {
     toggleUserStatus
   } = useAdmin();
 
-  useEffect(() => {
-    const savedUser = localStorage.getItem('intelligence_user');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
-  }, []);
-
   const handleLogin = (userData: { email: string, role: 'admin' | 'demo' }) => {
-    setUser(userData);
-    localStorage.setItem('intelligence_user', JSON.stringify(userData));
+    login(userData.email, userData.role);
   };
 
   const handleLogout = () => {
-    setUser(null);
-    localStorage.removeItem('intelligence_user');
+    logout();
     toast({
       title: "Sessão encerrada",
       description: "Você saiu do sistema com sucesso.",
@@ -107,6 +98,8 @@ const Index = () => {
     });
   }, [saveToHistory, toast]);
 
+  if (loading) return null; // Prevent flicker during auth check
+  
   if (!user) {
     return <Login onLogin={handleLogin} />;
   }
@@ -162,7 +155,7 @@ const Index = () => {
               />
             )}
 
-            {activeTab === 'ajustes' && user.role === 'admin' && (
+            {activeTab === 'ajustes' && isAdmin && (
               <AdminPanel 
                 users={users}
                 onBack={() => setActiveTab('home')}

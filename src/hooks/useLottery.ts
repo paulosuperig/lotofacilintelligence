@@ -4,6 +4,8 @@ import { getLatestResult } from '@/services/lotteryApi';
 import { LotteryResult, SavedGame } from '@/types/lottery';
 import { generateSecureId } from '@/lib/security/utils';
 import { supabase, isSupabaseEnabled } from '@/lib/supabase';
+import { secureStorage } from '@/lib/security/secureStorage';
+import { SavedGameSchema } from '@/lib/security/schemas';
 
 export const useLottery = () => {
   const { toast } = useToast();
@@ -95,7 +97,7 @@ export const useLottery = () => {
         }
       }
 
-      localStorage.removeItem('lottery_history');
+      secureStorage.removeItem('lottery_history');
       setHistory([]);
       window.dispatchEvent(new CustomEvent('lottery-history-updated'));
       toast({
@@ -129,9 +131,8 @@ export const useLottery = () => {
       // Input Validation
       if (!newGames || newGames.length === 0) return { success: false, duplicate: false };
 
-      const stored = localStorage.getItem('lottery_history');
-      const existingHistory: SavedGame[] = stored ? JSON.parse(stored) : [];
-      
+      const existingHistory = secureStorage.getItem<SavedGame[]>('lottery_history') || [];
+
       // Zero Trust: Filter out duplicates and sanitize inputs before state update
       const nonDuplicateNewGames = newGames.filter(newGame => {
         const signature = [...newGame.numbers].sort((a, b) => a - b).join(',');
@@ -170,9 +171,9 @@ export const useLottery = () => {
         }
       }
 
-      // Persistence: Local Fallback
-      localStorage.setItem('lottery_history', JSON.stringify(updatedHistory));
-      
+      // Persistence: Local Fallback (Encrypted)
+      secureStorage.setItem('lottery_history', updatedHistory);
+
       // Performance: Batch state updates
       setHistory(updatedHistory);
       
