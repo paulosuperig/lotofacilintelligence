@@ -1,9 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 import { useToast } from './use-toast';
 import { getLatestResult } from '@/services/lotteryApi';
 import { LotteryResult, SavedGame } from '@/types/lottery';
 import { generateSecureId } from '@/lib/security/utils';
 import { supabase, isSupabaseEnabled } from '@/lib/supabase';
+import { secureStorage } from '@/lib/security/secureStorage';
+import { SavedGameSchema } from '@/lib/security/schemas';
 
 export const useLottery = () => {
   const { toast } = useToast();
@@ -63,21 +66,23 @@ export const useLottery = () => {
       }
     }
 
-    // Priority 2: LocalStorage (Fallback/Offline)
-    const saved = localStorage.getItem('lottery_history');
+    // Priority 2: LocalStorage (Fallback/Offline) - Now Secure
+    const saved = secureStorage.getItem<SavedGame[]>('lottery_history');
     if (saved) {
       try {
-        const parsed = JSON.parse(saved) as SavedGame[];
-        const filtered = parsed
-          .sort((a, b) => b.timestamp - a.timestamp);
-        
+        // Validation: Defensive schema check
+        const parsed = saved.map(g => {
+          const validated = SavedGameSchema.parse(g);
+          return {
+            ...validated,
+            id: validated.id || generateSecureId()
+          } as SavedGame;
+        });
+        const filtered = parsed.sort((a, b) => b.timestamp - a.timestamp);
+
         setHistory(filtered);
-        
-        if (filtered.length !== parsed.length) {
-          localStorage.setItem('lottery_history', JSON.stringify(filtered));
-        }
       } catch (e) {
-        console.error("Error parsing history", e);
+        console.error("[Security] History schema validation failed:", e);
         setHistory([]);
       }
     }
@@ -95,7 +100,7 @@ export const useLottery = () => {
         }
       }
 
-      localStorage.removeItem('lottery_history');
+      secureStorage.removeItem('lottery_history');
       setHistory([]);
       window.dispatchEvent(new CustomEvent('lottery-history-updated'));
       toast({
@@ -129,9 +134,8 @@ export const useLottery = () => {
       // Input Validation
       if (!newGames || newGames.length === 0) return { success: false, duplicate: false };
 
-      const stored = localStorage.getItem('lottery_history');
-      const existingHistory: SavedGame[] = stored ? JSON.parse(stored) : [];
-      
+      const existingHistory = secureStorage.getItem<SavedGame[]>('lottery_history') || [];
+
       // Zero Trust: Filter out duplicates and sanitize inputs before state update
       const nonDuplicateNewGames = newGames.filter(newGame => {
         const signature = [...newGame.numbers].sort((a, b) => a - b).join(',');
@@ -145,7 +149,7 @@ export const useLottery = () => {
       }
 
       // Security: Ensure each new game has a cryptographically secure ID if missing
-      const securedGames = nonDuplicateNewGames.map(game => ({
+      const securedGames: SavedGame[] = nonDuplicateNewGames.map(game => ({
         ...game,
         id: game.id || generateSecureId(),
         timestamp: game.timestamp || Date.now()
@@ -170,9 +174,9 @@ export const useLottery = () => {
         }
       }
 
-      // Persistence: Local Fallback
-      localStorage.setItem('lottery_history', JSON.stringify(updatedHistory));
-      
+      // Persistence: Local Fallback (Encrypted)
+      secureStorage.setItem('lottery_history', updatedHistory);
+
       // Performance: Batch state updates
       setHistory(updatedHistory);
       
