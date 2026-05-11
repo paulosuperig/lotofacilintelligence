@@ -143,7 +143,7 @@ export const useLottery = () => {
       }
 
       // Security: Ensure each new game has a cryptographically secure ID if missing
-      const securedGames = nonDuplicateNewGames.map(game => ({
+      const securedGames: SavedGame[] = nonDuplicateNewGames.map(game => ({
         ...game,
         id: game.id || generateSecureId(),
         timestamp: game.timestamp || Date.now()
