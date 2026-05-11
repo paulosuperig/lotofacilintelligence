@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 import { useToast } from './use-toast';
 import { getLatestResult } from '@/services/lotteryApi';
 import { LotteryResult, SavedGame } from '@/types/lottery';
@@ -65,21 +66,17 @@ export const useLottery = () => {
       }
     }
 
-    // Priority 2: LocalStorage (Fallback/Offline)
-    const saved = localStorage.getItem('lottery_history');
+    // Priority 2: LocalStorage (Fallback/Offline) - Now Secure
+    const saved = secureStorage.getItem<SavedGame[]>('lottery_history');
     if (saved) {
       try {
-        const parsed = JSON.parse(saved) as SavedGame[];
-        const filtered = parsed
-          .sort((a, b) => b.timestamp - a.timestamp);
+        // Validation: Defensive schema check
+        const parsed = saved.map(g => SavedGameSchema.parse(g));
+        const filtered = parsed.sort((a, b) => b.timestamp - a.timestamp);
         
         setHistory(filtered);
-        
-        if (filtered.length !== parsed.length) {
-          localStorage.setItem('lottery_history', JSON.stringify(filtered));
-        }
       } catch (e) {
-        console.error("Error parsing history", e);
+        console.error("[Security] History schema validation failed:", e);
         setHistory([]);
       }
     }
