@@ -3,6 +3,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useLottery } from '@/hooks/useLottery';
 import { useAiAssistant } from '@/hooks/useAiAssistant';
 import { useAdmin } from '@/hooks/useAdmin';
+import { useAuth } from '@/hooks/useAuth';
 import { AnimatePresence } from 'framer-motion';
 import { generateSecureId } from '@/lib/security/utils';
 
