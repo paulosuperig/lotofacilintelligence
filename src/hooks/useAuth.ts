@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { cookieStorage } from '@/lib/security/cookieStorage';
 import { UserSchema, type ValidatedUser } from '@/lib/security/schemas';
 import CryptoJS from 'crypto-js';
-import { useToast } from './use-toast';
+import { toast } from 'sonner';
 
 const SESSION_SECRET = import.meta.env.VITE_SESSION_ENCRYPTION_KEY || 'session-vault-secret-2024';
 const SESSION_DURATION_MS = 1000 * 60 * 60; // 1 hour session
@@ -14,7 +14,7 @@ const SESSION_DURATION_MS = 1000 * 60 * 60; // 1 hour session
 export const useAuth = () => {
   const [user, setUser] = useState<ValidatedUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
+  
 
   const logout = useCallback(() => {
     cookieStorage.removeItem('intelligence_session');
@@ -62,10 +62,8 @@ export const useAuth = () => {
             const wasLoggedIn = !!user;
             logout();
             if (wasLoggedIn) {
-              toast({
-                title: "Sessão expirada",
+              toast.error("Sessão expirada", {
                 description: "Sua sessão expirou por segurança. Faça login novamente.",
-                variant: "destructive"
               });
             }
           }
