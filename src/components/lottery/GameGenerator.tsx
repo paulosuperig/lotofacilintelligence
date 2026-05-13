@@ -194,14 +194,14 @@ export const GameGenerator = () => {
           </Button>
         </div>
 
-        <div className="min-h-[160px] md:min-h-[200px] flex flex-wrap justify-center content-center gap-2 md:gap-4 bg-zinc-50 dark:bg-zinc-950/50 rounded-[1.5rem] md:rounded-[2rem] p-4 md:p-12 border border-zinc-100 dark:border-zinc-800/50 shadow-inner relative overflow-hidden">
+        <div className="min-h-[140px] md:min-h-[200px] flex flex-wrap justify-center content-center gap-1.5 sm:gap-2 md:gap-4 bg-zinc-50 dark:bg-zinc-950/50 rounded-2xl md:rounded-[2rem] p-3 sm:p-4 md:p-12 border border-zinc-100 dark:border-zinc-800/50 shadow-inner relative overflow-hidden">
           <AnimatePresence mode="wait">
             {currentResult ? (
               <motion.div 
                 key="game"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="flex flex-wrap justify-center gap-3 md:gap-5"
+                className="flex flex-wrap justify-center gap-1.5 sm:gap-3 md:gap-5"
               >
                 {currentResult.numbers.map((num, i) => (
                   <motion.div
@@ -238,12 +238,12 @@ export const GameGenerator = () => {
         </div>
       </div>
 
-      <div className="p-6 md:p-12 flex-grow flex flex-col">
+      <div className="p-4 sm:p-6 md:p-12 flex-grow flex flex-col">
         {stats && (
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-10"
+            className="grid grid-cols-2 xs:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4 mb-10"
           >
             <StatCard label="Pares/Ímpares" value={`${stats.pairs}/${stats.odd}`} icon={<TrendingUp size={14}/>} />
             <StatCard label="Soma Total" value={stats.sum} icon={<TrendingUp size={14}/>} />
@@ -324,7 +324,7 @@ export const GameGenerator = () => {
 };
 
 const StatCard = ({ label, value, icon }: { label: string, value: string | number, icon: React.ReactNode }) => (
-  <div className="bg-white dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-800 rounded-2xl p-5 shadow-sm">
+  <div className="bg-white dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-800 rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-sm">
     <div className="flex items-center gap-2 text-zinc-400 mb-2">
       <span className="shrink-0">{icon}</span>
       <span className="text-[9px] uppercase font-bold tracking-widest">{label}</span>

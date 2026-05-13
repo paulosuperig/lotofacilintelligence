@@ -97,7 +97,7 @@ export const AiAssistant = ({
               </div>
               <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-xs mb-8">Olá! Eu sou seu assistente inteligente. Como posso ajudar com suas análises hoje?</p>
               
-              <div className="w-full max-w-2xl grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+              <div className="w-full max-w-2xl grid grid-cols-1 xs:grid-cols-2 gap-3 sm:gap-4 mb-8 px-2">
                 <button 
                   onClick={() => onSendMessage(undefined, "Pode gerar 3 sugestões de jogos baseadas nas dezenas mais quentes e tendências atuais?")}
                   className="p-4 bg-white dark:bg-zinc-800 border border-purple-100 dark:border-zinc-700 rounded-2xl text-left hover:border-purple-300 dark:hover:border-purple-500 hover:shadow-md hover:shadow-purple-500/5 transition-all group"
