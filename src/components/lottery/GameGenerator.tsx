@@ -147,7 +147,7 @@ export const GameGenerator = () => {
   }, []);
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-zinc-900 overflow-y-auto pb-20">
+    <div className="flex flex-col h-full bg-white dark:bg-zinc-900 overflow-y-auto pb-32">
       <AlertDialog open={showDuplicateModal} onOpenChange={setShowDuplicateModal}>
         <AlertDialogContent className="rounded-[2rem] border-zinc-100 dark:border-zinc-800 shadow-2xl">
           <AlertDialogHeader>
@@ -194,7 +194,7 @@ export const GameGenerator = () => {
           </Button>
         </div>
 
-        <div className="min-h-[200px] flex flex-wrap justify-center content-center gap-3 md:gap-4 bg-zinc-50 dark:bg-zinc-950/50 rounded-[2rem] p-8 md:p-12 border border-zinc-100 dark:border-zinc-800/50 shadow-inner relative overflow-hidden">
+        <div className="min-h-[160px] md:min-h-[200px] flex flex-wrap justify-center content-center gap-2 md:gap-4 bg-zinc-50 dark:bg-zinc-950/50 rounded-[1.5rem] md:rounded-[2rem] p-4 md:p-12 border border-zinc-100 dark:border-zinc-800/50 shadow-inner relative overflow-hidden">
           <AnimatePresence mode="wait">
             {currentResult ? (
               <motion.div 
