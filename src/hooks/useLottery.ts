@@ -168,6 +168,7 @@ export const useLottery = () => {
             numbers: game.numbers,
             sum: game.sum,
             model_used: game.model,
+            type: game.type, // Added type field for complete synchronization
             created_at: new Date(game.timestamp).toISOString()
           }));
           
