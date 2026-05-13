@@ -1,11 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
-import { secureStorage } from '@/lib/security/secureStorage';
+import { cookieStorage } from '@/lib/security/cookieStorage';
 import { UserSchema, type ValidatedUser } from '@/lib/security/schemas';
 import CryptoJS from 'crypto-js';
 
 /**
  * Skill: Authentication & Authorization (Hardening)
- * Replaces fragile localStorage checks with a validated session hook.
+ * Replaces localStorage sessions with Secure Cookies to mitigate basic session hijacking.
+ * 
+ * Architectural Note: For true HttpOnly protection, session cookies must be set 
+ * via server-side headers (e.g., Supabase Auth or Edge Functions).
  */
 export const useAuth = () => {
   const [user, setUser] = useState<ValidatedUser | null>(null);
@@ -15,23 +18,33 @@ export const useAuth = () => {
   const verifySession = useCallback((userData: ValidatedUser): boolean => {
     if (!userData.token) return false;
     
-    // Check if token matches expected format (signature check simulation)
-    const [payload, signature] = userData.token.split('.');
-    const expectedSignature = CryptoJS.HmacSHA256(payload, 'session-secret').toString();
-    
-    return signature === expectedSignature;
+    try {
+      // Check if token matches expected format (signature check simulation)
+      const [payload, signature] = userData.token.split('.');
+      const expectedSignature = CryptoJS.HmacSHA256(payload, 'session-secret').toString();
+      
+      return signature === expectedSignature;
+    } catch (e) {
+      return false;
+    }
   }, []);
 
   useEffect(() => {
-    const rawData = secureStorage.getItem<any>('intelligence_user');
+    const rawDataString = cookieStorage.getItem('intelligence_session');
     
-    if (rawData) {
-      const result = UserSchema.safeParse(rawData);
-      if (result.success && verifySession(result.data)) {
-        setUser(result.data);
-      } else {
-        // Tampering detected or invalid schema
-        console.warn('[Security] Invalid session detected. Logging out.');
+    if (rawDataString) {
+      try {
+        const rawData = JSON.parse(rawDataString);
+        const result = UserSchema.safeParse(rawData);
+        
+        if (result.success && verifySession(result.data)) {
+          setUser(result.data);
+        } else {
+          console.warn('[Security] Invalid or tampered session detected. Clearing cookies.');
+          logout();
+        }
+      } catch (error) {
+        console.error('[Security] Failed to parse session data', error);
         logout();
       }
     }
@@ -45,12 +58,14 @@ export const useAuth = () => {
     const token = `${payload}.${signature}`;
 
     const userData: ValidatedUser = { email, role, token };
-    secureStorage.setItem('intelligence_user', userData);
+    
+    // Store in Secure Cookie instead of localStorage
+    cookieStorage.setItem('intelligence_session', JSON.stringify(userData));
     setUser(userData);
   };
 
   const logout = () => {
-    secureStorage.removeItem('intelligence_user');
+    cookieStorage.removeItem('intelligence_session');
     setUser(null);
   };
 
