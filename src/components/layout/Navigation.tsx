@@ -121,21 +121,23 @@ export const Sidebar = ({ activeTab, setActiveTab, role, onLogout }: SidebarProp
 
 export const MobileNav = ({ activeTab, setActiveTab, role, onLogout }: SidebarProps) => {
   return (
-    <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[400px] h-16 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-2xl border border-white/20 dark:border-zinc-800/50 z-50 flex items-center justify-between px-6 rounded-full shadow-[0_15px_35px_-10px_rgba(168,85,247,0.3)] md:hidden safe-area-bottom">
-      <NavIcon icon={<Clover size={22} />} active={activeTab === 'home'} label="Início" onClick={() => setActiveTab('home')} />
-      
-      <NavIcon icon={<History size={22} />} active={activeTab === 'historico'} label="Histórico" onClick={() => setActiveTab('historico')} />
-      <NavIcon 
-        icon={<Cpu size={22} />} 
-        active={activeTab === 'ia'} 
-        label="IA" 
-        onClick={() => setActiveTab('ia')} 
-        highlight
-      />
+    <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-[440px] h-16 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-2xl border border-white/20 dark:border-zinc-800/50 z-[100] flex items-center justify-around px-2 rounded-full shadow-[0_15px_35px_-10px_rgba(168,85,247,0.3)] md:hidden">
+      <NavIcon icon={<Clover size={20} />} active={activeTab === 'home'} label="Início" onClick={() => setActiveTab('home')} />
+      <NavIcon icon={<History size={20} />} active={activeTab === 'historico'} label="Histórico" onClick={() => setActiveTab('historico')} />
+      <div className="relative -top-2">
+        <div className="absolute inset-0 bg-purple-500 blur-lg opacity-20 rounded-full animate-pulse" />
+        <NavIcon 
+          icon={<Cpu size={24} className="text-white" />} 
+          active={activeTab === 'ia'} 
+          label="IA" 
+          onClick={() => setActiveTab('ia')} 
+          className="bg-gradient-to-br from-purple-600 to-fuchsia-600 rounded-full w-14 h-14 shadow-lg shadow-purple-500/40 border-4 border-white dark:border-zinc-900"
+        />
+      </div>
       {role === 'admin' && (
-        <NavIcon icon={<Settings size={22} />} active={activeTab === 'ajustes'} label="Ajustes" onClick={() => setActiveTab('ajustes')} />
+        <NavIcon icon={<Settings size={20} />} active={activeTab === 'ajustes'} label="Ajustes" onClick={() => setActiveTab('ajustes')} />
       )}
-      <NavIcon icon={<LogOut size={22} />} label="Sair" onClick={onLogout} />
+      <NavIcon icon={<LogOut size={20} />} label="Sair" onClick={onLogout} />
     </nav>
   );
 };
