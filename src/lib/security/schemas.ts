@@ -8,7 +8,9 @@ import { z } from 'zod';
 export const UserSchema = z.object({
   email: z.string().email(),
   role: z.enum(['admin', 'demo']),
-  token: z.string().optional(), // Secure session token
+  token: z.string().optional(),
+  iat: z.number().optional(),
+  exp: z.number().optional(),
 });
 
 export const SavedGameSchema = z.object({
