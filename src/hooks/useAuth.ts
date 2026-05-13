@@ -59,14 +59,12 @@ export const useAuth = () => {
           if (result.success && verifySession(result.data)) {
             setUser((prev) => prev?.token === result.data.token ? prev : result.data);
           } else {
-            setUser((prev) => {
-              if (prev) {
-                toast.error("Sessão expirada", {
-                  description: "Sua sessão expirou por segurança. Faça login novamente.",
-                });
-              }
-              return null;
-            });
+            if (user) {
+              toast.error("Sessão expirada", {
+                description: "Sua sessão expirou por segurança. Faça login novamente.",
+              });
+            }
+            setUser(null);
             cookieStorage.removeItem('intelligence_session');
           }
         } catch (error) {
