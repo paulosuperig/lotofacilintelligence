@@ -95,7 +95,7 @@ export const BentoGrid = ({
             <div className="inline-flex items-center gap-2 px-2 py-0.5 md:px-2.5 md:py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-600 text-[8px] font-bold mb-3 md:mb-4 uppercase tracking-widest">
               <History size={10} /> Sorteio
             </div>
-            <h2 className="text-xl md:text-2xl font-display font-bold text-zinc-900 dark:text-zinc-100 mb-1 md:mb-2">
+            <h2 className="text-lg xs:text-xl md:text-2xl font-display font-bold text-zinc-900 dark:text-zinc-100 mb-1 md:mb-2">
               Nº {latestResult?.concurso || "---"}
             </h2>
             <p className="text-zinc-500 dark:text-zinc-400 text-[9px] md:text-[10px] font-bold uppercase tracking-wider flex items-center gap-2">
@@ -118,7 +118,7 @@ export const BentoGrid = ({
           <div className="mt-auto space-y-4 pt-6 border-t border-purple-50 dark:border-zinc-800">
             <div className="bg-emerald-50/50 dark:bg-emerald-900/20 px-4 py-3 rounded-2xl border border-emerald-100/50 dark:border-emerald-800/50 text-center">
               <p className="text-[8px] text-emerald-600/70 dark:text-emerald-400/70 uppercase font-bold tracking-[0.2em] mb-1.5">Próximo Prêmio</p>
-              <p className="text-base md:text-lg font-display font-bold text-emerald-500 tabular-nums leading-none whitespace-nowrap">
+              <p className="text-sm xs:text-base md:text-lg font-display font-bold text-emerald-500 tabular-nums leading-none whitespace-nowrap">
                 {latestResult ? formatCurrency(latestResult.valorEstimadoProximoConcurso || 0) : "R$ ---"}
               </p>
             </div>
@@ -257,7 +257,7 @@ export const BentoGrid = ({
         </div>
         <div className="relative z-10 text-center md:text-left">
           <p className="text-[10px] font-bold uppercase tracking-widest text-white/70 mb-2 md:mb-1">Dica do Especialista</p>
-          <h4 className="text-base md:text-xl font-display font-bold leading-tight mb-6">
+          <h4 className="text-sm xs:text-base md:text-xl font-display font-bold leading-tight mb-6">
             "Ciclo das dezenas prestes a fechar. Foque no número 08 e 22."
           </h4>
           <button 
