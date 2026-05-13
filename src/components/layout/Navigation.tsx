@@ -17,6 +17,7 @@ interface NavIconProps {
   label: string;
   onClick?: () => void;
   highlight?: boolean;
+  className?: string;
 }
 
 const NavIcon = ({ 
@@ -24,13 +25,15 @@ const NavIcon = ({
   active = false, 
   label, 
   onClick, 
-  highlight = false 
+  highlight = false,
+  className
 }: NavIconProps) => (
   <button 
     onClick={onClick}
     className={cn(
       "flex h-full flex-1 flex-col items-center justify-center gap-1 group relative outline-none transition-transform active:scale-90 md:h-12 md:w-12 md:flex-none md:p-0",
-      highlight && !active && "relative"
+      highlight && !active && "relative",
+      className
     )}
   >
     {highlight && !active && (
