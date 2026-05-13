@@ -26,7 +26,8 @@ export const LotteryResultSchema = z.object({
   data: z.string(),
   dezenas: z.array(z.string().or(z.number())),
   acumulou: z.boolean().optional(),
-  proximo_concurso: z.number().or(z.string()).optional(),
+  proximoConcurso: z.number().or(z.string()).optional(),
+  valorEstimadoProximoConcurso: z.number().optional(),
   valor_estimado: z.number().optional(),
 });
 
