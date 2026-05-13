@@ -89,7 +89,7 @@ export const AiAssistant = ({
           </div>
         ) : null}
 
-        <div className="flex-grow overflow-y-auto p-3 sm:p-4 md:p-6 space-y-4 max-h-[450px] md:max-h-[500px] scrollbar-thin scrollbar-thumb-purple-100">
+        <div className="flex-grow overflow-y-auto p-3 sm:p-4 md:p-6 space-y-4 max-h-[400px] xs:max-h-[450px] md:max-h-[500px] scrollbar-thin scrollbar-thumb-purple-100 scroll-smooth">
           {aiChat.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center py-6">
               <div className="w-16 h-16 bg-white dark:bg-zinc-800 rounded-3xl shadow-sm flex items-center justify-center text-purple-400 dark:text-purple-300 mb-6 border border-purple-50 dark:border-zinc-700">

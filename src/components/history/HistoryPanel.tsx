@@ -191,7 +191,7 @@ export const HistoryPanel = ({
                         const text = `🔥 *GERADOR INTELIGENTE* 🔥\n\nJogo: *${item.numbers.map((n: number) => n.toString().padStart(2, '0')).join(' ')}*\n\n🍀 Boa sorte!`;
                         window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
                       }}
-                      className="w-9 h-9 rounded-full bg-emerald-500 text-white hover:bg-emerald-600 shadow-sm transition-transform hover:scale-110"
+                      className="w-11 h-11 rounded-full bg-emerald-500 text-white hover:bg-emerald-600 shadow-sm transition-transform active:scale-90"
                     >
                       <WhatsAppIcon className="w-5 h-5" />
                     </Button>
