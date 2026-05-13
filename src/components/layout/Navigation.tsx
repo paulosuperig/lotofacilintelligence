@@ -47,11 +47,11 @@ const NavIcon = ({
     )}
     <div className={cn(
       "w-10 h-10 rounded-[1.15rem] flex items-center justify-center transition-all duration-300 md:w-12 md:h-12 md:rounded-[1.25rem] md:group-hover:bg-purple-100/50",
-      active 
+      active && !className 
         ? "text-purple-600 md:bg-purple-100/50" 
-        : highlight 
+        : highlight && !className
           ? "text-purple-500 bg-purple-50 md:bg-transparent" 
-          : "text-zinc-500 hover:text-purple-600"
+          : !className && "text-zinc-500 hover:text-purple-600"
     )}>
       <motion.div
         animate={highlight && !active ? { 
