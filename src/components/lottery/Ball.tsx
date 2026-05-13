@@ -16,7 +16,7 @@ export const Ball = memo(({
   size = 'md', 
   className,
   onClick 
-}) => {
+}: BallProps) => {
   const sizeClasses = {
     sm: "w-8 h-8 md:w-9 md:h-9 text-[11px] md:text-xs",
     md: "w-10 h-10 md:w-12 md:h-12 text-sm md:text-base",
@@ -40,6 +40,7 @@ export const Ball = memo(({
     >
       <span className="relative z-10">{number.toString().padStart(2, '0')}</span>
     </motion.div>
+  );
 });
 
 Ball.displayName = 'Ball';
