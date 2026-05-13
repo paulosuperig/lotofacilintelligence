@@ -254,7 +254,7 @@ export const AiAssistant = ({
           <Button 
             type="submit" 
             disabled={isAiLoading || !deepSeekKey}
-            className="bg-purple-600 hover:bg-purple-700 text-white rounded-xl w-12 h-10 p-0 shrink-0"
+            className="bg-purple-600 hover:bg-purple-700 text-white rounded-xl w-12 h-10 p-0 shrink-0 active:scale-90 transition-transform"
           >
             <Send size={18} />
           </Button>
