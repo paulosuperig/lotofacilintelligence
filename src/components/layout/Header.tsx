@@ -35,11 +35,11 @@ export const Header = ({ role, isRefreshing, onRefresh }: HeaderProps) => {
       <motion.div 
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
-        className="flex items-center gap-4 w-full md:w-auto justify-center md:justify-end"
+        className="flex items-center gap-3 w-full md:w-auto justify-center md:justify-end"
       >
         <button 
           onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-          className="hidden md:flex w-12 h-12 rounded-2xl bg-white dark:bg-zinc-800 border border-purple-100 dark:border-zinc-700 items-center justify-center text-purple-600 dark:text-purple-400 hover:border-purple-300 dark:hover:border-purple-500 hover:shadow-lg transition-all active:scale-95"
+          className="flex w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-white dark:bg-zinc-800 border border-purple-100 dark:border-zinc-700 items-center justify-center text-purple-600 dark:text-purple-400 hover:border-purple-300 dark:hover:border-purple-500 hover:shadow-lg transition-all active:scale-95"
           aria-label="Alternar tema"
         >
           {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
@@ -48,7 +48,7 @@ export const Header = ({ role, isRefreshing, onRefresh }: HeaderProps) => {
         <button 
           onClick={onRefresh}
           disabled={isRefreshing}
-          className="hidden md:flex w-12 h-12 rounded-2xl bg-white dark:bg-zinc-800 border border-purple-100 dark:border-zinc-700 items-center justify-center text-purple-600 dark:text-purple-400 hover:border-purple-300 dark:hover:border-purple-500 hover:shadow-lg transition-all active:scale-95 disabled:opacity-50"
+          className="flex w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-white dark:bg-zinc-800 border border-purple-100 dark:border-zinc-700 items-center justify-center text-purple-600 dark:text-purple-400 hover:border-purple-300 dark:hover:border-purple-500 hover:shadow-lg transition-all active:scale-95 disabled:opacity-50"
         >
           <motion.div animate={isRefreshing ? { rotate: 360 } : {}} transition={isRefreshing ? { repeat: Infinity, duration: 1, ease: "linear" } : {}}>
             <Sparkles size={20} />
