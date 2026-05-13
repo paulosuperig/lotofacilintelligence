@@ -106,7 +106,7 @@ const Login = ({ onLogin }: LoginProps) => {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md bg-white rounded-[2.5rem] p-8 md:p-12 shadow-2xl shadow-purple-500/10 border border-purple-100 overflow-hidden relative z-10"
+        className="w-full max-w-md bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 sm:p-8 md:p-12 shadow-2xl shadow-purple-500/10 border border-purple-100 overflow-hidden relative z-10"
       >
         <AnimatePresence mode="wait">
           {view === 'login' ? (
@@ -117,11 +117,11 @@ const Login = ({ onLogin }: LoginProps) => {
               exit={{ opacity: 0, x: 20 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="flex flex-col items-center mb-8 md:mb-10 text-center">
+              <div className="flex flex-col items-center mb-6 sm:mb-8 md:mb-10 text-center">
                 <motion.div 
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-purple-600 to-fuchsia-600 flex items-center justify-center shadow-lg shadow-purple-500/20 mb-4 md:mb-6"
+                  className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-purple-600 to-fuchsia-600 flex items-center justify-center shadow-lg shadow-purple-500/20 mb-3 sm:mb-4 md:mb-6"
                 >
                   <Clover className="text-white w-7 h-7 md:w-8 md:h-8" />
                 </motion.div>
@@ -131,7 +131,7 @@ const Login = ({ onLogin }: LoginProps) => {
                 <p className="text-zinc-500 text-xs md:text-sm">Faça login para acessar sua conta premium</p>
               </div>
 
-              <form onSubmit={handleLogin} className="space-y-6">
+              <form onSubmit={handleLogin} className="space-y-4 sm:space-y-6">
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest ml-1">E-mail</label>
                   <div className="relative">
@@ -141,7 +141,7 @@ const Login = ({ onLogin }: LoginProps) => {
                       placeholder="seu@email.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="pl-12 h-14 rounded-2xl border-purple-100 focus:ring-purple-500 focus:border-purple-500 bg-purple-50/30 text-sm"
+                      className="pl-12 h-12 sm:h-14 rounded-2xl border-purple-100 focus:ring-purple-500 focus:border-purple-500 bg-purple-50/30 text-[13px] sm:text-sm"
                       required
                     />
                   </div>
@@ -165,7 +165,7 @@ const Login = ({ onLogin }: LoginProps) => {
                       placeholder="••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="pl-12 pr-12 h-14 rounded-2xl border-purple-100 focus:ring-purple-500 focus:border-purple-500 bg-purple-50/30 text-sm"
+                      className="pl-12 pr-12 h-12 sm:h-14 rounded-2xl border-purple-100 focus:ring-purple-500 focus:border-purple-500 bg-purple-50/30 text-[13px] sm:text-sm"
                       required
                     />
                     <button
@@ -181,7 +181,7 @@ const Login = ({ onLogin }: LoginProps) => {
                 <Button 
                   type="submit" 
                   disabled={isLoading}
-                  className="w-full h-14 rounded-2xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white font-bold text-base shadow-lg shadow-purple-500/25 transition-all active:scale-[0.98]"
+                  className="w-full h-12 sm:h-14 rounded-2xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white font-bold text-sm sm:text-base shadow-lg shadow-purple-500/25 transition-all active:scale-[0.98]"
                 >
                   {isLoading ? (
                     <motion.div 
