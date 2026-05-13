@@ -1,12 +1,14 @@
 import CryptoJS from 'crypto-js';
 
 // In a real production environment, this secret should be injected via environment variables
-// and not hardcoded. For this hardening exercise, we use a derivation or a consistent key.
 const STORAGE_SECRET = import.meta.env.VITE_STORAGE_ENCRYPTION_KEY || 'lotofacil-secure-vault-2024';
 
 /**
  * Skill: Cryptography & Data Protection
- * Implements AES-256 encryption for sensitive local storage data.
+ * Implements AES-256 encryption for non-session data.
+ * 
+ * WARNING: Do not use for session tokens or authentication data. 
+ * Use cookieStorage for sessions to mitigate bypass attacks.
  */
 export const secureStorage = {
   setItem: (key: string, value: any) => {
