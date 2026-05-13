@@ -15,10 +15,11 @@ export const UserSchema = z.object({
 
 export const SavedGameSchema = z.object({
   id: z.string().uuid().or(z.string()),
-  numbers: z.array(z.number().min(1).max(25)).length(15),
+  numbers: z.array(z.number().min(1).max(25)).min(15).max(25),
   timestamp: z.number(),
-  sum: z.number(),
+  sum: z.number().optional(),
   model: z.string().optional(),
+  type: z.string().optional(),
 });
 
 export const LotteryResultSchema = z.object({
