@@ -1,0 +1,22 @@
+# Lotofácil Intelligence
+
+Sistema avançado de análise estatística e inteligência artificial para Lotofácil.
+
+## Principais Funcionalidades
+- Análise de resultados em tempo real.
+- Geração de jogos baseada em modelos matemáticos e IA.
+- Painel administrativo para gestão de usuários.
+- Assistente IA integrado (DeepSeek) para insights estratégicos.
+- Histórico seguro e criptografado com AES-256.
+
+## Stack Tecnológica
+- React 18 + Vite
+- Tailwind CSS + shadcn/ui
+- Framer Motion para animações premium
+- Supabase para backend resiliente
+- Criptografia Client-side (AES-256)
+
+## Segurança
+- Arquitetura Zero Trust.
+- Sessões protegidas por tokens.
+- Política de Segurança de Conteúdo (CSP) rigorosa.
