@@ -80,7 +80,7 @@ export const HistoryPanel = ({
   };
 
   return (
-    <div className="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-[2.5rem] p-6 md:p-12 shadow-2xl shadow-purple-500/5 min-h-[600px] flex flex-col">
+    <div className="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-[1.5rem] md:rounded-[2.5rem] p-4 sm:p-6 md:p-12 shadow-2xl shadow-purple-500/5 min-h-[500px] md:min-h-[600px] flex flex-col">
       <div className="flex flex-col md:flex-row items-center justify-between mb-10 gap-6">
         <div className="flex items-center gap-4">
           <Button 

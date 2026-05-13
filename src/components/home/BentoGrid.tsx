@@ -72,7 +72,7 @@ export const BentoGrid = ({
       initial="hidden"
       animate="visible"
       exit="hidden"
-      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 auto-rows-[minmax(180px,auto)]"
+      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 md:gap-6 auto-rows-[minmax(140px,auto)]"
     >
       {/* Generator Bento */}
       <motion.div id="generator-section" variants={itemVariants} className="lg:col-span-8 lg:row-span-3">

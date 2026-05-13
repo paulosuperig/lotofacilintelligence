@@ -13,7 +13,7 @@ export const Header = ({ role, isRefreshing, onRefresh }: HeaderProps) => {
   const { theme, setTheme } = useTheme();
 
   return (
-    <header className="flex flex-col md:flex-row justify-between items-start md:items-center mt-4 md:mt-0 mb-8 md:mb-12 gap-6 relative">
+    <header className="flex flex-col md:flex-row justify-between items-start md:items-center mt-2 md:mt-0 mb-6 md:mb-12 gap-4 md:gap-6 relative">
       <motion.div 
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}

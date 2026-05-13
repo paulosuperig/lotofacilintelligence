@@ -18,9 +18,9 @@ export const Ball = memo(({
   onClick 
 }: BallProps) => {
   const sizeClasses = {
-    sm: "w-8 h-8 md:w-9 md:h-9 text-[11px] md:text-xs",
-    md: "w-10 h-10 md:w-12 md:h-12 text-sm md:text-base",
-    lg: "w-11 h-11 md:w-14 md:h-14 text-sm md:text-lg"
+    sm: "w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 text-[10px] sm:text-[11px] md:text-xs",
+    md: "w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 text-xs sm:text-sm md:text-base",
+    lg: "w-10 h-10 sm:w-11 sm:h-11 md:w-14 md:h-14 text-xs sm:text-sm md:text-lg"
   };
 
   return (

@@ -147,7 +147,7 @@ export const GameGenerator = () => {
   }, []);
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-zinc-900 overflow-y-auto pb-32">
+    <div className="flex flex-col h-full bg-white dark:bg-zinc-900 overflow-y-auto pb-20 md:pb-32">
       <AlertDialog open={showDuplicateModal} onOpenChange={setShowDuplicateModal}>
         <AlertDialogContent className="rounded-[2rem] border-zinc-100 dark:border-zinc-800 shadow-2xl">
           <AlertDialogHeader>
@@ -172,7 +172,7 @@ export const GameGenerator = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      <div className="p-6 md:p-12 border-b border-purple-50 dark:border-zinc-800/50">
+      <div className="p-4 sm:p-6 md:p-12 border-b border-purple-50 dark:border-zinc-800/50">
         <div className="flex flex-col gap-6 mb-8">
           <div>
             <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 mb-2">

@@ -43,7 +43,7 @@ export const AiAssistant = ({
   role
 }: AiAssistantProps) => {
   return (
-    <div className="bg-white dark:bg-zinc-900 border border-purple-200 dark:border-zinc-800 rounded-3xl md:rounded-[2rem] p-4 md:p-8 shadow-xl shadow-purple-500/5 min-h-[600px] flex flex-col">
+    <div className="bg-white dark:bg-zinc-900 border border-purple-200 dark:border-zinc-800 rounded-2xl md:rounded-[2rem] p-3 md:p-8 shadow-xl shadow-purple-500/5 min-h-[500px] md:min-h-[600px] flex flex-col">
       <div className="flex flex-col md:flex-row items-center justify-between mb-6 gap-4">
         <div className="flex flex-col items-center md:items-start">
           <div className="flex items-center gap-3 mb-1">
