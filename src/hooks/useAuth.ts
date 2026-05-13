@@ -35,7 +35,7 @@ export const useAuth = () => {
 
       // 2. Cryptographic Signature Check
       const [payload, signature] = userData.token.split('.');
-      const expectedSignature = CryptoJS.HmacSHA256(payload, 'session-secret').toString();
+      const expectedSignature = CryptoJS.HmacSHA256(payload, SESSION_SECRET).toString();
       return signature === expectedSignature;
     } catch (e) {
       return false;
@@ -88,7 +88,7 @@ export const useAuth = () => {
     const exp = now + SESSION_DURATION_MS;
     
     const payload = btoa(JSON.stringify({ email, role, iat: now, exp }));
-    const signature = CryptoJS.HmacSHA256(payload, 'session-secret').toString();
+    const signature = CryptoJS.HmacSHA256(payload, SESSION_SECRET).toString();
     const token = `${payload}.${signature}`;
 
     const userData: ValidatedUser = { email, role, token, iat: now, exp };
