@@ -43,49 +43,57 @@ export const useLottery = () => {
   }, [toast]);
 
   const loadHistory = useCallback(async () => {
-    // Priority 1: Supabase (Cloud)
-    if (isSupabaseEnabled() && supabase) {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data, error } = await supabase
-          .from('saved_games')
-          .select('*')
-          .order('created_at', { ascending: false });
-        
-        if (!error && data) {
-          const formattedHistory: SavedGame[] = data.map(item => ({
-            id: item.id,
-            numbers: item.numbers,
-            timestamp: new Date(item.created_at).getTime(),
-            sum: item.sum,
-            model: item.model_used,
-            type: item.type || (item.model_used ? 'Fechamento PRO' : 'IA Insight')
-          }));
-          setHistory(formattedHistory);
-          return;
+    try {
+      // Priority 1: Supabase (Cloud)
+      if (isSupabaseEnabled() && supabase) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data, error } = await supabase
+            .from('saved_games')
+            .select('*')
+            .order('created_at', { ascending: false });
+          
+          if (!error && data) {
+            const formattedHistory: SavedGame[] = data.map(item => ({
+              id: item.id,
+              numbers: item.numbers,
+              timestamp: new Date(item.created_at).getTime(),
+              sum: item.sum,
+              model: item.model_used,
+              type: item.type || (item.model_used ? 'Fechamento PRO' : 'IA Insight')
+            }));
+            setHistory(formattedHistory);
+            return;
+          }
         }
       }
-    }
 
-    // Priority 2: LocalStorage (Fallback/Offline) - Now Secure
-    const saved = secureStorage.getItem<SavedGame[]>('lottery_history');
-    if (saved) {
-      try {
-        // Validation: Defensive schema check
-        const parsed = saved.map(g => {
-          const validated = SavedGameSchema.parse(g);
-          return {
-            ...validated,
-            id: validated.id || generateSecureId()
-          } as SavedGame;
-        });
-        const filtered = parsed.sort((a, b) => b.timestamp - a.timestamp);
+      // Priority 2: LocalStorage (Fallback/Offline) - Now Secure
+      const saved = secureStorage.getItem<SavedGame[]>('lottery_history');
+      if (saved) {
+        try {
+          // Validation: Defensive schema check
+          const parsed = saved.map(g => {
+            const validated = SavedGameSchema.parse(g);
+            return {
+              ...validated,
+              id: validated.id || generateSecureId(),
+              timestamp: validated.timestamp || Date.now()
+            } as SavedGame;
+          });
+          const filtered = parsed.sort((a, b) => b.timestamp - a.timestamp);
 
-        setHistory(filtered);
-      } catch (e) {
-        console.error("[Security] History schema validation failed:", e);
+          setHistory(filtered);
+        } catch (e) {
+          console.error("[Security] History schema validation failed:", e);
+          setHistory([]);
+        }
+      } else {
         setHistory([]);
       }
+    } catch (error) {
+      console.error("Error loading history:", error);
+      setHistory([]);
     }
   }, []);
 

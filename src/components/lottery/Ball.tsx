@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from "@/lib/utils";
 
@@ -10,13 +10,13 @@ interface BallProps {
   onClick?: () => void;
 }
 
-export const Ball: React.FC<BallProps> = ({ 
+export const Ball = memo(({ 
   number, 
   active = false, 
   size = 'md', 
   className,
   onClick 
-}) => {
+}: BallProps) => {
   const sizeClasses = {
     sm: "w-8 h-8 md:w-9 md:h-9 text-[11px] md:text-xs",
     md: "w-10 h-10 md:w-12 md:h-12 text-sm md:text-base",
@@ -41,4 +41,6 @@ export const Ball: React.FC<BallProps> = ({
       <span className="relative z-10">{number.toString().padStart(2, '0')}</span>
     </motion.div>
   );
-};
+});
+
+Ball.displayName = 'Ball';
