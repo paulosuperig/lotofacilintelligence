@@ -8,13 +8,28 @@ export const getLatestResult = async (): Promise<LotteryResult> => {
     const response = await fetch(`${API_BASE}/lotofacil/latest`);
     if (!response.ok) throw new Error("API Offline");
     const data = await response.json();
-    return LotteryResultSchema.parse(data) as unknown as LotteryResult;
+    
+    // Normalização dos campos para garantir consistência entre APIs
+    const normalizedData = {
+      ...data,
+      valorEstimadoProximoConcurso: data.valorEstimadoProximoConcurso || data.valor_estimado || 0,
+      proximoConcurso: data.proximoConcurso || data.proximo_concurso || 0,
+    };
+
+    return LotteryResultSchema.parse(normalizedData) as unknown as LotteryResult;
   } catch (error) {
     console.error("[Security] Primary API validation failed or offline, trying fallback...", error);
     const fallbackResponse = await fetch(`https://api.guidi.com.br/loteria/lotofacil/ultimo`);
     if (!fallbackResponse.ok) throw new Error("All APIs failed");
     const data = await fallbackResponse.json();
-    return LotteryResultSchema.parse(data) as unknown as LotteryResult;
+    
+    const normalizedData = {
+      ...data,
+      valorEstimadoProximoConcurso: data.valorEstimadoProximoConcurso || data.valor_estimado || 0,
+      proximoConcurso: data.proximoConcurso || data.proximo_concurso || 0,
+    };
+
+    return LotteryResultSchema.parse(normalizedData) as unknown as LotteryResult;
   }
 };
 
