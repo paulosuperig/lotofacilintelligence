@@ -3,12 +3,11 @@ import { cookieStorage } from '@/lib/security/cookieStorage';
 import { UserSchema, type ValidatedUser } from '@/lib/security/schemas';
 import CryptoJS from 'crypto-js';
 
+const SESSION_SECRET = import.meta.env.VITE_SESSION_ENCRYPTION_KEY || 'session-vault-secret-2024';
+
 /**
  * Skill: Authentication & Authorization (Hardening)
- * Replaces localStorage sessions with Secure Cookies to mitigate basic session hijacking.
- * 
- * Architectural Note: For true HttpOnly protection, session cookies must be set 
- * via server-side headers (e.g., Supabase Auth or Edge Functions).
+ * Replaces localStorage sessions with Encrypted Secure Cookies.
  */
 export const useAuth = () => {
   const [user, setUser] = useState<ValidatedUser | null>(null);
@@ -19,10 +18,8 @@ export const useAuth = () => {
     if (!userData.token) return false;
     
     try {
-      // Check if token matches expected format (signature check simulation)
       const [payload, signature] = userData.token.split('.');
       const expectedSignature = CryptoJS.HmacSHA256(payload, 'session-secret').toString();
-      
       return signature === expectedSignature;
     } catch (e) {
       return false;
@@ -30,21 +27,25 @@ export const useAuth = () => {
   }, []);
 
   useEffect(() => {
-    const rawDataString = cookieStorage.getItem('intelligence_session');
+    const encryptedData = cookieStorage.getItem('intelligence_session');
     
-    if (rawDataString) {
+    if (encryptedData) {
       try {
-        const rawData = JSON.parse(rawDataString);
+        // Decrypt session data from cookie
+        const bytes = CryptoJS.AES.decrypt(encryptedData, SESSION_SECRET);
+        const decryptedData = bytes.toString(CryptoJS.enc.Utf8);
+        
+        if (!decryptedData) throw new Error('Decryption failed');
+
+        const rawData = JSON.parse(decryptedData);
         const result = UserSchema.safeParse(rawData);
         
         if (result.success && verifySession(result.data)) {
           setUser(result.data);
         } else {
-          console.warn('[Security] Invalid or tampered session detected. Clearing cookies.');
           logout();
         }
       } catch (error) {
-        console.error('[Security] Failed to parse session data', error);
         logout();
       }
     }
@@ -52,15 +53,17 @@ export const useAuth = () => {
   }, [verifySession]);
 
   const login = (email: string, role: 'admin' | 'demo') => {
-    // Generate a secure session token
     const payload = btoa(JSON.stringify({ email, role, iat: Date.now() }));
     const signature = CryptoJS.HmacSHA256(payload, 'session-secret').toString();
     const token = `${payload}.${signature}`;
 
     const userData: ValidatedUser = { email, role, token };
+    const jsonString = JSON.stringify(userData);
     
-    // Store in Secure Cookie instead of localStorage
-    cookieStorage.setItem('intelligence_session', JSON.stringify(userData));
+    // Encrypt before storing in cookie
+    const encrypted = CryptoJS.AES.encrypt(jsonString, SESSION_SECRET).toString();
+    
+    cookieStorage.setItem('intelligence_session', encrypted);
     setUser(userData);
   };
 
