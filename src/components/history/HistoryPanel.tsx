@@ -80,7 +80,7 @@ export const HistoryPanel = ({
   };
 
   return (
-    <div className="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-[2.5rem] p-6 md:p-12 shadow-2xl shadow-purple-500/5 min-h-[600px] flex flex-col">
+    <div className="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-[1.5rem] md:rounded-[2.5rem] p-4 sm:p-6 md:p-12 shadow-2xl shadow-purple-500/5 min-h-[500px] md:min-h-[600px] flex flex-col">
       <div className="flex flex-col md:flex-row items-center justify-between mb-10 gap-6">
         <div className="flex items-center gap-4">
           <Button 
@@ -98,10 +98,10 @@ export const HistoryPanel = ({
         </div>
 
         {history.length > 0 && (
-          <div className="flex flex-wrap items-center justify-center gap-3 w-full md:w-auto">
+          <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-2 sm:gap-3 w-full md:w-auto">
             <Button 
               onClick={shareAllOnWhatsApp}
-              className="bg-[#25D366] hover:bg-[#128C7E] text-white rounded-xl shadow-lg shadow-emerald-500/10 font-bold text-xs uppercase tracking-widest px-6"
+              className="w-full sm:w-auto bg-[#25D366] hover:bg-[#128C7E] text-white rounded-xl shadow-lg shadow-emerald-500/10 font-bold text-[10px] sm:text-xs uppercase tracking-widest px-6"
             >
               <WhatsAppIcon className="w-5 h-5 mr-2" />
               Enviar Todos
@@ -109,7 +109,7 @@ export const HistoryPanel = ({
             <Button 
               onClick={copyAllToClipboard}
               variant="outline"
-              className="rounded-xl border-zinc-200 dark:border-zinc-700 font-bold text-xs uppercase tracking-widest px-6"
+              className="w-full sm:w-auto rounded-xl border-zinc-200 dark:border-zinc-700 font-bold text-[10px] sm:text-xs uppercase tracking-widest px-6"
             >
               <Copy size={18} className="mr-2" />
               Copiar Tudo
@@ -155,7 +155,7 @@ export const HistoryPanel = ({
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  className="p-6 bg-zinc-50 dark:bg-zinc-800/30 border border-zinc-100 dark:border-zinc-800 rounded-3xl flex flex-col gap-6 group hover:border-purple-200 dark:hover:border-purple-900/50 transition-all shadow-sm"
+                  className="p-4 sm:p-6 bg-zinc-50 dark:bg-zinc-800/30 border border-zinc-100 dark:border-zinc-800 rounded-2xl md:rounded-3xl flex flex-col gap-4 sm:gap-6 group hover:border-purple-200 dark:hover:border-purple-900/50 transition-all shadow-sm"
                 >
                   <div className="flex justify-between items-center">
                     <div className="flex flex-col gap-1">
@@ -199,7 +199,7 @@ export const HistoryPanel = ({
                   
                   <div className="flex flex-wrap gap-2">
                     {item.numbers.map((num, i) => (
-                      <span key={i} className="w-9 h-9 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center text-xs font-bold text-purple-700 dark:text-purple-400 shadow-sm">
+                      <span key={i} className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center text-[10px] sm:text-xs font-bold text-purple-700 dark:text-purple-400 shadow-sm">
                         {num.toString().padStart(2, '0')}
                       </span>
                     ))}

@@ -147,7 +147,7 @@ export const GameGenerator = () => {
   }, []);
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-zinc-900 overflow-y-auto pb-32">
+    <div className="flex flex-col h-full bg-white dark:bg-zinc-900 overflow-y-auto pb-20 md:pb-32">
       <AlertDialog open={showDuplicateModal} onOpenChange={setShowDuplicateModal}>
         <AlertDialogContent className="rounded-[2rem] border-zinc-100 dark:border-zinc-800 shadow-2xl">
           <AlertDialogHeader>
@@ -172,7 +172,7 @@ export const GameGenerator = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      <div className="p-6 md:p-12 border-b border-purple-50 dark:border-zinc-800/50">
+      <div className="p-4 sm:p-6 md:p-12 border-b border-purple-50 dark:border-zinc-800/50">
         <div className="flex flex-col gap-6 mb-8">
           <div>
             <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 mb-2">
@@ -187,21 +187,21 @@ export const GameGenerator = () => {
           <Button 
             onClick={handleGenerate} 
             disabled={isGenerating}
-            className="w-full bg-purple-600 text-white hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-600 h-14 rounded-2xl shadow-xl shadow-purple-500/10 font-bold text-sm uppercase tracking-widest transition-all active:scale-95"
+            className="w-full bg-purple-600 text-white hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-600 h-14 rounded-2xl shadow-xl shadow-purple-500/10 font-bold text-xs sm:text-sm uppercase tracking-widest transition-all active:scale-95"
           >
             {isGenerating ? <RefreshCcw className="animate-spin mr-3" size={18} /> : <Zap className="mr-3" size={18} fill="currentColor" />}
             {isGenerating ? "Analisando Tendências..." : "Gerar Jogo Otimizado"}
           </Button>
         </div>
 
-        <div className="min-h-[160px] md:min-h-[200px] flex flex-wrap justify-center content-center gap-2 md:gap-4 bg-zinc-50 dark:bg-zinc-950/50 rounded-[1.5rem] md:rounded-[2rem] p-4 md:p-12 border border-zinc-100 dark:border-zinc-800/50 shadow-inner relative overflow-hidden">
+        <div className="min-h-[140px] md:min-h-[200px] flex flex-wrap justify-center content-center gap-1.5 sm:gap-2 md:gap-4 bg-zinc-50 dark:bg-zinc-950/50 rounded-2xl md:rounded-[2rem] p-3 sm:p-4 md:p-12 border border-zinc-100 dark:border-zinc-800/50 shadow-inner relative overflow-hidden">
           <AnimatePresence mode="wait">
             {currentResult ? (
               <motion.div 
                 key="game"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="flex flex-wrap justify-center gap-3 md:gap-5"
+                className="flex flex-wrap justify-center gap-1.5 sm:gap-3 md:gap-5"
               >
                 {currentResult.numbers.map((num, i) => (
                   <motion.div
@@ -238,12 +238,12 @@ export const GameGenerator = () => {
         </div>
       </div>
 
-      <div className="p-6 md:p-12 flex-grow flex flex-col">
+      <div className="p-4 sm:p-6 md:p-12 flex-grow flex flex-col">
         {stats && (
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-10"
+            className="grid grid-cols-2 xs:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4 mb-10"
           >
             <StatCard label="Pares/Ímpares" value={`${stats.pairs}/${stats.odd}`} icon={<TrendingUp size={14}/>} />
             <StatCard label="Soma Total" value={stats.sum} icon={<TrendingUp size={14}/>} />
@@ -258,7 +258,7 @@ export const GameGenerator = () => {
             <Button 
               variant="outline" 
               onClick={copyToClipboard}
-              className="w-full md:w-auto h-14 px-12 rounded-2xl bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 font-bold text-xs uppercase tracking-widest hover:bg-purple-50 dark:hover:bg-purple-950/20 hover:text-purple-600 dark:hover:text-purple-400 transition-all shadow-sm"
+              className="w-full md:w-auto h-12 sm:h-14 px-12 rounded-2xl bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 font-bold text-[10px] sm:text-xs uppercase tracking-widest hover:bg-purple-50 dark:hover:bg-purple-950/20 hover:text-purple-600 dark:hover:text-purple-400 transition-all shadow-sm"
             >
               {isCopied ? <Check className="mr-3 text-emerald-500" size={18} /> : <Copy className="mr-3" size={18} />}
               {isCopied ? "Copiado!" : "Copiar Números"}
@@ -324,7 +324,7 @@ export const GameGenerator = () => {
 };
 
 const StatCard = ({ label, value, icon }: { label: string, value: string | number, icon: React.ReactNode }) => (
-  <div className="bg-white dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-800 rounded-2xl p-5 shadow-sm">
+  <div className="bg-white dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-800 rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-sm">
     <div className="flex items-center gap-2 text-zinc-400 mb-2">
       <span className="shrink-0">{icon}</span>
       <span className="text-[9px] uppercase font-bold tracking-widest">{label}</span>

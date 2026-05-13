@@ -72,7 +72,7 @@ export const BentoGrid = ({
       initial="hidden"
       animate="visible"
       exit="hidden"
-      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 auto-rows-[minmax(180px,auto)]"
+      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 md:gap-6 auto-rows-[minmax(140px,auto)]"
     >
       {/* Generator Bento */}
       <motion.div id="generator-section" variants={itemVariants} className="lg:col-span-8 lg:row-span-3">
@@ -103,7 +103,7 @@ export const BentoGrid = ({
             </p>
           </div>
 
-          <div className="grid grid-cols-5 gap-1.5 md:gap-2 mb-6 md:mb-8">
+          <div className="grid grid-cols-5 gap-1 sm:gap-1.5 md:gap-2 mb-4 sm:mb-6 md:mb-8">
             {isLoading ? (
               Array(15).fill(0).map((_, i) => (
                 <div key={i} className="aspect-square rounded-full bg-purple-100/50 animate-pulse" />
@@ -234,7 +234,7 @@ export const BentoGrid = ({
       <motion.div 
         variants={itemVariants} 
         onClick={() => onNavigate('stats')}
-        className="lg:col-span-4 lg:row-span-1 xl:col-span-4 bg-white dark:bg-zinc-900 border border-purple-100 dark:border-zinc-800 rounded-[2rem] p-8 flex items-center gap-6 group cursor-pointer hover:bg-purple-50/50 dark:hover:bg-zinc-800/50 transition-all shadow-sm"
+        className="lg:col-span-4 lg:row-span-1 xl:col-span-4 bg-white dark:bg-zinc-900 border border-purple-100 dark:border-zinc-800 rounded-2xl md:rounded-[2rem] p-6 sm:p-8 flex items-center gap-4 sm:gap-6 group cursor-pointer hover:bg-purple-50/50 dark:hover:bg-zinc-800/50 transition-all shadow-sm"
       >
         <div className="w-16 h-16 rounded-3xl bg-purple-500/10 border border-purple-100 flex items-center justify-center text-purple-600 group-hover:scale-110 transition-transform duration-500">
           <ShieldCheck size={32} />

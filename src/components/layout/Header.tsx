@@ -13,7 +13,7 @@ export const Header = ({ role, isRefreshing, onRefresh }: HeaderProps) => {
   const { theme, setTheme } = useTheme();
 
   return (
-    <header className="flex flex-col md:flex-row justify-between items-start md:items-center mt-4 md:mt-0 mb-8 md:mb-12 gap-6 relative">
+    <header className="flex flex-col md:flex-row justify-between items-start md:items-center mt-2 md:mt-0 mb-6 md:mb-12 gap-4 md:gap-6 relative">
       <motion.div 
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
@@ -27,7 +27,7 @@ export const Header = ({ role, isRefreshing, onRefresh }: HeaderProps) => {
           </div>
           <span className="text-[clamp(9px,1.5vw,10px)] uppercase font-bold tracking-[0.2em] md:tracking-[0.25em] text-purple-600/60">Membro Premium Intelligence</span>
         </div>
-        <h1 className="text-[clamp(1.5rem,4.5vw,3rem)] font-display font-bold tracking-tight leading-[1.1] text-zinc-900 dark:text-zinc-100">
+        <h1 className="text-[clamp(1.25rem,4.5vw,3rem)] font-display font-bold tracking-tight leading-[1.1] text-zinc-900 dark:text-zinc-100">
           Lotofácil <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-fuchsia-600">Intelligence</span>
         </h1>
       </motion.div>

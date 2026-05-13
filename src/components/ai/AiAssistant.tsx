@@ -43,7 +43,7 @@ export const AiAssistant = ({
   role
 }: AiAssistantProps) => {
   return (
-    <div className="bg-white dark:bg-zinc-900 border border-purple-200 dark:border-zinc-800 rounded-3xl md:rounded-[2rem] p-4 md:p-8 shadow-xl shadow-purple-500/5 min-h-[600px] flex flex-col">
+    <div className="bg-white dark:bg-zinc-900 border border-purple-200 dark:border-zinc-800 rounded-2xl md:rounded-[2rem] p-3 md:p-8 shadow-xl shadow-purple-500/5 min-h-[500px] md:min-h-[600px] flex flex-col">
       <div className="flex flex-col md:flex-row items-center justify-between mb-6 gap-4">
         <div className="flex flex-col items-center md:items-start">
           <div className="flex items-center gap-3 mb-1">
@@ -89,7 +89,7 @@ export const AiAssistant = ({
           </div>
         ) : null}
 
-        <div className="flex-grow overflow-y-auto p-4 md:p-6 space-y-4 max-h-[500px] scrollbar-thin scrollbar-thumb-purple-100">
+        <div className="flex-grow overflow-y-auto p-3 sm:p-4 md:p-6 space-y-4 max-h-[450px] md:max-h-[500px] scrollbar-thin scrollbar-thumb-purple-100">
           {aiChat.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center py-6">
               <div className="w-16 h-16 bg-white dark:bg-zinc-800 rounded-3xl shadow-sm flex items-center justify-center text-purple-400 dark:text-purple-300 mb-6 border border-purple-50 dark:border-zinc-700">
@@ -97,7 +97,7 @@ export const AiAssistant = ({
               </div>
               <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-xs mb-8">Olá! Eu sou seu assistente inteligente. Como posso ajudar com suas análises hoje?</p>
               
-              <div className="w-full max-w-2xl grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+              <div className="w-full max-w-2xl grid grid-cols-1 xs:grid-cols-2 gap-3 sm:gap-4 mb-8 px-2">
                 <button 
                   onClick={() => onSendMessage(undefined, "Pode gerar 3 sugestões de jogos baseadas nas dezenas mais quentes e tendências atuais?")}
                   className="p-4 bg-white dark:bg-zinc-800 border border-purple-100 dark:border-zinc-700 rounded-2xl text-left hover:border-purple-300 dark:hover:border-purple-500 hover:shadow-md hover:shadow-purple-500/5 transition-all group"
@@ -150,7 +150,7 @@ export const AiAssistant = ({
                 msg.role === 'user' ? "ml-auto items-end" : "mr-auto items-start"
               )}>
                 <div className={cn(
-                  "p-4 rounded-2xl text-sm leading-relaxed shadow-sm relative group/msg",
+                  "p-3 sm:p-4 rounded-2xl text-[13px] sm:text-sm leading-relaxed shadow-sm relative group/msg",
                   msg.role === 'user' 
                     ? "bg-purple-600 text-white rounded-tr-none" 
                     : "bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 border border-purple-100 dark:border-zinc-700 rounded-tl-none"
