@@ -147,7 +147,7 @@ export const GameGenerator = () => {
   }, []);
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-zinc-900 overflow-y-auto pb-20 md:pb-32">
+    <div className="flex flex-col h-full bg-white dark:bg-zinc-900 overflow-y-auto pb-24 xs:pb-32">
       <AlertDialog open={showDuplicateModal} onOpenChange={setShowDuplicateModal}>
         <AlertDialogContent className="rounded-[2rem] border-zinc-100 dark:border-zinc-800 shadow-2xl">
           <AlertDialogHeader>
@@ -187,7 +187,7 @@ export const GameGenerator = () => {
           <Button 
             onClick={handleGenerate} 
             disabled={isGenerating}
-            className="w-full bg-purple-600 text-white hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-600 h-14 rounded-2xl shadow-xl shadow-purple-500/10 font-bold text-xs sm:text-sm uppercase tracking-widest transition-all active:scale-95"
+            className="w-full bg-purple-600 text-white hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-600 h-14 rounded-2xl shadow-xl shadow-purple-500/10 font-bold text-xs sm:text-sm uppercase tracking-widest transition-all active:scale-95 touch-manipulation"
           >
             {isGenerating ? <RefreshCcw className="animate-spin mr-3" size={18} /> : <Zap className="mr-3" size={18} fill="currentColor" />}
             {isGenerating ? "Analisando Tendências..." : "Gerar Jogo Otimizado"}
@@ -243,7 +243,7 @@ export const GameGenerator = () => {
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="grid grid-cols-2 xs:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4 mb-10"
+            className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4 mb-10"
           >
             <StatCard label="Pares/Ímpares" value={`${stats.pairs}/${stats.odd}`} icon={<TrendingUp size={14}/>} />
             <StatCard label="Soma Total" value={stats.sum} icon={<TrendingUp size={14}/>} />

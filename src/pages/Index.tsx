@@ -117,7 +117,7 @@ const Index = () => {
         </div>
       )}
 
-      <main className="flex-grow w-full md:pl-[5rem] pb-[calc(7rem+env(safe-area-inset-bottom))] md:pb-12 min-h-screen">
+      <main className="flex-grow w-full md:pl-[5rem] pb-[calc(8rem+env(safe-area-inset-bottom))] md:pb-12 min-h-screen">
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}

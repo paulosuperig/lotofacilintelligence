@@ -80,7 +80,7 @@ export const HistoryPanel = ({
   };
 
   return (
-    <div className="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-[1.5rem] md:rounded-[2.5rem] p-4 sm:p-6 md:p-12 shadow-2xl shadow-purple-500/5 min-h-[500px] md:min-h-[600px] flex flex-col">
+    <div className="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-[1.5rem] md:rounded-[2.5rem] p-4 sm:p-6 md:p-12 shadow-2xl shadow-purple-500/5 min-h-[500px] md:min-h-[600px] flex flex-col pb-[calc(2rem+env(safe-area-inset-bottom))]">
       <div className="flex flex-col md:flex-row items-center justify-between mb-10 gap-6">
         <div className="flex items-center gap-4">
           <Button 
@@ -146,7 +146,7 @@ export const HistoryPanel = ({
 
       <div className="flex-grow">
         {history.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 xs:gap-6">
             <AnimatePresence>
               {history.map((item) => (
                 <motion.div 
@@ -191,7 +191,7 @@ export const HistoryPanel = ({
                         const text = `🔥 *GERADOR INTELIGENTE* 🔥\n\nJogo: *${item.numbers.map((n: number) => n.toString().padStart(2, '0')).join(' ')}*\n\n🍀 Boa sorte!`;
                         window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
                       }}
-                      className="w-9 h-9 rounded-full bg-emerald-500 text-white hover:bg-emerald-600 shadow-sm transition-transform hover:scale-110"
+                      className="w-11 h-11 rounded-full bg-emerald-500 text-white hover:bg-emerald-600 shadow-sm transition-transform active:scale-90"
                     >
                       <WhatsAppIcon className="w-5 h-5" />
                     </Button>
