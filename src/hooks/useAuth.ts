@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { cookieStorage } from '@/lib/security/cookieStorage';
 import { UserSchema, type ValidatedUser } from '@/lib/security/schemas';
 import CryptoJS from 'crypto-js';
@@ -14,7 +14,11 @@ const SESSION_DURATION_MS = 1000 * 60 * 60; // 1 hour session
 export const useAuth = () => {
   const [user, setUser] = useState<ValidatedUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const userRef = useRef<ValidatedUser | null>(null);
   
+  useEffect(() => {
+    userRef.current = user;
+  }, [user]);
 
   const logout = useCallback(() => {
     cookieStorage.removeItem('intelligence_session');
@@ -35,7 +39,7 @@ export const useAuth = () => {
 
       // 2. Cryptographic Signature Check
       const [payload, signature] = userData.token.split('.');
-      const expectedSignature = CryptoJS.HmacSHA256(payload, 'session-secret').toString();
+      const expectedSignature = CryptoJS.HmacSHA256(payload, SESSION_SECRET).toString();
       return signature === expectedSignature;
     } catch (e) {
       return false;
@@ -59,14 +63,12 @@ export const useAuth = () => {
           if (result.success && verifySession(result.data)) {
             setUser((prev) => prev?.token === result.data.token ? prev : result.data);
           } else {
-            setUser((prev) => {
-              if (prev) {
-                toast.error("Sessão expirada", {
-                  description: "Sua sessão expirou por segurança. Faça login novamente.",
-                });
-              }
-              return null;
-            });
+            if (userRef.current) {
+              toast.error("Sessão expirada", {
+                description: "Sua sessão expirou por segurança. Faça login novamente.",
+              });
+            }
+            setUser(null);
             cookieStorage.removeItem('intelligence_session');
           }
         } catch (error) {
@@ -88,7 +90,7 @@ export const useAuth = () => {
     const exp = now + SESSION_DURATION_MS;
     
     const payload = btoa(JSON.stringify({ email, role, iat: now, exp }));
-    const signature = CryptoJS.HmacSHA256(payload, 'session-secret').toString();
+    const signature = CryptoJS.HmacSHA256(payload, SESSION_SECRET).toString();
     const token = `${payload}.${signature}`;
 
     const userData: ValidatedUser = { email, role, token, iat: now, exp };

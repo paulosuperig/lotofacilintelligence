@@ -63,7 +63,8 @@ const Index = () => {
   };
 
   const saveAiGameToHistory = useCallback((content: string) => {
-    const allNumbers = content.match(/\b\d{2}\b/g);
+    // Better regex to match both 1 and 2 digit numbers accurately
+    const allNumbers = content.match(/\b\d{1,2}\b/g);
     
     if (allNumbers && allNumbers.length >= 15) {
       const gamesToSave = [];

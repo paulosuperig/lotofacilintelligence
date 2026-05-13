@@ -15,7 +15,7 @@ export const useLottery = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [history, setHistory] = useState<SavedGame[]>([]);
 
-  const fetchLatestResult = async () => {
+  const fetchLatestResult = useCallback(async () => {
     setIsRefreshing(true);
     try {
       const data = await getLatestResult();
@@ -40,7 +40,7 @@ export const useLottery = () => {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  };
+  }, [toast]);
 
   const loadHistory = useCallback(async () => {
     // Priority 1: Supabase (Cloud)
@@ -168,6 +168,7 @@ export const useLottery = () => {
             numbers: game.numbers,
             sum: game.sum,
             model_used: game.model,
+            type: game.type, // Added type field for complete synchronization
             created_at: new Date(game.timestamp).toISOString()
           }));
           
@@ -275,7 +276,7 @@ export const useLottery = () => {
       window.removeEventListener('lottery-history-updated', handleHistoryUpdate);
       window.removeEventListener('storage', handleHistoryUpdate);
     };
-  }, [loadHistory]);
+  }, [fetchLatestResult, loadHistory]);
 
   return {
     latestResult,
