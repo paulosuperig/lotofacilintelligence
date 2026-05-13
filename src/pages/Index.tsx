@@ -186,7 +186,7 @@ const Index = () => {
               />
             ) : null}
           </AnimatePresence>
-        </div>
+        </motion.div>
       </main>
     </div>
   );
