@@ -18,9 +18,9 @@ export const Ball: React.FC<BallProps> = ({
   onClick 
 }) => {
   const sizeClasses = {
-    sm: "w-7 h-7 sm:w-8 sm:h-8 text-[10px] sm:text-xs",
-    md: "w-9 h-9 sm:w-10 sm:h-10 text-xs sm:text-sm",
-    lg: "w-10 h-10 sm:w-12 sm:h-12 text-sm sm:text-base"
+    sm: "w-8 h-8 md:w-9 md:h-9 text-[11px] md:text-xs",
+    md: "w-10 h-10 md:w-12 md:h-12 text-sm md:text-base",
+    lg: "w-11 h-11 md:w-14 md:h-14 text-sm md:text-lg"
   };
 
   return (
@@ -31,8 +31,8 @@ export const Ball: React.FC<BallProps> = ({
       className={cn(
         "rounded-full flex items-center justify-center font-display font-bold transition-all duration-500 cursor-default select-none border shrink-0",
         active 
-          ? "bg-gradient-to-br from-purple-600 to-purple-800 text-white shadow-[0_0_15px_rgba(168,85,247,0.2)] border-purple-400" 
-          : "bg-white text-zinc-400 border-purple-100 hover:text-purple-600 hover:bg-purple-50 hover:border-purple-200 shadow-sm",
+          ? "bg-gradient-to-br from-purple-600 to-fuchsia-600 text-white shadow-lg shadow-purple-500/30 border-2 border-white/20" 
+          : "bg-white dark:bg-zinc-800 text-zinc-400 dark:text-zinc-600 border border-zinc-100 dark:border-zinc-700",
         sizeClasses[size],
         onClick && "cursor-pointer",
         className
