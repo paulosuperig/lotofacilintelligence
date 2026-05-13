@@ -42,6 +42,22 @@ export const AiAssistant = ({
   onGoToSettings,
   role
 }: AiAssistantProps) => {
+  const chatContainerRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [aiChat, isAiLoading]);
+
+  const handleInputFocus = () => {
+    // Scroll small delay for keyboard appear on mobile
+    setTimeout(() => {
+      if (chatContainerRef.current) {
+        chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      }
+    }, 300);
+  };
   return (
     <div className="bg-white dark:bg-zinc-900 border border-purple-200 dark:border-zinc-800 rounded-2xl md:rounded-[2rem] p-3 md:p-8 shadow-xl shadow-purple-500/5 min-h-[500px] md:min-h-[600px] flex flex-col">
       <div className="flex flex-col md:flex-row items-center justify-between mb-6 gap-4">
@@ -89,7 +105,10 @@ export const AiAssistant = ({
           </div>
         ) : null}
 
-        <div className="flex-grow overflow-y-auto p-3 sm:p-4 md:p-6 space-y-4 max-h-[400px] xs:max-h-[450px] md:max-h-[500px] scrollbar-thin scrollbar-thumb-purple-100 scroll-smooth">
+        <div 
+          ref={chatContainerRef}
+          className="flex-grow overflow-y-auto p-3 sm:p-4 md:p-6 space-y-4 max-h-[400px] xs:max-h-[450px] md:max-h-[500px] scrollbar-thin scrollbar-thumb-purple-100 scroll-smooth"
+        >
           {aiChat.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center py-6">
               <div className="w-16 h-16 bg-white dark:bg-zinc-800 rounded-3xl shadow-sm flex items-center justify-center text-purple-400 dark:text-purple-300 mb-6 border border-purple-50 dark:border-zinc-700">
@@ -227,6 +246,7 @@ export const AiAssistant = ({
           <Input 
             placeholder="Pergunte ao especialista..." 
             value={aiMessage}
+            onFocus={handleInputFocus}
             onChange={(e) => onSetAiMessage(e.target.value)}
             className="rounded-xl border-purple-100"
             disabled={isAiLoading || !deepSeekKey}
