@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { ShieldCheck } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { generateSecureId } from '@/lib/security/utils';
 
 interface FechamentosPanelProps {
@@ -11,7 +11,7 @@ interface FechamentosPanelProps {
 }
 
 export const FechamentosPanel = ({ onBack, onSaveGame }: FechamentosPanelProps) => {
-  const { toast } = useToast();
+  // toast is already imported from sonner
   
   const models = [
     { 
@@ -84,12 +84,11 @@ export const FechamentosPanel = ({ onBack, onSaveGame }: FechamentosPanelProps) 
       numbers: sorted, 
       timestamp: Date.now(), 
       model: model.title,
-      type: 'Modelo'
+      type: 'Fechamento PRO'
     });
 
-    toast({
-      title: `Modelo "${model.title}" gerado!`,
-      description: `${model.numbers} dezenas: ${sorted.map(n => n.toString().padStart(2, '0')).join(' ')}`,
+    toast.success(`Modelo "${model.title}" inserido no histórico!`, {
+      description: `${model.numbers} dezenas geradas via Fechamento PRO.`
     });
   };
 
