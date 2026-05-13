@@ -165,12 +165,24 @@ export const HistoryPanel = ({
                           {new Date(item.timestamp).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
-                      {item.sum && (
-                        <div className="flex items-center gap-1.5 bg-purple-50 dark:bg-purple-900/20 px-2 py-0.5 rounded-lg border border-purple-100/50 dark:border-purple-800/30 w-fit">
-                          <span className="text-[8px] font-bold text-purple-400 uppercase tracking-tighter">Soma</span>
-                          <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400 tabular-nums">{item.sum}</span>
-                        </div>
-                      )}
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {item.type && (
+                          <div className="flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 rounded-lg border border-blue-100/50 dark:border-blue-800/30 w-fit">
+                            <span className="text-[8px] font-bold text-blue-500 uppercase tracking-tighter">{item.type}</span>
+                          </div>
+                        )}
+                        {item.model && (
+                          <div className="flex items-center gap-1.5 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded-lg border border-zinc-200 dark:border-zinc-700 w-fit">
+                            <span className="text-[8px] font-bold text-zinc-500 uppercase tracking-tighter">{item.model}</span>
+                          </div>
+                        )}
+                        {item.sum && (
+                          <div className="flex items-center gap-1.5 bg-purple-50 dark:bg-purple-900/20 px-2 py-0.5 rounded-lg border border-purple-100/50 dark:border-purple-800/30 w-fit">
+                            <span className="text-[8px] font-bold text-purple-400 uppercase tracking-tighter">Soma</span>
+                            <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400 tabular-nums">{item.sum}</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                     <Button 
                       size="icon"

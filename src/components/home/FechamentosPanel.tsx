@@ -84,7 +84,8 @@ export const FechamentosPanel = ({ onBack, onSaveGame }: FechamentosPanelProps) 
       numbers: sorted, 
       timestamp: Date.now(), 
       model: model.title,
-      type: 'Fechamento PRO'
+      type: 'Fechamento PRO',
+      sum: sorted.reduce((a, b) => a + b, 0)
     });
 
     toast.success(`Modelo "${model.title}" inserido no histórico!`, {
