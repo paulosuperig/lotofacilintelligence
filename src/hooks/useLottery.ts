@@ -58,7 +58,8 @@ export const useLottery = () => {
             numbers: item.numbers,
             timestamp: new Date(item.created_at).getTime(),
             sum: item.sum,
-            model: item.model_used
+            model: item.model_used,
+            type: item.type || (item.model_used ? 'Fechamento PRO' : 'IA Insight')
           }));
           setHistory(formattedHistory);
           return;
