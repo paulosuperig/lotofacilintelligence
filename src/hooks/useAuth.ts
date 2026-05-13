@@ -57,15 +57,17 @@ export const useAuth = () => {
           const result = UserSchema.safeParse(rawData);
           
           if (result.success && verifySession(result.data)) {
-            setUser(result.data);
+            setUser((prev) => prev?.token === result.data.token ? prev : result.data);
           } else {
-            const wasLoggedIn = !!user;
-            logout();
-            if (wasLoggedIn) {
-              toast.error("Sessão expirada", {
-                description: "Sua sessão expirou por segurança. Faça login novamente.",
-              });
-            }
+            setUser((prev) => {
+              if (prev) {
+                toast.error("Sessão expirada", {
+                  description: "Sua sessão expirou por segurança. Faça login novamente.",
+                });
+              }
+              return null;
+            });
+            cookieStorage.removeItem('intelligence_session');
           }
         } catch (error) {
           logout();
@@ -79,7 +81,7 @@ export const useAuth = () => {
     // Auto-check session every 30 seconds to catch expiration
     const interval = setInterval(checkSession, 30000);
     return () => clearInterval(interval);
-  }, [verifySession, logout, toast, user]);
+  }, [verifySession, logout]);
 
   const login = (email: string, role: 'admin' | 'demo') => {
     const now = Date.now();
