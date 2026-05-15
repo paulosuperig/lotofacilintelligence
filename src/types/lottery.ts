@@ -31,6 +31,7 @@ export interface UserProfile {
   role: 'admin' | 'demo';
   status: 'active' | 'blocked';
   createdAt: string;
+  created_at?: string; // Fallback for Supabase queries
 }
 
 export interface Statistics {

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useToast } from './use-toast';
-import { validateEmail, generateSecureId, hashData, sanitizeString } from '@/lib/security/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { UserProfile } from '@/types/lottery';
 
@@ -8,88 +7,101 @@ export const useAdmin = () => {
   const { toast } = useToast();
   const [users, setUsers] = useState<UserProfile[]>([]);
 
-  useEffect(() => {
-    const savedUsers = localStorage.getItem('intelligence_system_users');
-    if (savedUsers) {
-      setUsers(JSON.parse(savedUsers));
-    } else {
-      const initialUsers: UserProfile[] = [
-        { id: '1', email: 'admin@admin.com.br', role: 'admin', status: 'active', createdAt: new Date().toISOString() },
-        { id: '2', email: 'demo@demo.com.br', role: 'demo', status: 'active', createdAt: new Date().toISOString() }
-      ];
-      setUsers(initialUsers);
-      localStorage.setItem('intelligence_system_users', JSON.stringify(initialUsers));
+  const fetchUsers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      
+      if (data) {
+        const formatted = data.map((u: any) => ({
+          ...u,
+          createdAt: u.created_at || new Date().toISOString()
+        }));
+        setUsers(formatted as UserProfile[]);
+      }
+    } catch (error: any) {
+      console.error("Error fetching users:", error);
     }
+  };
+
+  useEffect(() => {
+    fetchUsers();
   }, []);
 
-  const saveUsers = (updatedUsers: any[]) => {
-    setUsers(updatedUsers);
-    localStorage.setItem('intelligence_system_users', JSON.stringify(updatedUsers));
-  };
-
   const createOrUpdateUser = async (userData: any, editingUser: any = null) => {
-    const sanitizedEmail = sanitizeString(userData.email);
-    
-    if (!validateEmail(sanitizedEmail)) {
+    if (editingUser) {
+      try {
+        const { error } = await supabase
+          .from('profiles')
+          .update({
+            role: userData.role,
+            status: userData.status
+          })
+          .eq('id', editingUser.id);
+        
+        if (error) throw error;
+
+        // Sync with user_roles table
+        await supabase
+          .from('user_roles')
+          .upsert({ user_id: editingUser.id, role: userData.role }, { onConflict: 'user_id,role' });
+
+        toast({ title: "Usuário atualizado", description: "As alterações foram salvas no Supabase." });
+        fetchUsers();
+      } catch (error: any) {
+        toast({ title: "Erro", description: error.message, variant: "destructive" });
+      }
+    } else {
       toast({ 
-        title: "Erro de validação", 
-        description: "Por favor, insira um e-mail válido.",
+        title: "Atenção", 
+        description: "Novos usuários devem se cadastrar na tela de login.",
         variant: "destructive"
       });
-      return;
     }
+  };
 
-    if (editingUser) {
-      const updated = users.map(u => u.id === editingUser.id ? { 
-        ...u, 
-        email: sanitizedEmail,
-        role: userData.role || u.role,
-        status: userData.status || u.status
-      } : u);
-      saveUsers(updated);
-      toast({ title: "Usuário atualizado", description: "As alterações foram salvas com sucesso." });
-    } else {
-      if (!userData.password || userData.password.length < 6) {
-        toast({ 
-          title: "Senha insegura", 
-          description: "A senha deve ter pelo menos 6 caracteres.",
-          variant: "destructive"
-        });
-        return;
-      }
+  const deleteUser = async (userId: string) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', userId);
       
-      const hashedPassword = await hashData(userData.password);
-      const newUser = {
-        ...userData,
-        email: sanitizedEmail,
-        password: hashedPassword,
-        id: generateSecureId(),
-        createdAt: new Date().toISOString()
-      };
-      saveUsers([...users, newUser]);
-      toast({ title: "Usuário criado", description: "O novo usuário foi cadastrado com sucesso." });
+      if (error) throw error;
+      
+      toast({ title: "Perfil removido", description: "O perfil foi excluído do banco de dados." });
+      fetchUsers();
+    } catch (error: any) {
+      toast({ title: "Erro", description: error.message, variant: "destructive" });
     }
   };
 
-  const deleteUser = (userId: string) => {
-    const updated = users.filter(u => u.id !== userId);
-    saveUsers(updated);
-    toast({ title: "Usuário excluído", description: "O usuário foi removido do sistema." });
-  };
+  const toggleUserStatus = async (userId: string) => {
+    const user = users.find(u => u.id === userId);
+    if (!user) return;
 
-  const toggleUserStatus = (userId: string) => {
-    const updated = users.map(u => {
-      if (u.id === userId) {
-        const newStatus = u.status === 'active' ? 'blocked' : 'active';
-        toast({ 
-          title: newStatus === 'active' ? "Usuário desbloqueado" : "Usuário bloqueado", 
-          description: `O acesso para ${u.email} foi ${newStatus === 'active' ? 'restaurado' : 'suspenso'}.` 
-        });
-        return { ...u, status: newStatus };
-      }
-      return u;
-    });
-    saveUsers(updated);
+    const newStatus = user.status === 'active' ? 'blocked' : 'active';
+    
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ status: newStatus })
+        .eq('id', userId);
+      
+      if (error) throw error;
+
+      toast({ 
+        title: newStatus === 'active' ? "Usuário desbloqueado" : "Usuário bloqueado", 
+        description: `O acesso para ${user.email} foi alterado.` 
+      });
+      fetchUsers();
+    } catch (error: any) {
+      toast({ title: "Erro", description: error.message, variant: "destructive" });
+    }
   };
 
   return {

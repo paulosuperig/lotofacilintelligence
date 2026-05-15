@@ -4,101 +4,113 @@ import { Clover, Lock, User, Eye, EyeOff, LogIn, ArrowLeft, Mail, UserPlus, Phon
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from '@/hooks/use-toast';
-import { hashData } from '@/lib/security/utils';
+import { supabase } from '@/integrations/supabase/client';
 
-interface LoginProps {
-  onLogin: (user: { email: string; role: 'admin' | 'demo' }) => void;
-}
-
-const Login = ({ onLogin }: LoginProps) => {
+const Login = () => {
   const currentYear = new Date().getFullYear();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [view, setView] = useState<'login' | 'forgot-password' | 'register'>('login');
-  const [registerData, setRegisterData] = useState({ name: '', email: '', whatsapp: '' });
+  const [registerData, setRegisterData] = useState({ name: '', email: '', whatsapp: '', password: '' });
   const { toast } = useToast();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    const emailInput = email.trim().toLowerCase();
-    const passwordInput = password;
-
-    // Zero Trust: Admin check using secure comparison
-    setTimeout(() => {
-      // In a real environment, this would be a backend call
-      const storedUsers = JSON.parse(localStorage.getItem('intelligence_system_users') || '[]');
-      
-      const foundUser = storedUsers.find((u: any) => 
-        u.email.toLowerCase() === emailInput && u.status === 'active'
-      );
-
-      // Secure verification logic
-      const verifyAccess = async () => {
-        // Fallback for first access/recovery
-        if (emailInput === 'admin@admin.com.br' && passwordInput === '81260642') {
-          return { email: emailInput, role: 'admin' as const };
-        }
-        
-        if (foundUser) {
-          const hashedInput = await hashData(passwordInput);
-          if (foundUser.password === hashedInput) {
-            return { email: foundUser.email, role: foundUser.role as 'admin' | 'demo' };
-          }
-        }
-        return null;
-      };
-
-      verifyAccess().then((userSession) => {
-        if (userSession) {
-          onLogin(userSession);
-          toast({
-            title: userSession.role === 'admin' ? "Bem-vindo, Admin!" : "Bem-vindo!",
-            description: userSession.role === 'admin' ? "Acesso total liberado." : "Acesso VIP Intelligence liberado.",
-          });
-        } else {
-          toast({
-            title: "Erro de autenticação",
-            description: "E-mail ou senha incorretos ou conta inativa.",
-            variant: "destructive",
-          });
-        }
-        setIsLoading(false);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password: password,
       });
-    }, 800);
+
+      if (error) throw error;
+
+      toast({
+        title: "Bem-vindo!",
+        description: "Acesso autorizado com sucesso.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erro de autenticação",
+        description: error.message || "E-mail ou senha incorretos.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleForgotPassword = (e: React.FormEvent) => {
+  const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate recovery email
-    setTimeout(() => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) throw error;
+
       toast({
         title: "E-mail enviado",
         description: `As instruções de recuperação foram enviadas para ${email}.`,
       });
-      setIsLoading(false);
       setView('login');
-    }, 1500);
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate registration
-    setTimeout(() => {
-      toast({
-        title: "Solicitação enviada",
-        description: "Seu cadastro foi recebido. Entraremos em contato via WhatsApp.",
+    try {
+      // 1. Sign Up the user
+      const { data, error } = await supabase.auth.signUp({
+        email: registerData.email.trim().toLowerCase(),
+        password: registerData.password,
+        options: {
+          data: {
+            full_name: registerData.name,
+            whatsapp: registerData.whatsapp,
+          },
+          emailRedirectTo: window.location.origin,
+        }
       });
+
+      if (error) throw error;
+
+      if (data.session) {
+        toast({
+          title: "Cadastro realizado!",
+          description: "Bem-vindo ao Lotofácil Intelligence.",
+        });
+      } else {
+        toast({
+          title: "Verifique seu e-mail",
+          description: "Enviamos um link de confirmação para o seu e-mail.",
+        });
+        setView('login');
+      }
+    } catch (error: any) {
+      toast({
+        title: "Erro no cadastro",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
       setIsLoading(false);
-      setView('login');
-    }, 1500);
+    }
   };
 
   return (
@@ -328,6 +340,22 @@ const Login = ({ onLogin }: LoginProps) => {
                       onChange={(e) => setRegisterData({...registerData, email: e.target.value})}
                       className="pl-11 h-12 rounded-xl border-purple-100 bg-purple-50/30"
                       required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Senha</label>
+                  <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
+                    <Input
+                      type="password"
+                      placeholder="••••••••"
+                      value={registerData.password}
+                      onChange={(e) => setRegisterData({...registerData, password: e.target.value})}
+                      className="pl-11 h-12 rounded-xl border-purple-100 bg-purple-50/30"
+                      required
+                      minLength={6}
                     />
                   </div>
                 </div>

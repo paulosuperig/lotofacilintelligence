@@ -1,107 +1,86 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { cookieStorage } from '@/lib/security/cookieStorage';
+import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { UserSchema, type ValidatedUser } from '@/lib/security/schemas';
-import CryptoJS from 'crypto-js';
 import { toast } from 'sonner';
-
-const SESSION_SECRET = import.meta.env.VITE_SESSION_ENCRYPTION_KEY || 'session-vault-secret-2024';
-const SESSION_DURATION_MS = 1000 * 60 * 60; // 1 hour session
+import { type User, type Session } from '@supabase/supabase-js';
 
 /**
  * Skill: Advanced Authentication & Token Management
- * Implements session expiration (IAT/EXP) and auto-logout logic.
+ * Migrated to Supabase Auth for persistent sessions and database integration.
  */
 export const useAuth = () => {
   const [user, setUser] = useState<ValidatedUser | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const userRef = useRef<ValidatedUser | null>(null);
-  
-  useEffect(() => {
-    userRef.current = user;
-  }, [user]);
 
-  const logout = useCallback(() => {
-    cookieStorage.removeItem('intelligence_session');
-    setUser(null);
-  }, []);
-
-  // Verification: Ensure the session hasn't been tampered with and is not expired
-  const verifySession = useCallback((userData: ValidatedUser): boolean => {
-    if (!userData.token || !userData.exp) return false;
-    
+  const fetchProfile = useCallback(async (authUser: User) => {
     try {
-      // 1. Check Expiration
-      const now = Date.now();
-      if (now > userData.exp) {
-        console.warn('[Security] Session expired');
-        return false;
-      }
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', authUser.id)
+        .maybeSingle();
 
-      // 2. Cryptographic Signature Check
-      const [payload, signature] = userData.token.split('.');
-      const expectedSignature = CryptoJS.HmacSHA256(payload, SESSION_SECRET).toString();
-      return signature === expectedSignature;
-    } catch (e) {
-      return false;
+      if (error) throw error;
+
+      const userData: ValidatedUser = {
+        email: authUser.email || '',
+        role: (profile?.role as 'admin' | 'demo') || 'demo',
+        token: 'supabase-managed', // Supabase handles tokens internally
+        iat: Date.now(),
+        exp: Date.now() + 3600000, // Not strictly used for logic anymore, kept for schema compatibility
+      };
+
+      setUser(userData);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      setUser(null);
     }
   }, []);
 
   useEffect(() => {
-    const checkSession = () => {
-      const encryptedData = cookieStorage.getItem('intelligence_session');
-      
-      if (encryptedData) {
-        try {
-          const bytes = CryptoJS.AES.decrypt(encryptedData, SESSION_SECRET);
-          const decryptedData = bytes.toString(CryptoJS.enc.Utf8);
-          
-          if (!decryptedData) throw new Error('Decryption failed');
-
-          const rawData = JSON.parse(decryptedData);
-          const result = UserSchema.safeParse(rawData);
-          
-          if (result.success && verifySession(result.data)) {
-            setUser((prev) => prev?.token === result.data.token ? prev : result.data);
-          } else {
-            if (userRef.current) {
-              toast.error("Sessão expirada", {
-                description: "Sua sessão expirou por segurança. Faça login novamente.",
-              });
-            }
-            setUser(null);
-            cookieStorage.removeItem('intelligence_session');
-          }
-        } catch (error) {
-          logout();
-        }
+    // 1. Get initial session
+    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+      setSession(initialSession);
+      if (initialSession?.user) {
+        fetchProfile(initialSession.user);
       }
       setLoading(false);
+    });
+
+    // 2. Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, currentSession) => {
+        setSession(currentSession);
+        if (currentSession?.user) {
+          fetchProfile(currentSession.user);
+        } else {
+          setUser(null);
+        }
+        setLoading(false);
+      }
+    );
+
+    return () => {
+      subscription.unsubscribe();
     };
+  }, [fetchProfile]);
 
-    checkSession();
+  const signOut = useCallback(async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast.error("Erro ao sair", { description: error.message });
+    } else {
+      setUser(null);
+      setSession(null);
+    }
+  }, []);
 
-    // Auto-check session every 30 seconds to catch expiration
-    const interval = setInterval(checkSession, 30000);
-    return () => clearInterval(interval);
-  }, [verifySession, logout]);
-
-  const login = (email: string, role: 'admin' | 'demo') => {
-    const now = Date.now();
-    const exp = now + SESSION_DURATION_MS;
-    
-    const payload = btoa(JSON.stringify({ email, role, iat: now, exp }));
-    const signature = CryptoJS.HmacSHA256(payload, SESSION_SECRET).toString();
-    const token = `${payload}.${signature}`;
-
-    const userData: ValidatedUser = { email, role, token, iat: now, exp };
-    const jsonString = JSON.stringify(userData);
-    
-    const encrypted = CryptoJS.AES.encrypt(jsonString, SESSION_SECRET).toString();
-    
-    // Cookie expires slightly after the token for grace period
-    cookieStorage.setItem('intelligence_session', encrypted, 1 / 24); // 1 hour
-    setUser(userData);
+  return { 
+    user, 
+    session,
+    loading, 
+    isAdmin: user?.role === 'admin',
+    signOut 
   };
-
-  return { user, login, logout, loading, isAdmin: user?.role === 'admin' };
 };
