@@ -49,7 +49,7 @@ export const useLottery = () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
           const { data, error } = await supabase
-            .from('saved_games')
+            .from('games_history')
             .select('*')
             .order('created_at', { ascending: false });
           
@@ -58,9 +58,9 @@ export const useLottery = () => {
               id: item.id,
               numbers: item.numbers,
               timestamp: new Date(item.created_at).getTime(),
-              sum: item.sum,
-              model: item.model_used,
-              type: item.type || (item.model_used ? 'Fechamento PRO' : 'IA Insight')
+              sum: item.sum_value ?? undefined,
+              model: item.model_name ?? undefined,
+              type: item.type || (item.model_name ? 'Fechamento PRO' : 'IA Insight')
             }));
             setHistory(formattedHistory);
             return;
@@ -103,7 +103,7 @@ export const useLottery = () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
           await supabase
-            .from('saved_games')
+            .from('games_history')
             .delete()
             .eq('user_id', user.id);
         }
@@ -174,13 +174,13 @@ export const useLottery = () => {
           const gamesToInsert = securedGames.map(game => ({
             user_id: user.id,
             numbers: game.numbers,
-            sum: game.sum,
-            model_used: game.model,
+            sum_value: game.sum,
+            model_name: game.model,
             type: game.type, // Added type field for complete synchronization
             created_at: new Date(game.timestamp).toISOString()
           }));
           
-          await supabase.from('saved_games').insert(gamesToInsert);
+          await supabase.from('games_history').insert(gamesToInsert);
         }
       }
 

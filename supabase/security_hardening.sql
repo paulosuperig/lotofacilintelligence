@@ -2,21 +2,21 @@
 -- Staff Engineer Audit: Immediate Hardening SQL for Supabase
 
 -- 1. Enable RLS on all tables
-ALTER TABLE saved_games ENABLE ROW LEVEL SECURITY;
-ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.games_history ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
 -- 2. Policy: Users can only see their own saved games
 CREATE POLICY "Users can only access their own games"
-ON saved_games
+ON public.games_history
 FOR ALL
 USING (auth.uid() = user_id);
 
 -- 3. Policy: Admins can view all users, but only themselves
 CREATE POLICY "Admins can manage user profiles"
-ON user_profiles
+ON public.profiles
 FOR ALL
 USING (
-  auth.jwt() ->> 'role' = 'service_role' OR 
+  public.has_role(auth.uid(), 'admin'::public.app_role) OR 
   auth.uid() = id
 );
 

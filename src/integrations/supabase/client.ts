@@ -2,17 +2,17 @@ import { createClient } from '@supabase/supabase-js';
 import { Database } from './types';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const supabasePublishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('Supabase URL ou Anon Key não configuradas. Verifique as configurações no painel da Lovable.');
+if (!supabaseUrl || !supabasePublishableKey) {
+  console.warn('Supabase URL ou Publishable Key não configuradas. Verifique a conexão Supabase no painel da Lovable.');
 }
 
 // Skill: Resilient Initialization
 // Garante que o app não quebre se as variáveis estiverem ausentes
 export const supabase = createClient<Database>(
   supabaseUrl || 'https://placeholder-url.supabase.co', 
-  supabaseAnonKey || 'placeholder-key'
+  supabasePublishableKey || 'placeholder-key'
 );
 
 /**
