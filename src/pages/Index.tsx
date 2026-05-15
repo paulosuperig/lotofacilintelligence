@@ -20,7 +20,7 @@ import { BentoGrid } from '@/components/home/BentoGrid';
 
 const Index = () => {
   const { toast } = useToast();
-  const { user, login, logout, loading, isAdmin } = useAuth();
+  const { user, loading, isAdmin, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState('home');
 
   const { 
@@ -50,12 +50,8 @@ const Index = () => {
     toggleUserStatus
   } = useAdmin();
 
-  const handleLogin = (userData: { email: string, role: 'admin' | 'demo' }) => {
-    login(userData.email, userData.role);
-  };
-
   const handleLogout = () => {
-    logout();
+    signOut();
     toast({
       title: "Sessão encerrada",
       description: "Você saiu do sistema com sucesso.",
@@ -115,7 +111,7 @@ const Index = () => {
   if (loading) return null; // Prevent flicker during auth check
   
   if (!user) {
-    return <Login onLogin={handleLogin} />;
+    return <Login />;
   }
 
   return (
