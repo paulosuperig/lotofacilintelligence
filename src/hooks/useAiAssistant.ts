@@ -1,14 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from './use-toast';
-import { sanitizeString } from '@/lib/security/utils';
+import { sanitizeString, generateSecureId } from '@/lib/security/utils';
 import type { LotteryResult } from '@/types/lottery';
+import { supabase, isSupabaseEnabled } from '@/lib/supabase';
 import { computeLotteryStats, formatStatsForPrompt } from '@/lib/ai/lotteryStats';
 import {
   sanitizeAiGamesDetailed,
   type UserIntent,
 } from '@/lib/ai/sanitizeGames';
 
-const MAX_HISTORY_MESSAGES = 12;
+const MAX_HISTORY_MESSAGES = 15;
 const REQUEST_TIMEOUT_MS = 60_000;
 const MAX_RETRIES = 2;
 
@@ -82,6 +83,26 @@ export const useAiAssistant = (latestResult?: LotteryResult | null) => {
   useEffect(() => {
     const savedKey = localStorage.getItem('deepseek_api_key');
     if (savedKey) setDeepSeekKey(savedKey);
+
+    const loadChatHistory = async () => {
+      if (!isSupabaseEnabled() || !supabase) return;
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('ai_chat_history')
+        .select('role, content')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: true })
+        .limit(30);
+
+      if (!error && data) {
+        setAiChat(data as any);
+      }
+    };
+
+    loadChatHistory();
   }, []);
 
   const saveDeepSeekKey = (key: string) => {
@@ -92,6 +113,23 @@ export const useAiAssistant = (latestResult?: LotteryResult | null) => {
       title: "Configuração Salva",
       description: "A chave da API DeepSeek foi armazenada com sucesso.",
     });
+  };
+
+  const persistChatMessage = async (role: 'user' | 'assistant', content: string) => {
+    if (!isSupabaseEnabled() || !supabase) return;
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      await supabase.from('ai_chat_history').insert({
+        user_id: user.id,
+        role,
+        content
+      });
+    } catch (error) {
+      console.error("Error persisting chat message:", error);
+    }
   };
 
   const buildSystemPrompt = useCallback((intent: UserIntent) => {
@@ -206,6 +244,7 @@ ${statsBlock}`;
 
     const newMessage = { role: 'user' as const, content: sanitizedMessage };
     setAiChat(prev => [...prev, newMessage]);
+    persistChatMessage('user', sanitizedMessage);
     setAiMessage('');
     setIsAiLoading(true);
 
@@ -249,6 +288,7 @@ ${statsBlock}`;
       }
 
       setAiChat(prev => [...prev, { role: 'assistant', content: result.content }]);
+      persistChatMessage('assistant', result.content);
     } catch (error: any) {
       console.error('Erro na IA:', error);
       const status = error?.status;
@@ -285,5 +325,14 @@ ${statsBlock}`;
     saveDeepSeekKey,
     sendMessage,
     setAiChat,
+    clearChatHistory: async () => {
+      if (isSupabaseEnabled() && supabase) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          await supabase.from('ai_chat_history').delete().eq('user_id', user.id);
+        }
+      }
+      setAiChat([]);
+    }
   };
 };
