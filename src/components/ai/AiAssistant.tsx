@@ -16,6 +16,87 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { Ball } from '@/components/lottery/Ball';
+
+// Detects a Lotofácil game line and renders it as a beautiful card of balls.
+// Accepts strings like "01) 03, 05, 08, 10, 12, 14, 16, 18, 20, 21, 22, 23, 24, 25 (soma 232)"
+const GameLine = ({ raw }: { raw: string }) => {
+  const text = String(raw);
+  const labelMatch = text.match(/^\s*(\d{1,2})\s*[\)\.\-:]/);
+  const sumMatch = text.match(/soma[:\s]*?(\d{2,3})/i);
+  const tokens = text.match(/\b\d{1,2}\b/g) || [];
+  const nums = tokens
+    .map((n) => parseInt(n, 10))
+    .filter((n) => n >= 1 && n <= 25);
+  const unique = Array.from(new Set(nums));
+  if (unique.length < 15) return null;
+  const game = unique.slice(0, 15).sort((a, b) => a - b);
+  const sum = sumMatch ? parseInt(sumMatch[1], 10) : game.reduce((a, b) => a + b, 0);
+  const evens = game.filter((n) => n % 2 === 0).length;
+  const odds = 15 - evens;
+
+  return (
+    <div className="my-2 rounded-2xl border border-purple-100 dark:border-zinc-700 bg-gradient-to-br from-white to-purple-50/40 dark:from-zinc-900 dark:to-purple-950/20 p-3 sm:p-4 shadow-sm">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-purple-600 dark:text-purple-400">
+            Jogo {labelMatch ? labelMatch[1].padStart(2, '0') : ''}
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-400">Soma</span>
+          <span className="text-[11px] font-bold text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/30 px-2 py-0.5 rounded-md">
+            {sum}
+          </span>
+        </div>
+      </div>
+      <div className="flex flex-wrap gap-1.5 sm:gap-2 justify-center">
+        {game.map((n) => (
+          <Ball key={n} number={n} active size="sm" />
+        ))}
+      </div>
+      <div className="flex items-center justify-center gap-3 mt-3 pt-3 border-t border-purple-50 dark:border-zinc-800">
+        <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-400">
+          Pares <span className="text-zinc-700 dark:text-zinc-200">{evens}</span>
+        </span>
+        <span className="w-1 h-1 rounded-full bg-zinc-300" />
+        <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-400">
+          Ímpares <span className="text-zinc-700 dark:text-zinc-200">{odds}</span>
+        </span>
+      </div>
+    </div>
+  );
+};
+
+const isGameLine = (text: string) => {
+  const tokens = text.match(/\b\d{1,2}\b/g) || [];
+  const valid = tokens.map((n) => parseInt(n, 10)).filter((n) => n >= 1 && n <= 25);
+  return new Set(valid).size >= 15;
+};
+
+const markdownComponents = {
+  code: ({ inline, className, children, ...props }: any) => {
+    const raw = String(children ?? '');
+    if (isGameLine(raw)) {
+      return <GameLine raw={raw} />;
+    }
+    return (
+      <code className={className} {...props}>
+        {children}
+      </code>
+    );
+  },
+  pre: ({ children, ...props }: any) => {
+    // If the <pre> only wraps a game-line code, let the GameLine render standalone.
+    const child: any = Array.isArray(children) ? children[0] : children;
+    const inner = child?.props?.children;
+    const raw = Array.isArray(inner) ? inner.join('') : String(inner ?? '');
+    if (isGameLine(raw)) {
+      return <GameLine raw={raw} />;
+    }
+    return <pre {...props}>{children}</pre>;
+  },
+};
 
 interface AiAssistantProps {
   deepSeekKey: string;
@@ -177,7 +258,7 @@ export const AiAssistant = ({
                   {msg.role === 'assistant' ? (
                     <>
                       <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:font-bold prose-headings:text-zinc-900 dark:prose-headings:text-zinc-100 prose-h1:text-base prose-h2:text-base prose-h3:text-sm prose-h4:text-sm prose-p:my-2 prose-p:leading-relaxed prose-strong:text-purple-700 dark:prose-strong:text-purple-400 prose-strong:font-bold prose-ul:my-2 prose-ol:my-2 prose-li:my-0.5 prose-hr:my-3 prose-hr:border-purple-100 dark:prose-hr:border-zinc-700 prose-code:text-purple-700 dark:prose-code:text-purple-300 prose-code:bg-purple-50 dark:prose-code:bg-purple-900/30 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>{msg.content}</ReactMarkdown>
                       </div>
                       <div className="flex justify-between items-center mt-3 pt-3 border-t border-purple-50">
                         <span className="text-[10px] text-zinc-400 font-medium italic">Extraído da análise Intelligence AI</span>
