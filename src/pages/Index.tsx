@@ -67,12 +67,23 @@ const Index = () => {
     const allNumbers = content.match(/\b\d{1,2}\b/g);
     
     if (allNumbers && allNumbers.length >= 15) {
-      const gamesToSave = [];
-      for (let i = 0; i < allNumbers.length; i += 15) {
-        if (i + 15 <= allNumbers.length) {
-          const gameNumbers = allNumbers.slice(i, i + 15).sort((a, b) => parseInt(a) - parseInt(b));
-          gamesToSave.push(gameNumbers);
-        }
+      // Convert to numbers and filter to valid Lotofácil range (1-25)
+      const validNums = allNumbers
+        .map(n => parseInt(n, 10))
+        .filter(n => Number.isInteger(n) && n >= 1 && n <= 25);
+
+      const gamesToSave: number[][] = [];
+      const seenInBatch = new Set<string>();
+      for (let i = 0; i + 15 <= validNums.length; i += 15) {
+        const slice = validNums.slice(i, i + 15);
+        // Ensure 15 unique numbers in this game
+        const unique = Array.from(new Set(slice));
+        if (unique.length !== 15) continue;
+        const sorted = unique.sort((a, b) => a - b);
+        const sig = sorted.join(',');
+        if (seenInBatch.has(sig)) continue;
+        seenInBatch.add(sig);
+        gamesToSave.push(sorted);
       }
 
       if (gamesToSave.length > 0) {
@@ -80,6 +91,7 @@ const Index = () => {
           id: generateSecureId(),
           numbers: nums,
           timestamp: Date.now(),
+          sum: nums.reduce((a, b) => a + b, 0),
           type: 'IA Insight'
         }));
 
