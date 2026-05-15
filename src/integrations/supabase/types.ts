@@ -119,10 +119,6 @@ export type Database = {
         }
         Returns: boolean
       }
-      promote_user_to_admin: {
-        Args: { target_email: string }
-        Returns: undefined
-      }
     }
     Enums: {
       account_status: "active" | "blocked"
