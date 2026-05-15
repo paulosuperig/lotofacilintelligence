@@ -103,7 +103,21 @@ const Index = () => {
     });
   }, [saveToHistory, toast]);
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#f5f3ff] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+            className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full"
+          />
+          <p className="text-purple-600 font-medium animate-pulse">Carregando sua inteligência...</p>
+        </div>
+      </div>
+    );
+  }
+  
   if (!user) return <Login />;
 
   return (
