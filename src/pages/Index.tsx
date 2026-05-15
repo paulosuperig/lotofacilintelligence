@@ -119,88 +119,88 @@ const Index = () => {
       </div>
 
       <div className="relative z-10 w-full flex flex-col md:flex-row min-h-screen">
+        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} role={user.role} onLogout={handleLogout} />
+        <MobileNav activeTab={activeTab} setActiveTab={setActiveTab} role={user.role} onLogout={handleLogout} />
 
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} role={user.role} onLogout={handleLogout} />
-      <MobileNav activeTab={activeTab} setActiveTab={setActiveTab} role={user.role} onLogout={handleLogout} />
+        {user.role === 'demo' && (
+          <div className="fixed top-0 left-0 right-0 bg-amber-500/90 backdrop-blur-sm text-white text-[clamp(8px,1.5vw,10px)] font-bold uppercase tracking-[0.2em] py-1.5 text-center z-[100] shadow-sm">
+            Modo de Demonstração — Acesso VIP Intelligence
+          </div>
+        )}
 
-      {user.role === 'demo' && (
-        <div className="fixed top-0 left-0 right-0 bg-amber-500/90 backdrop-blur-sm text-white text-[clamp(8px,1.5vw,10px)] font-bold uppercase tracking-[0.2em] py-1.5 text-center z-[100] shadow-sm">
-          Modo de Demonstração — Acesso VIP Intelligence
-        </div>
-      )}
+        <main className="flex-grow w-full md:pl-[5rem] pb-[calc(8rem+env(safe-area-inset-bottom))] md:pb-12 min-h-screen">
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="w-full max-w-[min(1600px,95%)] mx-auto p-4 sm:p-6 lg:p-10 transition-all duration-300"
+          >
+            <Header role={user.role} isRefreshing={isRefreshing} onRefresh={fetchLatestResult} />
 
-      <main className="flex-grow w-full md:pl-[5rem] pb-[calc(8rem+env(safe-area-inset-bottom))] md:pb-12 min-h-screen">
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className="w-full max-w-[min(1600px,95%)] mx-auto p-4 sm:p-6 lg:p-10 transition-all duration-300"
-        >
-          <Header role={user.role} isRefreshing={isRefreshing} onRefresh={fetchLatestResult} />
+            <AnimatePresence mode="wait">
+              {activeTab === 'historico' && (
+                <HistoryPanel 
+                  history={history} 
+                  onBack={() => setActiveTab('home')} 
+                  onClearHistory={clearHistory} 
+                  onGoToGenerator={() => setActiveTab('gerador')} 
+                />
+              )}
+              
+              {activeTab === 'stats' && (
+                <FechamentosPanel 
+                  onBack={() => setActiveTab('home')} 
+                  onSaveGame={(game) => saveToHistory([game])} 
+                />
+              )}
 
-          <AnimatePresence mode="wait">
-            {activeTab === 'historico' && (
-              <HistoryPanel 
-                history={history} 
-                onBack={() => setActiveTab('home')} 
-                onClearHistory={clearHistory} 
-                onGoToGenerator={() => setActiveTab('gerador')} 
-              />
-            )}
-            
-            {activeTab === 'stats' && (
-              <FechamentosPanel 
-                onBack={() => setActiveTab('home')} 
-                onSaveGame={(game) => saveToHistory([game])} 
-              />
-            )}
+              {activeTab === 'dicas' && (
+                <TipsPanel onBack={() => setActiveTab('home')} />
+              )}
 
-            {activeTab === 'dicas' && (
-              <TipsPanel onBack={() => setActiveTab('home')} />
-            )}
+              {activeTab === 'ia' && (
+                <AiAssistant 
+                  deepSeekKey={deepSeekKey}
+                  aiChat={aiChat}
+                  isAiLoading={isAiLoading}
+                  aiMessage={aiMessage}
+                  onSendMessage={(e, msg) => sendMessage(msg || aiMessage)}
+                  onSetAiMessage={setAiMessage}
+                  onSaveAiGame={saveAiGameToHistory}
+                  onBack={() => setActiveTab('home')}
+                  onGoToSettings={() => setActiveTab('ajustes')}
+                  role={user.role}
+                />
+              )}
 
-            {activeTab === 'ia' && (
-              <AiAssistant 
-                deepSeekKey={deepSeekKey}
-                aiChat={aiChat}
-                isAiLoading={isAiLoading}
-                aiMessage={aiMessage}
-                onSendMessage={(e, msg) => sendMessage(msg || aiMessage)}
-                onSetAiMessage={setAiMessage}
-                onSaveAiGame={saveAiGameToHistory}
-                onBack={() => setActiveTab('home')}
-                onGoToSettings={() => setActiveTab('ajustes')}
-                role={user.role}
-              />
-            )}
+              {activeTab === 'ajustes' && isAdmin && (
+                <AdminPanel 
+                  users={users}
+                  onBack={() => setActiveTab('home')}
+                  onCreateOrUpdateUser={createOrUpdateUser}
+                  onDeleteUser={deleteUser}
+                  onToggleUserStatus={toggleUserStatus}
+                  deepSeekKey={deepSeekKey}
+                  onSaveDeepSeekKey={saveDeepSeekKey}
+                />
+              )}
 
-            {activeTab === 'ajustes' && isAdmin && (
-              <AdminPanel 
-                users={users}
-                onBack={() => setActiveTab('home')}
-                onCreateOrUpdateUser={createOrUpdateUser}
-                onDeleteUser={deleteUser}
-                onToggleUserStatus={toggleUserStatus}
-                deepSeekKey={deepSeekKey}
-                onSaveDeepSeekKey={saveDeepSeekKey}
-              />
-            )}
-
-            {activeTab === 'home' || activeTab === 'gerador' ? (
-              <BentoGrid 
-                latestResult={latestResult} 
-                isLoading={isLoading} 
-                historyLength={history.length}
-                onClearHistory={clearHistory}
-                onNavigate={(tab) => {
-                  setActiveTab(tab);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-              />
-            ) : null}
-          </AnimatePresence>
-        </motion.div>
-      </main>
+              {activeTab === 'home' || activeTab === 'gerador' ? (
+                <BentoGrid 
+                  latestResult={latestResult} 
+                  isLoading={isLoading} 
+                  historyLength={history.length}
+                  onClearHistory={clearHistory}
+                  onNavigate={(tab) => {
+                    setActiveTab(tab);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                />
+              ) : null}
+            </AnimatePresence>
+          </motion.div>
+        </main>
+      </div>
     </div>
   );
 };
