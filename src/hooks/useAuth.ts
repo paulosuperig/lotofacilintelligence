@@ -13,69 +13,124 @@ export const useAuth = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchProfile = useCallback(async (authUser: User, retryCount = 0) => {
+  const fetchProfile = useCallback(async (authUser: User, retryCount = 0): Promise<ValidatedUser | null> => {
     try {
+      setLoading(true);
+      console.log(`Fetching profile for ${authUser.id}, attempt ${retryCount + 1}`);
+      
       const { data: profile, error } = await supabase
         .from('profiles')
         .select('role, status')
         .eq('id', authUser.id)
         .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database error fetching profile:', error);
+        throw error;
+      }
 
-      if (!profile && retryCount < 3) {
-        // Trigger might still be running, wait and retry
-        console.log(`Profile not found for ${authUser.id}, retrying... (${retryCount + 1})`);
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        return fetchProfile(authUser, retryCount + 1);
+      if (!profile) {
+        if (retryCount < 2) {
+          console.log(`Profile not found, retrying in 1s...`);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          return fetchProfile(authUser, retryCount + 1);
+        }
+        
+        // Skill: Automatic Profile Recovery
+        // If profile still missing after retries, try to create it manually
+        console.warn(`Profile missing for ${authUser.id} after retries. Attempting recovery...`);
+        const { data: newProfile, error: insertError } = await supabase
+          .from('profiles')
+          .insert([
+            { id: authUser.id, email: authUser.email, role: 'demo', status: 'active' }
+          ])
+          .select()
+          .single();
+          
+        if (insertError) {
+          console.error('Failed to recover/create profile:', insertError);
+          // Fallback to basic session if we can't create a profile
+        } else {
+          console.log('Profile successfully recovered.');
+        }
+        
+        const userData: ValidatedUser = {
+          email: authUser.email || '',
+          role: (newProfile?.role as 'admin' | 'demo') || 'demo',
+          token: 'supabase-managed',
+          iat: Date.now(),
+          exp: Date.now() + 3600000,
+        };
+        setUser(userData);
+        return userData;
+      }
+
+      if (profile.status === 'blocked') {
+        toast.error("Acesso bloqueado", { description: "Sua conta está desativada pelo administrador." });
+        await supabase.auth.signOut();
+        setUser(null);
+        return null;
       }
 
       const userData: ValidatedUser = {
         email: authUser.email || '',
-        role: (profile?.role as 'admin' | 'demo') || 'demo',
+        role: (profile.role as 'admin' | 'demo') || 'demo',
         token: 'supabase-managed',
         iat: Date.now(),
         exp: Date.now() + 3600000,
       };
 
-      if (profile?.status === 'blocked') {
-        toast.error("Acesso bloqueado", { description: "Sua conta está desativada." });
-        await supabase.auth.signOut();
-        setUser(null);
-        return;
-      }
-
       setUser(userData);
-    } catch (error) {
-      console.error('Error fetching profile:', error);
+      return userData;
+    } catch (error: any) {
+      console.error('Critical auth error:', error);
+      toast.error("Erro de sincronização", { description: "Não conseguimos carregar seu perfil. Tente novamente." });
       setUser(null);
+      return null;
+    } finally {
+      setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    // 1. Get initial session
-    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
-      setSession(initialSession);
-      if (initialSession?.user) {
-        fetchProfile(initialSession.user);
-      }
-      setLoading(false);
-    });
+    let mounted = true;
 
-    // 2. Listen for auth changes
+    const initializeAuth = async () => {
+      try {
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
+        if (!mounted) return;
+
+        setSession(initialSession);
+        if (initialSession?.user) {
+          await fetchProfile(initialSession.user);
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    initializeAuth();
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, currentSession) => {
+      async (event, currentSession) => {
+        if (!mounted) return;
+        
+        console.log('Auth state change:', event, currentSession?.user?.id);
         setSession(currentSession);
+        
         if (currentSession?.user) {
-          fetchProfile(currentSession.user);
+          await fetchProfile(currentSession.user);
         } else {
           setUser(null);
+          setLoading(false);
         }
-        setLoading(false);
       }
     );
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, [fetchProfile]);
