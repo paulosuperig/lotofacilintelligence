@@ -15,7 +15,6 @@ export const useAuth = () => {
 
   const fetchProfile = useCallback(async (authUser: User, retryCount = 0): Promise<ValidatedUser | null> => {
     try {
-      setLoading(true);
       console.log(`Fetching profile for ${authUser.id}, attempt ${retryCount + 1}`);
       
       const { data: profile, error } = await supabase
@@ -87,8 +86,6 @@ export const useAuth = () => {
       toast.error("Erro de sincronização", { description: "Não conseguimos carregar seu perfil. Tente novamente." });
       setUser(null);
       return null;
-    } finally {
-      setLoading(false);
     }
   }, []);
 
@@ -114,14 +111,20 @@ export const useAuth = () => {
     initializeAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, currentSession) => {
+      (event, currentSession) => {
         if (!mounted) return;
-        
+
         console.log('Auth state change:', event, currentSession?.user?.id);
         setSession(currentSession);
-        
+
         if (currentSession?.user) {
-          await fetchProfile(currentSession.user);
+          // Defer Supabase calls to avoid deadlock inside the auth callback
+          setTimeout(() => {
+            if (!mounted) return;
+            fetchProfile(currentSession.user).finally(() => {
+              if (mounted) setLoading(false);
+            });
+          }, 0);
         } else {
           setUser(null);
           setLoading(false);
