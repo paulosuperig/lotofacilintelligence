@@ -267,7 +267,8 @@ export const useLottery = () => {
       id: generateSecureId(),
       numbers: finalGame,
       timestamp: Date.now(),
-      sum: finalGame.reduce((a, b) => a + b, 0)
+      sum: finalGame.reduce((a, b) => a + b, 0),
+      type: 'Gerador Inteligente'
     };
   }, [history]);
 
