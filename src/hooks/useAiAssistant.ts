@@ -41,10 +41,18 @@ const parseUserIntent = (message: string): UserIntent => {
     intent.somaMin = parseInt(between[1], 10);
     intent.somaMax = parseInt(between[2], 10);
   } else {
-    const above = m.match(/soma[^.]{0,30}?(?:acima|maior|superior|>=?)\s*(?:de|que|a)?\s*(\d{2,3})/);
-    if (above) intent.somaMin = parseInt(above[1], 10) + (above[0].includes('>=') || above[0].includes('igual') ? 0 : 1);
-    const below = m.match(/soma[^.]{0,30}?(?:abaixo|menor|inferior|<=?)\s*(?:de|que|a)?\s*(\d{2,3})/);
-    if (below) intent.somaMax = parseInt(below[1], 10) - (below[0].includes('<=') || below[0].includes('igual') ? 0 : 1);
+    const above = m.match(/soma[^.]{0,30}?(?:acima|maior|superior|igual|>=?)\s*(?:de|que|a)?\s*(\d{2,3})/);
+    if (above) {
+      const val = parseInt(above[1], 10);
+      const isInclusive = above[0].includes('>=') || above[0].includes('igual') || above[0].includes('superior');
+      intent.somaMin = val + (isInclusive ? 0 : 1);
+    }
+    const below = m.match(/soma[^.]{0,30}?(?:abaixo|menor|inferior|igual|<=?)\s*(?:de|que|a)?\s*(\d{2,3})/);
+    if (below) {
+      const val = parseInt(below[1], 10);
+      const isInclusive = below[0].includes('<=') || below[0].includes('igual') || below[0].includes('inferior');
+      intent.somaMax = val - (isInclusive ? 0 : 1);
+    }
   }
 
   return intent;
