@@ -15,7 +15,6 @@ export const useAuth = () => {
 
   const fetchProfile = useCallback(async (authUser: User, retryCount = 0): Promise<ValidatedUser | null> => {
     try {
-      setLoading(true);
       console.log(`Fetching profile for ${authUser.id}, attempt ${retryCount + 1}`);
       
       const { data: profile, error } = await supabase
