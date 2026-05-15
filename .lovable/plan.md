@@ -1,43 +1,39 @@
-## Otimização Robusta da Inteligência Artificial (Lotofácil Intelligence)
+## Problema
+Ao pedir "Gere 10 jogos com soma acima de 210", a IA retorna só 1 jogo. Causas:
 
-### Objetivo
-Tornar as respostas da IA mais precisas, contextuais (com dados reais da Lotofácil), padronizadas e resilientes a falhas de rede/API.
+1. O system prompt em `src/hooks/useAiAssistant.ts` impõe **"Limite a 3 jogos por resposta, salvo pedido explícito de mais"** — mas o modelo está interpretando como teto rígido.
+2. `max_tokens: 1500` é apertado para 10 jogos + análise + métricas (cada jogo ocupa ~80 tokens, métricas mais ~60 → ~1400 só em jogos, sem margem para Análise/Estratégia).
+3. Não há detecção da **quantidade pedida** nem dos **filtros** (soma mínima/máxima, par/ímpar específico, repetidas etc.) para reforçar no prompt e validar a saída.
+4. O sanitizer (`sanitizeAiGames`) corrige somas, mas não verifica se a quantidade entregue bate com a solicitada nem se os jogos atendem aos filtros — então a UI aceita silenciosamente uma resposta incompleta.
 
-### 1. Contexto estatístico real injetado no prompt (precisão)
-Hoje a IA "alucina" frequências porque não recebe os dados reais. Vou:
-- Ler do hook `useLottery` o último resultado, os últimos 25 concursos e calcular:
-  - Frequência (quentes/frias) das 25 dezenas
-  - Atrasos (gap desde a última aparição)
-  - Pares/ímpares, primos, moldura/centro, soma média, repetidas do concurso anterior
-- Injetar essas estatísticas como bloco JSON no `system` prompt a cada chamada, para que a IA fundamente toda sugestão em dados reais e não em achismo.
+## Plano
 
-### 2. Prompt engineering reforçado
-- Estrutura de resposta padronizada (Análise → Estratégia → Jogos → Métricas) em Markdown.
-- Regra rígida: cada jogo deve ter exatamente 15 dezenas únicas (1–25), ordenadas, no formato detectado pelo `GameLine` renderer (`01) 03, 05, ...  (soma 187)`).
-- Auto-validação: a IA deve recontar antes de responder e refazer se algum jogo violar a regra.
-- Temperatura baixa (0.3) + `top_p` 0.9 para reduzir variabilidade/erros.
-- Limite `max_tokens` adequado (1500) para evitar respostas truncadas.
+### 1. `src/hooks/useAiAssistant.ts` — interpretar o pedido do usuário
+- Criar `parseUserIntent(message)` que extrai:
+  - `quantidade` (regex `/\b(\d{1,2})\s*jogos?\b/i`, fallback 3)
+  - `somaMin` / `somaMax` (`soma\s*(acima|maior|>=?|abaixo|menor|<=?|entre)\s*(\d+)`)
+  - `paridade` ("mais pares", "mais ímpares")
+  - `repetidasMin` (ex.: "com pelo menos 9 repetidas")
+- Injetar bloco `PEDIDO_DO_USUARIO` no system prompt com esses requisitos resolvidos, e instrução: **"Gere EXATAMENTE {quantidade} jogos. Cada jogo DEVE satisfazer: soma {operador} {valor}, ..."**.
+- Remover a regra fixa "Limite a 3 jogos" — substituir por "Gere a quantidade pedida pelo usuário; se não especificar, 3."
+- Ajustar parâmetros do modelo dinamicamente:
+  - `max_tokens = Math.min(4096, 400 + quantidade * 130)`
+  - manter `temperature 0.3`.
 
-### 3. Resiliência e UX
-- `AbortController` com timeout de 45s.
-- Retry exponencial (até 2 tentativas) em erros 5xx/429/network.
-- Mensagens de erro específicas: 401 (chave inválida), 402 (créditos), 429 (limite), 5xx (servidor).
-- Truncar histórico enviado para no máximo as últimas 12 mensagens (evita estouro de contexto e custo).
-- Validação client-side: se a resposta contiver jogos inválidos, exibe aviso e oferece "Regenerar".
+### 2. `src/lib/ai/sanitizeGames.ts` — validar contra a intenção
+- Estender assinatura: `sanitizeAiGames(text, intent?)`.
+- Após sanitizar, contar jogos válidos. Se `count < intent.quantidade` ou algum jogo violar `somaMin/Max`, anexar nota no final do texto: `> ⚠️ Resposta incompleta: foram entregues X de Y jogos solicitados. Use "Regenerar" para completar.` (não tenta inventar jogos — apenas sinaliza).
+- Filtrar/marcar jogos que não cumpram filtros declarados (ex.: soma fora do intervalo) com aviso inline.
 
-### 4. Pós-processamento (garantia matemática)
-Após receber a resposta, um sanitizer:
-- Detecta cada linha de jogo, valida 15 dezenas únicas em [1,25], ordena, recalcula a soma correta e substitui no texto.
-- Corrige somas erradas declaradas pela IA.
-- Garante que `GameLine` no chat renderize sempre cards corretos.
+### 3. Retry inteligente quando incompleto
+- Em `useAiAssistant.sendMessage`: se a resposta sanitizada tiver menos jogos que `intent.quantidade`, fazer **uma** tentativa automática de continuação enviando mensagem assistant + nova mensagem `user`: `"Faltaram N jogos. Continue a partir do jogo K, mantendo todos os filtros."` Concatenar respostas antes de exibir.
 
-### Arquivos afetados
-- `src/hooks/useAiAssistant.ts` — injeção de contexto, prompt reforçado, retry, abort, sanitizer, parâmetros do modelo.
-- `src/pages/Index.tsx` — passar estatísticas/contexto (último concurso + histórico) ao hook.
-- `src/lib/ai/lotteryStats.ts` (novo) — utilitários de cálculo (frequência, atraso, pares/ímpares, primos, moldura).
-- `src/lib/ai/sanitizeGames.ts` (novo) — pós-processamento e validação dos jogos no texto.
+### 4. UX
+- Em `src/components/ai/AiAssistant.tsx` (ajuste mínimo): se a mensagem assistant terminar com o marcador `⚠️ Resposta incompleta`, renderizar botão "Regenerar resposta completa" que reenviar a última mensagem do usuário.
 
-### Skill utilizada
-`@skillslovable` — boas práticas de chatbot AI (contexto completo, prompt engineering robusto, tratamento de erros 429/402, validação de saída).
+## Arquivos afetados
+- `src/hooks/useAiAssistant.ts` (parseUserIntent, prompt dinâmico, max_tokens, retry de continuação)
+- `src/lib/ai/sanitizeGames.ts` (validação contra intent)
+- `src/components/ai/AiAssistant.tsx` (botão Regenerar quando incompleto)
 
-Sem alterações de backend/Supabase. Mantém DeepSeek como provedor (chave do usuário); nenhum segredo é exposto.
+Sem mudanças em backend/Supabase. Skill aplicada: `@skillslovable` (chatbot AI: interpretação de intenção, prompt dinâmico, validação de saída, retry de continuação).

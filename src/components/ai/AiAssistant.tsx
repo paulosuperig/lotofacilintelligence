@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Ball } from '@/components/lottery/Ball';
+import { INCOMPLETE_MARKER } from '@/lib/ai/sanitizeGames';
 
 // Detects a Lotofácil game line and renders it as a beautiful card of balls.
 // Accepts strings like "01) 03, 05, 08, 10, 12, 14, 16, 18, 20, 21, 22, 23, 24, 25 (soma 232)"
@@ -263,6 +264,21 @@ export const AiAssistant = ({
                       <div className="flex justify-between items-center mt-3 pt-3 border-t border-purple-50">
                         <span className="text-[10px] text-zinc-400 font-medium italic">Extraído da análise Intelligence AI</span>
                         <div className="flex gap-2">
+                          {msg.content.includes(INCOMPLETE_MARKER) && (() => {
+                            const lastUser = [...aiChat].reverse().find((m) => m.role === 'user');
+                            if (!lastUser) return null;
+                            return (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                disabled={isAiLoading}
+                                className="h-8 px-3 text-[10px] text-amber-600 hover:text-amber-700 hover:bg-amber-50 rounded-lg gap-2 border border-amber-100/50"
+                                onClick={() => onSendMessage(undefined, lastUser.content)}
+                              >
+                                <Sparkles size={12} /> Regenerar Completa
+                              </Button>
+                            );
+                          })()}
                           <Button 
                             variant="ghost" 
                             size="sm" 
