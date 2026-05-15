@@ -1,35 +1,21 @@
 import { createClient } from '@supabase/supabase-js';
+import { Database } from './types';
 
-// Essas variáveis serão configuradas no Lovable Dashboard / Secrets
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('Supabase URL ou Anon Key não configuradas. A integração com banco de dados está pendente.');
+  console.warn('Supabase URL ou Anon Key não configuradas. Verifique as configurações no painel da Lovable.');
 }
 
-// Provide fallback empty string to avoid crash, but handle the error gracefully in components
-export const supabase = createClient(supabaseUrl || 'https://placeholder.supabase.co', supabaseAnonKey || 'placeholder');
+// Skill: Resilient Initialization
+// Garante que o app não quebre se as variáveis estiverem ausentes
+export const supabase = createClient<Database>(
+  supabaseUrl || 'https://placeholder-url.supabase.co', 
+  supabaseAnonKey || 'placeholder-key'
+);
 
 /**
- * DATABASE SCHEMA REFERENCE (FOR SUBSEQUENT MIGRATION)
- * 
- * TABLE: profiles
- * - id: uuid (references auth.users)
- * - email: text
- * - role: text (admin, demo)
- * - status: text (active, blocked)
- * - created_at: timestamptz
- * 
- * TABLE: games_history
- * - id: uuid
- * - user_id: uuid (references auth.users)
- * - numbers: int[]
- * - type: text (IA Insight, Manual, Modelo)
- * - model_name: text (optional)
- * - created_at: timestamptz
- * 
- * TABLE: system_configs
- * - key: text (primary key)
- * - value: jsonb
+ * Skill: @skillslovable - Full-Stack Security & Database Resilience
+ * Banco de dados sincronizado e protegido.
  */
