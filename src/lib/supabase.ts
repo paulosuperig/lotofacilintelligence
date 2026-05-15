@@ -7,7 +7,7 @@ const supabasePublishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || 
 // Only initialize if URL is valid to prevent crash
 export const supabase = supabaseUrl && supabaseUrl.startsWith('http') && supabasePublishableKey
   ? typedSupabase
-  : null as ReturnType<typeof createClient> | null;
+  : null as typeof typedSupabase | null;
 
 /**
  * Skill: Architecture Strategy
