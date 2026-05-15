@@ -30,7 +30,9 @@ const Index = () => {
     history, 
     fetchLatestResult, 
     clearHistory,
-    saveToHistory
+    saveToHistory,
+    loadMore,
+    hasMore
   } = useLottery();
 
   const {
@@ -48,7 +50,8 @@ const Index = () => {
     users,
     createOrUpdateUser,
     deleteUser,
-    toggleUserStatus
+    toggleUserStatus,
+    saveDeepSeekKeyToSystem
   } = useAdmin();
 
   const handleLogout = () => {
@@ -191,8 +194,11 @@ const Index = () => {
                   onDeleteUser={deleteUser}
                   onToggleUserStatus={toggleUserStatus}
                   deepSeekKey={deepSeekKey}
-                  onSaveDeepSeekKey={saveDeepSeekKey}
-                />
+                   onSaveDeepSeekKey={(key) => {
+                     saveDeepSeekKey(key);
+                     saveDeepSeekKeyToSystem(key);
+                   }}
+                 />
               )}
 
               {activeTab === 'home' || activeTab === 'gerador' ? (

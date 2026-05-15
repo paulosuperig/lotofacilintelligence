@@ -14,6 +14,9 @@ export const useLottery = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [history, setHistory] = useState<SavedGame[]>([]);
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(0);
+  const ITEMS_PER_PAGE = 30;
 
   const fetchLatestResult = useCallback(async () => {
     setIsRefreshing(true);
@@ -355,9 +358,11 @@ export const useLottery = () => {
     isLoading,
     isRefreshing,
     history,
+    hasMore,
     fetchLatestResult,
     clearHistory,
     loadHistory,
+    loadMore: () => loadHistory(true),
     saveToHistory,
     generateSmartGame,
     isGameDuplicate

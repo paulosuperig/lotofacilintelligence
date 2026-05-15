@@ -90,6 +90,19 @@ export const useAiAssistant = (latestResult?: LotteryResult | null) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      // Also try to load the API key from system_configs if missing
+      if (!savedKey) {
+        const { data: config } = await supabase
+          .from('system_configs')
+          .select('value')
+          .eq('key', 'deepseek_api_key')
+          .maybeSingle();
+        
+        if (config?.value) {
+          setDeepSeekKey(String(config.value));
+        }
+      }
+
       const { data, error } = await supabase
         .from('ai_chat_history')
         .select('role, content')
