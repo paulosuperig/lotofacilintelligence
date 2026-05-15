@@ -107,6 +107,7 @@ interface AiAssistantProps {
   onSendMessage: (e?: React.FormEvent, customMessage?: string) => void;
   onSetAiMessage: (val: string) => void;
   onSaveAiGame: (content: string) => void;
+  onClearChat?: () => void;
   onBack: () => void;
   onGoToSettings: () => void;
   role: 'admin' | 'demo';
@@ -120,6 +121,7 @@ export const AiAssistant = ({
   onSendMessage,
   onSetAiMessage,
   onSaveAiGame,
+  onClearChat,
   onBack,
   onGoToSettings,
   role
@@ -152,13 +154,24 @@ export const AiAssistant = ({
           </div>
           <p className="text-zinc-500 dark:text-zinc-400 text-[10px] uppercase font-bold tracking-[0.2em] ml-1">Análises & Probabilidades em Tempo Real</p>
         </div>
-        <Button 
-          variant="outline" 
-          onClick={onBack}
-          className="rounded-xl border-purple-100 text-purple-600 hover:bg-purple-50"
-        >
-          Voltar
-        </Button>
+        <div className="flex items-center gap-2">
+          {aiChat.length > 0 && (
+            <Button 
+              variant="ghost" 
+              onClick={onClearChat}
+              className="rounded-xl text-zinc-400 hover:text-red-500 hover:bg-red-50"
+            >
+              Limpar Chat
+            </Button>
+          )}
+          <Button 
+            variant="outline" 
+            onClick={onBack}
+            className="rounded-xl border-purple-100 text-purple-600 hover:bg-purple-50"
+          >
+            Voltar
+          </Button>
+        </div>
       </div>
 
       <div className="flex-grow flex flex-col bg-purple-50/30 dark:bg-zinc-950/30 rounded-[2rem] border border-purple-100 dark:border-zinc-800 overflow-hidden relative">

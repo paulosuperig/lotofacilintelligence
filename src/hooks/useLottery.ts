@@ -42,16 +42,59 @@ export const useLottery = () => {
     }
   }, [toast]);
 
+  const syncOfflineHistory = useCallback(async () => {
+    if (!isSupabaseEnabled() || !supabase) return;
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const localHistory = secureStorage.getItem<SavedGame[]>('lottery_history') || [];
+      if (localHistory.length === 0) return;
+
+      // Fetch existing cloud IDs to avoid duplicates
+      const { data: cloudData } = await supabase
+        .from('games_history')
+        .select('id')
+        .eq('user_id', user.id);
+      
+      const cloudIds = new Set(cloudData?.map(g => g.id) || []);
+      const toSync = localHistory.filter(g => !cloudIds.has(g.id));
+
+      if (toSync.length > 0) {
+        console.log(`Syncing ${toSync.length} games to cloud...`);
+        const gamesToInsert = toSync.map(game => ({
+          id: game.id,
+          user_id: user.id,
+          numbers: game.numbers,
+          sum_value: game.sum,
+          model_name: game.model,
+          type: game.type,
+          created_at: new Date(game.timestamp).toISOString()
+        }));
+        
+        await supabase.from('games_history').insert(gamesToInsert);
+      }
+    } catch (error) {
+      console.error("Error syncing history:", error);
+    }
+  }, []);
+
   const loadHistory = useCallback(async () => {
     try {
       // Priority 1: Supabase (Cloud)
       if (isSupabaseEnabled() && supabase) {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
+          // Sync offline data first
+          await syncOfflineHistory();
+
+          // Limit load to latest 50 games for performance
           const { data, error } = await supabase
             .from('games_history')
             .select('*')
-            .order('created_at', { ascending: false });
+            .order('created_at', { ascending: false })
+            .limit(50);
           
           if (!error && data) {
             const formattedHistory: SavedGame[] = data.map(item => ({
@@ -62,16 +105,18 @@ export const useLottery = () => {
               model: item.model_name ?? undefined,
               type: item.type || (item.model_name ? 'Fechamento PRO' : 'IA Insight')
             }));
+            
+            // Update local storage with fresh cloud data
+            secureStorage.setItem('lottery_history', formattedHistory);
             setHistory(formattedHistory);
             return;
           }
         }
       }
 
-      // Priority 2: LocalStorage (Fallback/Offline) - Now Secure
+      // Priority 2: LocalStorage (Fallback/Offline)
       const saved = secureStorage.getItem<SavedGame[]>('lottery_history');
       if (saved && Array.isArray(saved)) {
-        // Defensive: validate each entry; coerce string numbers; drop invalid ones
         const sanitized: SavedGame[] = [];
         for (const g of saved) {
           try {
@@ -89,9 +134,7 @@ export const useLottery = () => {
             console.warn("[Security] Skipping invalid history entry:", e);
           }
         }
-        const filtered = sanitized.sort((a, b) => b.timestamp - a.timestamp);
-        // Persist sanitized version back so corrupt entries are removed
-        secureStorage.setItem('lottery_history', filtered);
+        const filtered = sanitized.sort((a, b) => b.timestamp - a.timestamp).slice(0, 100);
         setHistory(filtered);
       } else {
         setHistory([]);
@@ -100,7 +143,7 @@ export const useLottery = () => {
       console.error("Error loading history:", error);
       setHistory([]);
     }
-  }, []);
+  }, [syncOfflineHistory]);
 
   const clearHistory = async () => {
     try {
@@ -281,14 +324,29 @@ export const useLottery = () => {
     fetchLatestResult();
     loadHistory();
     
-    // Cross-instance sync: reload history when any instance updates it
+    // Cross-instance sync and Realtime
     const handleHistoryUpdate = () => loadHistory();
     window.addEventListener('lottery-history-updated', handleHistoryUpdate);
     window.addEventListener('storage', handleHistoryUpdate);
+
+    let channel: any;
+    if (isSupabaseEnabled() && supabase) {
+      channel = supabase
+        .channel('schema-db-changes')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'games_history' },
+          () => {
+            loadHistory();
+          }
+        )
+        .subscribe();
+    }
     
     return () => {
       window.removeEventListener('lottery-history-updated', handleHistoryUpdate);
       window.removeEventListener('storage', handleHistoryUpdate);
+      if (channel) supabase.removeChannel(channel);
     };
   }, [fetchLatestResult, loadHistory]);
 

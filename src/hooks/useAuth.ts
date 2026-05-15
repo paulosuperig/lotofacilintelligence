@@ -13,23 +13,37 @@ export const useAuth = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchProfile = useCallback(async (authUser: User) => {
+  const fetchProfile = useCallback(async (authUser: User, retryCount = 0) => {
     try {
       const { data: profile, error } = await supabase
         .from('profiles')
-        .select('role')
+        .select('role, status')
         .eq('id', authUser.id)
         .maybeSingle();
 
       if (error) throw error;
 
+      if (!profile && retryCount < 3) {
+        // Trigger might still be running, wait and retry
+        console.log(`Profile not found for ${authUser.id}, retrying... (${retryCount + 1})`);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        return fetchProfile(authUser, retryCount + 1);
+      }
+
       const userData: ValidatedUser = {
         email: authUser.email || '',
         role: (profile?.role as 'admin' | 'demo') || 'demo',
-        token: 'supabase-managed', // Supabase handles tokens internally
+        token: 'supabase-managed',
         iat: Date.now(),
-        exp: Date.now() + 3600000, // Not strictly used for logic anymore, kept for schema compatibility
+        exp: Date.now() + 3600000,
       };
+
+      if (profile?.status === 'blocked') {
+        toast.error("Acesso bloqueado", { description: "Sua conta está desativada." });
+        await supabase.auth.signOut();
+        setUser(null);
+        return;
+      }
 
       setUser(userData);
     } catch (error) {

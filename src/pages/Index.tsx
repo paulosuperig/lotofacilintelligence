@@ -40,7 +40,8 @@ const Index = () => {
     aiMessage,
     setAiMessage,
     saveDeepSeekKey,
-    sendMessage
+    sendMessage,
+    clearChatHistory
   } = useAiAssistant(latestResult);
 
   const {
@@ -175,6 +176,7 @@ const Index = () => {
                   onSendMessage={(e, msg) => sendMessage(msg || aiMessage)}
                   onSetAiMessage={setAiMessage}
                   onSaveAiGame={saveAiGameToHistory}
+                  onClearChat={clearChatHistory}
                   onBack={() => setActiveTab('home')}
                   onGoToSettings={() => setActiveTab('ajustes')}
                   role={user.role}
