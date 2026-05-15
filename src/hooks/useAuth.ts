@@ -16,22 +16,57 @@ export const useAuth = () => {
   const fetchProfile = useCallback(async (authUser: User, retryCount = 0): Promise<ValidatedUser | null> => {
     try {
       setLoading(true);
+      console.log(`Fetching profile for ${authUser.id}, attempt ${retryCount + 1}`);
+      
       const { data: profile, error } = await supabase
         .from('profiles')
         .select('role, status')
         .eq('id', authUser.id)
         .maybeSingle();
 
-      if (error) throw error;
-
-      if (!profile && retryCount < 3) {
-        console.log(`Profile not found for ${authUser.id}, retrying... (${retryCount + 1})`);
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        return fetchProfile(authUser, retryCount + 1);
+      if (error) {
+        console.error('Database error fetching profile:', error);
+        throw error;
       }
 
-      if (profile?.status === 'blocked') {
-        toast.error("Acesso bloqueado", { description: "Sua conta está desativada." });
+      if (!profile) {
+        if (retryCount < 2) {
+          console.log(`Profile not found, retrying in 1s...`);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          return fetchProfile(authUser, retryCount + 1);
+        }
+        
+        // Skill: Automatic Profile Recovery
+        // If profile still missing after retries, try to create it manually
+        console.warn(`Profile missing for ${authUser.id} after retries. Attempting recovery...`);
+        const { data: newProfile, error: insertError } = await supabase
+          .from('profiles')
+          .insert([
+            { id: authUser.id, email: authUser.email, role: 'demo', status: 'active' }
+          ])
+          .select()
+          .single();
+          
+        if (insertError) {
+          console.error('Failed to recover/create profile:', insertError);
+          // Fallback to basic session if we can't create a profile
+        } else {
+          console.log('Profile successfully recovered.');
+        }
+        
+        const userData: ValidatedUser = {
+          email: authUser.email || '',
+          role: (newProfile?.role as 'admin' | 'demo') || 'demo',
+          token: 'supabase-managed',
+          iat: Date.now(),
+          exp: Date.now() + 3600000,
+        };
+        setUser(userData);
+        return userData;
+      }
+
+      if (profile.status === 'blocked') {
+        toast.error("Acesso bloqueado", { description: "Sua conta está desativada pelo administrador." });
         await supabase.auth.signOut();
         setUser(null);
         return null;
@@ -39,7 +74,7 @@ export const useAuth = () => {
 
       const userData: ValidatedUser = {
         email: authUser.email || '',
-        role: (profile?.role as 'admin' | 'demo') || 'demo',
+        role: (profile.role as 'admin' | 'demo') || 'demo',
         token: 'supabase-managed',
         iat: Date.now(),
         exp: Date.now() + 3600000,
@@ -47,8 +82,9 @@ export const useAuth = () => {
 
       setUser(userData);
       return userData;
-    } catch (error) {
-      console.error('Error fetching profile:', error);
+    } catch (error: any) {
+      console.error('Critical auth error:', error);
+      toast.error("Erro de sincronização", { description: "Não conseguimos carregar seu perfil. Tente novamente." });
       setUser(null);
       return null;
     } finally {
