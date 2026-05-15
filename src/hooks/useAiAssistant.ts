@@ -3,13 +3,56 @@ import { useToast } from './use-toast';
 import { sanitizeString } from '@/lib/security/utils';
 import type { LotteryResult } from '@/types/lottery';
 import { computeLotteryStats, formatStatsForPrompt } from '@/lib/ai/lotteryStats';
-import { sanitizeAiGames } from '@/lib/ai/sanitizeGames';
+import {
+  sanitizeAiGamesDetailed,
+  type UserIntent,
+} from '@/lib/ai/sanitizeGames';
 
 const MAX_HISTORY_MESSAGES = 12;
-const REQUEST_TIMEOUT_MS = 45_000;
+const REQUEST_TIMEOUT_MS = 60_000;
 const MAX_RETRIES = 2;
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+// Extract the user's intent (quantity of games, sum filters) from natural language.
+const parseUserIntent = (message: string): UserIntent => {
+  const m = message.toLowerCase();
+  const intent: UserIntent = {};
+
+  const qty = m.match(/\b(\d{1,2})\s*jogos?\b/);
+  if (qty) {
+    const n = parseInt(qty[1], 10);
+    if (n >= 1 && n <= 30) intent.quantidade = n;
+  }
+
+  // soma acima/maior/>= N | soma abaixo/menor/<= N | soma entre A e B
+  const between = m.match(/soma\s*entre\s*(\d{2,3})\s*(?:e|a|-)\s*(\d{2,3})/);
+  if (between) {
+    intent.somaMin = parseInt(between[1], 10);
+    intent.somaMax = parseInt(between[2], 10);
+  } else {
+    const above = m.match(/soma[^.]{0,20}?(?:acima|maior|superior|>=?)\s*(?:de|que|a)?\s*(\d{2,3})/);
+    if (above) intent.somaMin = parseInt(above[1], 10) + (m.includes('>=') || m.includes('igual') ? 0 : 1);
+    const below = m.match(/soma[^.]{0,20}?(?:abaixo|menor|inferior|<=?)\s*(?:de|que|a)?\s*(\d{2,3})/);
+    if (below) intent.somaMax = parseInt(below[1], 10) - (m.includes('<=') || m.includes('igual') ? 0 : 1);
+  }
+
+  return intent;
+};
+
+const formatIntentForPrompt = (intent: UserIntent): string => {
+  const lines: string[] = ['PEDIDO_DO_USUARIO (cumpra estritamente):'];
+  lines.push(`- Quantidade EXATA de jogos: ${intent.quantidade ?? 3}`);
+  if (intent.somaMin != null) lines.push(`- Soma mínima por jogo: ${intent.somaMin}`);
+  if (intent.somaMax != null) lines.push(`- Soma máxima por jogo: ${intent.somaMax}`);
+  if (intent.somaMin == null && intent.somaMax == null) {
+    lines.push('- Sem filtro de soma específico (preferir 180–220).');
+  }
+  lines.push(
+    '- Não reduza a quantidade. Se precisar de mais espaço, encurte a "Análise" e priorize entregar TODOS os jogos.'
+  );
+  return lines.join('\n');
+};
 
 export const useAiAssistant = (latestResult?: LotteryResult | null) => {
   const { toast } = useToast();
@@ -33,28 +76,30 @@ export const useAiAssistant = (latestResult?: LotteryResult | null) => {
     });
   };
 
-  const buildSystemPrompt = useCallback(() => {
+  const buildSystemPrompt = useCallback((intent: UserIntent) => {
     const statsBlock = formatStatsForPrompt(computeLotteryStats(latestResult ?? null));
+    const intentBlock = formatIntentForPrompt(intent);
     return `Você é o "Lotofácil Intelligence AI", inteligência artificial exclusiva do ecossistema Intelligence, especializada em estatística, probabilidade e análise da Lotofácil.
 
 REGRAS DE IDENTIDADE:
 - NUNCA cite empresas terceiras, modelos externos (DeepSeek, OpenAI, GPT, Claude, etc.) ou tecnologias de base.
 - Se perguntado quem você é, responda: "Sou a Inteligência Artificial exclusiva do ecossistema Intelligence".
-- Tom profissional, técnico, objetivo e encorajador. Use sempre termos como "probabilidades", "tendências", "frequências" e "estatísticas". Nunca prometa ganho.
+- Tom profissional, técnico, objetivo e encorajador. Nunca prometa ganho.
 
 REGRAS DE FORMATO DE RESPOSTA (Markdown):
-1. Sempre estruture em seções: "### Análise", "### Estratégia", "### Jogos sugeridos", "### Métricas".
+1. Estruture em: "### Análise" (curto, 2-3 linhas), "### Estratégia" (curto, 2-3 linhas), "### Jogos sugeridos", "### Métricas".
 2. Cada jogo sugerido DEVE estar em uma linha isolada dentro de um bloco de código \`\`\` no formato EXATO:
    \`NN) DD, DD, DD, DD, DD, DD, DD, DD, DD, DD, DD, DD, DD, DD, DD  (soma SSS)\`
-   onde NN é o número do jogo (01, 02, 03...) e DD são exatamente 15 dezenas únicas no intervalo 01-25, em ordem crescente, com 2 dígitos.
-3. Antes de responder, AUTO-VALIDE cada jogo: 15 dezenas, todas únicas, todas entre 1 e 25, ordenadas. Se algum violar, refaça antes de enviar.
-4. Limite a 3 jogos por resposta, salvo pedido explícito de mais.
-5. Em "Métricas" descreva por jogo: soma, pares/ímpares, primos, moldura/miolo e quantas repetidas do último concurso.
+   onde NN é o número sequencial do jogo (01, 02, 03...) e DD são exatamente 15 dezenas únicas no intervalo 01-25, em ordem crescente, com 2 dígitos.
+3. Auto-valide cada jogo antes de responder: 15 dezenas únicas, todas entre 1 e 25, ordenadas, e respeitando os filtros do PEDIDO_DO_USUARIO. Se algum violar, refaça.
+4. Gere EXATAMENTE a quantidade pedida no PEDIDO_DO_USUARIO. Não reduza por brevidade.
+5. Em "Métricas" use uma tabela compacta: jogo | soma | pares | primos | moldura | repetidas.
 
-REGRAS DE PRECISÃO ESTATÍSTICA:
-- Baseie TODAS as sugestões nos dados oficiais abaixo. Não invente concursos, datas ou frequências.
-- Se um dado não estiver no contexto, declare honestamente "dado não disponível" ao invés de inventar.
-- Privilegie soma 180–220, equilíbrio 7-8 ou 8-7 par/ímpar, 4–5 primos, 8–10 dezenas repetidas do concurso anterior.
+REGRAS DE PRECISÃO:
+- Baseie sugestões nos dados oficiais abaixo. Não invente concursos nem frequências.
+- Se um filtro não for atingível, diga claramente — mas ainda assim entregue a quantidade pedida com as melhores aproximações.
+
+${intentBlock}
 
 ${statsBlock}`;
   }, [latestResult]);
@@ -62,7 +107,8 @@ ${statsBlock}`;
   const callDeepSeek = useCallback(async (
     messages: Array<{ role: string; content: string }>,
     apiKey: string,
-    attempt = 0
+    maxTokens: number,
+    attempt = 0,
   ): Promise<string> => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
@@ -79,7 +125,7 @@ ${statsBlock}`;
           stream: false,
           temperature: 0.3,
           top_p: 0.9,
-          max_tokens: 1500,
+          max_tokens: maxTokens,
           presence_penalty: 0,
           frequency_penalty: 0.2,
         }),
@@ -88,10 +134,9 @@ ${statsBlock}`;
 
       if (!response.ok) {
         const status = response.status;
-        // Retry on transient errors
         if ((status === 429 || status >= 500) && attempt < MAX_RETRIES) {
           await sleep(800 * Math.pow(2, attempt));
-          return callDeepSeek(messages, apiKey, attempt + 1);
+          return callDeepSeek(messages, apiKey, maxTokens, attempt + 1);
         }
         const errText = await response.text().catch(() => '');
         const err: any = new Error(`HTTP ${status}: ${errText.slice(0, 200)}`);
@@ -109,14 +154,13 @@ ${statsBlock}`;
       if (err?.name === 'AbortError') {
         if (attempt < MAX_RETRIES) {
           await sleep(500);
-          return callDeepSeek(messages, apiKey, attempt + 1);
+          return callDeepSeek(messages, apiKey, maxTokens, attempt + 1);
         }
         throw new Error('Tempo limite excedido. Tente novamente.');
       }
-      // Network error retry
       if (!err?.status && attempt < MAX_RETRIES) {
         await sleep(800 * Math.pow(2, attempt));
-        return callDeepSeek(messages, apiKey, attempt + 1);
+        return callDeepSeek(messages, apiKey, maxTokens, attempt + 1);
       }
       throw err;
     } finally {
@@ -137,22 +181,51 @@ ${statsBlock}`;
       return;
     }
 
+    const intent = parseUserIntent(sanitizedMessage);
+    const targetQty = intent.quantidade ?? 3;
+    const maxTokens = Math.min(4096, 500 + targetQty * 140);
+
     const newMessage = { role: 'user' as const, content: sanitizedMessage };
     setAiChat(prev => [...prev, newMessage]);
     setAiMessage('');
     setIsAiLoading(true);
 
     try {
-      // Truncate history to last N messages to limit tokens / cost
       const trimmedHistory = aiChat.slice(-MAX_HISTORY_MESSAGES);
+      const systemPrompt = buildSystemPrompt(intent);
       const payload = [
-        { role: 'system', content: buildSystemPrompt() },
+        { role: 'system', content: systemPrompt },
         ...trimmedHistory,
         newMessage,
       ];
-      const raw = await callDeepSeek(payload, deepSeekKey);
-      const cleaned = sanitizeAiGames(raw);
-      setAiChat(prev => [...prev, { role: 'assistant', content: cleaned }]);
+
+      let raw = await callDeepSeek(payload, deepSeekKey, maxTokens);
+      let result = sanitizeAiGamesDetailed(raw, intent);
+
+      // One automatic continuation if the AI shipped fewer games than asked.
+      if (result.incomplete && result.gamesFound > 0 && result.gamesFound < targetQty) {
+        const missing = targetQty - result.gamesFound;
+        const continuation = await callDeepSeek(
+          [
+            { role: 'system', content: systemPrompt },
+            ...trimmedHistory,
+            newMessage,
+            { role: 'assistant', content: raw },
+            {
+              role: 'user',
+              content: `Faltaram ${missing} jogos. Continue numerando a partir do jogo ${String(
+                result.gamesFound + 1
+              ).padStart(2, '0')}, mantendo TODOS os filtros. Responda APENAS com os blocos de código \`\`\` dos jogos faltantes (sem repetir Análise/Estratégia/Métricas).`,
+            },
+          ],
+          deepSeekKey,
+          Math.min(4096, 200 + missing * 140),
+        );
+        const merged = `${raw}\n\n${continuation}`;
+        result = sanitizeAiGamesDetailed(merged, intent);
+      }
+
+      setAiChat(prev => [...prev, { role: 'assistant', content: result.content }]);
     } catch (error: any) {
       console.error('Erro na IA:', error);
       const status = error?.status;
