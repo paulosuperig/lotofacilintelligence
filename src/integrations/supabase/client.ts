@@ -8,7 +8,8 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.warn('Supabase URL ou Anon Key não configuradas. A integração com banco de dados está pendente.');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Provide fallback empty string to avoid crash, but handle the error gracefully in components
+export const supabase = createClient(supabaseUrl || 'https://placeholder.supabase.co', supabaseAnonKey || 'placeholder');
 
 /**
  * DATABASE SCHEMA REFERENCE (FOR SUBSEQUENT MIGRATION)
