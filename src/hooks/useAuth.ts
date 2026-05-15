@@ -86,8 +86,6 @@ export const useAuth = () => {
       toast.error("Erro de sincronização", { description: "Não conseguimos carregar seu perfil. Tente novamente." });
       setUser(null);
       return null;
-    } finally {
-      setLoading(false);
     }
   }, []);
 
