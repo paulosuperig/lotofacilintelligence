@@ -202,8 +202,8 @@ const Index = () => {
         </motion.div>
       </main>
     </div>
-  </div>
-);
+    </div>
+  );
 };
 
 export default Index;
