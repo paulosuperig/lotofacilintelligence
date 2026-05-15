@@ -19,9 +19,19 @@ const parseUserIntent = (message: string): UserIntent => {
   const m = message.toLowerCase();
   const intent: UserIntent = {};
 
-  const qty = m.match(/\b(\d{1,2})\s*jogos?\b/);
-  if (qty) {
-    const n = parseInt(qty[1], 10);
+  // Map Portuguese words to numbers
+  const ptNumbers: Record<string, number> = {
+    'um': 1, 'uma': 1, 'dois': 2, 'duas': 2, 'três': 3, 'tres': 3, 'quatro': 4,
+    'cinco': 5, 'seis': 6, 'sete': 7, 'oito': 8, 'nove': 9, 'dez': 10,
+    'onze': 11, 'doze': 12, 'treze': 13, 'quatorze': 14, 'catorze': 14, 'quinze': 15,
+    'vinte': 20, 'trinta': 30
+  };
+
+  const qtyMatch = m.match(/\b(\d{1,2}|um|uma|dois|duas|três|tres|quatro|cinco|seis|sete|oito|nove|dez|onze|doze|treze|quatorze|catorze|quinze|vinte|trinta)\s*jogos?\b/);
+  
+  if (qtyMatch) {
+    const val = qtyMatch[1];
+    const n = ptNumbers[val] || parseInt(val, 10);
     if (n >= 1 && n <= 30) intent.quantidade = n;
   }
 
@@ -31,10 +41,18 @@ const parseUserIntent = (message: string): UserIntent => {
     intent.somaMin = parseInt(between[1], 10);
     intent.somaMax = parseInt(between[2], 10);
   } else {
-    const above = m.match(/soma[^.]{0,20}?(?:acima|maior|superior|>=?)\s*(?:de|que|a)?\s*(\d{2,3})/);
-    if (above) intent.somaMin = parseInt(above[1], 10) + (m.includes('>=') || m.includes('igual') ? 0 : 1);
-    const below = m.match(/soma[^.]{0,20}?(?:abaixo|menor|inferior|<=?)\s*(?:de|que|a)?\s*(\d{2,3})/);
-    if (below) intent.somaMax = parseInt(below[1], 10) - (m.includes('<=') || m.includes('igual') ? 0 : 1);
+    const above = m.match(/soma[^.]{0,30}?(?:acima|maior|superior|igual|>=?)\s*(?:de|que|a)?\s*(\d{2,3})/);
+    if (above) {
+      const val = parseInt(above[1], 10);
+      const isInclusive = above[0].includes('>=') || above[0].includes('igual') || above[0].includes('superior');
+      intent.somaMin = val + (isInclusive ? 0 : 1);
+    }
+    const below = m.match(/soma[^.]{0,30}?(?:abaixo|menor|inferior|igual|<=?)\s*(?:de|que|a)?\s*(\d{2,3})/);
+    if (below) {
+      const val = parseInt(below[1], 10);
+      const isInclusive = below[0].includes('<=') || below[0].includes('igual') || below[0].includes('inferior');
+      intent.somaMax = val - (isInclusive ? 0 : 1);
+    }
   }
 
   return intent;
@@ -42,14 +60,14 @@ const parseUserIntent = (message: string): UserIntent => {
 
 const formatIntentForPrompt = (intent: UserIntent): string => {
   const lines: string[] = ['PEDIDO_DO_USUARIO (cumpra estritamente):'];
-  lines.push(`- Quantidade EXATA de jogos: ${intent.quantidade ?? 3}`);
-  if (intent.somaMin != null) lines.push(`- Soma mínima por jogo: ${intent.somaMin}`);
-  if (intent.somaMax != null) lines.push(`- Soma máxima por jogo: ${intent.somaMax}`);
+  lines.push(`- Quantidade MANDATÓRIA de jogos: ${intent.quantidade ?? 3}`);
+  if (intent.somaMin != null) lines.push(`- SOMA DEVE SER MAIOR OU IGUAL A: ${intent.somaMin}`);
+  if (intent.somaMax != null) lines.push(`- SOMA DEVE SER MENOR OU IGUAL A: ${intent.somaMax}`);
   if (intent.somaMin == null && intent.somaMax == null) {
-    lines.push('- Sem filtro de soma específico (preferir 180–220).');
+    lines.push('- Sem filtro de soma específico (equilibrar entre 180 e 220).');
   }
   lines.push(
-    '- Não reduza a quantidade. Se precisar de mais espaço, encurte a "Análise" e priorize entregar TODOS os jogos.'
+    '- É PROIBIDO entregar menos jogos do que o solicitado.'
   );
   return lines.join('\n');
 };
@@ -87,13 +105,14 @@ REGRAS DE IDENTIDADE:
 - Tom profissional, técnico, objetivo e encorajador. Nunca prometa ganho.
 
 REGRAS DE FORMATO DE RESPOSTA (Markdown):
-1. Estruture em: "### Análise" (curto, 2-3 linhas), "### Estratégia" (curto, 2-3 linhas), "### Jogos sugeridos", "### Métricas".
+1. Estruture obrigatoriamente em: "### Análise" (curto), "### Estratégia" (curto), "### Jogos sugeridos", "### Métricas".
 2. Cada jogo sugerido DEVE estar em uma linha isolada dentro de um bloco de código \`\`\` no formato EXATO:
    \`NN) DD, DD, DD, DD, DD, DD, DD, DD, DD, DD, DD, DD, DD, DD, DD  (soma SSS)\`
-   onde NN é o número sequencial do jogo (01, 02, 03...) e DD são exatamente 15 dezenas únicas no intervalo 01-25, em ordem crescente, com 2 dígitos.
-3. Auto-valide cada jogo antes de responder: 15 dezenas únicas, todas entre 1 e 25, ordenadas, e respeitando os filtros do PEDIDO_DO_USUARIO. Se algum violar, refaça.
-4. Gere EXATAMENTE a quantidade pedida no PEDIDO_DO_USUARIO. Não reduza por brevidade.
+   onde NN é o número sequencial (01, 02, 03...) e DD são 15 dezenas únicas (01-25), ordenadas.
+3. Gere EXATAMENTE a quantidade total pedida no PEDIDO_DO_USUARIO. Se pediu 10, entregue 10. Se pediu 20, entregue 20.
+4. Se o espaço for curto, sacrifique o texto da Análise/Estratégia para garantir a entrega de TODOS os jogos.
 5. Em "Métricas" use uma tabela compacta: jogo | soma | pares | primos | moldura | repetidas.
+6. Auto-valide cada jogo: 15 dezenas únicas e respeitando estritamente os filtros de soma solicitados.
 
 REGRAS DE PRECISÃO:
 - Baseie sugestões nos dados oficiais abaixo. Não invente concursos nem frequências.
@@ -123,11 +142,11 @@ ${statsBlock}`;
           model: 'deepseek-chat',
           messages,
           stream: false,
-          temperature: 0.3,
-          top_p: 0.9,
+          temperature: 0.2,
+          top_p: 0.8,
           max_tokens: maxTokens,
-          presence_penalty: 0,
-          frequency_penalty: 0.2,
+          presence_penalty: 0.1,
+          frequency_penalty: 0.1,
         }),
         signal: controller.signal,
       });
@@ -202,27 +221,31 @@ ${statsBlock}`;
       let raw = await callDeepSeek(payload, deepSeekKey, maxTokens);
       let result = sanitizeAiGamesDetailed(raw, intent);
 
-      // One automatic continuation if the AI shipped fewer games than asked.
-      if (result.incomplete && result.gamesFound > 0 && result.gamesFound < targetQty) {
+      // Loop for continuation if the AI shipped fewer games than asked (up to 3 attempts total).
+      let currentContent = raw;
+      let attempts = 0;
+      
+      while (result.incomplete && result.gamesFound < targetQty && attempts < 2) {
+        attempts++;
         const missing = targetQty - result.gamesFound;
         const continuation = await callDeepSeek(
           [
             { role: 'system', content: systemPrompt },
             ...trimmedHistory,
             newMessage,
-            { role: 'assistant', content: raw },
+            { role: 'assistant', content: currentContent },
             {
               role: 'user',
-              content: `Faltaram ${missing} jogos. Continue numerando a partir do jogo ${String(
+              content: `Você entregou apenas ${result.gamesFound} jogos, mas eu pedi ${targetQty}. Continue IMEDIATAMENTE a partir do jogo ${String(
                 result.gamesFound + 1
-              ).padStart(2, '0')}, mantendo TODOS os filtros. Responda APENAS com os blocos de código \`\`\` dos jogos faltantes (sem repetir Análise/Estratégia/Métricas).`,
+              ).padStart(2, '0')}, mantendo TODOS os filtros (especialmente soma ${intent.somaMin ? '>= ' + intent.somaMin : ''} ${intent.somaMax ? '<= ' + intent.somaMax : ''}). Responda APENAS com os blocos de código \`\`\` dos jogos restantes.`,
             },
           ],
           deepSeekKey,
-          Math.min(4096, 200 + missing * 140),
+          Math.min(4096, 300 + missing * 150),
         );
-        const merged = `${raw}\n\n${continuation}`;
-        result = sanitizeAiGamesDetailed(merged, intent);
+        currentContent = `${currentContent}\n\n${continuation}`;
+        result = sanitizeAiGamesDetailed(currentContent, intent);
       }
 
       setAiChat(prev => [...prev, { role: 'assistant', content: result.content }]);
