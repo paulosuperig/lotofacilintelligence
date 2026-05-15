@@ -41,7 +41,7 @@ const Index = () => {
     setAiMessage,
     saveDeepSeekKey,
     sendMessage
-  } = useAiAssistant();
+  } = useAiAssistant(latestResult);
 
   const {
     users,
