@@ -1,12 +1,13 @@
 import { createClient } from '@supabase/supabase-js';
+import { supabase as typedSupabase } from '@/integrations/supabase/client';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const supabasePublishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 // Only initialize if URL is valid to prevent crash
-export const supabase = supabaseUrl && supabaseUrl.startsWith('http') 
-  ? createClient(supabaseUrl, supabaseAnonKey)
-  : null as any;
+export const supabase = supabaseUrl && supabaseUrl.startsWith('http') && supabasePublishableKey
+  ? typedSupabase
+  : null as ReturnType<typeof createClient> | null;
 
 /**
  * Skill: Architecture Strategy
@@ -14,5 +15,5 @@ export const supabase = supabaseUrl && supabaseUrl.startsWith('http')
  * When VITE_SUPABASE_URL is present, it will prioritize cloud storage.
  */
 export const isSupabaseEnabled = () => {
-  return !!import.meta.env.VITE_SUPABASE_URL && !!import.meta.env.VITE_SUPABASE_ANON_KEY;
+  return !!supabaseUrl && supabaseUrl.startsWith('http') && !!supabasePublishableKey;
 };
