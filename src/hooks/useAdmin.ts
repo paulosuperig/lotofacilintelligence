@@ -17,7 +17,11 @@ export const useAdmin = () => {
       if (error) throw error;
       
       if (data) {
-        setUsers(data as UserProfile[]);
+        const formatted = data.map((u: any) => ({
+          ...u,
+          createdAt: u.created_at || new Date().toISOString()
+        }));
+        setUsers(formatted as UserProfile[]);
       }
     } catch (error: any) {
       console.error("Error fetching users:", error);
@@ -29,11 +33,6 @@ export const useAdmin = () => {
   }, []);
 
   const createOrUpdateUser = async (userData: any, editingUser: any = null) => {
-    // Note: To truly create users in Supabase from Admin panel, 
-    // we would need an Edge Function since the client SDK can't 
-    // create users (only sign them up).
-    // For now, we update profiles which are already linked.
-    
     if (editingUser) {
       try {
         const { error } = await supabase
@@ -46,12 +45,10 @@ export const useAdmin = () => {
         
         if (error) throw error;
 
-        // Also update user_roles table to keep in sync
-        const { error: roleError } = await supabase
+        // Sync with user_roles table
+        await supabase
           .from('user_roles')
           .upsert({ user_id: editingUser.id, role: userData.role }, { onConflict: 'user_id,role' });
-
-        if (roleError) throw roleError;
 
         toast({ title: "Usuário atualizado", description: "As alterações foram salvas no Supabase." });
         fetchUsers();
@@ -68,7 +65,6 @@ export const useAdmin = () => {
   };
 
   const deleteUser = async (userId: string) => {
-    // Delete profile (auth user deletion requires edge function/admin SDK)
     try {
       const { error } = await supabase
         .from('profiles')
