@@ -74,6 +74,7 @@ export type Database = {
           email: string
           full_name: string | null
           id: string
+          last_active_at: string | null
           role: Database["public"]["Enums"]["app_role"]
           status: Database["public"]["Enums"]["account_status"]
           updated_at: string
@@ -84,6 +85,7 @@ export type Database = {
           email: string
           full_name?: string | null
           id: string
+          last_active_at?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           status?: Database["public"]["Enums"]["account_status"]
           updated_at?: string
@@ -94,6 +96,7 @@ export type Database = {
           email?: string
           full_name?: string | null
           id?: string
+          last_active_at?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           status?: Database["public"]["Enums"]["account_status"]
           updated_at?: string
