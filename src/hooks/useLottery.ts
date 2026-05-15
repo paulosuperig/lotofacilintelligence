@@ -70,24 +70,29 @@ export const useLottery = () => {
 
       // Priority 2: LocalStorage (Fallback/Offline) - Now Secure
       const saved = secureStorage.getItem<SavedGame[]>('lottery_history');
-      if (saved) {
-        try {
-          // Validation: Defensive schema check
-          const parsed = saved.map(g => {
-            const validated = SavedGameSchema.parse(g);
-            return {
-              ...validated,
-              id: validated.id || generateSecureId(),
-              timestamp: validated.timestamp || Date.now()
-            } as SavedGame;
-          });
-          const filtered = parsed.sort((a, b) => b.timestamp - a.timestamp);
-
-          setHistory(filtered);
-        } catch (e) {
-          console.error("[Security] History schema validation failed:", e);
-          setHistory([]);
+      if (saved && Array.isArray(saved)) {
+        // Defensive: validate each entry; coerce string numbers; drop invalid ones
+        const sanitized: SavedGame[] = [];
+        for (const g of saved) {
+          try {
+            const coerced = {
+              ...g,
+              numbers: Array.isArray(g?.numbers)
+                ? g.numbers.map((n: any) => typeof n === 'string' ? parseInt(n, 10) : n)
+                : g?.numbers,
+              id: g?.id || generateSecureId(),
+              timestamp: g?.timestamp || Date.now(),
+            };
+            const validated = SavedGameSchema.parse(coerced);
+            sanitized.push(validated as SavedGame);
+          } catch (e) {
+            console.warn("[Security] Skipping invalid history entry:", e);
+          }
         }
+        const filtered = sanitized.sort((a, b) => b.timestamp - a.timestamp);
+        // Persist sanitized version back so corrupt entries are removed
+        secureStorage.setItem('lottery_history', filtered);
+        setHistory(filtered);
       } else {
         setHistory([]);
       }
