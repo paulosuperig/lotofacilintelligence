@@ -200,10 +200,10 @@ const Index = () => {
             ) : null}
           </AnimatePresence>
         </motion.div>
-        </motion.div>
       </main>
     </div>
-  );
+  </div>
+);
 };
 
 export default Index;
