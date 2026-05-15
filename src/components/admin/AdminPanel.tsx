@@ -79,9 +79,10 @@ export const AdminPanel = ({
 }: AdminPanelProps) => {
   const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<any>(null);
-  const [userFormData, setUserFormData] = useState({ email: '', password: '', role: 'demo', status: 'active' });
-  const [tempDeepSeekKey, setTempDeepSeekKey] = useState(deepSeekKey);
-  const [showKey, setShowKey] = useState(false);
+   const [userFormData, setUserFormData] = useState({ email: '', password: '', role: 'demo', status: 'active' });
+   const [tempDeepSeekKey, setTempDeepSeekKey] = useState(deepSeekKey);
+   const [showKey, setShowKey] = useState(false);
+   const [showEmails, setShowEmails] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,6 +100,15 @@ export const AdminPanel = ({
           <p className="text-zinc-500 dark:text-zinc-400 text-xs">Gerenciamento de usuários e acessos</p>
         </div>
         <div className="flex items-center gap-3">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => setShowEmails(!showEmails)}
+            className="rounded-xl text-[10px] font-bold uppercase tracking-widest text-zinc-400"
+          >
+            {showEmails ? <EyeOff size={14} className="mr-1" /> : <Eye size={14} className="mr-1" />}
+            {showEmails ? 'Ocultar E-mails' : 'Revelar E-mails'}
+          </Button>
           <Dialog open={isUserDialogOpen} onOpenChange={(open) => {
             setIsUserDialogOpen(open);
             if (!open) {
@@ -207,8 +217,12 @@ export const AdminPanel = ({
                       {u.role === 'admin' ? <ShieldCheck size={16} /> : <Sparkles size={16} />}
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{maskSensitiveData(u.email)}</p>
+                      <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+                        {showEmails ? u.email : maskSensitiveData(u.email)}
+                        {u.full_name && <span className="ml-2 font-normal text-zinc-400 text-xs">({u.full_name})</span>}
+                      </p>
                       <p className="text-[10px] text-zinc-500 dark:text-zinc-400">
+                        {u.whatsapp && <span className="mr-2 text-emerald-500">WA: {u.whatsapp} |</span>}
                         ID: {u.id.substring(0, 8)}... | Cadastrado em {new Date(u.createdAt).toLocaleDateString('pt-BR')}
                       </p>
                     </div>

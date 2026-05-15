@@ -11,7 +11,7 @@ export const useAdmin = () => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select('id, email, role, status, created_at, full_name, whatsapp')
         .order('created_at', { ascending: false });
       
       if (error) throw error;
@@ -104,10 +104,24 @@ export const useAdmin = () => {
     }
   };
 
+  const saveDeepSeekKeyToSystem = async (key: string) => {
+    try {
+      const { error } = await supabase
+        .from('system_configs')
+        .upsert({ key: 'deepseek_api_key', value: key }, { onConflict: 'key' });
+      
+      if (error) throw error;
+      toast({ title: "Configuração Global", description: "Chave da IA salva para todos os usuários." });
+    } catch (error: any) {
+      toast({ title: "Erro ao salvar globalmente", description: error.message, variant: "destructive" });
+    }
+  };
+
   return {
     users,
     createOrUpdateUser,
     deleteUser,
-    toggleUserStatus
+    toggleUserStatus,
+    saveDeepSeekKeyToSystem
   };
 };

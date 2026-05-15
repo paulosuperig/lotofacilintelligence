@@ -30,7 +30,9 @@ const Index = () => {
     history, 
     fetchLatestResult, 
     clearHistory,
-    saveToHistory
+    saveToHistory,
+    loadMore,
+    hasMore
   } = useLottery();
 
   const {
@@ -48,7 +50,8 @@ const Index = () => {
     users,
     createOrUpdateUser,
     deleteUser,
-    toggleUserStatus
+    toggleUserStatus,
+    saveDeepSeekKeyToSystem
   } = useAdmin();
 
   const handleLogout = () => {
@@ -60,20 +63,15 @@ const Index = () => {
   };
 
   const saveAiGameToHistory = useCallback((content: string) => {
-    // Better regex to match both 1 and 2 digit numbers accurately
     const allNumbers = content.match(/\b\d{1,2}\b/g);
-    
     if (allNumbers && allNumbers.length >= 15) {
-      // Convert to numbers and filter to valid Lotofácil range (1-25)
       const validNums = allNumbers
         .map(n => parseInt(n, 10))
         .filter(n => Number.isInteger(n) && n >= 1 && n <= 25);
-
       const gamesToSave: number[][] = [];
       const seenInBatch = new Set<string>();
       for (let i = 0; i + 15 <= validNums.length; i += 15) {
         const slice = validNums.slice(i, i + 15);
-        // Ensure 15 unique numbers in this game
         const unique = Array.from(new Set(slice));
         if (unique.length !== 15) continue;
         const sorted = unique.sort((a, b) => a - b);
@@ -82,7 +80,6 @@ const Index = () => {
         seenInBatch.add(sig);
         gamesToSave.push(sorted);
       }
-
       if (gamesToSave.length > 0) {
         const newGames = gamesToSave.map(nums => ({
           id: generateSecureId(),
@@ -91,9 +88,7 @@ const Index = () => {
           sum: nums.reduce((a, b) => a + b, 0),
           type: 'IA Insight'
         }));
-
         saveToHistory(newGames);
-        
         toast({
           title: gamesToSave.length === 1 ? "Jogo salvo!" : `${gamesToSave.length} jogos salvos!`,
           description: "As sugestões da IA foram adicionadas ao seu histórico.",
@@ -101,7 +96,6 @@ const Index = () => {
         return;
       }
     }
-    
     toast({
       title: "Não foi possível salvar",
       description: "Não identificamos uma sequência válida de 15 dezenas no texto.",
@@ -109,21 +103,15 @@ const Index = () => {
     });
   }, [saveToHistory, toast]);
 
-  if (loading) return null; // Prevent flicker during auth check
-  
-  if (!user) {
-    return <Login />;
-  }
+  if (loading) return null;
+  if (!user) return <Login />;
 
   return (
     <div className="min-h-screen bg-[#f5f3ff] dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 selection:bg-purple-500/30 overflow-x-hidden font-sans pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] flex flex-col md:flex-row relative">
-      {/* Background Decorativo */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute top-[-5%] left-[-5%] w-[50%] h-[50%] bg-purple-400/20 dark:bg-purple-600/10 rounded-full blur-[100px] animate-pulse" />
         <div className="absolute bottom-[-5%] right-[-5%] w-[50%] h-[50%] bg-indigo-400/20 dark:bg-indigo-600/10 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '2s' }} />
         <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] bg-purple-300/10 dark:bg-zinc-800/20 rounded-full blur-[120px]" />
-        
-        {/* Grid de fundo sutil */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
       </div>
 
@@ -153,6 +141,8 @@ const Index = () => {
                   onBack={() => setActiveTab('home')} 
                   onClearHistory={clearHistory} 
                   onGoToGenerator={() => setActiveTab('gerador')} 
+                  onLoadMore={loadMore}
+                  hasMore={hasMore}
                 />
               )}
               
@@ -191,8 +181,11 @@ const Index = () => {
                   onDeleteUser={deleteUser}
                   onToggleUserStatus={toggleUserStatus}
                   deepSeekKey={deepSeekKey}
-                  onSaveDeepSeekKey={saveDeepSeekKey}
-                />
+                   onSaveDeepSeekKey={(key) => {
+                     saveDeepSeekKey(key);
+                     saveDeepSeekKeyToSystem(key);
+                   }}
+                 />
               )}
 
               {activeTab === 'home' || activeTab === 'gerador' ? (
