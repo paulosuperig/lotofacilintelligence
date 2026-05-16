@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useToast } from './use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { UserProfile } from '@/types/lottery';
-import { systemService } from '@/services/systemService';
 
 export const useAdmin = () => {
   const { toast } = useToast();
@@ -12,7 +11,7 @@ export const useAdmin = () => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, email, role, status, created_at, full_name, whatsapp')
+        .select('*')
         .order('created_at', { ascending: false });
       
       if (error) throw error;
@@ -40,15 +39,18 @@ export const useAdmin = () => {
           .from('profiles')
           .update({
             role: userData.role,
-            status: userData.status,
-            full_name: userData.full_name,
-            whatsapp: userData.whatsapp
+            status: userData.status
           })
           .eq('id', editingUser.id);
         
         if (error) throw error;
 
-        toast({ title: "Usuário atualizado", description: "As alterações foram salvas com sucesso." });
+        // Sync with user_roles table
+        await supabase
+          .from('user_roles')
+          .upsert({ user_id: editingUser.id, role: userData.role }, { onConflict: 'user_id,role' });
+
+        toast({ title: "Usuário atualizado", description: "As alterações foram salvas no Supabase." });
         fetchUsers();
       } catch (error: any) {
         toast({ title: "Erro", description: error.message, variant: "destructive" });
@@ -102,20 +104,10 @@ export const useAdmin = () => {
     }
   };
 
-  const saveDeepSeekKeyToSystem = async (key: string) => {
-    try {
-      await systemService.saveDeepSeekKey(key);
-      toast({ title: "Configuração Global", description: "Chave da IA salva para todos os usuários." });
-    } catch (error: any) {
-      toast({ title: "Erro ao salvar globalmente", description: error.message, variant: "destructive" });
-    }
-  };
-
   return {
     users,
     createOrUpdateUser,
     deleteUser,
-    toggleUserStatus,
-    saveDeepSeekKeyToSystem
+    toggleUserStatus
   };
 };

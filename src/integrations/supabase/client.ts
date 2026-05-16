@@ -15,10 +15,6 @@ export const supabase = createClient<Database>(
   supabasePublishableKey || 'placeholder-key'
 );
 
-export const isSupabaseEnabled = () => {
-  return !!supabaseUrl && supabaseUrl.startsWith('http') && !!supabasePublishableKey;
-};
-
 /**
  * Skill: @skillslovable - Full-Stack Security & Database Resilience
  * Banco de dados sincronizado e protegido.

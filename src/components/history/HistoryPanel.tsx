@@ -28,8 +28,6 @@ interface HistoryPanelProps {
   onBack: () => void;
   onClearHistory: () => void;
   onGoToGenerator: () => void;
-  onLoadMore?: () => void;
-  hasMore?: boolean;
 }
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
@@ -47,9 +45,7 @@ export const HistoryPanel = ({
   history, 
   onBack, 
   onClearHistory, 
-  onGoToGenerator,
-  onLoadMore,
-  hasMore = false
+  onGoToGenerator 
 }: HistoryPanelProps) => {
   const generateAllGamesText = () => {
     if (history.length === 0) return "";
@@ -211,18 +207,6 @@ export const HistoryPanel = ({
                 </motion.div>
               ))}
             </AnimatePresence>
-            
-            {hasMore && (
-              <div className="col-span-1 sm:col-span-2 lg:col-span-3 flex justify-center py-8">
-                <Button 
-                  onClick={onLoadMore}
-                  variant="outline"
-                  className="rounded-2xl h-12 px-12 font-bold uppercase tracking-widest text-[10px] border-purple-100 text-purple-600 hover:bg-purple-50 transition-all"
-                >
-                  Carregar Mais Jogos
-                </Button>
-              </div>
-            )}
           </div>
         ) : (
           <div className="py-32 flex flex-col items-center justify-center text-center">
