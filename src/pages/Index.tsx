@@ -2,14 +2,13 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useLottery } from '@/hooks/useLottery';
 import { useAiAssistant } from '@/hooks/useAiAssistant';
-import { useAdmin } from '@/hooks/useAdmin';
 import { useAuth } from '@/hooks/useAuth';
 import { AnimatePresence, motion } from 'framer-motion';
 import { generateSecureId } from '@/lib/security/utils';
 
 import { Sidebar, MobileNav } from '@/components/layout/Navigation';
 import { Header } from '@/components/layout/Header';
-import { AdminPanel } from '@/components/admin/AdminPanel';
+import { AdminPanelContainer } from '@/components/admin/AdminPanelContainer';
 import { AiAssistant } from '@/components/ai/AiAssistant';
 import { HistoryPanel } from '@/components/history/HistoryPanel';
 import Login from '@/components/Login';
@@ -45,14 +44,6 @@ const Index = () => {
     sendMessage,
     clearChatHistory
   } = useAiAssistant(latestResult);
-
-  const {
-    users,
-    createOrUpdateUser,
-    deleteUser,
-    toggleUserStatus,
-    saveDeepSeekKeyToSystem
-  } = useAdmin();
 
   const handleLogout = () => {
     signOut();
@@ -188,18 +179,11 @@ const Index = () => {
               )}
 
               {activeTab === 'ajustes' && isAdmin && (
-                <AdminPanel 
-                  users={users}
+                <AdminPanelContainer
                   onBack={() => setActiveTab('home')}
-                  onCreateOrUpdateUser={createOrUpdateUser}
-                  onDeleteUser={deleteUser}
-                  onToggleUserStatus={toggleUserStatus}
                   deepSeekKey={deepSeekKey}
-                   onSaveDeepSeekKey={(key) => {
-                     saveDeepSeekKey(key);
-                     saveDeepSeekKeyToSystem(key);
-                   }}
-                 />
+                  onSaveDeepSeekKey={saveDeepSeekKey}
+                />
               )}
 
               {activeTab === 'home' || activeTab === 'gerador' ? (
