@@ -197,12 +197,17 @@ ${statsBlock}`;
     if (!sanitizedMessage) return;
 
     if (!deepSeekKey) {
-      toast({
-        title: "API Key Ausente",
-        description: "Configure a chave da API nas configurações para usar a IA.",
-        variant: "destructive"
-      });
-      return;
+      const keyFromDb = await systemService.getDeepSeekKey();
+      if (keyFromDb) {
+        setDeepSeekKey(keyFromDb);
+      } else {
+        toast({
+          title: "API Key Ausente",
+          description: "Configure a chave da API nas configurações para usar a IA.",
+          variant: "destructive"
+        });
+        return;
+      }
     }
 
     const intent = parseUserIntent(sanitizedMessage);

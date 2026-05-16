@@ -251,7 +251,11 @@ export const useLottery = () => {
     if (isSupabaseEnabled()) {
       channel = supabase
         .channel('schema-db-changes')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'games_history' }, () => loadHistory(false))
+        .on('postgres_changes', { 
+          event: '*', 
+          schema: 'public', 
+          table: 'games_history' 
+        }, () => loadHistory(false))
         .subscribe();
     }
     
@@ -260,7 +264,7 @@ export const useLottery = () => {
       window.removeEventListener('storage', handleHistoryUpdate);
       if (channel) supabase.removeChannel(channel);
     };
-  }, [fetchLatestResult]);
+  }, [fetchLatestResult, loadHistory]);
 
   return {
     latestResult,
