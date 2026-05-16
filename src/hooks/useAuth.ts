@@ -1,156 +1,122 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { UserSchema, type ValidatedUser } from '@/lib/security/schemas';
+import { type ValidatedUser } from '@/lib/security/schemas';
 import { toast } from 'sonner';
 import { type User, type Session } from '@supabase/supabase-js';
 
 /**
- * Skill: Advanced Authentication & Token Management
- * Migrated to Supabase Auth for persistent sessions and database integration.
+ * Resilient auth hook.
+ * - Single source of truth for `loading` (always released in finally).
+ * - Profile is auto-created server-side by the `on_auth_user_created` trigger,
+ *   so we just fetch it. One short retry covers the race between INSERT and SELECT.
  */
 export const useAuth = () => {
   const [user, setUser] = useState<ValidatedUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const initializedRef = useRef(false);
 
-  const fetchProfile = useCallback(async (authUser: User, retryCount = 0): Promise<ValidatedUser | null> => {
+  const buildUser = (authUser: User, role: 'admin' | 'demo'): ValidatedUser => ({
+    email: authUser.email || '',
+    role,
+    token: 'supabase-managed',
+    iat: Date.now(),
+    exp: Date.now() + 3600000,
+  });
+
+  const fetchProfile = useCallback(async (authUser: User): Promise<void> => {
     try {
-      console.log(`[Auth] Inciando busca de perfil para ${authUser.id} (Tentativa ${retryCount + 1})`);
-      
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('role, status')
-        .eq('id', authUser.id)
-        .maybeSingle();
+      let profile: { role: string | null; status: string | null } | null = null;
 
-      if (error) {
-        console.error('[Auth] Erro ao buscar perfil:', error);
-        throw error;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('role, status')
+          .eq('id', authUser.id)
+          .maybeSingle();
+
+        if (error) {
+          console.error('[Auth] profile fetch error:', error);
+          break;
+        }
+        if (data) {
+          profile = data;
+          break;
+        }
+        // Trigger may still be running on first signup
+        if (attempt === 0) await new Promise((r) => setTimeout(r, 800));
       }
 
       if (!profile) {
-        if (retryCount < 2) {
-          console.log(`[Auth] Perfil não encontrado, tentando novamente em 1.5s...`);
-          await new Promise(resolve => setTimeout(resolve, 1500));
-          return fetchProfile(authUser, retryCount + 1);
-        }
-        
-        // Skill: Automatic Profile Recovery
-        console.warn(`[Auth] Perfil ausente para ${authUser.id}. Tentando criação automática...`);
-        const { data: newProfile, error: insertError } = await supabase
-          .from('profiles')
-          .insert([
-            { id: authUser.id, email: authUser.email, role: 'demo', status: 'active' }
-          ])
-          .select()
-          .single();
-          
-        if (insertError) {
-          console.error('[Auth] Falha ao criar perfil:', insertError);
-          // Se falhou ao inserir, retornamos um perfil temporário para não quebrar o login
-          // se o usuário estiver autenticado no Supabase.
-          const fallbackUser: ValidatedUser = {
-            email: authUser.email || '',
-            role: 'demo',
-            token: 'supabase-managed',
-            iat: Date.now(),
-            exp: Date.now() + 3600000,
-          };
-          setUser(fallbackUser);
-          return fallbackUser;
-        }
-
-        console.log('[Auth] Perfil criado com sucesso.');
-        const userData: ValidatedUser = {
-          email: authUser.email || '',
-          role: (newProfile?.role as 'admin' | 'demo') || 'demo',
-          token: 'supabase-managed',
-          iat: Date.now(),
-          exp: Date.now() + 3600000,
-        };
-        setUser(userData);
-        return userData;
+        // Fallback: assume demo so user can use the app while we investigate.
+        console.warn('[Auth] no profile row found, falling back to demo role');
+        setUser(buildUser(authUser, 'demo'));
+        return;
       }
 
       if (profile.status === 'blocked') {
-        toast.error("Acesso bloqueado", { description: "Sua conta está desativada." });
+        toast.error('Acesso bloqueado', { description: 'Sua conta está desativada.' });
         await supabase.auth.signOut();
         setUser(null);
-        return null;
+        return;
       }
 
-      const userData: ValidatedUser = {
-        email: authUser.email || '',
-        role: (profile.role as 'admin' | 'demo') || 'demo',
-        token: 'supabase-managed',
-        iat: Date.now(),
-        exp: Date.now() + 3600000,
-      };
+      const role = (profile.role === 'admin' ? 'admin' : 'demo') as 'admin' | 'demo';
+      setUser(buildUser(authUser, role));
 
-      console.log('[Auth] Perfil carregado com sucesso:', userData.role);
-      
-      // Atualiza o timestamp de atividade de forma assíncrona (não bloqueante)
-      supabase.from('profiles').update({ last_active_at: new Date().toISOString() }).eq('id', authUser.id).then();
-
-      setUser(userData);
-      return userData;
-    } catch (error: any) {
-      console.error('[Auth] Erro crítico no fetchProfile:', error);
-      // Fallback para evitar travamento da tela se o Supabase Auth está logado
-      const fallbackUser: ValidatedUser = {
-        email: authUser.email || '',
-        role: 'demo',
-        token: 'supabase-managed',
-        iat: Date.now(),
-        exp: Date.now() + 3600000,
-      };
-      setUser(fallbackUser);
-      return fallbackUser;
+      // Fire-and-forget activity ping
+      supabase
+        .from('profiles')
+        .update({ last_active_at: new Date().toISOString() })
+        .eq('id', authUser.id)
+        .then(undefined, () => undefined);
+    } catch (err) {
+      console.error('[Auth] fetchProfile crashed:', err);
+      setUser(buildUser(authUser, 'demo'));
     }
   }, []);
 
   useEffect(() => {
     let mounted = true;
 
-    const initializeAuth = async () => {
+    // Subscribe FIRST so we never miss an event
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
+      if (!mounted) return;
+      console.log('[Auth] state change:', event, currentSession?.user?.id ?? 'none');
+      setSession(currentSession);
+
+      if (!currentSession?.user) {
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
+      // Defer Supabase calls to avoid deadlock inside the callback
+      setTimeout(() => {
+        if (!mounted) return;
+        fetchProfile(currentSession.user).finally(() => {
+          if (mounted) setLoading(false);
+        });
+      }, 0);
+    });
+
+    // Then hydrate from existing session
+    (async () => {
       try {
         const { data: { session: initialSession } } = await supabase.auth.getSession();
-        if (!mounted) return;
+        if (!mounted || initializedRef.current) return;
+        initializedRef.current = true;
 
         setSession(initialSession);
         if (initialSession?.user) {
           await fetchProfile(initialSession.user);
         }
-      } catch (error) {
-        console.error('Error initializing auth:', error);
+      } catch (err) {
+        console.error('[Auth] init failed:', err);
       } finally {
         if (mounted) setLoading(false);
       }
-    };
-
-    initializeAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, currentSession) => {
-        if (!mounted) return;
-
-        console.log('Auth state change:', event, currentSession?.user?.id);
-        setSession(currentSession);
-
-        if (currentSession?.user) {
-          // Defer Supabase calls to avoid deadlock inside the auth callback
-          setTimeout(() => {
-            if (!mounted) return;
-            fetchProfile(currentSession.user).finally(() => {
-              if (mounted) setLoading(false);
-            });
-          }, 0);
-        } else {
-          setUser(null);
-          setLoading(false);
-        }
-      }
-    );
+    })();
 
     return () => {
       mounted = false;
@@ -161,18 +127,18 @@ export const useAuth = () => {
   const signOut = useCallback(async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
-      toast.error("Erro ao sair", { description: error.message });
+      toast.error('Erro ao sair', { description: error.message });
     } else {
       setUser(null);
       setSession(null);
     }
   }, []);
 
-  return { 
-    user, 
+  return {
+    user,
     session,
-    loading, 
+    loading,
     isAdmin: user?.role === 'admin',
-    signOut 
+    signOut,
   };
 };
