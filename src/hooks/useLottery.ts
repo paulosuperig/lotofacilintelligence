@@ -331,8 +331,9 @@ export const useLottery = () => {
 
     let channel: any;
     if (isSupabaseEnabled() && supabase) {
+      const channelName = `games-history-${Math.random().toString(36).slice(2)}`;
       channel = supabase
-        .channel('schema-db-changes')
+        .channel(channelName)
         .on(
           'postgres_changes',
           { event: '*', schema: 'public', table: 'games_history' },

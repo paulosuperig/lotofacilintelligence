@@ -72,26 +72,35 @@ export type Database = {
         Row: {
           created_at: string
           email: string
+          full_name: string | null
           id: string
+          last_active_at: string | null
           role: Database["public"]["Enums"]["app_role"]
           status: Database["public"]["Enums"]["account_status"]
           updated_at: string
+          whatsapp: string | null
         }
         Insert: {
           created_at?: string
           email: string
+          full_name?: string | null
           id: string
+          last_active_at?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           status?: Database["public"]["Enums"]["account_status"]
           updated_at?: string
+          whatsapp?: string | null
         }
         Update: {
           created_at?: string
           email?: string
+          full_name?: string | null
           id?: string
+          last_active_at?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           status?: Database["public"]["Enums"]["account_status"]
           updated_at?: string
+          whatsapp?: string | null
         }
         Relationships: []
       }
