@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from './use-toast';
-import { getLatestResult } from '@/services/lotteryApi';
+import { getLatestResult, getRecentResults, calculateFrequencies } from '@/services/lotteryApi';
 import { historyService } from '@/services/historyService';
 import { LotteryResult, SavedGame } from '@/types/lottery';
 import { generateSecureId } from '@/lib/security/utils';
@@ -13,6 +13,7 @@ const ITEMS_PER_PAGE = 30;
 export const useLottery = () => {
   const { toast } = useToast();
   const [latestResult, setLatestResult] = useState<LotteryResult | null>(null);
+  const [stats, setStats] = useState<{ hot: string[], cold: string[] }>({ hot: [], cold: [] });
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [history, setHistory] = useState<SavedGame[]>([]);
@@ -22,8 +23,14 @@ export const useLottery = () => {
   const fetchLatestResult = useCallback(async () => {
     setIsRefreshing(true);
     try {
-      const data = await getLatestResult();
+      const [data, recent] = await Promise.all([
+        getLatestResult(),
+        getRecentResults(20)
+      ]);
       setLatestResult(data);
+      if (recent.length > 0) {
+        setStats(calculateFrequencies(recent));
+      }
       localStorage.setItem('latest_lottery_result', JSON.stringify(data));
     } catch (error) {
       console.error("Error fetching latest result:", error);
@@ -251,7 +258,11 @@ export const useLottery = () => {
     if (isSupabaseEnabled()) {
       channel = supabase
         .channel('schema-db-changes')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'games_history' }, () => loadHistory(false))
+        .on('postgres_changes', { 
+          event: '*', 
+          schema: 'public', 
+          table: 'games_history' 
+        }, () => loadHistory(false))
         .subscribe();
     }
     
@@ -260,10 +271,11 @@ export const useLottery = () => {
       window.removeEventListener('storage', handleHistoryUpdate);
       if (channel) supabase.removeChannel(channel);
     };
-  }, [fetchLatestResult]);
+  }, [fetchLatestResult, loadHistory]);
 
   return {
     latestResult,
+    stats,
     isLoading,
     isRefreshing,
     history,

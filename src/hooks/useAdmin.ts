@@ -40,18 +40,15 @@ export const useAdmin = () => {
           .from('profiles')
           .update({
             role: userData.role,
-            status: userData.status
+            status: userData.status,
+            full_name: userData.full_name,
+            whatsapp: userData.whatsapp
           })
           .eq('id', editingUser.id);
         
         if (error) throw error;
 
-        // Sync with user_roles table
-        await supabase
-          .from('user_roles')
-          .upsert({ user_id: editingUser.id, role: userData.role }, { onConflict: 'user_id,role' });
-
-        toast({ title: "Usuário atualizado", description: "As alterações foram salvas no Supabase." });
+        toast({ title: "Usuário atualizado", description: "As alterações foram salvas com sucesso." });
         fetchUsers();
       } catch (error: any) {
         toast({ title: "Erro", description: error.message, variant: "destructive" });
