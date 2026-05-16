@@ -33,6 +33,7 @@ import {
 
 interface BentoGridProps {
   latestResult: LotteryResult | null;
+  stats?: { hot: string[], cold: string[] };
   isLoading: boolean;
   historyLength: number;
   onClearHistory: () => void;
@@ -61,6 +62,7 @@ const itemVariants: Variants = {
 
 export const BentoGrid = ({ 
   latestResult, 
+  stats,
   isLoading, 
   historyLength, 
   onClearHistory,

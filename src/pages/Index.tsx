@@ -23,6 +23,7 @@ const Index = () => {
 
   const { 
     latestResult, 
+    stats,
     isLoading, 
     isRefreshing, 
     history, 
@@ -173,6 +174,7 @@ const Index = () => {
         {(activeTab === 'home' || activeTab === 'gerador') && (
           <BentoGrid 
             latestResult={latestResult} 
+            stats={stats}
             isLoading={isLoading} 
             historyLength={history.length}
             onClearHistory={clearHistory}
