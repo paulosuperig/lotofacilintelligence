@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useToast } from './use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { UserProfile } from '@/types/lottery';
+import { systemService } from '@/services/systemService';
 
 export const useAdmin = () => {
   const { toast } = useToast();
@@ -106,11 +107,7 @@ export const useAdmin = () => {
 
   const saveDeepSeekKeyToSystem = async (key: string) => {
     try {
-      const { error } = await supabase
-        .from('system_configs')
-        .upsert({ key: 'deepseek_api_key', value: key }, { onConflict: 'key' });
-      
-      if (error) throw error;
+      await systemService.saveDeepSeekKey(key);
       toast({ title: "Configuração Global", description: "Chave da IA salva para todos os usuários." });
     } catch (error: any) {
       toast({ title: "Erro ao salvar globalmente", description: error.message, variant: "destructive" });

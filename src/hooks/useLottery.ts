@@ -1,12 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '@/hooks/useAuth';
 import { useToast } from './use-toast';
 import { getLatestResult } from '@/services/lotteryApi';
+import { historyService } from '@/services/historyService';
 import { LotteryResult, SavedGame } from '@/types/lottery';
 import { generateSecureId } from '@/lib/security/utils';
-import { supabase, isSupabaseEnabled } from '@/lib/supabase';
+import { supabase, isSupabaseEnabled } from '@/integrations/supabase/client';
 import { secureStorage } from '@/lib/security/secureStorage';
 import { SavedGameSchema } from '@/lib/security/schemas';
+
+const ITEMS_PER_PAGE = 30;
 
 export const useLottery = () => {
   const { toast } = useToast();
@@ -16,7 +18,6 @@ export const useLottery = () => {
   const [history, setHistory] = useState<SavedGame[]>([]);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
-  const ITEMS_PER_PAGE = 30;
 
   const fetchLatestResult = useCallback(async () => {
     setIsRefreshing(true);
@@ -45,36 +46,16 @@ export const useLottery = () => {
     }
   }, [toast]);
 
-  const syncOfflineHistory = useCallback(async () => {
-    if (!isSupabaseEnabled() || !supabase) return;
-    
+  const syncOfflineHistory = useCallback(async (userId: string) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
       const localHistory = secureStorage.getItem<SavedGame[]>('lottery_history') || [];
       if (localHistory.length === 0) return;
 
-      const { data: cloudData } = await supabase
-        .from('games_history')
-        .select('id')
-        .eq('user_id', user.id);
-      
-      const cloudIds = new Set(cloudData?.map(g => g.id) || []);
+      const cloudIds = await historyService.getOfflineSyncInfo(userId);
       const toSync = localHistory.filter(g => !cloudIds.has(g.id));
 
       if (toSync.length > 0) {
-        const gamesToInsert = toSync.map(game => ({
-          id: game.id,
-          user_id: user.id,
-          numbers: game.numbers,
-          sum_value: game.sum,
-          model_name: game.model,
-          type: game.type,
-          created_at: new Date(game.timestamp).toISOString()
-        }));
-        
-        await supabase.from('games_history').insert(gamesToInsert);
+        await historyService.saveGames(userId, toSync);
       }
     } catch (error) {
       console.error("Error syncing history:", error);
@@ -85,39 +66,25 @@ export const useLottery = () => {
     try {
       const currentPage = isLoadMore ? page + 1 : 0;
       
-      if (isSupabaseEnabled() && supabase) {
+      if (isSupabaseEnabled()) {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          if (!isLoadMore) await syncOfflineHistory();
+          if (!isLoadMore) await syncOfflineHistory(user.id);
 
-          const { data, error } = await supabase
-            .from('games_history')
-            .select('*')
-            .order('created_at', { ascending: false })
-            .range(currentPage * ITEMS_PER_PAGE, (currentPage + 1) * ITEMS_PER_PAGE - 1);
+          const formattedHistory = await historyService.fetchHistory(user.id, currentPage, ITEMS_PER_PAGE);
           
-          if (!error && data) {
-            const formattedHistory: SavedGame[] = data.map(item => ({
-              id: item.id,
-              numbers: item.numbers,
-              timestamp: new Date(item.created_at).getTime(),
-              sum: item.sum_value ?? undefined,
-              model: item.model_name ?? undefined,
-              type: item.type || (item.model_name ? 'Fechamento PRO' : 'IA Insight')
-            }));
-            
-            setHistory(prev => isLoadMore ? [...prev, ...formattedHistory] : formattedHistory);
-            setHasMore(data.length === ITEMS_PER_PAGE);
-            if (isLoadMore) setPage(currentPage);
-            
-            if (!isLoadMore) {
-              secureStorage.setItem('lottery_history', formattedHistory);
-            }
-            return;
+          setHistory(prev => isLoadMore ? [...prev, ...formattedHistory] : formattedHistory);
+          setHasMore(formattedHistory.length === ITEMS_PER_PAGE);
+          if (isLoadMore) setPage(currentPage);
+          
+          if (!isLoadMore) {
+            secureStorage.setItem('lottery_history', formattedHistory);
           }
+          return;
         }
       }
 
+      // Fallback to local storage
       const saved = secureStorage.getItem<SavedGame[]>('lottery_history');
       if (saved && Array.isArray(saved)) {
         const sanitized: SavedGame[] = [];
@@ -157,10 +124,10 @@ export const useLottery = () => {
 
   const clearHistory = async () => {
     try {
-      if (isSupabaseEnabled() && supabase) {
+      if (isSupabaseEnabled()) {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          await supabase.from('games_history').delete().eq('user_id', user.id);
+          await historyService.deleteHistory(user.id);
         }
       }
       secureStorage.removeItem('lottery_history');
@@ -184,6 +151,7 @@ export const useLottery = () => {
   const saveToHistory = async (newGames: SavedGame[]) => {
     try {
       if (!newGames || newGames.length === 0) return { success: false, duplicate: false };
+      
       const existingHistory = secureStorage.getItem<SavedGame[]>('lottery_history') || [];
       const nonDuplicateNewGames = newGames.filter(newGame => {
         const signature = [...newGame.numbers].sort((a, b) => a - b).join(',');
@@ -191,28 +159,24 @@ export const useLottery = () => {
           [...saved.numbers].sort((a, b) => a - b).join(',') === signature
         );
       });
+      
       if (nonDuplicateNewGames.length === 0) return { success: false, duplicate: true };
+      
       const securedGames: SavedGame[] = nonDuplicateNewGames.map(game => ({
         ...game,
         id: game.id || generateSecureId(),
         timestamp: game.timestamp || Date.now()
       }));
+      
       const updatedHistory = [...securedGames, ...existingHistory].sort((a, b) => b.timestamp - a.timestamp);
-      if (isSupabaseEnabled() && supabase) {
+      
+      if (isSupabaseEnabled()) {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          const gamesToInsert = securedGames.map(game => ({
-            id: game.id,
-            user_id: user.id,
-            numbers: game.numbers,
-            sum_value: game.sum,
-            model_name: game.model,
-            type: game.type,
-            created_at: new Date(game.timestamp).toISOString()
-          }));
-          await supabase.from('games_history').insert(gamesToInsert);
+          await historyService.saveGames(user.id, securedGames);
         }
       }
+      
       secureStorage.setItem('lottery_history', updatedHistory);
       setHistory(updatedHistory);
       window.dispatchEvent(new CustomEvent('lottery-history-updated'));
@@ -232,6 +196,7 @@ export const useLottery = () => {
     let attempts = 0;
     let finalGame: number[] = [];
     let valid = false;
+    
     while (!valid && attempts < 300) {
       attempts++;
       const numbers: number[] = [];
@@ -277,22 +242,25 @@ export const useLottery = () => {
   useEffect(() => {
     fetchLatestResult();
     loadHistory(false);
+    
     const handleHistoryUpdate = () => loadHistory(false);
     window.addEventListener('lottery-history-updated', handleHistoryUpdate);
     window.addEventListener('storage', handleHistoryUpdate);
+    
     let channel: any;
-    if (isSupabaseEnabled() && supabase) {
+    if (isSupabaseEnabled()) {
       channel = supabase
         .channel('schema-db-changes')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'games_history' }, () => loadHistory(false))
         .subscribe();
     }
+    
     return () => {
       window.removeEventListener('lottery-history-updated', handleHistoryUpdate);
       window.removeEventListener('storage', handleHistoryUpdate);
       if (channel) supabase.removeChannel(channel);
     };
-  }, [fetchLatestResult]); // Removed loadHistory from deps to avoid loop
+  }, [fetchLatestResult]);
 
   return {
     latestResult,
