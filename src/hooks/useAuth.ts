@@ -88,6 +88,10 @@ export const useAuth = () => {
       };
 
       console.log('[Auth] Perfil carregado com sucesso:', userData.role);
+      
+      // Atualiza o timestamp de atividade de forma assíncrona (não bloqueante)
+      supabase.from('profiles').update({ last_active_at: new Date().toISOString() }).eq('id', authUser.id).then();
+
       setUser(userData);
       return userData;
     } catch (error: any) {
