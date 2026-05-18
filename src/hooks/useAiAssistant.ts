@@ -67,18 +67,17 @@ const formatIntentForPrompt = (intent: UserIntent): string => {
 
 export const useAiAssistant = (latestResult?: LotteryResult | null) => {
   const { toast } = useToast();
-  const [deepSeekKey, setDeepSeekKey] = useState('');
   const [aiChat, setAiChat] = useState<{ role: 'user' | 'assistant', content: string }[]>([]);
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [aiMessage, setAiMessage] = useState('');
-
-  useEffect(() => {
-    const savedKey = secureStorage.getItem<string>('deepseek_api_key');
-    if (savedKey) setDeepSeekKey(savedKey);
-  }, []);
+  const [deepSeekKey, setDeepSeekKey] = useState('');
 
   useEffect(() => {
     let isMounted = true;
+    
+    const savedKey = secureStorage.getItem<string>('deepseek_api_key');
+    if (savedKey) setDeepSeekKey(savedKey);
+
     const loadChatHistory = async () => {
       if (!isSupabaseEnabled() || !supabase) return;
       try {
@@ -130,12 +129,7 @@ ${intentBlock}
 ${statsBlock}`;
   }, [latestResult]);
 
-  const callDeepSeek = useCallback(async (
-    messages: Array<{ role: string; content: string }>,
-    apiKey: string,
-    maxTokens: number,
-    attempt = 0,
-  ): Promise<string> => {
+  const callDeepSeekDirect = useCallback(async (messages: any[], apiKey: string, maxTokens: number, attempt = 0): Promise<string> => {
     try {
       const response = await fetch('https://api.deepseek.com/chat/completions', {
         method: 'POST',
@@ -162,19 +156,17 @@ ${statsBlock}`;
     } catch (err: any) {
       if (attempt < MAX_RETRIES) {
         await sleep(1000 * Math.pow(2, attempt));
-        return callDeepSeek(messages, apiKey, maxTokens, attempt + 1);
+        return callDeepSeekDirect(messages, apiKey, maxTokens, attempt + 1);
       }
       throw err;
     }
   }, []);
 
   const callAiGateway = useCallback(async (messages: any[], maxTokens: number, attempt = 0): Promise<string> => {
-    // If we have a manual key, use DeepSeek directly
     if (deepSeekKey) {
-      return callDeepSeek(messages, deepSeekKey, maxTokens);
+      return callDeepSeekDirect(messages, deepSeekKey, maxTokens);
     }
-    
-    // Fallback to Edge Function
+
     try {
       const { data, error } = await supabase.functions.invoke('intelligence-ai', {
         body: { messages, max_tokens: maxTokens },
@@ -188,7 +180,7 @@ ${statsBlock}`;
       }
       throw err;
     }
-  }, [deepSeekKey, callDeepSeek]);
+  }, [deepSeekKey, callDeepSeekDirect]);
 
   const sendMessage = useCallback(async (messageToSend: string) => {
     const sanitizedMessage = sanitizeString(messageToSend.trim());
@@ -225,6 +217,16 @@ ${statsBlock}`;
     setAiMessage,
     sendMessage,
     setAiChat,
+    deepSeekKey,
+    saveDeepSeekKey: (key: string) => {
+      const sanitizedKey = sanitizeString(key.trim());
+      secureStorage.setItem('deepseek_api_key', sanitizedKey);
+      setDeepSeekKey(sanitizedKey);
+      toast({
+        title: "Configuração Salva",
+        description: "A chave da API DeepSeek foi armazenada com sucesso.",
+      });
+    },
     clearChatHistory: async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
