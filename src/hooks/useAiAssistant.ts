@@ -110,16 +110,6 @@ export const useAiAssistant = (latestResult?: LotteryResult | null) => {
     return () => { isMounted = false; };
   }, []);
 
-  const saveDeepSeekKey = (key: string) => {
-    const sanitizedKey = sanitizeString(key.trim());
-    secureStorage.setItem('deepseek_api_key', sanitizedKey);
-    setDeepSeekKey(sanitizedKey);
-    toast({
-      title: "Configuração Salva",
-      description: "A chave da API DeepSeek foi armazenada com sucesso.",
-    });
-  };
-
   const persistChatMessage = async (role: 'user' | 'assistant', content: string) => {
     if (!isSupabaseEnabled() || !supabase) return;
     
