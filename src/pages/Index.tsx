@@ -39,7 +39,9 @@ const Index = () => {
     aiMessage,
     setAiMessage,
     sendMessage,
-    clearChatHistory
+    clearChatHistory,
+    deepSeekKey,
+    saveDeepSeekKey
   } = useAiAssistant(latestResult);
 
   const {
