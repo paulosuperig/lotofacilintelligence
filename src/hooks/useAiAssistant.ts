@@ -15,7 +15,6 @@ const MAX_RETRIES = 2;
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-// Extract the user's intent (quantity of games, sum filters) from natural language.
 const parseUserIntent = (message: string): UserIntent => {
   const m = message.toLowerCase();
   const intent: UserIntent = {};
@@ -74,7 +73,6 @@ export const useAiAssistant = (latestResult?: LotteryResult | null) => {
 
   useEffect(() => {
     let isMounted = true;
-    
     const savedKey = secureStorage.getItem<string>('deepseek_api_key');
     if (savedKey) setDeepSeekKey(savedKey);
 
@@ -187,7 +185,6 @@ ${statsBlock}`;
     if (!sanitizedMessage) return;
 
     const intent = parseUserIntent(sanitizedMessage);
-    const targetQty = intent.quantidade ?? 3;
     const newMessage = { role: 'user' as const, content: sanitizedMessage };
     
     setAiChat(prev => [...prev, newMessage]);
