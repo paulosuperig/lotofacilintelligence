@@ -5,6 +5,7 @@ import type { LotteryResult } from '@/types/lottery';
 import { supabase, isSupabaseEnabled } from '@/lib/supabase';
 import { computeLotteryStats, formatStatsForPrompt } from '@/lib/ai/lotteryStats';
 import { secureStorage } from '@/lib/security/secureStorage';
+import { aiService } from '@/services/aiService';
 import {
   sanitizeAiGamesDetailed,
   type UserIntent,
@@ -127,50 +128,12 @@ ${intentBlock}
 ${statsBlock}`;
   }, [latestResult]);
 
-  const callDeepSeekDirect = useCallback(async (messages: any[], apiKey: string, maxTokens: number, attempt = 0): Promise<string> => {
-    try {
-      const response = await fetch('https://api.deepseek.com/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: 'deepseek-chat',
-          messages,
-          stream: false,
-          temperature: 0.2,
-          max_tokens: maxTokens,
-        }),
-      });
-
-      if (!response.ok) {
-        const errText = await response.text().catch(() => '');
-        throw new Error(`DeepSeek API Error: ${response.status} ${errText}`);
-      }
-
-      const data = await response.json();
-      return data?.choices?.[0]?.message?.content || '';
-    } catch (err: any) {
-      if (attempt < MAX_RETRIES) {
-        await sleep(1000 * Math.pow(2, attempt));
-        return callDeepSeekDirect(messages, apiKey, maxTokens, attempt + 1);
-      }
-      throw err;
-    }
-  }, []);
-
   const callAiGateway = useCallback(async (messages: any[], maxTokens: number, attempt = 0): Promise<string> => {
-    if (deepSeekKey) {
-      return callDeepSeekDirect(messages, deepSeekKey, maxTokens);
-    }
-
     try {
-      const { data, error } = await supabase.functions.invoke('intelligence-ai', {
-        body: { messages, max_tokens: maxTokens },
-      });
-      if (error) throw error;
-      return data?.choices?.[0]?.message?.content || '';
+      if (deepSeekKey) {
+        return await aiService.callDeepSeekDirect(messages, deepSeekKey, maxTokens);
+      }
+      return await aiService.callAiGateway(messages, maxTokens);
     } catch (err: any) {
       if (attempt < MAX_RETRIES) {
         await sleep(1000 * Math.pow(2, attempt));
@@ -178,7 +141,7 @@ ${statsBlock}`;
       }
       throw err;
     }
-  }, [deepSeekKey, callDeepSeekDirect]);
+  }, [deepSeekKey]);
 
   const sendMessage = useCallback(async (messageToSend: string) => {
     const sanitizedMessage = sanitizeString(messageToSend.trim());

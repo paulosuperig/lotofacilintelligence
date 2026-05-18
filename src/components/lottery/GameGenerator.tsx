@@ -1,11 +1,12 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Ball } from './Ball';
+import { StatCard } from './StatCard';
 import { Button } from '@/components/ui/button';
+import { WhatsAppIcon } from '@/components/ui/icons';
 import { 
   Zap, 
   RefreshCcw, 
-  Save, 
   TrendingUp, 
   History, 
   Copy, 
@@ -22,25 +23,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useLottery } from '@/hooks/useLottery';
 import { SavedGame } from '@/types/lottery';
-
-const WhatsAppIcon = () => (
-  <svg 
-    viewBox="0 0 24 24" 
-    width="18" 
-    height="18" 
-    fill="currentColor"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-  </svg>
-);
+import { calculateGameStats } from '@/lib/lottery/stats';
 
 export const GameGenerator = () => {
-  const { history, saveToHistory, generateSmartGame, isGameDuplicate } = useLottery();
+  const { history, saveToHistory, generateSmartGame } = useLottery();
   const [currentResult, setCurrentResult] = useState<SavedGame | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
@@ -49,34 +38,7 @@ export const GameGenerator = () => {
 
   const stats = useMemo(() => {
     if (!currentResult) return null;
-    const nums = currentResult.numbers;
-    const primes = [2, 3, 5, 7, 11, 13, 17, 19, 23];
-    const moldNumbers = [1, 2, 3, 4, 5, 6, 10, 11, 15, 16, 20, 21, 22, 23, 24, 25];
-    
-    const evenCount = nums.filter(n => n % 2 === 0).length;
-    const pCount = nums.filter(n => primes.includes(n)).length;
-    const moldCount = nums.filter(n => moldNumbers.includes(n)).length;
-    const sum = nums.reduce((a, b) => a + b, 0);
-    
-    let maxSeq = 1;
-    let currentSeq = 1;
-    for (let i = 1; i < nums.length; i++) {
-      if (nums[i] === nums[i - 1] + 1) {
-        currentSeq++;
-        maxSeq = Math.max(maxSeq, currentSeq);
-      } else {
-        currentSeq = 1;
-      }
-    }
-    
-    return {
-      pairs: evenCount,
-      odd: 15 - evenCount,
-      primes: pCount,
-      sum,
-      mold: moldCount,
-      sequence: maxSeq
-    };
+    return calculateGameStats(currentResult.numbers);
   }, [currentResult]);
 
   const handleGenerate = async () => {
@@ -84,31 +46,12 @@ export const GameGenerator = () => {
     setIsGenerating(true);
     setIsCopied(false);
     
-    // Simulate thinking process for "Smart" feel
     await new Promise(resolve => setTimeout(resolve, 800));
     
     const newGame = generateSmartGame();
     setCurrentResult(newGame);
     await saveToHistory([newGame]);
     setIsGenerating(false);
-  };
-
-  const handleSave = async () => {
-    if (!currentResult) return;
-    
-    const result = await saveToHistory([currentResult]);
-    
-    if (result.duplicate) {
-      setShowDuplicateModal(true);
-      return;
-    }
-
-    if (result.success) {
-      toast({
-        title: "Sucesso!",
-        description: "Jogo salvo no seu histórico.",
-      });
-    }
   };
 
   const copyToClipboard = () => {
@@ -123,15 +66,10 @@ export const GameGenerator = () => {
     setTimeout(() => setIsCopied(false), 2000);
   };
 
-  /**
-   * Performance Engineering: Optimized URI formatting for WhatsApp
-   * Follows Platform Engineering standards for resilient external links
-   */
   const shareOnWhatsApp = useCallback((game: number[]) => {
     const domain = window.location.origin;
     const gameText = game.map(n => n.toString().padStart(2, '0')).join(' ');
     
-    // Clean Code: Structured message template
     const template = [
       '🔥 *GERADOR INTELIGENTE PRO* 🔥',
       '',
@@ -322,17 +260,3 @@ export const GameGenerator = () => {
     </div>
   );
 };
-
-const StatCard = ({ label, value, icon }: { label: string, value: string | number, icon: React.ReactNode }) => (
-  <div className="bg-white dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-800 rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-sm">
-    <div className="flex items-center gap-2 text-zinc-400 mb-2">
-      <span className="shrink-0">{icon}</span>
-      <span className="text-[9px] uppercase font-bold tracking-widest">{label}</span>
-    </div>
-    <div className="text-xl font-display font-bold text-zinc-900 dark:text-zinc-100">
-      {value}
-    </div>
-  </div>
-);
-
-

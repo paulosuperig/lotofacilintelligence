@@ -1,12 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '@/hooks/useAuth';
 import { useToast } from './use-toast';
-import { getLatestResult } from '@/services/lotteryApi';
 import { LotteryResult, SavedGame } from '@/types/lottery';
 import { generateSecureId } from '@/lib/security/utils';
 import { supabase, isSupabaseEnabled } from '@/lib/supabase';
 import { secureStorage } from '@/lib/security/secureStorage';
-import { SavedGameSchema } from '@/lib/security/schemas';
+import { lotteryService } from '@/services/lotteryService';
+import { historyService } from '@/services/historyService';
 
 export const useLottery = () => {
   const { toast } = useToast();
@@ -18,15 +17,13 @@ export const useLottery = () => {
   const fetchLatestResult = useCallback(async () => {
     setIsRefreshing(true);
     try {
-      const data = await getLatestResult();
+      const data = await lotteryService.getLatestResult();
       setLatestResult(data);
       secureStorage.setItem('latest_lottery_result', data);
     } catch (error) {
       console.error("[Lottery] Error fetching latest result:", error);
       const cached = secureStorage.getItem<LotteryResult>('latest_lottery_result');
-      if (cached) {
-        setLatestResult(cached);
-      }
+      if (cached) setLatestResult(cached);
       toast({
         title: "Erro ao atualizar",
         description: "Exibindo últimos dados salvos. Verifique sua conexão.",
@@ -38,131 +35,35 @@ export const useLottery = () => {
     }
   }, [toast]);
 
-  const syncOfflineHistory = useCallback(async () => {
-    if (!isSupabaseEnabled() || !supabase) return;
-    
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const user = session?.user;
-      if (!user) return;
-
-      const localHistory = secureStorage.getItem<SavedGame[]>('lottery_history') || [];
-      if (localHistory.length === 0) return;
-
-      // Fetch existing cloud IDs to avoid duplicates
-      const { data: cloudData } = await supabase
-        .from('games_history')
-        .select('id')
-        .eq('user_id', user.id);
-      
-      const cloudIds = new Set(cloudData?.map(g => g.id) || []);
-      const toSync = localHistory.filter(g => !cloudIds.has(g.id));
-
-      if (toSync.length > 0) {
-        console.log(`Syncing ${toSync.length} games to cloud...`);
-        const gamesToInsert = toSync.map(game => ({
-          id: game.id,
-          user_id: user.id,
-          numbers: game.numbers,
-          sum_value: game.sum,
-          model_name: game.model,
-          type: game.type,
-          created_at: new Date(game.timestamp).toISOString()
-        }));
-        
-        await supabase.from('games_history').insert(gamesToInsert);
-      }
-    } catch (error) {
-      console.error("Error syncing history:", error);
-    }
-  }, []);
-
   const loadHistory = useCallback(async () => {
     try {
-      // Priority 1: Supabase (Cloud)
       if (isSupabaseEnabled() && supabase) {
         const { data: { session } } = await supabase.auth.getSession();
         const user = session?.user;
         if (user) {
-          // Sync offline data first
-          await syncOfflineHistory();
-
-          // Limit load to latest 50 games for performance
-          const { data, error } = await supabase
-            .from('games_history')
-            .select('*')
-            .eq('user_id', user.id) // Security: Filter by user_id explicitly
-            .order('created_at', { ascending: false })
-            .limit(50);
-          
-          if (error) throw error;
-          
-          if (data) {
-            const formattedHistory: SavedGame[] = data.map(item => ({
-              id: item.id,
-              numbers: item.numbers,
-              timestamp: new Date(item.created_at).getTime(),
-              sum: item.sum_value ?? undefined,
-              model: item.model_name ?? undefined,
-              type: item.type || (item.model_name ? 'Fechamento PRO' : 'IA Insight')
-            }));
-            
-            // Update local storage with fresh cloud data
-            secureStorage.setItem('lottery_history', formattedHistory);
-            setHistory(formattedHistory);
-            return;
-          }
+          await historyService.syncOffline(user.id);
+          const data = await historyService.fetchHistory(user.id);
+          setHistory(data);
+          return;
         }
-      } else {
-        console.warn("[Lottery] Supabase is disabled or not initialized.");
       }
-
-      // Priority 2: LocalStorage (Fallback/Offline)
-      const saved = secureStorage.getItem<SavedGame[]>('lottery_history');
-      if (saved && Array.isArray(saved)) {
-        const sanitized: SavedGame[] = [];
-        for (const g of saved) {
-          try {
-            const coerced = {
-              ...g,
-              numbers: Array.isArray(g?.numbers)
-                ? g.numbers.map((n: any) => typeof n === 'string' ? parseInt(n, 10) : n)
-                : g?.numbers,
-              id: g?.id || generateSecureId(),
-              timestamp: g?.timestamp || Date.now(),
-            };
-            const validated = SavedGameSchema.parse(coerced);
-            sanitized.push(validated as SavedGame);
-          } catch (e) {
-            console.warn("[Security] Skipping invalid history entry:", e);
-          }
-        }
-        const filtered = sanitized.sort((a, b) => b.timestamp - a.timestamp).slice(0, 100);
-        setHistory(filtered);
-      } else {
-        setHistory([]);
-      }
+      const local = historyService.getLocalHistory();
+      setHistory(local.sort((a, b) => b.timestamp - a.timestamp).slice(0, 100));
     } catch (error) {
       console.error("Error loading history:", error);
       setHistory([]);
     }
-  }, [syncOfflineHistory]);
+  }, []);
 
   const clearHistory = async () => {
     try {
+      let userId = null;
       if (isSupabaseEnabled() && supabase) {
         const { data: { session } } = await supabase.auth.getSession();
-        const user = session?.user;
-        if (user) {
-          const { error } = await supabase
-            .from('games_history')
-            .delete()
-            .eq('user_id', user.id);
-          if (error) throw error;
-        }
+        userId = session?.user?.id || null;
       }
-
-      secureStorage.removeItem('lottery_history');
+      
+      await historyService.clearHistory(userId);
       setHistory([]);
       window.dispatchEvent(new CustomEvent('lottery-history-updated'));
       toast({
@@ -178,9 +79,6 @@ export const useLottery = () => {
     }
   };
 
-  /**
-   * Performance Engineering: Memoized duplicate check using string hashing for O(1) comparison
-   */
   const isGameDuplicate = useCallback((numbers: number[]) => {
     const signature = [...numbers].sort((a, b) => a - b).join(',');
     return history.some(saved => 
@@ -188,17 +86,11 @@ export const useLottery = () => {
     );
   }, [history]);
 
-  /**
-   * Clean Code & Zero Trust: Validation-first saving logic with immutable updates
-   */
   const saveToHistory = async (newGames: SavedGame[]) => {
     try {
-      // Input Validation
       if (!newGames || newGames.length === 0) return { success: false, duplicate: false };
 
       const existingHistory = secureStorage.getItem<SavedGame[]>('lottery_history') || [];
-
-      // Zero Trust: Filter out duplicates and sanitize inputs before state update
       const nonDuplicateNewGames = newGames.filter(newGame => {
         const signature = [...newGame.numbers].sort((a, b) => a - b).join(',');
         return !existingHistory.some((saved: SavedGame) => 
@@ -210,49 +102,28 @@ export const useLottery = () => {
         return { success: false, duplicate: true };
       }
 
-      // Security: Ensure each new game has a cryptographically secure ID if missing
       const securedGames: SavedGame[] = nonDuplicateNewGames.map(game => ({
         ...game,
         id: game.id || generateSecureId(),
         timestamp: game.timestamp || Date.now()
       }));
 
-      const updatedHistory = [...securedGames, ...existingHistory]
-        .sort((a, b) => b.timestamp - a.timestamp);
-      
-      // Persistence: Cloud Sync (Supabase) if available
+      let userId = null;
       if (isSupabaseEnabled() && supabase) {
         const { data: { session } } = await supabase.auth.getSession();
-        const user = session?.user;
-        if (user) {
-          const gamesToInsert = securedGames.map(game => ({
-            user_id: user.id,
-            numbers: game.numbers,
-            sum_value: game.sum,
-            model_name: game.model,
-            type: game.type, // Added type field for complete synchronization
-            created_at: new Date(game.timestamp).toISOString()
-          }));
-          
-          await supabase.from('games_history').insert(gamesToInsert);
-        }
+        userId = session?.user?.id || null;
       }
 
-      // Persistence: Local Fallback (Encrypted)
-      secureStorage.setItem('lottery_history', updatedHistory);
-
-      // Performance: Batch state updates
+      const updatedHistory = await historyService.saveGames(userId, securedGames);
       setHistory(updatedHistory);
-      
-      // Cross-instance sync: notify other useLottery instances
       window.dispatchEvent(new CustomEvent('lottery-history-updated'));
       
       return { success: true, duplicate: false };
     } catch (error) {
-      console.error("[Performance] Error during history persistence:", error);
+      console.error("[Lottery] Error saving history:", error);
       toast({
         title: "Erro na persistência",
-        description: "Não foi possível sincronizar o histórico com segurança.",
+        description: "Não foi possível sincronizar o histórico.",
         variant: "destructive"
       });
       return { success: false, duplicate: false };
@@ -264,7 +135,6 @@ export const useLottery = () => {
     const primes = [2, 3, 5, 7, 11, 13, 17, 19, 23];
     const moldNumbers = [1, 2, 3, 4, 5, 6, 10, 11, 15, 16, 20, 21, 22, 23, 24, 25];
     
-    // Obter assinaturas do histórico para evitar repetição total
     const historySignatures = new Set(history.map(g => [...g.numbers].sort((a, b) => a - b).join(',')));
     
     let attempts = 0;
@@ -274,8 +144,6 @@ export const useLottery = () => {
     while (!valid && attempts < 300) {
       attempts++;
       const numbers: number[] = [];
-      
-      // Uso de Crypto para aleatoriedade superior
       const randomValues = new Uint32Array(15);
       window.crypto.getRandomValues(randomValues);
       
@@ -288,7 +156,6 @@ export const useLottery = () => {
       const sorted = numbers.sort((a, b) => a - b);
       const signature = sorted.join(',');
 
-      // 1. Garantia de Unicidade: Nunca repete o que já está no histórico
       if (historySignatures.has(signature)) continue;
       
       const evenCount = sorted.filter(n => n % 2 === 0).length;
@@ -296,14 +163,11 @@ export const useLottery = () => {
       const pCount = sorted.filter(n => primes.includes(n)).length;
       const moldCount = sorted.filter(n => moldNumbers.includes(n)).length;
 
-      // 2. Filtros Matemáticos e Históricos (Baseados em tendências reais)
-      const checkParity = (evenCount >= 7 && evenCount <= 8); // Tendência de 60%
-      const checkPrimes = (pCount >= 5 && pCount <= 6);       // Frequência alta
-      const checkMold = (moldCount >= 9 && moldCount <= 11); // Padrão de borda
-      const checkSum = (sum >= 170 && sum <= 220);           // Faixa central de massa
+      const checkParity = (evenCount >= 7 && evenCount <= 8);
+      const checkPrimes = (pCount >= 5 && pCount <= 6);
+      const checkMold = (moldCount >= 9 && moldCount <= 11);
+      const checkSum = (sum >= 170 && sum <= 220);
 
-      // Na primeira metade das tentativas, buscamos o "jogo perfeito"
-      // Se não encontrar, relaxamos levemente os critérios para garantir performance
       if (attempts < 150) {
         if (checkParity && checkPrimes && checkSum && checkMold) {
           finalGame = sorted;
@@ -328,34 +192,23 @@ export const useLottery = () => {
 
   useEffect(() => {
     let isMounted = true;
-    
     const init = async () => {
       await fetchLatestResult();
       if (isMounted) await loadHistory();
     };
-    
     init();
     
-    // Cross-instance sync and Realtime
     const handleHistoryUpdate = () => loadHistory();
     window.addEventListener('lottery-history-updated', handleHistoryUpdate);
     window.addEventListener('storage', handleHistoryUpdate);
 
     let channel: any;
     if (isSupabaseEnabled() && supabase) {
-      const channelName = `games-history-${Math.random().toString(36).slice(2)}`;
       channel = supabase
-        .channel(channelName)
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'games_history' },
-          (payload) => {
-            // Optimization: avoid reloading everything if the change was made by the current user
-            // and we already have the data in local state. But since we need full sync across tabs,
-            // a refresh is often the safest route for data consistency.
-            loadHistory();
-          }
-        )
+        .channel(`games-history-${Math.random().toString(36).slice(2)}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'games_history' }, () => {
+          loadHistory();
+        })
         .subscribe();
     }
     
@@ -363,11 +216,7 @@ export const useLottery = () => {
       isMounted = false;
       window.removeEventListener('lottery-history-updated', handleHistoryUpdate);
       window.removeEventListener('storage', handleHistoryUpdate);
-      if (channel) {
-        supabase.removeChannel(channel).catch(err => {
-          console.debug("[Realtime] Error removing channel:", err);
-        });
-      }
+      if (channel) supabase.removeChannel(channel);
     };
   }, [fetchLatestResult, loadHistory]);
 
