@@ -163,12 +163,12 @@ export const GameGenerator = () => {
         </div>
       </div>
 
-      <div className="p-4 sm:p-6 md:p-12 flex-grow flex flex-col">
+      <div className="p-5 sm:p-8 md:p-12 flex-grow flex flex-col">
         {stats && (
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4 mb-10"
+            className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-5 gap-3 sm:gap-4 mb-10"
           >
             <StatCard label="Pares/Ímpares" value={`${stats.pairs}/${stats.odd}`} icon={<TrendingUp size={14}/>} />
             <StatCard label="Soma Total" value={stats.sum} icon={<TrendingUp size={14}/>} />
