@@ -64,6 +64,8 @@ interface AdminPanelProps {
   onCreateOrUpdateUser: (userData: any, editingUser: any) => void;
   onDeleteUser: (userId: string) => void;
   onToggleUserStatus: (userId: string) => void;
+  deepSeekKey: string;
+  onSaveDeepSeekKey: (key: string) => void;
 }
 
 export const AdminPanel = ({ 
@@ -71,11 +73,15 @@ export const AdminPanel = ({
   onBack, 
   onCreateOrUpdateUser, 
   onDeleteUser, 
-  onToggleUserStatus
+  onToggleUserStatus,
+  deepSeekKey,
+  onSaveDeepSeekKey
 }: AdminPanelProps) => {
   const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<any>(null);
   const [userFormData, setUserFormData] = useState({ email: '', password: '', role: 'demo', status: 'active' });
+  const [tempDeepSeekKey, setTempDeepSeekKey] = useState(deepSeekKey);
+  const [showKey, setShowKey] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
