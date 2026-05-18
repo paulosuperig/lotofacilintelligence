@@ -112,8 +112,11 @@ export const historyService = {
       const { error } = await supabase
         .from('games_history')
         .delete()
-        .eq('user_id', userId);
-      if (error) throw error;
+        .filter('user_id', 'eq', userId);
+      if (error) {
+        console.error("[historyService] Error clearing history from Supabase:", error);
+        throw error;
+      }
     }
 
     secureStorage.removeItem('lottery_history');
