@@ -130,7 +130,51 @@ ${intentBlock}
 ${statsBlock}`;
   }, [latestResult]);
 
+  const callDeepSeek = useCallback(async (
+    messages: Array<{ role: string; content: string }>,
+    apiKey: string,
+    maxTokens: number,
+    attempt = 0,
+  ): Promise<string> => {
+    try {
+      const response = await fetch('https://api.deepseek.com/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: 'deepseek-chat',
+          messages,
+          stream: false,
+          temperature: 0.2,
+          max_tokens: maxTokens,
+        }),
+      });
+
+      if (!response.ok) {
+        const errText = await response.text().catch(() => '');
+        throw new Error(`DeepSeek API Error: ${response.status} ${errText}`);
+      }
+
+      const data = await response.json();
+      return data?.choices?.[0]?.message?.content || '';
+    } catch (err: any) {
+      if (attempt < MAX_RETRIES) {
+        await sleep(1000 * Math.pow(2, attempt));
+        return callDeepSeek(messages, apiKey, maxTokens, attempt + 1);
+      }
+      throw err;
+    }
+  }, []);
+
   const callAiGateway = useCallback(async (messages: any[], maxTokens: number, attempt = 0): Promise<string> => {
+    // If we have a manual key, use DeepSeek directly
+    if (deepSeekKey) {
+      return callDeepSeek(messages, deepSeekKey, maxTokens);
+    }
+    
+    // Fallback to Edge Function
     try {
       const { data, error } = await supabase.functions.invoke('intelligence-ai', {
         body: { messages, max_tokens: maxTokens },
@@ -144,7 +188,7 @@ ${statsBlock}`;
       }
       throw err;
     }
-  }, []);
+  }, [deepSeekKey, callDeepSeek]);
 
   const sendMessage = useCallback(async (messageToSend: string) => {
     const sanitizedMessage = sanitizeString(messageToSend.trim());
