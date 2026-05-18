@@ -63,6 +63,7 @@ const markdownComponents = {
 };
 
 interface AiAssistantProps {
+  deepSeekKey: string;
   aiChat: any[];
   isAiLoading: boolean;
   aiMessage: string;
@@ -71,10 +72,12 @@ interface AiAssistantProps {
   onSaveAiGame: (content: string) => void;
   onClearChat?: () => void;
   onBack: () => void;
+  onGoToSettings: () => void;
   role: 'admin' | 'demo';
 }
 
 export const AiAssistant = ({
+  deepSeekKey,
   aiChat,
   isAiLoading,
   aiMessage,
@@ -83,6 +86,7 @@ export const AiAssistant = ({
   onSaveAiGame,
   onClearChat,
   onBack,
+  onGoToSettings,
   role
 }: AiAssistantProps) => {
   const chatContainerRef = React.useRef<HTMLDivElement>(null);
