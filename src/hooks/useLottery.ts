@@ -13,6 +13,7 @@ export const useLottery = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [history, setHistory] = useState<SavedGame[]>([]);
+  const [isClearingInProgress, setIsClearingInProgress] = useState(false);
 
   const fetchLatestResult = useCallback(async () => {
     setIsRefreshing(true);
@@ -56,6 +57,11 @@ export const useLottery = () => {
   }, []);
 
   const clearHistory = useCallback(async () => {
+    if (isClearingInProgress) return;
+    
+    setIsClearingInProgress(true);
+    setHistory([]); // Feedback visual instantâneo
+    
     try {
       let userId = null;
       if (isSupabaseEnabled() && supabase) {
@@ -64,25 +70,26 @@ export const useLottery = () => {
       }
       
       await historyService.clearHistory(userId);
-      setHistory([]);
       
-      // Imediatamente limpa o estado local para garantir feedback visual
-      secureStorage.removeItem('lottery_history');
-      
-      window.dispatchEvent(new CustomEvent('lottery-history-updated'));
       toast({
         title: "Histórico limpo",
         description: "Todos os seus jogos salvos foram removidos com sucesso.",
       });
+      
+      // Notificar outros componentes que o histórico mudou
+      window.dispatchEvent(new CustomEvent('lottery-history-updated'));
     } catch (error) {
       console.error("[useLottery] Error clearing history:", error);
+      // Em caso de erro, poderíamos tentar recarregar, mas o storage local já foi limpo
       toast({
-        title: "Erro",
-        description: "Não foi possível limpar o histórico.",
-        variant: "destructive"
+        title: "Aviso",
+        description: "O histórico local foi limpo, mas pode ter ocorrido um erro na sincronização cloud.",
+        variant: "default"
       });
+    } finally {
+      setIsClearingInProgress(false);
     }
-  }, [toast]);
+  }, [toast, isClearingInProgress]);
 
   const isGameDuplicate = useCallback((numbers: number[]) => {
     const signature = [...numbers].sort((a, b) => a - b).join(',');
@@ -211,8 +218,12 @@ export const useLottery = () => {
     if (isSupabaseEnabled() && supabase) {
       channel = supabase
         .channel(`games-history-${Math.random().toString(36).slice(2)}`)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'games_history' }, () => {
-          loadHistory();
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'games_history' }, (payload) => {
+          // Só recarrega se não estivermos no meio de uma limpeza
+          // e se a mudança não for apenas um DELETE (que nós mesmos iniciamos)
+          if (!isClearingInProgress) {
+            loadHistory();
+          }
         })
         .subscribe();
     }

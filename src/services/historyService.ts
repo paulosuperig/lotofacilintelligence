@@ -108,17 +108,21 @@ export const historyService = {
   },
 
   async clearHistory(userId: string | null) {
+    // 1. Limpar o storage local IMEDIATAMENTE para evitar que o syncOffline
+    // tente sincronizar de volta dados que estamos prestes a deletar no cloud.
+    secureStorage.removeItem('lottery_history');
+
     if (isSupabaseEnabled() && supabase && userId) {
+      // 2. Deletar no Supabase
       const { error } = await supabase
         .from('games_history')
         .delete()
-        .filter('user_id', 'eq', userId);
+        .eq('user_id', userId);
+        
       if (error) {
-        console.error("[historyService] Error clearing history from Supabase:", error);
+        console.error("[historyService] Erro ao limpar histórico no Supabase:", error);
         throw error;
       }
     }
-
-    secureStorage.removeItem('lottery_history');
   }
 };
