@@ -44,7 +44,7 @@ const GameLine = ({ raw }: { raw: string }) => {
           Soma: {sum}
         </div>
       </div>
-      <div className="grid grid-cols-5 xs:grid-cols-8 sm:grid-cols-15 gap-1.5">
+      <div className="flex flex-wrap gap-1.5">
         {game.map((n, idx) => (
           <div 
             key={idx} 
