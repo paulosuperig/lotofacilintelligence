@@ -167,7 +167,6 @@ const Index = () => {
 
               {activeTab === 'ia' && (
                 <AiAssistant 
-                  deepSeekKey={deepSeekKey}
                   aiChat={aiChat}
                   isAiLoading={isAiLoading}
                   aiMessage={aiMessage}
@@ -176,7 +175,6 @@ const Index = () => {
                   onSaveAiGame={saveAiGameToHistory}
                   onClearChat={clearChatHistory}
                   onBack={() => setActiveTab('home')}
-                  onGoToSettings={() => setActiveTab('ajustes')}
                   role={user.role}
                 />
               )}
@@ -188,8 +186,6 @@ const Index = () => {
                   onCreateOrUpdateUser={createOrUpdateUser}
                   onDeleteUser={deleteUser}
                   onToggleUserStatus={toggleUserStatus}
-                  deepSeekKey={deepSeekKey}
-                  onSaveDeepSeekKey={saveDeepSeekKey}
                 />
               )}
 
