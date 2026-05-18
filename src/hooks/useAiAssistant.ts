@@ -67,9 +67,15 @@ const formatIntentForPrompt = (intent: UserIntent): string => {
 
 export const useAiAssistant = (latestResult?: LotteryResult | null) => {
   const { toast } = useToast();
+  const [deepSeekKey, setDeepSeekKey] = useState('');
   const [aiChat, setAiChat] = useState<{ role: 'user' | 'assistant', content: string }[]>([]);
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [aiMessage, setAiMessage] = useState('');
+
+  useEffect(() => {
+    const savedKey = secureStorage.getItem<string>('deepseek_api_key');
+    if (savedKey) setDeepSeekKey(savedKey);
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
