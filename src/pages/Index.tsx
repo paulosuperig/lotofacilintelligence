@@ -83,7 +83,7 @@ const Index = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
-            className="w-full max-w-[min(1600px,95%)] mx-auto p-4 sm:p-6 lg:p-10 transition-all duration-300"
+            className="w-full max-w-[min(1600px,100%)] mx-auto p-3 sm:p-6 lg:p-10 transition-all duration-300"
           >
             <Header role={user.role} isRefreshing={isRefreshing} onRefresh={fetchLatestResult} />
 
