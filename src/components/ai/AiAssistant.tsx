@@ -1,83 +1,10 @@
 import React from 'react';
-import { 
-  Cpu, 
-  Loader2, 
-  Send, 
-  Save,
-  Sparkles,
-  Flame,
-  PieChart,
-  ShieldCheck
-} from 'lucide-react';
+import { Cpu, Loader2, Send } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ChatMessage } from './ChatMessage';
 import { cn } from "@/lib/utils";
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-
-const GameLine = ({ raw }: { raw: string }) => {
-  const text = String(raw);
-  const sumMatch = text.match(/soma[:\s]*?(\d{2,3})/i);
-  const tokens = text.match(/\b\d{1,2}\b/g) || [];
-  const nums = tokens
-    .map((n) => parseInt(n, 10))
-    .filter((n) => n >= 1 && n <= 25);
-  
-  // Extract only numbers that are not part of the label "Jogo NN" or "soma SSS"
-  // Actually the sanitizeLine already prepares it.
-  
-  const unique = Array.from(new Set(nums));
-  if (unique.length < 15) return <div className="text-zinc-500 italic my-1 font-mono">{text}</div>;
-  
-  // Sort numbers for display
-  const game = unique.slice(0, 15).sort((a, b) => a - b);
-  const sum = sumMatch ? parseInt(sumMatch[1], 10) : game.reduce((a, b) => a + b, 0);
-
-  return (
-    <div className="my-3 p-4 bg-white dark:bg-zinc-800 border border-purple-100 dark:border-purple-900/30 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-      <div className="flex justify-between items-center mb-3">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
-          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Sugestão de Jogo</span>
-        </div>
-        <div className="px-2 py-0.5 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 rounded text-[10px] font-bold uppercase tracking-tighter">
-          Soma: {sum}
-        </div>
-      </div>
-      <div className="flex flex-wrap gap-1.5">
-        {game.map((n, idx) => (
-          <div 
-            key={idx} 
-            className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-zinc-50 dark:bg-zinc-700/50 border border-zinc-100 dark:border-zinc-700 text-xs sm:text-sm font-bold text-zinc-700 dark:text-zinc-200"
-          >
-            {String(n).padStart(2, '0')}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-const isGameLine = (text: string) => {
-  const tokens = text.match(/\b\d{1,2}\b/g) || [];
-  const valid = tokens.map((n) => parseInt(n, 10)).filter((n) => n >= 1 && n <= 25);
-  return new Set(valid).size >= 15;
-};
-
-const markdownComponents = {
-  code: ({ inline, className, children, ...props }: any) => {
-    const raw = String(children ?? '');
-    if (isGameLine(raw)) return <GameLine raw={raw} />;
-    return <code className={className} {...props}>{children}</code>;
-  },
-  pre: ({ children, ...props }: any) => {
-    const child: any = Array.isArray(children) ? children[0] : children;
-    const inner = child?.props?.children;
-    const raw = Array.isArray(inner) ? inner.join('') : String(inner ?? '');
-    if (isGameLine(raw)) return <GameLine raw={raw} />;
-    return <pre {...props}>{children}</pre>;
-  },
-};
+import { Sparkles, Flame, PieChart, ShieldCheck } from 'lucide-react';
 
 interface AiAssistantProps {
   deepSeekKey: string;
@@ -113,6 +40,13 @@ export const AiAssistant = ({
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [aiChat, isAiLoading]);
+
+  const SUGGESTIONS = [
+    { label: "Sugestões de Jogos", text: "Gere 3 sugestões de jogos baseadas em tendências atuais.", icon: <Sparkles size={18} />, color: "orange" },
+    { label: "Dezenas Quentes", text: "Quais são as dezenas mais quentes?", icon: <Flame size={18} />, color: "orange" },
+    { label: "Padrões de Somas", text: "Quais padrões de somas mais saem?", icon: <PieChart size={18} />, color: "blue" },
+    { label: "Dicas de Fechamento", text: "Explique os melhores fechamentos.", icon: <ShieldCheck size={18} />, color: "emerald" }
+  ];
 
   return (
     <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl md:rounded-[2rem] p-3 md:p-8 shadow-xl shadow-purple-500/5 min-h-[500px] flex flex-col">
@@ -151,12 +85,7 @@ export const AiAssistant = ({
               <p className="text-sm text-zinc-500 max-w-xs mb-8">Olá! Eu sou seu assistente inteligente. Como posso ajudar hoje?</p>
               
               <div className="w-full max-w-2xl grid grid-cols-1 xs:grid-cols-2 gap-3 mb-8 px-2">
-                {[
-                  { label: "Sugestões de Jogos", text: "Gere 3 sugestões de jogos baseadas em tendências atuais.", icon: <Sparkles size={18} />, color: "orange" },
-                  { label: "Dezenas Quentes", text: "Quais são as dezenas mais quentes?", icon: <Flame size={18} />, color: "orange" },
-                  { label: "Padrões de Somas", text: "Quais padrões de somas mais saem?", icon: <PieChart size={18} />, color: "blue" },
-                  { label: "Dicas de Fechamento", text: "Explique os melhores fechamentos.", icon: <ShieldCheck size={18} />, color: "emerald" }
-                ].map((item, idx) => (
+                {SUGGESTIONS.map((item, idx) => (
                   <button 
                     key={idx}
                     onClick={() => onSendMessage(undefined, item.text)}
@@ -173,38 +102,7 @@ export const AiAssistant = ({
             </div>
           ) : (
             aiChat.map((msg, i) => (
-              <div key={i} className={cn("flex flex-col max-w-[95%] md:max-w-[90%]", msg.role === 'user' ? "ml-auto items-end" : "mr-auto items-start")}>
-                <div className={cn(
-                  "p-3 sm:p-4 rounded-2xl text-sm leading-relaxed shadow-sm",
-                  msg.role === 'user' 
-                    ? "bg-zinc-800 text-white rounded-tr-none" 
-                    : "bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 border border-zinc-100 dark:border-zinc-700 rounded-tl-none"
-                )}>
-                  {msg.role === 'assistant' ? (
-                    <>
-                      <div className="prose prose-sm max-w-none dark:prose-invert">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>{msg.content}</ReactMarkdown>
-                      </div>
-                      <div className="flex justify-between items-center mt-3 pt-3 border-t border-zinc-50 dark:border-zinc-700">
-                        <span className="text-[10px] text-zinc-400 font-medium">Intelligence AI Otimizada</span>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="h-8 px-3 text-[10px] text-zinc-600 hover:bg-zinc-50 rounded-lg gap-2"
-                          onClick={() => onSaveAiGame(msg.content)}
-                        >
-                          <Save size={12} /> Salvar
-                        </Button>
-                      </div>
-                    </>
-                  ) : (
-                    msg.content
-                  )}
-                </div>
-                <span className="text-[9px] text-zinc-400 mt-1 uppercase font-bold tracking-widest px-1">
-                  {msg.role === 'user' ? 'Você' : 'Intelligence AI'}
-                </span>
-              </div>
+              <ChatMessage key={i} msg={msg} onSaveAiGame={onSaveAiGame} />
             ))
           )}
           {isAiLoading && (
