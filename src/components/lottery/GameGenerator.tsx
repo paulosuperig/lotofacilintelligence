@@ -67,21 +67,7 @@ export const GameGenerator = () => {
   };
 
   const shareOnWhatsApp = useCallback((game: number[]) => {
-    const domain = window.location.origin;
-    const gameText = game.map(n => n.toString().padStart(2, '0')).join(' ');
-    
-    const template = [
-      '🔥 *GERADOR INTELIGENTE PRO* 🔥',
-      '',
-      'Confira meu novo jogo otimizado:',
-      `✅ *${gameText}*`,
-      '',
-      '🍀 Boa sorte!',
-      `Gerado em: ${domain}`
-    ].join('\n');
-
-    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(template)}`;
-    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+    openWhatsApp(buildSingleGameMessage(game));
   }, []);
 
   return (
