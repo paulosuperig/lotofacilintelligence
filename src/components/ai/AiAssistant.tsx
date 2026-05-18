@@ -22,20 +22,37 @@ const GameLine = ({ raw }: { raw: string }) => {
   const nums = tokens
     .map((n) => parseInt(n, 10))
     .filter((n) => n >= 1 && n <= 25);
-  const unique = Array.from(new Set(nums));
-  if (unique.length < 15) return <div className="text-zinc-500 italic my-1">{text}</div>;
   
+  // Extract only numbers that are not part of the label "Jogo NN" or "soma SSS"
+  // Actually the sanitizeLine already prepares it.
+  
+  const unique = Array.from(new Set(nums));
+  if (unique.length < 15) return <div className="text-zinc-500 italic my-1 font-mono">{text}</div>;
+  
+  // Sort numbers for display
   const game = unique.slice(0, 15).sort((a, b) => a - b);
   const sum = sumMatch ? parseInt(sumMatch[1], 10) : game.reduce((a, b) => a + b, 0);
 
   return (
-    <div className="my-2 p-3 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-lg font-mono text-sm">
-      <div className="flex justify-between mb-1 text-[10px] text-zinc-500 uppercase font-bold">
-        <span>Sugestão de Jogo</span>
-        <span>Soma: {sum}</span>
+    <div className="my-3 p-4 bg-white dark:bg-zinc-800 border border-purple-100 dark:border-purple-900/30 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+      <div className="flex justify-between items-center mb-3">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
+          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Sugestão de Jogo</span>
+        </div>
+        <div className="px-2 py-0.5 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 rounded text-[10px] font-bold uppercase tracking-tighter">
+          Soma: {sum}
+        </div>
       </div>
-      <div className="tracking-widest font-bold text-purple-600 dark:text-purple-400">
-        {game.map(n => String(n).padStart(2, '0')).join(' ')}
+      <div className="grid grid-cols-5 xs:grid-cols-8 sm:grid-cols-15 gap-1.5">
+        {game.map((n, idx) => (
+          <div 
+            key={idx} 
+            className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-zinc-50 dark:bg-zinc-700/50 border border-zinc-100 dark:border-zinc-700 text-xs sm:text-sm font-bold text-zinc-700 dark:text-zinc-200"
+          >
+            {String(n).padStart(2, '0')}
+          </div>
+        ))}
       </div>
     </div>
   );
