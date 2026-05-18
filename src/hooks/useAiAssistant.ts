@@ -119,9 +119,9 @@ export const useAiAssistant = (latestResult?: LotteryResult | null) => {
 REGRAS:
 - NUNCA cite modelos externos.
 - Tom profissional e objetivo.
-- Formato de texto simples e limpo.
-- Estrutura: "ANALISE", "ESTRATEGIA", "JOGOS SUGERIDOS" e "RESUMO".
-- Cada jogo em uma linha: Jogo NN: DD DD DD DD DD DD DD DD DD DD DD DD DD DD DD (Soma: SSS)
+- Formato de texto limpo usando Markdown (use negrito para títulos).
+- Estrutura: ### ANALISE, ### ESTRATEGIA, ### JOGOS SUGERIDOS e ### RESUMO.
+- Cada jogo deve seguir este formato: Jogo NN: DD DD DD DD DD DD DD DD DD DD DD DD DD DD DD (Soma: SSS)
 
 ${intentBlock}
 ${statsBlock}`;

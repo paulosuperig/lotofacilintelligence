@@ -74,7 +74,8 @@ export const sanitizeAiGamesDetailed = (
       outOfRangeSums += 1;
       suffix = `  // ⚠️ soma ${sum} acima do máximo ${intent.somaMax}`;
     }
-    return text + suffix;
+    // Wrap game in a code block to trigger special rendering in the UI
+    return "```\n" + text + suffix + "\n```";
   });
 
   let body = out.join('\n');
