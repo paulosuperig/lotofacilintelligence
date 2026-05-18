@@ -1,17 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from './use-toast';
-import { sanitizeString, generateSecureId } from '@/lib/security/utils';
+import { sanitizeString } from '@/lib/security/utils';
 import type { LotteryResult } from '@/types/lottery';
 import { supabase, isSupabaseEnabled } from '@/lib/supabase';
 import { computeLotteryStats, formatStatsForPrompt } from '@/lib/ai/lotteryStats';
-import { secureStorage } from '@/lib/security/secureStorage';
 import {
   sanitizeAiGamesDetailed,
   type UserIntent,
 } from '@/lib/ai/sanitizeGames';
 
 const MAX_HISTORY_MESSAGES = 15;
-const REQUEST_TIMEOUT_MS = 60_000;
 const MAX_RETRIES = 2;
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -21,7 +19,6 @@ const parseUserIntent = (message: string): UserIntent => {
   const m = message.toLowerCase();
   const intent: UserIntent = {};
 
-  // Map Portuguese words to numbers
   const ptNumbers: Record<string, number> = {
     'um': 1, 'uma': 1, 'dois': 2, 'duas': 2, 'três': 3, 'tres': 3, 'quatro': 4,
     'cinco': 5, 'seis': 6, 'sete': 7, 'oito': 8, 'nove': 9, 'dez': 10,
@@ -37,7 +34,6 @@ const parseUserIntent = (message: string): UserIntent => {
     if (n >= 1 && n <= 30) intent.quantidade = n;
   }
 
-  // soma acima/maior/>= N | soma abaixo/menor/<= N | soma entre A e B
   const between = m.match(/soma\s*entre\s*(\d{2,3})\s*(?:e|a|-)\s*(\d{2,3})/);
   if (between) {
     intent.somaMin = parseInt(between[1], 10);
@@ -61,82 +57,51 @@ const parseUserIntent = (message: string): UserIntent => {
 };
 
 const formatIntentForPrompt = (intent: UserIntent): string => {
-  const lines: string[] = ['PEDIDO_DO_USUARIO (cumpra estritamente):'];
-  lines.push(`- Quantidade MANDATÓRIA de jogos: ${intent.quantidade ?? 3}`);
-  if (intent.somaMin != null) lines.push(`- SOMA DEVE SER MAIOR OU IGUAL A: ${intent.somaMin}`);
-  if (intent.somaMax != null) lines.push(`- SOMA DEVE SER MENOR OU IGUAL A: ${intent.somaMax}`);
-  if (intent.somaMin == null && intent.somaMax == null) {
-    lines.push('- Sem filtro de soma específico (equilibrar entre 180 e 220).');
-  }
-  lines.push(
-    '- É PROIBIDO entregar menos jogos do que o solicitado.'
-  );
+  const lines: string[] = ['PEDIDO_DO_USUARIO:'];
+  lines.push(`- Quantidade: ${intent.quantidade ?? 3}`);
+  if (intent.somaMin != null) lines.push(`- Soma mínima: ${intent.somaMin}`);
+  if (intent.somaMax != null) lines.push(`- Soma máxima: ${intent.somaMax}`);
   return lines.join('\n');
 };
 
 export const useAiAssistant = (latestResult?: LotteryResult | null) => {
   const { toast } = useToast();
-  const [deepSeekKey, setDeepSeekKey] = useState('');
   const [aiChat, setAiChat] = useState<{ role: 'user' | 'assistant', content: string }[]>([]);
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [aiMessage, setAiMessage] = useState('');
 
   useEffect(() => {
     let isMounted = true;
-    const savedKey = secureStorage.getItem<string>('deepseek_api_key');
-    if (savedKey) setDeepSeekKey(savedKey);
-
     const loadChatHistory = async () => {
       if (!isSupabaseEnabled() || !supabase) return;
-      
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        const user = session?.user;
-        if (!user) return;
-
+        if (!session?.user) return;
         const { data, error } = await supabase
           .from('ai_chat_history')
           .select('role, content')
-          .eq('user_id', user.id)
+          .eq('user_id', session.user.id)
           .order('created_at', { ascending: true })
           .limit(30);
-
-        if (isMounted && !error && data) {
-          setAiChat(data as any);
-        }
+        if (isMounted && !error && data) setAiChat(data as any);
       } catch (err) {
         console.error("[AI] History load error:", err);
       }
     };
-
     loadChatHistory();
     return () => { isMounted = false; };
   }, []);
 
-  const saveDeepSeekKey = (key: string) => {
-    const sanitizedKey = sanitizeString(key.trim());
-    secureStorage.setItem('deepseek_api_key', sanitizedKey);
-    setDeepSeekKey(sanitizedKey);
-    toast({
-      title: "Configuração Salva",
-      description: "A chave da API DeepSeek foi armazenada com sucesso.",
-    });
-  };
-
   const persistChatMessage = async (role: 'user' | 'assistant', content: string) => {
     if (!isSupabaseEnabled() || !supabase) return;
-    
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const user = session?.user;
-      if (!user) return;
-
-      const { error } = await supabase.from('ai_chat_history').insert({
-        user_id: user.id,
+      if (!session?.user) return;
+      await supabase.from('ai_chat_history').insert({
+        user_id: session.user.id,
         role,
         content
       });
-      if (error) throw error;
     } catch (error) {
       console.error("[AI] Error persisting chat message:", error);
     }
@@ -145,93 +110,32 @@ export const useAiAssistant = (latestResult?: LotteryResult | null) => {
   const buildSystemPrompt = useCallback((intent: UserIntent) => {
     const statsBlock = formatStatsForPrompt(computeLotteryStats(latestResult ?? null));
     const intentBlock = formatIntentForPrompt(intent);
-    return `Você é o "Lotofácil Intelligence AI", inteligência artificial exclusiva do ecossistema Intelligence, especializada em estatística, probabilidade e análise da Lotofácil.
+    return `Você é o "Lotofácil Intelligence AI", inteligência artificial especializada em estatística da Lotofácil.
 
-REGRAS DE IDENTIDADE:
-- NUNCA cite empresas terceiras, modelos externos (DeepSeek, OpenAI, GPT, Claude, etc.) ou tecnologias de base.
-- Se perguntado quem você é, responda: "Sou a Inteligência Artificial exclusiva do ecossistema Intelligence".
-- Tom profissional, técnico, objetivo e encorajador. Nunca prometa ganho.
-
-REGRAS DE FORMATO DE RESPOSTA (Markdown):
-1. Estruture obrigatoriamente em: "### Análise" (curto), "### Estratégia" (curto), "### Jogos sugeridos", "### Métricas".
-2. Cada jogo sugerido DEVE estar em uma linha isolada dentro de um bloco de código \`\`\` no formato EXATO:
-   \`NN) DD, DD, DD, DD, DD, DD, DD, DD, DD, DD, DD, DD, DD, DD, DD  (soma SSS)\`
-   onde NN é o número sequencial (01, 02, 03...) e DD são 15 dezenas únicas (01-25), ordenadas.
-3. Gere EXATAMENTE a quantidade total pedida no PEDIDO_DO_USUARIO. Se pediu 10, entregue 10. Se pediu 20, entregue 20.
-4. Se o espaço for curto, sacrifique o texto da Análise/Estratégia para garantir a entrega de TODOS os jogos.
-5. Em "Métricas" use uma tabela compacta: jogo | soma | pares | primos | moldura | repetidas.
-6. Auto-valide cada jogo: 15 dezenas únicas e respeitando estritamente os filtros de soma solicitados.
-
-REGRAS DE PRECISÃO:
-- Baseie sugestões nos dados oficiais abaixo. Não invente concursos nem frequências.
-- Se um filtro não for atingível, diga claramente — mas ainda assim entregue a quantidade pedida com as melhores aproximações.
+REGRAS:
+- NUNCA cite modelos externos.
+- Tom profissional e objetivo.
+- Formato de texto simples e limpo.
+- Estrutura: "ANALISE", "ESTRATEGIA", "JOGOS SUGERIDOS" e "RESUMO".
+- Cada jogo em uma linha: Jogo NN: DD DD DD DD DD DD DD DD DD DD DD DD DD DD DD (Soma: SSS)
 
 ${intentBlock}
-
 ${statsBlock}`;
   }, [latestResult]);
 
-  const callDeepSeek = useCallback(async (
-    messages: Array<{ role: string; content: string }>,
-    apiKey: string,
-    maxTokens: number,
-    attempt = 0,
-  ): Promise<string> => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  const callAiGateway = useCallback(async (messages: any[], maxTokens: number, attempt = 0): Promise<string> => {
     try {
-      const response = await fetch('https://api.deepseek.com/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: 'deepseek-chat',
-          messages,
-          stream: false,
-          temperature: 0.2,
-          top_p: 0.8,
-          max_tokens: maxTokens,
-          presence_penalty: 0.1,
-          frequency_penalty: 0.1,
-        }),
-        signal: controller.signal,
+      const { data, error } = await supabase.functions.invoke('intelligence-ai', {
+        body: { messages, max_tokens: maxTokens },
       });
-
-      if (!response.ok) {
-        const status = response.status;
-        if ((status === 429 || status >= 500) && attempt < MAX_RETRIES) {
-          await sleep(800 * Math.pow(2, attempt));
-          return callDeepSeek(messages, apiKey, maxTokens, attempt + 1);
-        }
-        const errText = await response.text().catch(() => '');
-        const err: any = new Error(`HTTP ${status}: ${errText.slice(0, 200)}`);
-        err.status = status;
-        throw err;
-      }
-
-      const data = await response.json();
-      const content = data?.choices?.[0]?.message?.content;
-      if (!content || typeof content !== 'string') {
-        throw new Error('Resposta vazia da IA');
-      }
-      return content;
+      if (error) throw error;
+      return data?.choices?.[0]?.message?.content || '';
     } catch (err: any) {
-      if (err?.name === 'AbortError') {
-        if (attempt < MAX_RETRIES) {
-          await sleep(500);
-          return callDeepSeek(messages, apiKey, maxTokens, attempt + 1);
-        }
-        throw new Error('Tempo limite excedido. Tente novamente.');
-      }
-      if (!err?.status && attempt < MAX_RETRIES) {
-        await sleep(800 * Math.pow(2, attempt));
-        return callDeepSeek(messages, apiKey, maxTokens, attempt + 1);
+      if (attempt < MAX_RETRIES) {
+        await sleep(1000 * Math.pow(2, attempt));
+        return callAiGateway(messages, maxTokens, attempt + 1);
       }
       throw err;
-    } finally {
-      clearTimeout(timeoutId);
     }
   }, []);
 
@@ -239,110 +143,41 @@ ${statsBlock}`;
     const sanitizedMessage = sanitizeString(messageToSend.trim());
     if (!sanitizedMessage) return;
 
-    if (!deepSeekKey) {
-      toast({
-        title: "API Key Ausente",
-        description: "Configure a chave da API nas configurações para usar a IA.",
-        variant: "destructive"
-      });
-      return;
-    }
-
     const intent = parseUserIntent(sanitizedMessage);
     const targetQty = intent.quantidade ?? 3;
-    const maxTokens = Math.min(4096, 500 + targetQty * 140);
-
     const newMessage = { role: 'user' as const, content: sanitizedMessage };
+    
     setAiChat(prev => [...prev, newMessage]);
     persistChatMessage('user', sanitizedMessage);
     setAiMessage('');
     setIsAiLoading(true);
 
     try {
-      const trimmedHistory = aiChat.slice(-MAX_HISTORY_MESSAGES);
       const systemPrompt = buildSystemPrompt(intent);
-      const payload = [
-        { role: 'system', content: systemPrompt },
-        ...trimmedHistory,
-        newMessage,
-      ];
-
-      let raw = await callDeepSeek(payload, deepSeekKey, maxTokens);
-      let result = sanitizeAiGamesDetailed(raw, intent);
-
-      // Loop for continuation if the AI shipped fewer games than asked (up to 3 attempts total).
-      let currentContent = raw;
-      let attempts = 0;
+      const payload = [{ role: 'system', content: systemPrompt }, ...aiChat.slice(-MAX_HISTORY_MESSAGES), newMessage];
+      const raw = await callAiGateway(payload, 2048);
+      const result = sanitizeAiGamesDetailed(raw, intent);
       
-      while (result.incomplete && result.gamesFound < targetQty && attempts < 2) {
-        attempts++;
-        const missing = targetQty - result.gamesFound;
-        const continuation = await callDeepSeek(
-          [
-            { role: 'system', content: systemPrompt },
-            ...trimmedHistory,
-            newMessage,
-            { role: 'assistant', content: currentContent },
-            {
-              role: 'user',
-              content: `Você entregou apenas ${result.gamesFound} jogos, mas eu pedi ${targetQty}. Continue IMEDIATAMENTE a partir do jogo ${String(
-                result.gamesFound + 1
-              ).padStart(2, '0')}, mantendo TODOS os filtros (especialmente soma ${intent.somaMin ? '>= ' + intent.somaMin : ''} ${intent.somaMax ? '<= ' + intent.somaMax : ''}). Responda APENAS com os blocos de código \`\`\` dos jogos restantes.`,
-            },
-          ],
-          deepSeekKey,
-          Math.min(4096, 300 + missing * 150),
-        );
-        currentContent = `${currentContent}\n\n${continuation}`;
-        result = sanitizeAiGamesDetailed(currentContent, intent);
-      }
-
       setAiChat(prev => [...prev, { role: 'assistant', content: result.content }]);
       persistChatMessage('assistant', result.content);
     } catch (error: any) {
-      console.error('Erro na IA:', error);
-      const status = error?.status;
-      let title = 'Erro na Inteligência Artificial';
-      let description = 'Não foi possível processar sua solicitação. Tente novamente.';
-      if (status === 401 || status === 403) {
-        title = 'Chave de API inválida';
-        description = 'Verifique sua chave nas configurações.';
-      } else if (status === 402) {
-        title = 'Créditos esgotados';
-        description = 'Sua chave não possui créditos suficientes.';
-      } else if (status === 429) {
-        title = 'Muitas requisições';
-        description = 'Aguarde alguns segundos e tente novamente.';
-      } else if (status >= 500) {
-        title = 'Servidor da IA indisponível';
-        description = 'O servidor está instável. Tente novamente em instantes.';
-      } else if (typeof error?.message === 'string' && error.message.includes('Tempo limite')) {
-        title = 'Tempo esgotado';
-        description = error.message;
-      }
-      toast({ title, description, variant: 'destructive' });
+      toast({ title: 'Erro na IA', description: 'Tente novamente em instantes.', variant: 'destructive' });
     } finally {
       setIsAiLoading(false);
     }
-  }, [aiChat, buildSystemPrompt, callDeepSeek, deepSeekKey, toast]);
+  }, [aiChat, buildSystemPrompt, callAiGateway, toast]);
 
   return {
-    deepSeekKey,
     aiChat,
     isAiLoading,
     aiMessage,
     setAiMessage,
-    saveDeepSeekKey,
     sendMessage,
     setAiChat,
     clearChatHistory: async () => {
-      if (isSupabaseEnabled() && supabase) {
-        const { data: { session } } = await supabase.auth.getSession();
-        const user = session?.user;
-        if (user) {
-          const { error } = await supabase.from('ai_chat_history').delete().eq('user_id', user.id);
-          if (error) console.error("[AI] Error clearing chat history:", error);
-        }
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        await supabase.from('ai_chat_history').delete().eq('user_id', session.user.id);
       }
       setAiChat([]);
     }
