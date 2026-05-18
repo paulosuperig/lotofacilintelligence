@@ -33,10 +33,11 @@ serve(async (req) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${Deno.env.get('LOVABLE_API_KEY')}`,
+        'Lovable-API-Key': `${Deno.env.get('LOVABLE_API_KEY')}`,
+        'X-Lovable-AIG-SDK': 'vercel-ai-sdk'
       },
       body: JSON.stringify({
-        model: 'google/gemini-3-flash-preview',
+        model: 'deepseek/deepseek-chat',
         messages,
         max_tokens: max_tokens || 2048,
         temperature: 0.2,
