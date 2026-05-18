@@ -19,7 +19,7 @@ export const userService = {
     })) as UserProfile[];
   },
 
-  async updateProfile(userId: string, data: { role: string; status: string }) {
+  async updateProfile(userId: string, data: { role: 'admin' | 'demo'; status: 'active' | 'blocked' }) {
     if (!isSupabaseEnabled() || !supabase) return;
 
     const { error: profileError } = await supabase
@@ -50,7 +50,7 @@ export const userService = {
     if (error) throw error;
   },
 
-  async updateStatus(userId: string, status: string) {
+  async updateStatus(userId: string, status: 'active' | 'blocked') {
     if (!isSupabaseEnabled() || !supabase) return;
 
     const { error } = await supabase

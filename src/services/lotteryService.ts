@@ -1,5 +1,5 @@
-import { LotteryResultSchema } from "../../lib/security/schemas";
-import { LotteryResult } from "../../types/lottery";
+import { LotteryResultSchema } from "@/lib/security/schemas";
+import { LotteryResult } from "@/types/lottery";
 
 const API_BASE = "https://loteriascaixa-api.herokuapp.com/api";
 const FALLBACK_API_BASE = "https://api.guidi.com.br/loteria/lotofacil/ultimo";
