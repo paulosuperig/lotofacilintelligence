@@ -47,7 +47,7 @@ export const TipsPanel = ({ onBack }: TipsPanelProps) => {
             </div>
           </div>
 
-          <div className="p-8 bg-white dark:bg-zinc-800 border border-purple-100 dark:border-zinc-700 rounded-[2.5rem] shadow-sm">
+          <div className="p-6 sm:p-8 bg-white dark:bg-zinc-800 border border-purple-100 dark:border-zinc-700 rounded-[2.5rem] shadow-sm">
             <div className="flex items-center gap-4 mb-6">
               <div className="w-12 h-12 rounded-2xl bg-emerald-500 flex items-center justify-center text-white shadow-lg">
                 <TrendingUp size={24} />
