@@ -4,6 +4,7 @@ import { sanitizeString, generateSecureId } from '@/lib/security/utils';
 import type { LotteryResult } from '@/types/lottery';
 import { supabase, isSupabaseEnabled } from '@/lib/supabase';
 import { computeLotteryStats, formatStatsForPrompt } from '@/lib/ai/lotteryStats';
+import { secureStorage } from '@/lib/security/secureStorage';
 import {
   sanitizeAiGamesDetailed,
   type UserIntent,
