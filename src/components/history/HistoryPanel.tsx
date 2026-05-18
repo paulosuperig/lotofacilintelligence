@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { SavedGame } from '@/types/lottery';
 import { HistoryItem } from './HistoryItem';
+import { buildHistoryMessage, buildSingleGameMessage, openWhatsApp } from '@/lib/whatsapp';
 
 interface HistoryPanelProps {
   history: SavedGame[];
