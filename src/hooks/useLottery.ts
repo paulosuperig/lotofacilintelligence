@@ -55,7 +55,7 @@ export const useLottery = () => {
     }
   }, []);
 
-  const clearHistory = async () => {
+  const clearHistory = useCallback(async () => {
     try {
       let userId = null;
       if (isSupabaseEnabled() && supabase) {
@@ -65,19 +65,24 @@ export const useLottery = () => {
       
       await historyService.clearHistory(userId);
       setHistory([]);
+      
+      // Imediatamente limpa o estado local para garantir feedback visual
+      secureStorage.removeItem('lottery_history');
+      
       window.dispatchEvent(new CustomEvent('lottery-history-updated'));
       toast({
         title: "Histórico limpo",
         description: "Todos os seus jogos salvos foram removidos com sucesso.",
       });
     } catch (error) {
+      console.error("[useLottery] Error clearing history:", error);
       toast({
         title: "Erro",
         description: "Não foi possível limpar o histórico.",
         variant: "destructive"
       });
     }
-  };
+  }, [toast]);
 
   const isGameDuplicate = useCallback((numbers: number[]) => {
     const signature = [...numbers].sort((a, b) => a - b).join(',');
