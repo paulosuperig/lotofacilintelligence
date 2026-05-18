@@ -37,6 +37,8 @@ export const useLottery = () => {
   }, [toast]);
 
   const loadHistory = useCallback(async () => {
+    if (isClearingRef.current) return;
+
     try {
       if (isSupabaseEnabled() && supabase) {
         const { data: { session } } = await supabase.auth.getSession();
