@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useToast } from './use-toast';
 import { LotteryResult, SavedGame } from '@/types/lottery';
 import { generateSecureId } from '@/lib/security/utils';
@@ -13,7 +13,7 @@ export const useLottery = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [history, setHistory] = useState<SavedGame[]>([]);
-  const [isClearingInProgress, setIsClearingInProgress] = useState(false);
+  const isClearingRef = useRef(false);
 
   const fetchLatestResult = useCallback(async () => {
     setIsRefreshing(true);
@@ -57,9 +57,9 @@ export const useLottery = () => {
   }, []);
 
   const clearHistory = useCallback(async () => {
-    if (isClearingInProgress) return;
+    if (isClearingRef.current) return;
     
-    setIsClearingInProgress(true);
+    isClearingRef.current = true;
     setHistory([]); // Feedback visual instantâneo
     
     try {
@@ -80,16 +80,15 @@ export const useLottery = () => {
       window.dispatchEvent(new CustomEvent('lottery-history-updated'));
     } catch (error) {
       console.error("[useLottery] Error clearing history:", error);
-      // Em caso de erro, poderíamos tentar recarregar, mas o storage local já foi limpo
       toast({
         title: "Aviso",
         description: "O histórico local foi limpo, mas pode ter ocorrido um erro na sincronização cloud.",
         variant: "default"
       });
     } finally {
-      setIsClearingInProgress(false);
+      isClearingRef.current = false;
     }
-  }, [toast, isClearingInProgress]);
+  }, [toast]);
 
   const isGameDuplicate = useCallback((numbers: number[]) => {
     const signature = [...numbers].sort((a, b) => a - b).join(',');
@@ -220,8 +219,7 @@ export const useLottery = () => {
         .channel(`games-history-${Math.random().toString(36).slice(2)}`)
         .on('postgres_changes', { event: '*', schema: 'public', table: 'games_history' }, (payload) => {
           // Só recarrega se não estivermos no meio de uma limpeza
-          // e se a mudança não for apenas um DELETE (que nós mesmos iniciamos)
-          if (!isClearingInProgress) {
+          if (!isClearingRef.current) {
             loadHistory();
           }
         })
