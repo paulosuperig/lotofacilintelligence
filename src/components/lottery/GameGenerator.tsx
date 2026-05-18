@@ -97,7 +97,7 @@ export const GameGenerator = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      <div className="p-4 sm:p-6 md:p-12 border-b border-purple-50 dark:border-zinc-800/50">
+      <div className="p-5 sm:p-8 md:p-12 border-b border-purple-50 dark:border-zinc-800/50">
         <div className="flex flex-col gap-6 mb-8">
           <div>
             <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 mb-2">
@@ -119,7 +119,7 @@ export const GameGenerator = () => {
           </Button>
         </div>
 
-        <div className="min-h-[140px] md:min-h-[200px] flex flex-wrap justify-center content-center gap-1.5 sm:gap-2 md:gap-4 bg-zinc-50 dark:bg-zinc-950/50 rounded-2xl md:rounded-[2rem] p-3 sm:p-4 md:p-12 border border-zinc-100 dark:border-zinc-800/50 shadow-inner relative overflow-hidden">
+        <div className="min-h-[140px] md:min-h-[200px] flex flex-wrap justify-center content-center gap-2 sm:gap-4 md:gap-6 bg-zinc-50 dark:bg-zinc-950/50 rounded-2xl md:rounded-[2rem] p-4 sm:p-8 md:p-12 border border-zinc-100 dark:border-zinc-800/50 shadow-inner relative overflow-hidden">
           <AnimatePresence mode="wait">
             {currentResult ? (
               <motion.div 
@@ -163,12 +163,12 @@ export const GameGenerator = () => {
         </div>
       </div>
 
-      <div className="p-4 sm:p-6 md:p-12 flex-grow flex flex-col">
+      <div className="p-5 sm:p-8 md:p-12 flex-grow flex flex-col">
         {stats && (
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4 mb-10"
+            className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-5 gap-3 sm:gap-4 mb-10"
           >
             <StatCard label="Pares/Ímpares" value={`${stats.pairs}/${stats.odd}`} icon={<TrendingUp size={14}/>} />
             <StatCard label="Soma Total" value={stats.sum} icon={<TrendingUp size={14}/>} />

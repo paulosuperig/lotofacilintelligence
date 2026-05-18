@@ -49,8 +49,8 @@ export const AiAssistant = ({
   ];
 
   return (
-    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl md:rounded-[2rem] p-3 md:p-8 shadow-xl shadow-purple-500/5 min-h-[500px] flex flex-col">
-      <div className="flex flex-col md:flex-row items-center justify-between mb-6 gap-4">
+    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl md:rounded-[2rem] p-4 sm:p-6 md:p-10 shadow-xl shadow-purple-500/5 min-h-[500px] flex flex-col">
+      <div className="flex flex-col lg:flex-row items-center lg:items-center justify-between mb-8 md:mb-10 gap-6">
         <div className="flex flex-col items-center md:items-start">
           <div className="flex items-center gap-3 mb-1">
             <div className="w-10 h-10 rounded-xl bg-purple-600 dark:bg-purple-700 flex items-center justify-center text-white shadow-lg shadow-purple-600/20">

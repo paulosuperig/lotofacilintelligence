@@ -28,7 +28,7 @@ export const TrendsCard = () => (
           </span>
           <span className="text-[9px] font-bold text-zinc-400">↑ Frequência alta</span>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {["20", "10", "25", "01", "13"].map(num => (
             <Ball key={`hot-${num}`} number={num} active size="sm" />
           ))}
@@ -42,7 +42,7 @@ export const TrendsCard = () => (
           </span>
           <span className="text-[9px] font-bold text-zinc-400">↓ Atrasadas</span>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {["04", "07", "12", "18", "22"].map(num => (
             <span key={`cold-${num}`} className="w-8 h-8 flex items-center justify-center rounded-full bg-sky-50 dark:bg-sky-950/30 border border-sky-100 dark:border-sky-900/50 text-sky-700 dark:text-sky-400 text-[11px] font-bold">
               {num}

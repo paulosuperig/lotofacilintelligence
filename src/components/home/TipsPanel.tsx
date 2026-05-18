@@ -16,8 +16,8 @@ export const TipsPanel = ({ onBack }: TipsPanelProps) => {
       exit={{ opacity: 0, x: -20 }}
       className="grid grid-cols-1 gap-6"
     >
-      <div className="bg-white dark:bg-zinc-900 border border-purple-200 dark:border-zinc-800 rounded-[2rem] p-8 md:p-12 shadow-xl shadow-purple-500/5">
-        <div className="flex flex-col md:flex-row items-center md:items-center justify-between mb-10 gap-4 text-center md:text-left">
+      <div className="bg-white dark:bg-zinc-900 border border-purple-200 dark:border-zinc-800 rounded-[2rem] p-5 sm:p-8 md:p-12 shadow-xl shadow-purple-500/5">
+        <div className="flex flex-col lg:flex-row items-center lg:items-center justify-between mb-10 gap-6 text-center lg:text-left">
           <div className="flex flex-col items-center md:items-start">
             <h2 className="text-3xl font-display font-bold text-zinc-900 dark:text-zinc-100 mb-2">Dicas do Especialista</h2>
             <p className="text-zinc-500 dark:text-zinc-400 text-sm">Análises estratégicas baseadas nos últimos 5 anos de resultados</p>
@@ -32,7 +32,7 @@ export const TipsPanel = ({ onBack }: TipsPanelProps) => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="p-8 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-zinc-800 dark:to-zinc-900 border border-purple-100 dark:border-zinc-700 rounded-[2.5rem]">
+          <div className="p-6 sm:p-8 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-zinc-800 dark:to-zinc-900 border border-purple-100 dark:border-zinc-700 rounded-[2.5rem]">
             <div className="flex items-center gap-4 mb-6">
               <div className="w-12 h-12 rounded-2xl bg-purple-600 flex items-center justify-center text-white shadow-lg">
                 <Target size={24} />
@@ -47,7 +47,7 @@ export const TipsPanel = ({ onBack }: TipsPanelProps) => {
             </div>
           </div>
 
-          <div className="p-8 bg-white dark:bg-zinc-800 border border-purple-100 dark:border-zinc-700 rounded-[2.5rem] shadow-sm">
+          <div className="p-6 sm:p-8 bg-white dark:bg-zinc-800 border border-purple-100 dark:border-zinc-700 rounded-[2.5rem] shadow-sm">
             <div className="flex items-center gap-4 mb-6">
               <div className="w-12 h-12 rounded-2xl bg-emerald-500 flex items-center justify-center text-white shadow-lg">
                 <TrendingUp size={24} />
@@ -71,7 +71,7 @@ export const TipsPanel = ({ onBack }: TipsPanelProps) => {
           </div>
         </div>
 
-        <div className="mt-8 p-8 bg-zinc-900 rounded-[2.5rem] text-white overflow-hidden relative group">
+        <div className="mt-8 p-6 sm:p-10 bg-zinc-900 rounded-[2.5rem] text-white overflow-hidden relative group">
           <div className="absolute -right-10 -bottom-10 text-white/5 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-1000">
             <Target size={200} />
           </div>

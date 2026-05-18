@@ -12,7 +12,7 @@ export const DecorativeBackground = () => (
 );
 
 export const DemoBanner = () => (
-  <div className="fixed top-0 left-0 right-0 bg-amber-500/90 backdrop-blur-sm text-white text-[clamp(8px,1.5vw,10px)] font-bold uppercase tracking-[0.2em] py-1.5 text-center z-[100] shadow-sm">
+  <div className="fixed top-0 left-0 right-0 bg-amber-500/90 backdrop-blur-sm text-white text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.2em] py-1.5 text-center z-[100] shadow-sm">
     Modo de Demonstração — Acesso VIP Intelligence
   </div>
 );
