@@ -37,36 +37,13 @@ export const HistoryPanel = ({
   onClearHistory, 
   onGoToGenerator 
 }: HistoryPanelProps) => {
-  const generateAllGamesText = () => {
-    if (history.length === 0) return "";
-    
-    let text = `🔥 *HISTÓRICO DE JOGOS* 🔥\n\n`;
-    
-    history.forEach((item, idx) => {
-      const date = new Date(item.timestamp).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-      const gameNumbers = item.numbers.map((n: number) => n.toString().padStart(2, '0')).join(' ');
-      text += `${idx + 1}. [${date}] ✅ *${gameNumbers}*\n`;
-    });
-    
-    text += `\n🍀 Boa sorte!\nGerado em: ${window.location.origin}`;
-    return text;
-  };
-
-  const shareAllOnWhatsApp = () => {
-    const text = generateAllGamesText();
-    if (!text) return;
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
-  };
-
-  const shareSingleOnWhatsApp = (game: number[]) => {
-    const text = `🔥 *GERADOR INTELIGENTE* 🔥\n\nJogo: *${game.map((n: number) => n.toString().padStart(2, '0')).join(' ')}*\n\n🍀 Boa sorte!`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
-  };
+  const shareAllOnWhatsApp = () => openWhatsApp(buildHistoryMessage(history));
+  const shareSingleOnWhatsApp = (game: number[]) => openWhatsApp(buildSingleGameMessage(game));
 
   const copyAllToClipboard = () => {
-    const text = generateAllGamesText();
+    const text = buildHistoryMessage(history);
     if (!text) return;
-    
+
     navigator.clipboard.writeText(text).then(() => {
       toast.success("Todos os jogos foram copiados com sucesso!");
     }).catch(() => {
