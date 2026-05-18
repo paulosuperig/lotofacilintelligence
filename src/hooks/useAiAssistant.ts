@@ -82,7 +82,7 @@ export const useAiAssistant = (latestResult?: LotteryResult | null) => {
 
   useEffect(() => {
     let isMounted = true;
-    const savedKey = localStorage.getItem('deepseek_api_key');
+    const savedKey = secureStorage.getItem<string>('deepseek_api_key');
     if (savedKey) setDeepSeekKey(savedKey);
 
     const loadChatHistory = async () => {
@@ -114,7 +114,7 @@ export const useAiAssistant = (latestResult?: LotteryResult | null) => {
 
   const saveDeepSeekKey = (key: string) => {
     const sanitizedKey = sanitizeString(key.trim());
-    localStorage.setItem('deepseek_api_key', sanitizedKey);
+    secureStorage.setItem('deepseek_api_key', sanitizedKey);
     setDeepSeekKey(sanitizedKey);
     toast({
       title: "Configuração Salva",

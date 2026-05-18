@@ -20,16 +20,12 @@ export const useLottery = () => {
     try {
       const data = await getLatestResult();
       setLatestResult(data);
-      localStorage.setItem('latest_lottery_result', JSON.stringify(data));
+      secureStorage.setItem('latest_lottery_result', data);
     } catch (error) {
-      console.error("Error fetching latest result:", error);
-      const cached = localStorage.getItem('latest_lottery_result');
+      console.error("[Lottery] Error fetching latest result:", error);
+      const cached = secureStorage.getItem<LotteryResult>('latest_lottery_result');
       if (cached) {
-        try {
-          setLatestResult(JSON.parse(cached));
-        } catch (e) {
-          console.error("Error parsing cached result", e);
-        }
+        setLatestResult(cached);
       }
       toast({
         title: "Erro ao atualizar",
@@ -117,6 +113,8 @@ export const useLottery = () => {
             return;
           }
         }
+      } else {
+        console.warn("[Lottery] Supabase is disabled or not initialized.");
       }
 
       // Priority 2: LocalStorage (Fallback/Offline)

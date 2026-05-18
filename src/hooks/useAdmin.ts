@@ -12,6 +12,7 @@ export const useAdmin = () => {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
+        .order('role', { ascending: true }) // Admin first for clarity
         .order('created_at', { ascending: false });
       
       if (error) throw error;
@@ -24,7 +25,8 @@ export const useAdmin = () => {
         setUsers(formatted as UserProfile[]);
       }
     } catch (error: any) {
-      console.error("Error fetching users:", error);
+      console.error("[Admin] Error fetching users:", error);
+      toast({ title: "Erro de rede", description: "Não foi possível carregar a lista de usuários.", variant: "destructive" });
     }
   };
 
@@ -35,7 +37,7 @@ export const useAdmin = () => {
   const createOrUpdateUser = async (userData: any, editingUser: any = null) => {
     if (editingUser) {
       try {
-        const { error } = await supabase
+        const { error: profileError } = await supabase
           .from('profiles')
           .update({
             role: userData.role,
@@ -43,17 +45,20 @@ export const useAdmin = () => {
           })
           .eq('id', editingUser.id);
         
-        if (error) throw error;
+        if (profileError) throw profileError;
 
         // Sync with user_roles table
-        await supabase
+        const { error: roleError } = await supabase
           .from('user_roles')
           .upsert({ user_id: editingUser.id, role: userData.role }, { onConflict: 'user_id,role' });
+        
+        if (roleError) throw roleError;
 
-        toast({ title: "Usuário atualizado", description: "As alterações foram salvas no Supabase." });
-        fetchUsers();
+        toast({ title: "Usuário atualizado", description: "As alterações foram salvas com sucesso." });
+        await fetchUsers();
       } catch (error: any) {
-        toast({ title: "Erro", description: error.message, variant: "destructive" });
+        console.error("[Admin] Update error:", error);
+        toast({ title: "Erro na atualização", description: error.message, variant: "destructive" });
       }
     } else {
       toast({ 
