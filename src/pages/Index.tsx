@@ -1,17 +1,18 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useLottery } from '@/hooks/useLottery';
 import { useAiAssistant } from '@/hooks/useAiAssistant';
 import { useAdmin } from '@/hooks/useAdmin';
 import { useAuth } from '@/hooks/useAuth';
+import { useAiGameSaver } from '@/hooks/useAiGameSaver';
 import { AnimatePresence, motion } from 'framer-motion';
-import { generateSecureId } from '@/lib/security/utils';
 
 import { Sidebar, MobileNav } from '@/components/layout/Navigation';
 import { Header } from '@/components/layout/Header';
 import { AdminPanel } from '@/components/admin/AdminPanel';
 import { AiAssistant } from '@/components/ai/AiAssistant';
 import { HistoryPanel } from '@/components/history/HistoryPanel';
+import { DecorativeBackground, DemoBanner } from '@/components/layout/VisualDecorations';
 import Login from '@/components/Login';
 
 import { FechamentosPanel } from '@/components/home/FechamentosPanel';
@@ -51,6 +52,8 @@ const Index = () => {
     toggleUserStatus
   } = useAdmin();
 
+  const { saveAiGameToHistory } = useAiGameSaver(saveToHistory);
+
   const handleLogout = () => {
     signOut();
     toast({
@@ -58,56 +61,6 @@ const Index = () => {
       description: "Você saiu do sistema com sucesso.",
     });
   };
-
-  const saveAiGameToHistory = useCallback((content: string) => {
-    // Better regex to match both 1 and 2 digit numbers accurately
-    const allNumbers = content.match(/\b\d{1,2}\b/g);
-    
-    if (allNumbers && allNumbers.length >= 15) {
-      // Convert to numbers and filter to valid Lotofácil range (1-25)
-      const validNums = allNumbers
-        .map(n => parseInt(n, 10))
-        .filter(n => Number.isInteger(n) && n >= 1 && n <= 25);
-
-      const gamesToSave: number[][] = [];
-      const seenInBatch = new Set<string>();
-      for (let i = 0; i + 15 <= validNums.length; i += 15) {
-        const slice = validNums.slice(i, i + 15);
-        // Ensure 15 unique numbers in this game
-        const unique = Array.from(new Set(slice));
-        if (unique.length !== 15) continue;
-        const sorted = unique.sort((a, b) => a - b);
-        const sig = sorted.join(',');
-        if (seenInBatch.has(sig)) continue;
-        seenInBatch.add(sig);
-        gamesToSave.push(sorted);
-      }
-
-      if (gamesToSave.length > 0) {
-        const newGames = gamesToSave.map(nums => ({
-          id: generateSecureId(),
-          numbers: nums,
-          timestamp: Date.now(),
-          sum: nums.reduce((a, b) => a + b, 0),
-          type: 'IA Insight'
-        }));
-
-        saveToHistory(newGames);
-        
-        toast({
-          title: gamesToSave.length === 1 ? "Jogo salvo!" : `${gamesToSave.length} jogos salvos!`,
-          description: "As sugestões da IA foram adicionadas ao seu histórico.",
-        });
-        return;
-      }
-    }
-    
-    toast({
-      title: "Não foi possível salvar",
-      description: "Não identificamos uma sequência válida de 15 dezenas no texto.",
-      variant: "destructive"
-    });
-  }, [saveToHistory, toast]);
 
   if (loading) return null; // Prevent flicker during auth check
   
@@ -117,25 +70,13 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-[#f5f3ff] dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 selection:bg-purple-500/30 overflow-x-hidden font-sans pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] flex flex-col md:flex-row relative">
-      {/* Background Decorativo */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-[-5%] left-[-5%] w-[50%] h-[50%] bg-purple-400/20 dark:bg-purple-600/10 rounded-full blur-[100px] animate-pulse" />
-        <div className="absolute bottom-[-5%] right-[-5%] w-[50%] h-[50%] bg-indigo-400/20 dark:bg-indigo-600/10 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '2s' }} />
-        <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] bg-purple-300/10 dark:bg-zinc-800/20 rounded-full blur-[120px]" />
-        
-        {/* Grid de fundo sutil */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
-      </div>
+      <DecorativeBackground />
 
       <div className="relative z-10 w-full flex flex-col md:flex-row min-h-screen">
         <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} role={user.role} onLogout={handleLogout} />
         <MobileNav activeTab={activeTab} setActiveTab={setActiveTab} role={user.role} onLogout={handleLogout} />
 
-        {user.role === 'demo' && (
-          <div className="fixed top-0 left-0 right-0 bg-amber-500/90 backdrop-blur-sm text-white text-[clamp(8px,1.5vw,10px)] font-bold uppercase tracking-[0.2em] py-1.5 text-center z-[100] shadow-sm">
-            Modo de Demonstração — Acesso VIP Intelligence
-          </div>
-        )}
+        {user.role === 'demo' && <DemoBanner />}
 
         <main className="flex-grow w-full md:pl-[5rem] pb-[calc(8rem+env(safe-area-inset-bottom))] md:pb-12 min-h-screen">
           <motion.div 
