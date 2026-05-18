@@ -27,6 +27,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useLottery } from '@/hooks/useLottery';
 import { SavedGame } from '@/types/lottery';
 import { calculateGameStats } from '@/lib/lottery/stats';
+import { buildSingleGameMessage, openWhatsApp } from '@/lib/whatsapp';
 
 export const GameGenerator = () => {
   const { history, saveToHistory, generateSmartGame } = useLottery();
