@@ -73,7 +73,7 @@ export const AdminPanel = ({
   onDeleteUser, 
   onToggleUserStatus
 }: AdminPanelProps) => {
-  const [isUserDialogOpen] = useState(false);
+  const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<any>(null);
   const [userFormData, setUserFormData] = useState({ email: '', password: '', role: 'demo', status: 'active' });
 
