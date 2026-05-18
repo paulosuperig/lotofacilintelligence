@@ -46,7 +46,8 @@ export const useLottery = () => {
     if (!isSupabaseEnabled() || !supabase) return;
     
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) return;
 
       const localHistory = secureStorage.getItem<SavedGame[]>('lottery_history') || [];
@@ -84,7 +85,8 @@ export const useLottery = () => {
     try {
       // Priority 1: Supabase (Cloud)
       if (isSupabaseEnabled() && supabase) {
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { session } } = await supabase.auth.getSession();
+        const user = session?.user;
         if (user) {
           // Sync offline data first
           await syncOfflineHistory();
@@ -93,10 +95,13 @@ export const useLottery = () => {
           const { data, error } = await supabase
             .from('games_history')
             .select('*')
+            .eq('user_id', user.id) // Security: Filter by user_id explicitly
             .order('created_at', { ascending: false })
             .limit(50);
           
-          if (!error && data) {
+          if (error) throw error;
+          
+          if (data) {
             const formattedHistory: SavedGame[] = data.map(item => ({
               id: item.id,
               numbers: item.numbers,
@@ -148,12 +153,14 @@ export const useLottery = () => {
   const clearHistory = async () => {
     try {
       if (isSupabaseEnabled() && supabase) {
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { session } } = await supabase.auth.getSession();
+        const user = session?.user;
         if (user) {
-          await supabase
+          const { error } = await supabase
             .from('games_history')
             .delete()
             .eq('user_id', user.id);
+          if (error) throw error;
         }
       }
 
@@ -217,7 +224,8 @@ export const useLottery = () => {
       
       // Persistence: Cloud Sync (Supabase) if available
       if (isSupabaseEnabled() && supabase) {
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { session } } = await supabase.auth.getSession();
+        const user = session?.user;
         if (user) {
           const gamesToInsert = securedGames.map(game => ({
             user_id: user.id,
@@ -321,8 +329,14 @@ export const useLottery = () => {
   }, [history]);
 
   useEffect(() => {
-    fetchLatestResult();
-    loadHistory();
+    let isMounted = true;
+    
+    const init = async () => {
+      await fetchLatestResult();
+      if (isMounted) await loadHistory();
+    };
+    
+    init();
     
     // Cross-instance sync and Realtime
     const handleHistoryUpdate = () => loadHistory();
@@ -337,7 +351,10 @@ export const useLottery = () => {
         .on(
           'postgres_changes',
           { event: '*', schema: 'public', table: 'games_history' },
-          () => {
+          (payload) => {
+            // Optimization: avoid reloading everything if the change was made by the current user
+            // and we already have the data in local state. But since we need full sync across tabs,
+            // a refresh is often the safest route for data consistency.
             loadHistory();
           }
         )
@@ -345,9 +362,14 @@ export const useLottery = () => {
     }
     
     return () => {
+      isMounted = false;
       window.removeEventListener('lottery-history-updated', handleHistoryUpdate);
       window.removeEventListener('storage', handleHistoryUpdate);
-      if (channel) supabase.removeChannel(channel);
+      if (channel) {
+        supabase.removeChannel(channel).catch(err => {
+          console.debug("[Realtime] Error removing channel:", err);
+        });
+      }
     };
   }, [fetchLatestResult, loadHistory]);
 

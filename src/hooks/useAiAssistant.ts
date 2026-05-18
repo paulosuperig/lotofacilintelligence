@@ -81,28 +81,35 @@ export const useAiAssistant = (latestResult?: LotteryResult | null) => {
   const [aiMessage, setAiMessage] = useState('');
 
   useEffect(() => {
+    let isMounted = true;
     const savedKey = localStorage.getItem('deepseek_api_key');
     if (savedKey) setDeepSeekKey(savedKey);
 
     const loadChatHistory = async () => {
       if (!isSupabaseEnabled() || !supabase) return;
       
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const user = session?.user;
+        if (!user) return;
 
-      const { data, error } = await supabase
-        .from('ai_chat_history')
-        .select('role, content')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: true })
-        .limit(30);
+        const { data, error } = await supabase
+          .from('ai_chat_history')
+          .select('role, content')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: true })
+          .limit(30);
 
-      if (!error && data) {
-        setAiChat(data as any);
+        if (isMounted && !error && data) {
+          setAiChat(data as any);
+        }
+      } catch (err) {
+        console.error("[AI] History load error:", err);
       }
     };
 
     loadChatHistory();
+    return () => { isMounted = false; };
   }, []);
 
   const saveDeepSeekKey = (key: string) => {
@@ -119,16 +126,18 @@ export const useAiAssistant = (latestResult?: LotteryResult | null) => {
     if (!isSupabaseEnabled() || !supabase) return;
     
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) return;
 
-      await supabase.from('ai_chat_history').insert({
+      const { error } = await supabase.from('ai_chat_history').insert({
         user_id: user.id,
         role,
         content
       });
+      if (error) throw error;
     } catch (error) {
-      console.error("Error persisting chat message:", error);
+      console.error("[AI] Error persisting chat message:", error);
     }
   };
 
@@ -327,9 +336,11 @@ ${statsBlock}`;
     setAiChat,
     clearChatHistory: async () => {
       if (isSupabaseEnabled() && supabase) {
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { session } } = await supabase.auth.getSession();
+        const user = session?.user;
         if (user) {
-          await supabase.from('ai_chat_history').delete().eq('user_id', user.id);
+          const { error } = await supabase.from('ai_chat_history').delete().eq('user_id', user.id);
+          if (error) console.error("[AI] Error clearing chat history:", error);
         }
       }
       setAiChat([]);
