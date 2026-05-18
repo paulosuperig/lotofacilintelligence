@@ -34,12 +34,10 @@ const Index = () => {
   } = useLottery();
 
   const {
-    deepSeekKey,
     aiChat,
     isAiLoading,
     aiMessage,
     setAiMessage,
-    saveDeepSeekKey,
     sendMessage,
     clearChatHistory
   } = useAiAssistant(latestResult);
