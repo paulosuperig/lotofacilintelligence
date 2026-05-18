@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useToast } from './use-toast';
 import { LotteryResult, SavedGame } from '@/types/lottery';
 import { generateSecureId } from '@/lib/security/utils';
@@ -13,6 +13,7 @@ export const useLottery = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [history, setHistory] = useState<SavedGame[]>([]);
+  const isClearingRef = useRef(false);
 
   const fetchLatestResult = useCallback(async () => {
     setIsRefreshing(true);
@@ -36,6 +37,8 @@ export const useLottery = () => {
   }, [toast]);
 
   const loadHistory = useCallback(async () => {
+    if (isClearingRef.current) return;
+
     try {
       if (isSupabaseEnabled() && supabase) {
         const { data: { session } } = await supabase.auth.getSession();
@@ -56,6 +59,11 @@ export const useLottery = () => {
   }, []);
 
   const clearHistory = useCallback(async () => {
+    if (isClearingRef.current) return;
+    
+    isClearingRef.current = true;
+    setHistory([]); // Feedback visual instantâneo
+    
     try {
       let userId = null;
       if (isSupabaseEnabled() && supabase) {
@@ -64,23 +72,23 @@ export const useLottery = () => {
       }
       
       await historyService.clearHistory(userId);
-      setHistory([]);
       
-      // Imediatamente limpa o estado local para garantir feedback visual
-      secureStorage.removeItem('lottery_history');
-      
-      window.dispatchEvent(new CustomEvent('lottery-history-updated'));
       toast({
         title: "Histórico limpo",
         description: "Todos os seus jogos salvos foram removidos com sucesso.",
       });
+      
+      // Notificar outros componentes que o histórico mudou
+      window.dispatchEvent(new CustomEvent('lottery-history-updated'));
     } catch (error) {
       console.error("[useLottery] Error clearing history:", error);
       toast({
-        title: "Erro",
-        description: "Não foi possível limpar o histórico.",
-        variant: "destructive"
+        title: "Aviso",
+        description: "O histórico local foi limpo, mas pode ter ocorrido um erro na sincronização cloud.",
+        variant: "default"
       });
+    } finally {
+      isClearingRef.current = false;
     }
   }, [toast]);
 
@@ -211,8 +219,11 @@ export const useLottery = () => {
     if (isSupabaseEnabled() && supabase) {
       channel = supabase
         .channel(`games-history-${Math.random().toString(36).slice(2)}`)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'games_history' }, () => {
-          loadHistory();
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'games_history' }, (payload) => {
+          // Só recarrega se não estivermos no meio de uma limpeza
+          if (!isClearingRef.current) {
+            loadHistory();
+          }
         })
         .subscribe();
     }
