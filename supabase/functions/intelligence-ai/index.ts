@@ -29,14 +29,14 @@ serve(async (req) => {
 
     const { messages, max_tokens } = await req.json();
 
-    const response = await fetch('https://api.lovable.ai/v1/chat/completions', {
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${Deno.env.get('LOVABLE_API_KEY')}`,
       },
       body: JSON.stringify({
-        model: 'deepseek/deepseek-chat',
+        model: 'google/gemini-3-flash-preview',
         messages,
         max_tokens: max_tokens || 2048,
         temperature: 0.2,
