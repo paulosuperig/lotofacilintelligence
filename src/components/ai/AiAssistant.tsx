@@ -1,69 +1,42 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { 
   Cpu, 
-  Key, 
-  ShieldCheck, 
-  Sparkles, 
-  Flame, 
-  PieChart, 
   Loader2, 
   Send, 
-  Save 
+  Save,
+  Sparkles,
+  Flame,
+  PieChart,
+  ShieldCheck
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Ball } from '@/components/lottery/Ball';
-import { INCOMPLETE_MARKER } from '@/lib/ai/sanitizeGames';
 
-// Detects a Lotofácil game line and renders it as a beautiful card of balls.
-// Accepts strings like "01) 03, 05, 08, 10, 12, 14, 16, 18, 20, 21, 22, 23, 24, 25 (soma 232)"
+// Simple text-based GameLine for efficiency
 const GameLine = ({ raw }: { raw: string }) => {
   const text = String(raw);
-  const labelMatch = text.match(/^\s*(\d{1,2})\s*[\)\.\-:]/);
   const sumMatch = text.match(/soma[:\s]*?(\d{2,3})/i);
   const tokens = text.match(/\b\d{1,2}\b/g) || [];
   const nums = tokens
     .map((n) => parseInt(n, 10))
     .filter((n) => n >= 1 && n <= 25);
   const unique = Array.from(new Set(nums));
-  if (unique.length < 15) return null;
+  if (unique.length < 15) return <div className="text-zinc-500 italic my-1">{text}</div>;
+  
   const game = unique.slice(0, 15).sort((a, b) => a - b);
   const sum = sumMatch ? parseInt(sumMatch[1], 10) : game.reduce((a, b) => a + b, 0);
-  const evens = game.filter((n) => n % 2 === 0).length;
-  const odds = 15 - evens;
 
   return (
-    <div className="my-2 rounded-2xl border border-purple-100 dark:border-zinc-700 bg-gradient-to-br from-white to-purple-50/40 dark:from-zinc-900 dark:to-purple-950/20 p-3 sm:p-4 shadow-sm">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-purple-600 dark:text-purple-400">
-            Jogo {labelMatch ? labelMatch[1].padStart(2, '0') : ''}
-          </span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-400">Soma</span>
-          <span className="text-[11px] font-bold text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/30 px-2 py-0.5 rounded-md">
-            {sum}
-          </span>
-        </div>
+    <div className="my-2 p-3 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-lg font-mono text-sm">
+      <div className="flex justify-between mb-1 text-[10px] text-zinc-500 uppercase font-bold">
+        <span>Sugestão de Jogo</span>
+        <span>Soma: {sum}</span>
       </div>
-      <div className="flex flex-wrap gap-1.5 sm:gap-2 justify-center">
-        {game.map((n) => (
-          <Ball key={n} number={n} active size="sm" />
-        ))}
-      </div>
-      <div className="flex items-center justify-center gap-3 mt-3 pt-3 border-t border-purple-50 dark:border-zinc-800">
-        <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-400">
-          Pares <span className="text-zinc-700 dark:text-zinc-200">{evens}</span>
-        </span>
-        <span className="w-1 h-1 rounded-full bg-zinc-300" />
-        <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-400">
-          Ímpares <span className="text-zinc-700 dark:text-zinc-200">{odds}</span>
-        </span>
+      <div className="tracking-widest font-bold text-purple-600 dark:text-purple-400">
+        {game.map(n => String(n).padStart(2, '0')).join(' ')}
       </div>
     </div>
   );
@@ -78,29 +51,19 @@ const isGameLine = (text: string) => {
 const markdownComponents = {
   code: ({ inline, className, children, ...props }: any) => {
     const raw = String(children ?? '');
-    if (isGameLine(raw)) {
-      return <GameLine raw={raw} />;
-    }
-    return (
-      <code className={className} {...props}>
-        {children}
-      </code>
-    );
+    if (isGameLine(raw)) return <GameLine raw={raw} />;
+    return <code className={className} {...props}>{children}</code>;
   },
   pre: ({ children, ...props }: any) => {
-    // If the <pre> only wraps a game-line code, let the GameLine render standalone.
     const child: any = Array.isArray(children) ? children[0] : children;
     const inner = child?.props?.children;
     const raw = Array.isArray(inner) ? inner.join('') : String(inner ?? '');
-    if (isGameLine(raw)) {
-      return <GameLine raw={raw} />;
-    }
+    if (isGameLine(raw)) return <GameLine raw={raw} />;
     return <pre {...props}>{children}</pre>;
   },
 };
 
 interface AiAssistantProps {
-  deepSeekKey: string;
   aiChat: any[];
   isAiLoading: boolean;
   aiMessage: string;
@@ -109,12 +72,10 @@ interface AiAssistantProps {
   onSaveAiGame: (content: string) => void;
   onClearChat?: () => void;
   onBack: () => void;
-  onGoToSettings: () => void;
   role: 'admin' | 'demo';
 }
 
 export const AiAssistant = ({
-  deepSeekKey,
   aiChat,
   isAiLoading,
   aiMessage,
@@ -123,7 +84,6 @@ export const AiAssistant = ({
   onSaveAiGame,
   onClearChat,
   onBack,
-  onGoToSettings,
   role
 }: AiAssistantProps) => {
   const chatContainerRef = React.useRef<HTMLDivElement>(null);
