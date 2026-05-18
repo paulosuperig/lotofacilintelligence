@@ -71,7 +71,7 @@ export const TipsPanel = ({ onBack }: TipsPanelProps) => {
           </div>
         </div>
 
-        <div className="mt-8 p-8 bg-zinc-900 rounded-[2.5rem] text-white overflow-hidden relative group">
+        <div className="mt-8 p-6 sm:p-10 bg-zinc-900 rounded-[2.5rem] text-white overflow-hidden relative group">
           <div className="absolute -right-10 -bottom-10 text-white/5 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-1000">
             <Target size={200} />
           </div>
