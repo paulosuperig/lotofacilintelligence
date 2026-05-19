@@ -27,8 +27,8 @@ export const HistoryStatusCard = ({ historyLength, onClearHistory }: HistoryStat
         {historyLength > 0 && (
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <button className="p-2 text-zinc-400 hover:text-red-500 transition-colors" title="Limpar Histórico">
-                <Trash2 size={16} />
+              <button aria-label="Limpar histórico" className="p-2 text-zinc-400 hover:text-red-500 transition-colors">
+                <Trash2 size={16} aria-hidden="true" />
               </button>
             </AlertDialogTrigger>
             <AlertDialogContent>

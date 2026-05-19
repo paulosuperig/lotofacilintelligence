@@ -41,9 +41,11 @@ export const DeepSeekConfig = ({ deepSeekKey, onSaveDeepSeekKey }: DeepSeekConfi
               <button 
                 type="button"
                 onClick={() => setShowKey(!showKey)}
+                aria-label={showKey ? "Ocultar chave" : "Mostrar chave"}
+                aria-pressed={showKey}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 transition-colors"
               >
-                {showKey ? <EyeOff size={16} /> : <Eye size={16} />}
+                {showKey ? <EyeOff size={16} aria-hidden="true" /> : <Eye size={16} aria-hidden="true" />}
               </button>
             </div>
             <Button 
