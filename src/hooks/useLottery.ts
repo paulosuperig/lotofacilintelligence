@@ -44,9 +44,14 @@ export const useLottery = () => {
         const { data: { session } } = await supabase.auth.getSession();
         const user = session?.user;
         if (user) {
+          // Bloquear carregamento se houve uma limpeza recente que ainda não refletiu no server
+          const lastClear = Number(localStorage.getItem('last_history_clear_at') || 0);
           await historyService.syncOffline(user.id);
           const data = await historyService.fetchHistory(user.id);
-          setHistory(data);
+          
+          // Filtrar qualquer dado que possa ter vindo do cache/realtime pós-limpeza
+          const filteredData = data.filter(g => g.timestamp > lastClear);
+          setHistory(filteredData);
           return;
         }
       }
