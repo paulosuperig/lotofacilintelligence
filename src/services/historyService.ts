@@ -129,6 +129,9 @@ export const historyService = {
     
     // 2. Limpar o storage local IMEDIATAMENTE
     secureStorage.removeItem('lottery_history');
+    // Forçar atualização do estado em todas as tabs
+    window.localStorage.removeItem('lottery_history');
+
 
     if (isSupabaseEnabled() && supabase && userId) {
       try {
