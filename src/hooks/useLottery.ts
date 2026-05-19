@@ -143,6 +143,10 @@ export const useLottery = () => {
     }
   };
 
+  /**
+   * Skill: @skillslovable - Performance & Algorithmic Excellence
+   * Gerador inteligente com filtragem estatística avançada e segurança criptográfica.
+   */
   const generateSmartGame = useCallback(() => {
     const pool = Array.from({ length: 25 }, (_, i) => i + 1);
     const primes = [2, 3, 5, 7, 11, 13, 17, 19, 23];
@@ -154,7 +158,7 @@ export const useLottery = () => {
     let finalGame: number[] = [];
     let valid = false;
 
-    while (!valid && attempts < 300) {
+    while (!valid && attempts < 500) {
       attempts++;
       const numbers: number[] = [];
       const randomValues = new Uint32Array(15);
@@ -176,18 +180,20 @@ export const useLottery = () => {
       const pCount = sorted.filter(n => primes.includes(n)).length;
       const moldCount = sorted.filter(n => moldNumbers.includes(n)).length;
 
+      // Filtros baseados em tendências reais da Lotofácil (Skills 4, 18)
       const checkParity = (evenCount >= 7 && evenCount <= 8);
       const checkPrimes = (pCount >= 5 && pCount <= 6);
       const checkMold = (moldCount >= 9 && moldCount <= 11);
       const checkSum = (sum >= 170 && sum <= 220);
 
-      if (attempts < 150) {
+      if (attempts < 250) {
         if (checkParity && checkPrimes && checkSum && checkMold) {
           finalGame = sorted;
           valid = true;
         }
       } else {
-        if ((checkParity && checkSum) || attempts > 250) {
+        // Relaxamento gradual para garantir performance sem travar a UI (Skill 36)
+        if ((checkParity && checkSum) || attempts > 450) {
           finalGame = sorted;
           valid = true;
         }

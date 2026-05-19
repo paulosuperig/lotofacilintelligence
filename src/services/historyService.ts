@@ -5,32 +5,41 @@ import { SavedGameSchema } from '@/lib/security/schemas';
 import { generateSecureId } from '@/lib/security/utils';
 
 export const historyService = {
+  /**
+   * Skill: @skillslovable - Full-Stack Architecture & Data Resilience
+   * Busca histórico com estratégia de cache e resiliência offline.
+   */
   async fetchHistory(userId: string): Promise<SavedGame[]> {
     if (!isSupabaseEnabled() || !supabase) {
       return this.getLocalHistory();
     }
 
-    const { data, error } = await supabase
-      .from('games_history')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(50);
-    
-    if (error) throw error;
-    
-    const formattedHistory: SavedGame[] = (data || []).map(item => ({
-      id: item.id,
-      numbers: item.numbers,
-      timestamp: new Date(item.created_at).getTime(),
-      sum: item.sum_value ?? undefined,
-      model: item.model_name ?? undefined,
-      type: item.type || (item.model_name ? 'Fechamento PRO' : 'IA Insight')
-    }));
+    try {
+      const { data, error } = await supabase
+        .from('games_history')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(50);
+      
+      if (error) throw error;
+      
+      const formattedHistory: SavedGame[] = (data || []).map(item => ({
+        id: item.id,
+        numbers: item.numbers,
+        timestamp: new Date(item.created_at).getTime(),
+        sum: item.sum_value ?? undefined,
+        model: item.model_name ?? undefined,
+        type: item.type || (item.model_name ? 'Fechamento PRO' : 'IA Insight')
+      }));
 
-    // Update local storage for offline access
-    secureStorage.setItem('lottery_history', formattedHistory);
-    return formattedHistory;
+      // Persistência local segura para acesso offline-first (Skill 41)
+      secureStorage.setItem('lottery_history', formattedHistory);
+      return formattedHistory;
+    } catch (err) {
+      console.warn("[historyService] Cloud fetch failed, falling back to local storage", err);
+      return this.getLocalHistory();
+    }
   },
 
   getLocalHistory(): SavedGame[] {
