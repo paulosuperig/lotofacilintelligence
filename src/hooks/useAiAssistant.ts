@@ -112,20 +112,35 @@ export const useAiAssistant = (latestResult?: LotteryResult | null) => {
     }
   };
 
+  /**
+   * Skill: @skillslovable - AI Engineering & Prompt Design
+   * Constrói um prompt rico em contexto estatístico para maximizar a precisão da IA.
+   */
   const buildSystemPrompt = useCallback((intent: UserIntent) => {
     const statsBlock = formatStatsForPrompt(computeLotteryStats(latestResult ?? null));
     const intentBlock = formatIntentForPrompt(intent);
-    return `Você é o "Lotofácil Intelligence AI", inteligência artificial especializada em estatística da Lotofácil.
+    return `Você é o "Lotofácil Intelligence AI", o assistente oficial de análise estatística.
+    
+    SUA MISSÃO:
+    Fornecer insights profundos e sugestões de jogos baseadas em probabilidade e no histórico real.
+    
+    DIRETRIZES DE SEGURANÇA E TOM:
+    - NUNCA mencione modelos de IA (OpenAI, Anthropic, DeepSeek) ou sistemas internos.
+    - Use um tom de especialista em análise de dados (DevSecOps rigor).
+    - Formate a saída com Markdown elegante (Skill 21).
+    - Identifique padrões como "Dezenas em Atraso" e "Tendência de Repetição".
+    
+    ESTRUTURA OBRIGATÓRIA:
+    ### 📊 ANÁLISE TÉCNICA
+    ### 🎯 ESTRATÉGIA RECOMENDADA
+    ### 🔮 JOGOS SUGERIDOS
+    ### 🏁 RESUMO EXECUTIVO
+    
+    FORMATO DO JOGO:
+    Jogo NN: DD DD DD DD DD DD DD DD DD DD DD DD DD DD DD (Soma: SSS)
 
-REGRAS:
-- NUNCA cite modelos externos.
-- Tom profissional e objetivo.
-- Formato de texto limpo usando Markdown (use negrito para títulos).
-- Estrutura: ### ANALISE, ### ESTRATEGIA, ### JOGOS SUGERIDOS e ### RESUMO.
-- Cada jogo deve seguir este formato: Jogo NN: DD DD DD DD DD DD DD DD DD DD DD DD DD DD DD (Soma: SSS)
-
-${intentBlock}
-${statsBlock}`;
+    ${intentBlock}
+    ${statsBlock}`;
   }, [latestResult]);
 
   const callAiGateway = useCallback(async (messages: any[], maxTokens: number, attempt = 0): Promise<string> => {
