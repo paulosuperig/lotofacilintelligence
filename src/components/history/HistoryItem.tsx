@@ -49,6 +49,7 @@ export const HistoryItem = ({ item, onShare }: HistoryItemProps) => (
         size="icon"
         variant="ghost"
         onClick={() => onShare(item.numbers)}
+        aria-label="Compartilhar jogo no WhatsApp"
         className="w-11 h-11 rounded-full bg-emerald-500 text-white hover:bg-emerald-600 shadow-sm transition-transform active:scale-90"
       >
         <WhatsAppIcon size={20} />

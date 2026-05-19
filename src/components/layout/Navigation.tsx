@@ -30,8 +30,10 @@ const NavIcon = ({
 }: NavIconProps) => (
   <button 
     onClick={onClick}
+    aria-label={label}
+    aria-current={active ? 'page' : undefined}
     className={cn(
-      "flex h-full flex-1 flex-col items-center justify-center gap-1 group relative outline-none transition-transform active:scale-90 md:h-12 md:w-12 md:flex-none md:p-0 touch-none",
+      "flex h-full flex-1 flex-col items-center justify-center gap-1 group relative outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 rounded-2xl transition-transform active:scale-90 md:h-12 md:w-12 md:flex-none md:p-0 touch-none",
       highlight && !active && "relative",
       className
     )}
