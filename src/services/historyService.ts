@@ -93,15 +93,21 @@ export const historyService = {
     const localHistory = this.getLocalHistory();
     if (localHistory.length === 0) return;
 
+    // Verificar se houve uma limpeza recente que deve invalidar o sync local
+    const lastClear = secureStorage.getItem<number>('last_history_clear_at') || 0;
+    const toSync = localHistory.filter(g => g.timestamp > lastClear);
+
+    if (toSync.length === 0) return;
+
     const { data: cloudData } = await supabase
       .from('games_history')
       .select('id')
       .eq('user_id', userId);
     
     const cloudIds = new Set(cloudData?.map(g => g.id) || []);
-    const toSync = localHistory.filter(g => !cloudIds.has(g.id));
+    const finalToSync = toSync.filter(g => !cloudIds.has(g.id));
 
-    if (toSync.length > 0) {
+    if (finalToSync.length > 0) {
       const gamesToInsert = toSync.map(game => ({
         id: game.id,
         user_id: userId,
@@ -117,20 +123,26 @@ export const historyService = {
   },
 
   async clearHistory(userId: string | null) {
-    // 1. Limpar o storage local IMEDIATAMENTE para evitar que o syncOffline
-    // tente sincronizar de volta dados que estamos prestes a deletar no cloud.
+    // 1. Marcar o momento da limpeza para evitar sincronização de dados antigos
+    const clearTimestamp = Date.now();
+    secureStorage.setItem('last_history_clear_at', clearTimestamp);
+    
+    // 2. Limpar o storage local IMEDIATAMENTE
     secureStorage.removeItem('lottery_history');
 
     if (isSupabaseEnabled() && supabase && userId) {
-      // 2. Deletar no Supabase
-      const { error } = await supabase
-        .from('games_history')
-        .delete()
-        .eq('user_id', userId);
-        
-      if (error) {
-        console.error("[historyService] Erro ao limpar histórico no Supabase:", error);
-        throw error;
+      try {
+        // 3. Deletar no Supabase de forma definitiva
+        const { error } = await supabase
+          .from('games_history')
+          .delete()
+          .eq('user_id', userId);
+          
+        if (error) throw error;
+      } catch (err) {
+        console.error("[historyService] Erro crítico ao limpar histórico no Cloud:", err);
+        // Se falhar no cloud, ainda mantemos o local limpo e o timestamp de bloqueio
+        throw err;
       }
     }
   }

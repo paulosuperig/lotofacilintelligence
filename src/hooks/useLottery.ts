@@ -62,6 +62,7 @@ export const useLottery = () => {
     if (isClearingRef.current) return;
     
     isClearingRef.current = true;
+    const previousHistory = [...history];
     setHistory([]); // Feedback visual instantâneo
     
     try {
@@ -71,26 +72,31 @@ export const useLottery = () => {
         userId = session?.user?.id || null;
       }
       
+      // Limpeza definitiva no serviço (local + cloud)
       await historyService.clearHistory(userId);
       
       toast({
         title: "Histórico limpo",
-        description: "Todos os seus jogos salvos foram removidos com sucesso.",
+        description: "Todos os seus jogos salvos foram removidos de forma definitiva.",
       });
       
-      // Notificar outros componentes que o histórico mudou
-      window.dispatchEvent(new CustomEvent('lottery-history-updated'));
+      // Notificar outros componentes/tabs
+      window.dispatchEvent(new CustomEvent('lottery-history-updated', { detail: { action: 'clear' } }));
     } catch (error) {
-      console.error("[useLottery] Error clearing history:", error);
+      console.error("[useLottery] Erro ao limpar histórico:", error);
+      setHistory(previousHistory); // Reverter em caso de erro crítico
       toast({
-        title: "Aviso",
-        description: "O histórico local foi limpo, mas pode ter ocorrido um erro na sincronização cloud.",
-        variant: "default"
+        title: "Erro ao limpar",
+        description: "Não foi possível remover o histórico cloud. Tente novamente.",
+        variant: "destructive"
       });
     } finally {
-      isClearingRef.current = false;
+      // Pequeno delay para garantir que eventos de rede/realtime sejam ignorados
+      setTimeout(() => {
+        isClearingRef.current = false;
+      }, 1500);
     }
-  }, [toast]);
+  }, [toast, history]);
 
   const isGameDuplicate = useCallback((numbers: number[]) => {
     const signature = [...numbers].sort((a, b) => a - b).join(',');
@@ -213,11 +219,19 @@ export const useLottery = () => {
     let isMounted = true;
     const init = async () => {
       await fetchLatestResult();
-      if (isMounted) await loadHistory();
+      if (isMounted && !isClearingRef.current) await loadHistory();
     };
     init();
     
-    const handleHistoryUpdate = () => loadHistory();
+    const handleHistoryUpdate = (e?: any) => {
+      // Se for um evento de limpeza, garantimos o estado vazio
+      if (e?.detail?.action === 'clear') {
+        setHistory([]);
+        return;
+      }
+      if (!isClearingRef.current) loadHistory();
+    };
+
     window.addEventListener('lottery-history-updated', handleHistoryUpdate);
     window.addEventListener('storage', handleHistoryUpdate);
 
