@@ -233,7 +233,7 @@ export const GameGenerator = () => {
                       variant="ghost"
                       onClick={() => shareOnWhatsApp(item.numbers)}
                       className="text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 rounded-xl transition-all"
-                      title="WhatsApp"
+                      aria-label="Compartilhar jogo no WhatsApp"
                     >
                       <WhatsAppIcon />
                     </Button>

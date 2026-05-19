@@ -59,9 +59,10 @@ export const HistoryPanel = ({
             variant="ghost" 
             size="icon" 
             onClick={onBack}
+            aria-label="Voltar"
             className="rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800"
           >
-            <ChevronLeft size={24} />
+            <ChevronLeft size={24} aria-hidden="true" />
           </Button>
           <div>
             <h2 className="text-3xl font-display font-bold text-zinc-900 dark:text-zinc-100">Meu Histórico</h2>

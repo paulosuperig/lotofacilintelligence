@@ -114,7 +114,7 @@ const Login = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#f5f3ff] flex flex-col items-center justify-center p-4 pt-[env(safe-area-inset-top)] pb-[calc(env(safe-area-inset-bottom)+3rem)]">
+    <div className="relative min-h-dvh bg-[#f5f3ff] flex flex-col items-center justify-center p-4 pt-[env(safe-area-inset-top)] pb-[calc(env(safe-area-inset-bottom)+3rem)]">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -145,11 +145,13 @@ const Login = () => {
 
               <form onSubmit={handleLogin} className="space-y-4 sm:space-y-6">
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest ml-1">E-mail</label>
+                  <label htmlFor="login-email" className="text-xs font-bold text-zinc-500 uppercase tracking-widest ml-1 block">E-mail</label>
                   <div className="relative">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
+                    <User aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
                     <Input
+                      id="login-email"
                       type="email"
+                      autoComplete="email"
                       placeholder="seu@email.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -161,7 +163,7 @@ const Login = () => {
 
                 <div className="space-y-2">
                   <div className="flex justify-between items-center ml-1">
-                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Senha</label>
+                    <label htmlFor="login-password" className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Senha</label>
                     <button 
                       type="button"
                       onClick={() => setView('forgot-password')}
@@ -171,9 +173,11 @@ const Login = () => {
                     </button>
                   </div>
                   <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
+                    <Lock aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
                     <Input
+                      id="login-password"
                       type={showPassword ? "text" : "password"}
+                      autoComplete="current-password"
                       placeholder="••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
@@ -183,9 +187,11 @@ const Login = () => {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                      aria-pressed={showPassword}
                       className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-purple-600 transition-colors"
                     >
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      {showPassword ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
                     </button>
                   </div>
                 </div>
@@ -244,11 +250,13 @@ const Login = () => {
 
               <form onSubmit={handleForgotPassword} className="space-y-6">
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest ml-1">E-mail Cadastrado</label>
+                  <label htmlFor="forgot-email" className="text-xs font-bold text-zinc-500 uppercase tracking-widest ml-1 block">E-mail Cadastrado</label>
                   <div className="relative">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
+                    <User aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
                     <Input
+                      id="forgot-email"
                       type="email"
+                      autoComplete="email"
                       placeholder="seu@email.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -302,10 +310,12 @@ const Login = () => {
 
               <form onSubmit={handleRegister} className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Nome Completo</label>
+                  <label htmlFor="register-name" className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1 block">Nome Completo</label>
                   <div className="relative">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
+                    <User aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
                     <Input
+                      id="register-name"
+                      autoComplete="name"
                       placeholder="Seu nome"
                       value={registerData.name}
                       onChange={(e) => setRegisterData({...registerData, name: e.target.value})}
@@ -316,10 +326,13 @@ const Login = () => {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">WhatsApp</label>
+                  <label htmlFor="register-whatsapp" className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1 block">WhatsApp</label>
                   <div className="relative">
-                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
+                    <Phone aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
                     <Input
+                      id="register-whatsapp"
+                      type="tel"
+                      autoComplete="tel"
                       placeholder="(00) 00000-0000"
                       value={registerData.whatsapp}
                       onChange={(e) => setRegisterData({...registerData, whatsapp: e.target.value})}
@@ -330,11 +343,13 @@ const Login = () => {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">E-mail</label>
+                  <label htmlFor="register-email" className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1 block">E-mail</label>
                   <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
+                    <Mail aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
                     <Input
+                      id="register-email"
                       type="email"
+                      autoComplete="email"
                       placeholder="seu@email.com"
                       value={registerData.email}
                       onChange={(e) => setRegisterData({...registerData, email: e.target.value})}
@@ -345,11 +360,13 @@ const Login = () => {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Senha</label>
+                  <label htmlFor="register-password" className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1 block">Senha</label>
                   <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
+                    <Lock aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
                     <Input
+                      id="register-password"
                       type="password"
+                      autoComplete="new-password"
                       placeholder="••••••••"
                       value={registerData.password}
                       onChange={(e) => setRegisterData({...registerData, password: e.target.value})}
