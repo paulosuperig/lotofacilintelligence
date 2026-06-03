@@ -57,8 +57,12 @@ export const AdminPanel = ({
     <div className="bg-white dark:bg-zinc-900 border border-purple-200 dark:border-zinc-800 rounded-2xl md:rounded-[2rem] p-5 sm:p-8 md:p-12 shadow-xl shadow-purple-500/5">
       <div className="flex flex-col lg:flex-row items-center justify-between mb-8 md:mb-10 gap-6">
         <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
-          <h2 className="text-2xl md:text-3xl font-display font-bold text-zinc-900 dark:text-zinc-100 mb-1 md:mb-2">Painel Administrativo</h2>
-          <p className="text-zinc-500 dark:text-zinc-400 text-sm">Gerencie usuários, acessos e configurações do sistema</p>
+          <h2 className="text-2xl md:text-3xl font-display font-bold text-zinc-900 dark:text-zinc-100 mb-1 md:mb-2">
+            {activeTab === 'users' ? 'Usuários Cadastrados' : 'Painel Administrativo'}
+          </h2>
+          <p className="text-zinc-500 dark:text-zinc-400 text-sm">
+            {activeTab === 'users' ? 'Gerencie usuários e permissões de acesso' : 'Gerencie usuários, acessos e configurações do sistema'}
+          </p>
         </div>
         <div className="flex items-center gap-3">
           {activeTab === 'users' && (
