@@ -22,7 +22,9 @@ export const userService = {
   async updateProfile(userId: string, data: { role: 'admin' | 'demo'; status: 'active' | 'blocked' }) {
     if (!isSupabaseEnabled() || !supabase) return;
 
-    const { error: profileError } = await supabase
+    // O trigger 'on_profile_change_sync_role' no banco de dados cuidará 
+    // automaticamente da sincronização com a tabela 'user_roles'.
+    const { error } = await supabase
       .from('profiles')
       .update({
         role: data.role,
@@ -30,13 +32,7 @@ export const userService = {
       })
       .eq('id', userId);
     
-    if (profileError) throw profileError;
-
-    const { error: roleError } = await supabase
-      .from('user_roles')
-      .upsert({ user_id: userId, role: data.role }, { onConflict: 'user_id,role' });
-    
-    if (roleError) throw roleError;
+    if (error) throw error;
   },
 
   async deleteProfile(userId: string) {
