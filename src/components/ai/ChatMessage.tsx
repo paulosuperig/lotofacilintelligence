@@ -103,7 +103,7 @@ export const ChatMessage = ({ msg, onSaveAiGame }: ChatMessageProps) => (
               className="h-8 px-3 text-[10px] text-zinc-600 hover:bg-zinc-50 rounded-lg gap-2"
               onClick={() => onSaveAiGame(msg.content)}
             >
-              <Save size={12} /> Salvar
+              <Save size={12} /> Salvar todos os jogos
             </Button>
           </div>
         </>
