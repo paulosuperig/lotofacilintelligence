@@ -32,7 +32,7 @@ export const AdminPanel = ({
   const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<any>(null);
   const [userFormData, setUserFormData] = useState({ email: '', password: '', role: 'demo', status: 'active' });
-  const [activeTab, setActiveTab] = useState(defaultTab);
+  const [activeTab, setActiveTab] = useState<'users' | 'settings'>(defaultTab);
 
   // Sync with defaultTab prop when it changes
   React.useEffect(() => {
