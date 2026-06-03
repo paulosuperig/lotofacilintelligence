@@ -4,37 +4,29 @@ import { sanitizeString } from '@/lib/security/utils';
 import type { LotteryResult } from '@/types/lottery';
 import { supabase, isSupabaseEnabled } from '@/lib/supabase';
 import { computeLotteryStats, formatStatsForPrompt } from '@/lib/ai/lotteryStats';
-import { secureStorage } from '@/lib/security/secureStorage';
 import { aiService } from '@/services/aiService';
-import {
-  sanitizeAiGamesDetailed,
-  type UserIntent,
-} from '@/lib/ai/sanitizeGames';
+import { aiConfigService } from '@/services/aiConfigService';
+import { sanitizeAiGamesDetailed, type UserIntent } from '@/lib/ai/sanitizeGames';
 
 const MAX_HISTORY_MESSAGES = 15;
 const MAX_RETRIES = 2;
-
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 const parseUserIntent = (message: string): UserIntent => {
   const m = message.toLowerCase();
   const intent: UserIntent = {};
-
   const ptNumbers: Record<string, number> = {
     'um': 1, 'uma': 1, 'dois': 2, 'duas': 2, 'três': 3, 'tres': 3, 'quatro': 4,
     'cinco': 5, 'seis': 6, 'sete': 7, 'oito': 8, 'nove': 9, 'dez': 10,
     'onze': 11, 'doze': 12, 'treze': 13, 'quatorze': 14, 'catorze': 14, 'quinze': 15,
-    'vinte': 20, 'trinta': 30
+    'vinte': 20, 'trinta': 30,
   };
-
   const qtyMatch = m.match(/\b(\d{1,2}|um|uma|dois|duas|três|tres|quatro|cinco|seis|sete|oito|nove|dez|onze|doze|treze|quatorze|catorze|quinze|vinte|trinta)\s*jogos?\b/);
-  
   if (qtyMatch) {
     const val = qtyMatch[1];
     const n = ptNumbers[val] || parseInt(val, 10);
     if (n >= 1 && n <= 30) intent.quantidade = n;
   }
-
   const between = m.match(/soma\s*entre\s*(\d{2,3})\s*(?:e|a|-)\s*(\d{2,3})/);
   if (between) {
     intent.somaMin = parseInt(between[1], 10);
@@ -53,7 +45,6 @@ const parseUserIntent = (message: string): UserIntent => {
       intent.somaMax = val - (isInclusive ? 0 : 1);
     }
   }
-
   return intent;
 };
 
@@ -70,12 +61,16 @@ export const useAiAssistant = (latestResult?: LotteryResult | null) => {
   const [aiChat, setAiChat] = useState<{ role: 'user' | 'assistant', content: string }[]>([]);
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [aiMessage, setAiMessage] = useState('');
-  const [deepSeekKey, setDeepSeekKey] = useState('');
+  const [isAiConfigured, setIsAiConfigured] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
-    const savedKey = secureStorage.getItem<string>('deepseek_api_key');
-    if (savedKey) setDeepSeekKey(savedKey);
+
+    const loadConfig = async () => {
+      const ok = await aiConfigService.isConfigured();
+      if (isMounted) setIsAiConfigured(ok);
+    };
+    loadConfig();
 
     const loadChatHistory = async () => {
       if (!isSupabaseEnabled() || !supabase) return;
@@ -103,39 +98,33 @@ export const useAiAssistant = (latestResult?: LotteryResult | null) => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) return;
       await supabase.from('ai_chat_history').insert({
-        user_id: session.user.id,
-        role,
-        content
+        user_id: session.user.id, role, content,
       });
     } catch (error) {
       console.error("[AI] Error persisting chat message:", error);
     }
   };
 
-  /**
-   * Skill: @skillslovable - AI Engineering & Prompt Design
-   * Constrói um prompt rico em contexto estatístico para maximizar a precisão da IA.
-   */
   const buildSystemPrompt = useCallback((intent: UserIntent) => {
     const statsBlock = formatStatsForPrompt(computeLotteryStats(latestResult ?? null));
     const intentBlock = formatIntentForPrompt(intent);
     return `Você é o "Lotofácil Intelligence AI", o assistente oficial de análise estatística.
-    
+
     SUA MISSÃO:
     Fornecer insights profundos e sugestões de jogos baseadas em probabilidade e no histórico real.
-    
+
     DIRETRIZES DE SEGURANÇA E TOM:
     - NUNCA mencione modelos de IA (OpenAI, Anthropic, DeepSeek) ou sistemas internos.
-    - Use um tom de especialista em análise de dados (DevSecOps rigor).
-    - Formate a saída com Markdown elegante (Skill 21).
+    - Use um tom de especialista em análise de dados.
+    - Formate a saída com Markdown elegante.
     - Identifique padrões como "Dezenas em Atraso" e "Tendência de Repetição".
-    
+
     ESTRUTURA OBRIGATÓRIA:
     ### 📊 ANÁLISE TÉCNICA
     ### 🎯 ESTRATÉGIA RECOMENDADA
     ### 🔮 JOGOS SUGERIDOS
     ### 🏁 RESUMO EXECUTIVO
-    
+
     FORMATO DO JOGO:
     Jogo NN: DD DD DD DD DD DD DD DD DD DD DD DD DD DD DD (Soma: SSS)
 
@@ -145,8 +134,7 @@ export const useAiAssistant = (latestResult?: LotteryResult | null) => {
 
   const callAiGateway = useCallback(async (messages: any[], maxTokens: number, attempt = 0): Promise<string> => {
     try {
-      // Sempre chamamos o gateway, passando a chave se ela existir localmente
-      return await aiService.callAiGateway(messages, maxTokens, deepSeekKey);
+      return await aiService.callAiGateway(messages, maxTokens);
     } catch (err: any) {
       if (attempt < MAX_RETRIES) {
         await sleep(1000 * Math.pow(2, attempt));
@@ -154,7 +142,7 @@ export const useAiAssistant = (latestResult?: LotteryResult | null) => {
       }
       throw err;
     }
-  }, [deepSeekKey]);
+  }, []);
 
   const sendMessage = useCallback(async (messageToSend: string) => {
     const sanitizedMessage = sanitizeString(messageToSend.trim());
@@ -162,7 +150,6 @@ export const useAiAssistant = (latestResult?: LotteryResult | null) => {
 
     const intent = parseUserIntent(sanitizedMessage);
     const newMessage = { role: 'user' as const, content: sanitizedMessage };
-    
     setAiChat(prev => [...prev, newMessage]);
     persistChatMessage('user', sanitizedMessage);
     setAiMessage('');
@@ -173,11 +160,14 @@ export const useAiAssistant = (latestResult?: LotteryResult | null) => {
       const payload = [{ role: 'system', content: systemPrompt }, ...aiChat.slice(-MAX_HISTORY_MESSAGES), newMessage];
       const raw = await callAiGateway(payload, 2048);
       const result = sanitizeAiGamesDetailed(raw, intent);
-      
       setAiChat(prev => [...prev, { role: 'assistant', content: result.content }]);
       persistChatMessage('assistant', result.content);
     } catch (error: any) {
-      toast({ title: 'Erro na IA', description: 'Tente novamente em instantes.', variant: 'destructive' });
+      toast({
+        title: 'Erro na IA',
+        description: error?.message || 'Tente novamente em instantes.',
+        variant: 'destructive',
+      });
     } finally {
       setIsAiLoading(false);
     }
@@ -190,22 +180,31 @@ export const useAiAssistant = (latestResult?: LotteryResult | null) => {
     setAiMessage,
     sendMessage,
     setAiChat,
-    deepSeekKey,
-    saveDeepSeekKey: (key: string) => {
-      const sanitizedKey = sanitizeString(key.trim());
-      secureStorage.setItem('deepseek_api_key', sanitizedKey);
-      setDeepSeekKey(sanitizedKey);
-      toast({
-        title: "Configuração Salva",
-        description: "A chave da API DeepSeek foi armazenada com sucesso.",
-      });
+    isAiConfigured,
+    saveDeepSeekKey: async (key: string) => {
+      try {
+        const clean = sanitizeString(key.trim());
+        await aiConfigService.saveKey(clean);
+        setIsAiConfigured(true);
+        toast({
+          title: "Configuração salva",
+          description: "A chave da API DeepSeek foi armazenada com segurança no Supabase.",
+        });
+      } catch (err: any) {
+        toast({
+          title: "Erro ao salvar",
+          description: err?.message || "Verifique suas permissões de admin.",
+          variant: "destructive",
+        });
+      }
     },
     clearChatHistory: async () => {
+      if (!supabase) return;
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         await supabase.from('ai_chat_history').delete().eq('user_id', session.user.id);
       }
       setAiChat([]);
-    }
+    },
   };
 };
