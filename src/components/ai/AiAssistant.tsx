@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { Sparkles, Flame, PieChart, ShieldCheck } from 'lucide-react';
 
 interface AiAssistantProps {
-  deepSeekKey: string;
+  isAiConfigured: boolean;
   aiChat: any[];
   isAiLoading: boolean;
   aiMessage: string;
@@ -21,7 +21,7 @@ interface AiAssistantProps {
 }
 
 export const AiAssistant = ({
-  deepSeekKey,
+  isAiConfigured,
   aiChat,
   isAiLoading,
   aiMessage,
