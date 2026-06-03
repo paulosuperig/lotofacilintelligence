@@ -161,6 +161,7 @@ export type Database = {
     }
     Functions: {
       clear_user_history: { Args: never; Returns: undefined }
+      get_meta_pixel_id: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
