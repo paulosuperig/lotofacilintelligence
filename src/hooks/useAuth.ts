@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { UserSchema, type ValidatedUser } from '@/lib/security/schemas';
 import { toast } from 'sonner';
 import { type User, type Session } from '@supabase/supabase-js';
-import { trackEvent, trackCustom } from '@/lib/analytics/metaPixel';
+import { trackEvent, trackCustom, setAdvancedMatching, clearAdvancedMatching } from '@/lib/analytics/metaPixel';
 
 /**
  * Skill: Advanced Authentication & Token Management
@@ -63,15 +63,32 @@ export const useAuth = () => {
         if (!isMounted) return;
         setSession(currentSession);
         if (currentSession?.user) {
+          // Advanced Matching (SHA-256) — melhora match rate em campanhas Meta
+          setAdvancedMatching({
+            email: currentSession.user.email,
+            externalId: currentSession.user.id,
+          });
           if (event === 'SIGNED_IN') {
-            trackEvent('CompleteRegistration', { content_name: 'Login', status: true });
-            trackCustom('UserLogin', { user_id: currentSession.user.id });
+            trackEvent('CompleteRegistration', {
+              content_name: 'Login Lotofácil Intelligence',
+              content_category: 'auth',
+              status: true,
+              value: 0,
+              currency: 'BRL',
+            });
+            trackCustom('UserLogin', {
+              content_category: 'auth',
+              method: 'supabase_password',
+            });
           }
           fetchProfile(currentSession.user).finally(() => {
             if (isMounted) setLoading(false);
           });
         } else {
-          if (event === 'SIGNED_OUT') trackCustom('UserLogout');
+          if (event === 'SIGNED_OUT') {
+            trackCustom('UserLogout', { content_category: 'auth' });
+            clearAdvancedMatching();
+          }
           setUser(null);
           setLoading(false);
         }
@@ -84,6 +101,10 @@ export const useAuth = () => {
       if (!isMounted) return;
       setSession(initialSession);
       if (initialSession?.user) {
+        setAdvancedMatching({
+          email: initialSession.user.email,
+          externalId: initialSession.user.id,
+        });
         fetchProfile(initialSession.user).finally(() => {
           if (isMounted) setLoading(false);
         });

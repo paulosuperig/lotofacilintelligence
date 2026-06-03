@@ -119,7 +119,13 @@ export const useLottery = () => {
 
       const updatedHistory = await historyService.saveGames(userId, securedGames);
       setHistory(updatedHistory);
-      trackCustom('SalvarJogo', { quantity: securedGames.length });
+      trackCustom('SalvarJogo', {
+        content_category: 'history',
+        content_ids: securedGames.map(g => g.id),
+        num_items: securedGames.length,
+        value: securedGames.length * 3.5,
+        currency: 'BRL',
+      });
       window.dispatchEvent(new CustomEvent('lottery-history-updated'));
       return { success: true, duplicate: false };
     } catch (error) {
