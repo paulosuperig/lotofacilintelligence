@@ -1,36 +1,37 @@
 import { supabase } from "@/lib/supabase";
 
 export const aiService = {
-  async callDeepSeekDirect(messages: any[], apiKey: string, maxTokens: number): Promise<string> {
-    const response = await fetch('https://api.deepseek.com/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: 'deepseek-chat',
-        messages,
-        stream: false,
-        temperature: 0.2,
+  /**
+   * Chamada principal para o serviço de IA.
+   * Agora sempre passa pelo Edge Function para evitar problemas de CORS
+   * e garantir o tratamento centralizado de erros.
+   */
+  async callAiGateway(messages: any[], maxTokens: number, apiKey?: string): Promise<string> {
+    const { data, error } = await supabase.functions.invoke('intelligence-ai', {
+      body: { 
+        messages, 
         max_tokens: maxTokens,
-      }),
+        apiKey: apiKey // Se fornecido, o Edge Function usará esta chave
+      },
     });
 
-    if (!response.ok) {
-      const errText = await response.text().catch(() => '');
-      throw new Error(`DeepSeek API Error: ${response.status} ${errText}`);
+    if (error) {
+      console.error("[AI Service] Invoke error:", error);
+      throw error;
     }
 
-    const data = await response.json();
+    if (data?.error) {
+      console.error("[AI Service] Business error:", data.error, data.message);
+      throw new Error(data.message || 'Erro no serviço de IA');
+    }
+
     return data?.choices?.[0]?.message?.content || '';
   },
 
-  async callAiGateway(messages: any[], maxTokens: number): Promise<string> {
-    const { data, error } = await supabase.functions.invoke('intelligence-ai', {
-      body: { messages, max_tokens: maxTokens },
-    });
-    if (error) throw error;
-    return data?.choices?.[0]?.message?.content || '';
+  /**
+   * @deprecated Utilize callAiGateway passando a apiKey no terceiro parâmetro
+   */
+  async callDeepSeekDirect(messages: any[], apiKey: string, maxTokens: number): Promise<string> {
+    return this.callAiGateway(messages, maxTokens, apiKey);
   }
 };
