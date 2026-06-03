@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import Index from "./pages/Index.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import { MetaPixelLoader } from "./components/analytics/MetaPixelLoader";
 
 const queryClient = new QueryClient();
 
@@ -16,6 +17,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
+        <MetaPixelLoader />
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
