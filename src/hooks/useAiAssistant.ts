@@ -195,15 +195,6 @@ export const useAiAssistant = (latestResult?: LotteryResult | null) => {
       setIsAiLoading(false);
     }
   }, [aiChat, buildSystemPrompt, callAiGateway, toast]);
-      toast({
-        title: 'Erro na IA',
-        description: error?.message || 'Tente novamente em instantes.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsAiLoading(false);
-    }
-  }, [aiChat, buildSystemPrompt, callAiGateway, toast]);
 
   return {
     aiChat,
