@@ -115,7 +115,10 @@ export const Sidebar = ({ activeTab, setActiveTab, role, onLogout }: SidebarProp
           highlight
         />
         {role === 'admin' && (
-           <NavIcon icon={<Settings size={20} strokeWidth={1.5} />} active={activeTab === 'ajustes'} label="Ajustes" onClick={() => setActiveTab('ajustes')} />
+          <>
+            <NavIcon icon={<Users size={20} strokeWidth={1.5} />} active={activeTab === 'usuarios'} label="Usuários" onClick={() => setActiveTab('usuarios')} />
+            <NavIcon icon={<Settings size={20} strokeWidth={1.5} />} active={activeTab === 'ajustes'} label="Ajustes" onClick={() => setActiveTab('ajustes')} />
+          </>
         )}
       </nav>
       <div className="mt-auto">
