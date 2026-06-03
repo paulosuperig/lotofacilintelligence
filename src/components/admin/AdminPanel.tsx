@@ -12,7 +12,7 @@ interface AdminPanelProps {
   onCreateOrUpdateUser: (userData: any, editingUser: any) => void;
   onDeleteUser: (userId: string) => void;
   onToggleUserStatus: (userId: string) => void;
-  deepSeekKey: string;
+  isAiConfigured: boolean;
   onSaveDeepSeekKey: (key: string) => void;
 }
 
@@ -22,7 +22,7 @@ export const AdminPanel = ({
   onCreateOrUpdateUser, 
   onDeleteUser, 
   onToggleUserStatus,
-  deepSeekKey,
+  isAiConfigured,
   onSaveDeepSeekKey
 }: AdminPanelProps) => {
   const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
@@ -84,7 +84,7 @@ export const AdminPanel = ({
       />
 
       <DeepSeekConfig 
-        deepSeekKey={deepSeekKey} 
+        isConfigured={isAiConfigured}
         onSaveDeepSeekKey={onSaveDeepSeekKey} 
       />
 

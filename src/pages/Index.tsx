@@ -41,7 +41,7 @@ const Index = () => {
     setAiMessage,
     sendMessage,
     clearChatHistory,
-    deepSeekKey,
+    isAiConfigured,
     saveDeepSeekKey
   } = useAiAssistant(latestResult);
 
@@ -110,7 +110,7 @@ const Index = () => {
 
               {activeTab === 'ia' && (
                 <AiAssistant 
-                  deepSeekKey={deepSeekKey}
+                  isAiConfigured={isAiConfigured}
                   aiChat={aiChat}
                   isAiLoading={isAiLoading}
                   aiMessage={aiMessage}
@@ -131,7 +131,7 @@ const Index = () => {
                   onCreateOrUpdateUser={createOrUpdateUser}
                   onDeleteUser={deleteUser}
                   onToggleUserStatus={toggleUserStatus}
-                  deepSeekKey={deepSeekKey}
+                  isAiConfigured={isAiConfigured}
                   onSaveDeepSeekKey={saveDeepSeekKey}
                 />
               )}
