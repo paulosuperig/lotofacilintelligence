@@ -16,6 +16,7 @@ interface AdminPanelProps {
   onToggleUserStatus: (userId: string) => void;
   isAiConfigured: boolean;
   onSaveDeepSeekKey: (key: string) => void;
+  defaultTab?: 'users' | 'settings';
 }
 
 export const AdminPanel = ({ 
@@ -25,12 +26,18 @@ export const AdminPanel = ({
   onDeleteUser, 
   onToggleUserStatus,
   isAiConfigured,
-  onSaveDeepSeekKey
+  onSaveDeepSeekKey,
+  defaultTab = 'users'
 }: AdminPanelProps) => {
   const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<any>(null);
   const [userFormData, setUserFormData] = useState({ email: '', password: '', role: 'demo', status: 'active' });
-  const [activeTab, setActiveTab] = useState('users');
+  const [activeTab, setActiveTab] = useState(defaultTab);
+
+  // Sync with defaultTab prop when it changes
+  React.useEffect(() => {
+    setActiveTab(defaultTab);
+  }, [defaultTab]);
 
   const handleEditUser = (user: any) => {
     setEditingUser(user);
