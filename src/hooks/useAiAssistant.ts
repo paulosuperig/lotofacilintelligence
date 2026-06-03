@@ -145,10 +145,8 @@ export const useAiAssistant = (latestResult?: LotteryResult | null) => {
 
   const callAiGateway = useCallback(async (messages: any[], maxTokens: number, attempt = 0): Promise<string> => {
     try {
-      if (deepSeekKey) {
-        return await aiService.callDeepSeekDirect(messages, deepSeekKey, maxTokens);
-      }
-      return await aiService.callAiGateway(messages, maxTokens);
+      // Sempre chamamos o gateway, passando a chave se ela existir localmente
+      return await aiService.callAiGateway(messages, maxTokens, deepSeekKey);
     } catch (err: any) {
       if (attempt < MAX_RETRIES) {
         await sleep(1000 * Math.pow(2, attempt));
