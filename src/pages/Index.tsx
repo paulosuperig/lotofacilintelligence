@@ -135,6 +135,19 @@ const Index = () => {
                 />
               )}
 
+              {activeTab === 'usuarios' && isAdmin && (
+                <AdminPanel 
+                  users={users}
+                  onBack={() => setActiveTab('home')}
+                  onCreateOrUpdateUser={createOrUpdateUser}
+                  onDeleteUser={deleteUser}
+                  onToggleUserStatus={toggleUserStatus}
+                  isAiConfigured={isAiConfigured}
+                  onSaveDeepSeekKey={saveDeepSeekKey}
+                  defaultTab="users"
+                />
+              )}
+
               {activeTab === 'ajustes' && isAdmin && (
                 <AdminPanel 
                   users={users}
@@ -144,6 +157,7 @@ const Index = () => {
                   onToggleUserStatus={toggleUserStatus}
                   isAiConfigured={isAiConfigured}
                   onSaveDeepSeekKey={saveDeepSeekKey}
+                  defaultTab="settings"
                 />
               )}
 
