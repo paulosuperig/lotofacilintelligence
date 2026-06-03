@@ -6,7 +6,7 @@ import { UserTable } from './UserTable';
 import { DeepSeekConfig } from './DeepSeekConfig';
 import { SecurityBanner } from './SecurityBanner';
 import { MetaPixelConfig } from './MetaPixelConfig';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 
 interface AdminPanelProps {
   users: any[];
@@ -89,19 +89,8 @@ export const AdminPanel = ({
         onSubmit={handleUserDialogSubmit}
       />
 
-      <Tabs value={activeTab} className="w-full" onValueChange={(v) => setActiveTab(v as 'users' | 'settings')}>
-        <TabsList className="grid w-full max-w-md grid-cols-2 mb-8 bg-zinc-100 dark:bg-zinc-800 p-1 rounded-xl h-12">
-          <TabsTrigger value="users" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-700 data-[state=active]:shadow-sm transition-all flex items-center gap-2 h-10">
-            <Users size={16} />
-            Usuários
-          </TabsTrigger>
-          <TabsTrigger value="settings" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-700 data-[state=active]:shadow-sm transition-all flex items-center gap-2 h-10">
-            <Settings size={16} />
-            Configurações
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="users" className="mt-0 space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+      {activeTab === 'users' ? (
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
           <div className="bg-zinc-50/50 dark:bg-zinc-800/30 rounded-2xl p-1">
             <UserTable 
               users={users} 
@@ -110,9 +99,9 @@ export const AdminPanel = ({
               onDelete={onDeleteUser} 
             />
           </div>
-        </TabsContent>
-
-        <TabsContent value="settings" className="mt-0 space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+        </div>
+      ) : (
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <div className="grid grid-cols-1 gap-8">
             <DeepSeekConfig 
               isConfigured={isAiConfigured}
@@ -123,8 +112,8 @@ export const AdminPanel = ({
             
             <SecurityBanner />
           </div>
-        </TabsContent>
-      </Tabs>
+        </div>
+      )}
     </div>
   );
 };
