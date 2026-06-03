@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useLottery } from '@/hooks/useLottery';
 import { useAiAssistant } from '@/hooks/useAiAssistant';
@@ -6,6 +6,7 @@ import { useAdmin } from '@/hooks/useAdmin';
 import { useAuth } from '@/hooks/useAuth';
 import { useAiGameSaver } from '@/hooks/useAiGameSaver';
 import { AnimatePresence, motion } from 'framer-motion';
+import { trackEvent } from '@/lib/analytics/metaPixel';
 
 import { Sidebar, MobileNav } from '@/components/layout/Navigation';
 import { Header } from '@/components/layout/Header';
@@ -23,6 +24,16 @@ const Index = () => {
   const { toast } = useToast();
   const { user, loading, isAdmin, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState('home');
+
+  // SPA tracking: ViewContent a cada mudança de aba (otimiza campanhas de engajamento)
+  useEffect(() => {
+    if (!user) return;
+    trackEvent('ViewContent', {
+      content_name: `tab:${activeTab}`,
+      content_category: 'app_section',
+      content_ids: [activeTab],
+    });
+  }, [activeTab, user]);
 
   const { 
     latestResult, 
