@@ -2,6 +2,8 @@ import { supabase, isSupabaseEnabled } from '@/lib/supabase';
 
 const KEY = 'deepseek_api_key';
 const PIXEL_KEY = 'meta_pixel_id';
+const CAPI_KEY = 'meta_capi_token';
+const TEST_CODE_KEY = 'meta_test_event_code';
 
 /**
  * Skill: @skillslovable — Configurações de sistema via Supabase.
@@ -64,5 +66,59 @@ export const aiConfigService = {
   async isPixelConfigured(): Promise<boolean> {
     const id = await this.getMetaPixelId();
     return !!id;
+  },
+
+  /** Apenas admin (RLS) pode gravar. O frontend NUNCA lê este valor de volta por segurança. */
+  async saveMetaCapiToken(token: string): Promise<void> {
+    if (!isSupabaseEnabled() || !supabase) throw new Error('Supabase indisponível.');
+    const clean = token.trim();
+    if (!clean) throw new Error('Token CAPI vazio.');
+
+    const { error } = await supabase
+      .from('system_configs')
+      .upsert(
+        { key: CAPI_KEY, value: { token: clean } as any, updated_at: new Date().toISOString() },
+        { onConflict: 'key' }
+      );
+    if (error) throw error;
+  },
+
+  async saveMetaTestEventCode(code: string): Promise<void> {
+    if (!isSupabaseEnabled() || !supabase) throw new Error('Supabase indisponível.');
+    const clean = code.trim();
+
+    const { error } = await supabase
+      .from('system_configs')
+      .upsert(
+        { key: TEST_CODE_KEY, value: { code: clean } as any, updated_at: new Date().toISOString() },
+        { onConflict: 'key' }
+      );
+    if (error) throw error;
+  },
+
+  /** 
+   * Retorna se o CAPI está configurado (apenas o fato de existir, não o valor).
+   * Útil para o Admin UI mostrar o status.
+   */
+  async getMetaCapiStatus(): Promise<{ token: boolean; testCode: string | null }> {
+    if (!isSupabaseEnabled() || !supabase) return { token: false, testCode: null };
+    
+    // Tentamos ler (se for admin o RLS permitirá ver que a linha existe)
+    const { data: tokenData } = await supabase
+      .from('system_configs')
+      .select('value')
+      .eq('key', CAPI_KEY)
+      .maybeSingle();
+
+    const { data: testData } = await supabase
+      .from('system_configs')
+      .select('value')
+      .eq('key', TEST_CODE_KEY)
+      .maybeSingle();
+
+    return {
+      token: !!tokenData,
+      testCode: (testData?.value as any)?.code || null
+    };
   },
 };
