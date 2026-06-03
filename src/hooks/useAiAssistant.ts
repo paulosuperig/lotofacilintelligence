@@ -7,6 +7,7 @@ import { computeLotteryStats, formatStatsForPrompt } from '@/lib/ai/lotteryStats
 import { aiService } from '@/services/aiService';
 import { aiConfigService } from '@/services/aiConfigService';
 import { sanitizeAiGamesDetailed, type UserIntent } from '@/lib/ai/sanitizeGames';
+import { trackCustom, trackEvent } from '@/lib/analytics/metaPixel';
 
 const MAX_HISTORY_MESSAGES = 15;
 const MAX_RETRIES = 2;
@@ -162,6 +163,8 @@ export const useAiAssistant = (latestResult?: LotteryResult | null) => {
       const result = sanitizeAiGamesDetailed(raw, intent);
       setAiChat(prev => [...prev, { role: 'assistant', content: result.content }]);
       persistChatMessage('assistant', result.content);
+      trackCustom('ConsultaIA', { quantidade: intent.quantidade ?? null });
+      trackEvent('Contact', { content_name: 'Intelligence AI' });
     } catch (error: any) {
       toast({
         title: 'Erro na IA',

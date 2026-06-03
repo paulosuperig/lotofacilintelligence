@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { UserSchema, type ValidatedUser } from '@/lib/security/schemas';
 import { toast } from 'sonner';
 import { type User, type Session } from '@supabase/supabase-js';
+import { trackEvent, trackCustom } from '@/lib/analytics/metaPixel';
 
 /**
  * Skill: Advanced Authentication & Token Management
@@ -58,14 +59,19 @@ export const useAuth = () => {
     // 1. Listener PRIMEIRO (evita perder eventos durante o getSession inicial).
     //    "Fire and forget" do fetchProfile dentro do callback para evitar deadlock.
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, currentSession) => {
+      (event, currentSession) => {
         if (!isMounted) return;
         setSession(currentSession);
         if (currentSession?.user) {
+          if (event === 'SIGNED_IN') {
+            trackEvent('CompleteRegistration', { content_name: 'Login', status: true });
+            trackCustom('UserLogin', { user_id: currentSession.user.id });
+          }
           fetchProfile(currentSession.user).finally(() => {
             if (isMounted) setLoading(false);
           });
         } else {
+          if (event === 'SIGNED_OUT') trackCustom('UserLogout');
           setUser(null);
           setLoading(false);
         }
