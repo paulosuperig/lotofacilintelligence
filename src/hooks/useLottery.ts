@@ -5,6 +5,7 @@ import { generateSecureId } from '@/lib/security/utils';
 import { supabase, isSupabaseEnabled } from '@/lib/supabase';
 import { lotteryService } from '@/services/lotteryService';
 import { historyService } from '@/services/historyService';
+import { trackCustom } from '@/lib/analytics/metaPixel';
 
 export const useLottery = () => {
   const { toast } = useToast();
@@ -118,6 +119,7 @@ export const useLottery = () => {
 
       const updatedHistory = await historyService.saveGames(userId, securedGames);
       setHistory(updatedHistory);
+      trackCustom('SalvarJogo', { quantity: securedGames.length });
       window.dispatchEvent(new CustomEvent('lottery-history-updated'));
       return { success: true, duplicate: false };
     } catch (error) {

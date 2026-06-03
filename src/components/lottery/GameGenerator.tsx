@@ -28,6 +28,7 @@ import { useLottery } from '@/hooks/useLottery';
 import { SavedGame } from '@/types/lottery';
 import { calculateGameStats } from '@/lib/lottery/stats';
 import { buildSingleGameMessage, openWhatsApp } from '@/lib/whatsapp';
+import { trackCustom, trackEvent } from '@/lib/analytics/metaPixel';
 
 export const GameGenerator = () => {
   const { history, saveToHistory, generateSmartGame } = useLottery();
@@ -52,6 +53,8 @@ export const GameGenerator = () => {
     const newGame = generateSmartGame();
     setCurrentResult(newGame);
     await saveToHistory([newGame]);
+    trackCustom('GerarJogo', { sum: newGame.sum, type: newGame.type });
+    trackEvent('Lead', { content_name: 'Jogo Gerado', value: 1, currency: 'BRL' });
     setIsGenerating(false);
   };
 

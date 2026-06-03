@@ -5,6 +5,7 @@ import { UserDialog } from './UserDialog';
 import { UserTable } from './UserTable';
 import { DeepSeekConfig } from './DeepSeekConfig';
 import { SecurityBanner } from './SecurityBanner';
+import { MetaPixelConfig } from './MetaPixelConfig';
 
 interface AdminPanelProps {
   users: any[];
@@ -87,6 +88,8 @@ export const AdminPanel = ({
         isConfigured={isAiConfigured}
         onSaveDeepSeekKey={onSaveDeepSeekKey} 
       />
+
+      <MetaPixelConfig />
 
       <SecurityBanner />
     </div>
