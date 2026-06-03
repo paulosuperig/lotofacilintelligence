@@ -53,32 +53,45 @@ export const useAuth = () => {
   }, []);
 
   useEffect(() => {
-    // 1. Get initial session
-    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
-      setSession(initialSession);
-      if (initialSession?.user) {
-        fetchProfile(initialSession.user);
-      }
-      setLoading(false);
-    });
+    let isMounted = true;
 
-    // 2. Listen for auth changes
+    // 1. Listener PRIMEIRO (evita perder eventos durante o getSession inicial).
+    //    "Fire and forget" do fetchProfile dentro do callback para evitar deadlock.
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, currentSession) => {
+        if (!isMounted) return;
         setSession(currentSession);
         if (currentSession?.user) {
-          fetchProfile(currentSession.user);
+          fetchProfile(currentSession.user).finally(() => {
+            if (isMounted) setLoading(false);
+          });
         } else {
           setUser(null);
+          setLoading(false);
         }
-        setLoading(false);
       }
     );
 
+    // 2. Restaurar sessão existente. Só liberamos `loading=false` após o
+    //    fetchProfile resolver — evita o flicker da tela de login no F5.
+    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+      if (!isMounted) return;
+      setSession(initialSession);
+      if (initialSession?.user) {
+        fetchProfile(initialSession.user).finally(() => {
+          if (isMounted) setLoading(false);
+        });
+      } else {
+        setLoading(false);
+      }
+    });
+
     return () => {
+      isMounted = false;
       subscription.unsubscribe();
     };
   }, [fetchProfile]);
+
 
   const signOut = useCallback(async () => {
     const { error } = await supabase.auth.signOut();
