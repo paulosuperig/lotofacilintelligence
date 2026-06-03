@@ -5,7 +5,7 @@ import remarkGfm from 'remark-gfm';
 import { Loader2, Save } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
-const GameLine = ({ raw }: { raw: string }) => {
+const GameLine = ({ raw, onSave }: { raw: string; onSave?: (text: string) => void }) => {
   const text = String(raw);
   const sumMatch = text.match(/soma[:\s]*?(\d{2,3})/i);
   const tokens = text.match(/\b\d{1,2}\b/g) || [];
@@ -40,6 +40,18 @@ const GameLine = ({ raw }: { raw: string }) => {
           </div>
         ))}
       </div>
+      {onSave && (
+        <div className="flex justify-end mt-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2.5 text-[10px] text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg gap-1.5"
+            onClick={() => onSave(game.map((n) => String(n).padStart(2, '0')).join(' '))}
+          >
+            <Save size={11} /> Salvar este jogo
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
@@ -50,20 +62,20 @@ const isGameLine = (text: string) => {
   return new Set(valid).size >= 15;
 };
 
-const markdownComponents = {
+const makeMarkdownComponents = (onSave: (text: string) => void) => ({
   code: ({ inline, className, children, ...props }: any) => {
     const raw = String(children ?? '');
-    if (isGameLine(raw)) return <GameLine raw={raw} />;
+    if (isGameLine(raw)) return <GameLine raw={raw} onSave={onSave} />;
     return <code className={className} {...props}>{children}</code>;
   },
   pre: ({ children, ...props }: any) => {
     const child: any = Array.isArray(children) ? children[0] : children;
     const inner = child?.props?.children;
     const raw = Array.isArray(inner) ? inner.join('') : String(inner ?? '');
-    if (isGameLine(raw)) return <GameLine raw={raw} />;
+    if (isGameLine(raw)) return <GameLine raw={raw} onSave={onSave} />;
     return <pre {...props}>{children}</pre>;
   },
-};
+});
 
 interface ChatMessageProps {
   msg: any;
@@ -81,7 +93,7 @@ export const ChatMessage = ({ msg, onSaveAiGame }: ChatMessageProps) => (
       {msg.role === 'assistant' ? (
         <>
           <div className="prose prose-sm max-w-none dark:prose-invert">
-            <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>{msg.content}</ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm]} components={makeMarkdownComponents(onSaveAiGame)}>{msg.content}</ReactMarkdown>
           </div>
           <div className="flex justify-between items-center mt-3 pt-3 border-t border-zinc-50 dark:border-zinc-700">
             <span className="text-[10px] text-zinc-400 font-medium">Intelligence AI Otimizada</span>
@@ -91,7 +103,7 @@ export const ChatMessage = ({ msg, onSaveAiGame }: ChatMessageProps) => (
               className="h-8 px-3 text-[10px] text-zinc-600 hover:bg-zinc-50 rounded-lg gap-2"
               onClick={() => onSaveAiGame(msg.content)}
             >
-              <Save size={12} /> Salvar
+              <Save size={12} /> Salvar todos os jogos
             </Button>
           </div>
         </>
