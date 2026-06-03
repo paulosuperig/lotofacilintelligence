@@ -33,29 +33,57 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { messages, max_tokens } = await req.json();
+    const { messages, max_tokens, model: requestedModel } = await req.json();
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      return new Response(
-        JSON.stringify({ error: 'AI_SERVICE_UNAVAILABLE', fallback: true, message: 'LOVABLE_API_KEY não configurada' }),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    // Use external DeepSeek API as requested by user
+    const DEEPSEEK_API_KEY = Deno.env.get('DEEPSEEK_API_KEY');
+    
+    // Default model if none provided
+    const model = requestedModel || 'deepseek-chat';
+
+    let response;
+    
+    if (DEEPSEEK_API_KEY) {
+      // Direct call to DeepSeek API
+      response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: model,
+          messages,
+          max_tokens: max_tokens || 2048,
+          temperature: 0.2,
+        }),
+      });
+    } else {
+      // Fallback to Lovable AI Gateway with deepseek/deepseek-chat
+      // Note: User mentioned using external API, so we should ensure DEEPSEEK_API_KEY is set.
+      const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+      
+      if (!LOVABLE_API_KEY) {
+        return new Response(
+          JSON.stringify({ error: 'AI_SERVICE_UNAVAILABLE', fallback: true, message: 'API Keys não configuradas' }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: `deepseek/${model}`,
+          messages,
+          max_tokens: max_tokens || 2048,
+          temperature: 0.2,
+        }),
+      });
     }
-
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages,
-        max_tokens: max_tokens || 2048,
-        temperature: 0.2,
-      }),
-    });
 
     if (!response.ok) {
       const errorText = await response.text();
