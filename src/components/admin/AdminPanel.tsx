@@ -89,7 +89,7 @@ export const AdminPanel = ({
         onSubmit={handleUserDialogSubmit}
       />
 
-      <Tabs defaultValue="users" className="w-full" onValueChange={setActiveTab}>
+      <Tabs value={activeTab} className="w-full" onValueChange={(v) => setActiveTab(v as 'users' | 'settings')}>
         <TabsList className="grid w-full max-w-md grid-cols-2 mb-8 bg-zinc-100 dark:bg-zinc-800 p-1 rounded-xl h-12">
           <TabsTrigger value="users" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-700 data-[state=active]:shadow-sm transition-all flex items-center gap-2 h-10">
             <Users size={16} />
