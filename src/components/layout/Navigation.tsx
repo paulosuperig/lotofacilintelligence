@@ -7,7 +7,8 @@ import {
   Cpu, 
   Settings, 
   LogOut,
-  Trophy
+  Trophy,
+  Users
 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
