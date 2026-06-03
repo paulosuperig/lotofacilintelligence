@@ -53,8 +53,21 @@ export const GameGenerator = () => {
     const newGame = generateSmartGame();
     setCurrentResult(newGame);
     await saveToHistory([newGame]);
-    trackCustom('GerarJogo', { sum: newGame.sum, type: newGame.type });
-    trackEvent('Lead', { content_name: 'Jogo Gerado', value: 1, currency: 'BRL' });
+    trackEvent('Lead', {
+      content_name: 'Jogo Lotofácil Gerado',
+      content_category: 'game_generator',
+      content_type: 'lottery_game',
+      content_ids: [newGame.id],
+      value: 3.5, // valor médio de aposta Lotofácil (BRL)
+      currency: 'BRL',
+      num_items: 1,
+      sum: newGame.sum,
+    });
+    trackCustom('GerarJogo', {
+      content_category: 'game_generator',
+      sum: newGame.sum,
+      type: newGame.type,
+    });
     setIsGenerating(false);
   };
 

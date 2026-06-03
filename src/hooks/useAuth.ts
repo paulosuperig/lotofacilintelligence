@@ -101,6 +101,10 @@ export const useAuth = () => {
       if (!isMounted) return;
       setSession(initialSession);
       if (initialSession?.user) {
+        setAdvancedMatching({
+          email: initialSession.user.email,
+          externalId: initialSession.user.id,
+        });
         fetchProfile(initialSession.user).finally(() => {
           if (isMounted) setLoading(false);
         });

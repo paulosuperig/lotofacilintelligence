@@ -156,6 +156,13 @@ export const useAiAssistant = (latestResult?: LotteryResult | null) => {
     setAiMessage('');
     setIsAiLoading(true);
 
+    // Search event — Meta usa para otimização de campanhas de descoberta
+    trackEvent('Search', {
+      search_string: sanitizedMessage.slice(0, 120),
+      content_category: 'ai_chat',
+      content_name: 'Intelligence AI Query',
+    });
+
     try {
       const systemPrompt = buildSystemPrompt(intent);
       const payload = [{ role: 'system', content: systemPrompt }, ...aiChat.slice(-MAX_HISTORY_MESSAGES), newMessage];
@@ -163,9 +170,31 @@ export const useAiAssistant = (latestResult?: LotteryResult | null) => {
       const result = sanitizeAiGamesDetailed(raw, intent);
       setAiChat(prev => [...prev, { role: 'assistant', content: result.content }]);
       persistChatMessage('assistant', result.content);
-      trackCustom('ConsultaIA', { quantidade: intent.quantidade ?? null });
-      trackEvent('Contact', { content_name: 'Intelligence AI' });
+      trackEvent('Contact', {
+        content_name: 'Intelligence AI Response',
+        content_category: 'ai_chat',
+        status: true,
+      });
+      trackCustom('ConsultaIA', {
+        content_category: 'ai_chat',
+        quantidade: intent.quantidade ?? null,
+        soma_min: intent.somaMin ?? null,
+        soma_max: intent.somaMax ?? null,
+      });
     } catch (error: any) {
+      trackCustom('ConsultaIAFalhou', {
+        content_category: 'ai_chat',
+        error: error?.message?.slice(0, 100) || 'unknown',
+      });
+      toast({
+        title: 'Erro na IA',
+        description: error?.message || 'Tente novamente em instantes.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsAiLoading(false);
+    }
+  }, [aiChat, buildSystemPrompt, callAiGateway, toast]);
       toast({
         title: 'Erro na IA',
         description: error?.message || 'Tente novamente em instantes.',
