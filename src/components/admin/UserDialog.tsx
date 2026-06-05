@@ -46,16 +46,20 @@ export const UserDialog = ({
   editingUser,
   userFormData,
   setUserFormData,
-  onSubmit
-}: UserDialogProps) => (
-  <Dialog open={isOpen} onOpenChange={onOpenChange}>
-    <DialogContent className="sm:max-w-[425px] rounded-3xl">
-      <DialogHeader>
-        <DialogTitle className="text-zinc-900 dark:text-zinc-100">{editingUser ? 'Editar Usuário' : 'Criar Novo Usuário'}</DialogTitle>
-        <DialogDescription>
-          Preencha os dados do usuário abaixo.
-        </DialogDescription>
-      </DialogHeader>
+  onSubmit,
+  onResetPassword
+}: UserDialogProps) => {
+  const [newPassword, setNewPassword] = useState('');
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[425px] rounded-3xl">
+        <DialogHeader>
+          <DialogTitle className="text-zinc-900 dark:text-zinc-100">{editingUser ? 'Editar Usuário' : 'Criar Novo Usuário'}</DialogTitle>
+          <DialogDescription>
+            Preencha os dados do usuário abaixo.
+          </DialogDescription>
+        </DialogHeader>
       <form onSubmit={onSubmit} className="space-y-4 py-4">
         <div className="space-y-2">
           <Label htmlFor="email" className="text-zinc-700 dark:text-zinc-300">E-mail</Label>
