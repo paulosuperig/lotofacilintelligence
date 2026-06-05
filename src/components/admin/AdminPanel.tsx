@@ -129,6 +129,7 @@ export const AdminPanel = ({
         userFormData={userFormData}
         setUserFormData={setUserFormData}
         onSubmit={handleUserDialogSubmit}
+        onResetPassword={(newPassword) => onResetPassword(editingUser.id, newPassword)}
       />
 
       {activeTab === 'users' ? (
