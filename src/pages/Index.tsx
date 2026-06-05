@@ -87,7 +87,7 @@ const Index = () => {
         <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} role={user.role} onLogout={handleLogout} />
         <MobileNav activeTab={activeTab} setActiveTab={setActiveTab} role={user.role} onLogout={handleLogout} />
 
-        {user.role === 'demo' && <DemoBanner />}
+        {/* {user.role === 'demo' && <DemoBanner />} */}
 
         <main className="flex-grow w-full md:pl-[5rem] pb-[calc(8rem+env(safe-area-inset-bottom))] md:pb-12 min-h-dvh">
           <motion.div 
