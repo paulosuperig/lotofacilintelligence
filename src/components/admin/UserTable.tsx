@@ -163,10 +163,10 @@ const ActionMenu = ({ u, onEdit, onToggleStatus, onDelete }: any) => (
     <DropdownMenuContent align="end" className="rounded-xl w-48">
       <DropdownMenuLabel>Ações</DropdownMenuLabel>
       <DropdownMenuSeparator />
-      <DropdownMenuItem onClick={() => onEdit(u)} className="cursor-pointer">
+      <DropdownMenuItem onClick={() => onEdit(u)} className="cursor-pointer text-zinc-900 dark:text-zinc-100">
         <Edit size={14} className="mr-2" /> Editar
       </DropdownMenuItem>
-      <DropdownMenuItem onClick={() => onToggleStatus(u.id)} className="cursor-pointer">
+      <DropdownMenuItem onClick={() => onToggleStatus(u.id)} className="cursor-pointer text-zinc-900 dark:text-zinc-100">
         {u.status === 'active' ? (
           <><Ban size={14} className="mr-2 text-amber-500" /> Bloquear</>
         ) : (
