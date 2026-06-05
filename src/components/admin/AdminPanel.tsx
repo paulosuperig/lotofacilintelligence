@@ -26,6 +26,7 @@ export const AdminPanel = ({
   onCreateOrUpdateUser, 
   onDeleteUser, 
   onToggleUserStatus,
+  onResetPassword,
   isAiConfigured,
   onSaveDeepSeekKey,
   defaultTab = 'users'
