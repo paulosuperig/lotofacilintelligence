@@ -26,7 +26,7 @@ export const TrendsCard = () => (
           <span className="text-[9px] font-bold text-rose-500 uppercase tracking-widest flex items-center gap-1.5">
             <Flame size={10} /> Mais Quentes
           </span>
-          <span className="text-[9px] font-bold text-zinc-400">↑ Frequência alta</span>
+          <span className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500">↑ Frequência alta</span>
         </div>
         <div className="flex flex-wrap gap-2">
           {["20", "10", "25", "01", "13"].map(num => (
@@ -40,7 +40,7 @@ export const TrendsCard = () => (
           <span className="text-[9px] font-bold text-sky-500 uppercase tracking-widest flex items-center gap-1.5">
             <Snowflake size={10} /> Mais Frias
           </span>
-          <span className="text-[9px] font-bold text-zinc-400">↓ Atrasadas</span>
+          <span className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500">↓ Atrasadas</span>
         </div>
         <div className="flex flex-wrap gap-2">
           {["04", "07", "12", "18", "22"].map(num => (
