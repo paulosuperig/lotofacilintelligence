@@ -160,8 +160,8 @@ const ActionMenu = ({ u, onEdit, onToggleStatus, onDelete }: any) => (
         <MoreVertical size={16} />
       </Button>
     </DropdownMenuTrigger>
-    <DropdownMenuContent align="end" className="rounded-xl w-48">
-      <DropdownMenuLabel>Ações</DropdownMenuLabel>
+    <DropdownMenuContent align="end" className="rounded-xl w-48 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+      <DropdownMenuLabel className="text-zinc-500 dark:text-zinc-400">Ações</DropdownMenuLabel>
       <DropdownMenuSeparator />
       <DropdownMenuItem onClick={() => onEdit(u)} className="cursor-pointer text-zinc-900 dark:text-zinc-100">
         <Edit size={14} className="mr-2" /> Editar
