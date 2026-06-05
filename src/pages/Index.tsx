@@ -143,6 +143,7 @@ const Index = () => {
                   onCreateOrUpdateUser={createOrUpdateUser}
                   onDeleteUser={deleteUser}
                   onToggleUserStatus={toggleUserStatus}
+                  onResetPassword={resetPassword}
                   isAiConfigured={isAiConfigured}
                   onSaveDeepSeekKey={saveDeepSeekKey}
                   defaultTab="users"
