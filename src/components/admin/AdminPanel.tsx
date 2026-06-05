@@ -14,6 +14,7 @@ interface AdminPanelProps {
   onCreateOrUpdateUser: (userData: any, editingUser: any) => void;
   onDeleteUser: (userId: string) => void;
   onToggleUserStatus: (userId: string) => void;
+  onResetPassword: (userId: string, newPassword: string) => void;
   isAiConfigured: boolean;
   onSaveDeepSeekKey: (key: string) => void;
   defaultTab?: 'users' | 'settings';
@@ -25,6 +26,7 @@ export const AdminPanel = ({
   onCreateOrUpdateUser, 
   onDeleteUser, 
   onToggleUserStatus,
+  onResetPassword,
   isAiConfigured,
   onSaveDeepSeekKey,
   defaultTab = 'users'
@@ -127,6 +129,7 @@ export const AdminPanel = ({
         userFormData={userFormData}
         setUserFormData={setUserFormData}
         onSubmit={handleUserDialogSubmit}
+        onResetPassword={(newPassword) => onResetPassword(editingUser.id, newPassword)}
       />
 
       {activeTab === 'users' ? (

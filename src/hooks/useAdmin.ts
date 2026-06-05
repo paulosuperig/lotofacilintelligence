@@ -71,10 +71,21 @@ export const useAdmin = () => {
     }
   };
 
+  const resetPassword = async (userId: string, newPassword: string) => {
+    try {
+      const { error } = await userService.updatePassword(userId, newPassword);
+      if (error) throw error;
+      toast({ title: "Senha resetada", description: "A senha do usuário foi alterada com sucesso." });
+    } catch (error: any) {
+      toast({ title: "Erro", description: error.message, variant: "destructive" });
+    }
+  };
+
   return {
     users,
     createOrUpdateUser,
     deleteUser,
-    toggleUserStatus
+    toggleUserStatus,
+    resetPassword
   };
 };

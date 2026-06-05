@@ -60,7 +60,8 @@ const Index = () => {
     users,
     createOrUpdateUser,
     deleteUser,
-    toggleUserStatus
+    toggleUserStatus,
+    resetPassword
   } = useAdmin();
 
   const { saveAiGameToHistory } = useAiGameSaver(saveToHistory);
@@ -142,6 +143,7 @@ const Index = () => {
                   onCreateOrUpdateUser={createOrUpdateUser}
                   onDeleteUser={deleteUser}
                   onToggleUserStatus={toggleUserStatus}
+                  onResetPassword={resetPassword}
                   isAiConfigured={isAiConfigured}
                   onSaveDeepSeekKey={saveDeepSeekKey}
                   defaultTab="users"
@@ -155,6 +157,7 @@ const Index = () => {
                   onCreateOrUpdateUser={createOrUpdateUser}
                   onDeleteUser={deleteUser}
                   onToggleUserStatus={toggleUserStatus}
+                  onResetPassword={resetPassword}
                   isAiConfigured={isAiConfigured}
                   onSaveDeepSeekKey={saveDeepSeekKey}
                   defaultTab="settings"
