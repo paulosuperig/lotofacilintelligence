@@ -12,6 +12,7 @@ export const historyService = {
     const { data, error } = await supabase
       .from('games_history')
       .select('*')
+      // RLS now handles user isolation, but we keep the filter for clarity and performance
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .limit(100);
