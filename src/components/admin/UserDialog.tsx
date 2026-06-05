@@ -37,6 +37,7 @@ interface UserDialogProps {
   userFormData: any;
   setUserFormData: (data: any) => void;
   onSubmit: (e: React.FormEvent) => void;
+  onResetPassword?: (userId: string) => void;
 }
 
 export const UserDialog = ({
