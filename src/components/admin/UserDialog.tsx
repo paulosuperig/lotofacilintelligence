@@ -39,20 +39,20 @@ export const UserDialog = ({
   <Dialog open={isOpen} onOpenChange={onOpenChange}>
     <DialogContent className="sm:max-w-[425px] rounded-3xl">
       <DialogHeader>
-        <DialogTitle>{editingUser ? 'Editar Usuário' : 'Criar Novo Usuário'}</DialogTitle>
+        <DialogTitle className="text-zinc-900 dark:text-zinc-100">{editingUser ? 'Editar Usuário' : 'Criar Novo Usuário'}</DialogTitle>
         <DialogDescription>
           Preencha os dados do usuário abaixo.
         </DialogDescription>
       </DialogHeader>
       <form onSubmit={onSubmit} className="space-y-4 py-4">
         <div className="space-y-2">
-          <Label htmlFor="email">E-mail</Label>
+          <Label htmlFor="email" className="text-zinc-700 dark:text-zinc-300">E-mail</Label>
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
             <Input 
               id="email" 
               type="email" 
-              className="pl-10 rounded-xl"
+              className="pl-10 rounded-xl bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100"
               placeholder="email@exemplo.com"
               value={userFormData.email}
               onChange={(e) => setUserFormData({...userFormData, email: e.target.value})}
@@ -62,13 +62,13 @@ export const UserDialog = ({
         </div>
         {!editingUser && (
           <div className="space-y-2">
-            <Label htmlFor="password">Senha Temporária</Label>
+            <Label htmlFor="password" className="text-zinc-700 dark:text-zinc-300">Senha Temporária</Label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
               <Input 
                 id="password" 
                 type="password" 
-                className="pl-10 rounded-xl"
+                className="pl-10 rounded-xl bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100"
                 placeholder="••••••••"
                 value={userFormData.password}
                 onChange={(e) => setUserFormData({...userFormData, password: e.target.value})}
@@ -78,15 +78,15 @@ export const UserDialog = ({
           </div>
         )}
         <div className="space-y-2">
-          <Label htmlFor="role">Perfil de Acesso</Label>
+          <Label htmlFor="role" className="text-zinc-700 dark:text-zinc-300">Perfil de Acesso</Label>
           <Select 
             value={userFormData.role} 
             onValueChange={(value: any) => setUserFormData({...userFormData, role: value})}
           >
-            <SelectTrigger className="rounded-xl">
+            <SelectTrigger className="rounded-xl bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100">
               <SelectValue placeholder="Selecione o perfil" />
             </SelectTrigger>
-            <SelectContent className="rounded-xl">
+            <SelectContent className="rounded-xl bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100">
               <SelectItem value="admin">Administrador</SelectItem>
               <SelectItem value="demo">Usuário</SelectItem>
             </SelectContent>

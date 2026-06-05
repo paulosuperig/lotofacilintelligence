@@ -11,11 +11,11 @@ export const TrendsCard = () => (
     <div className="flex flex-col items-center justify-between mb-4 md:mb-5 relative z-10 text-center md:text-left md:flex-row md:items-start">
       <div className="flex flex-col items-center md:items-start">
         <h3 className="text-lg md:text-xl font-display font-bold mb-1 flex items-center gap-2">
-          <Target size={18} className="text-purple-600" /> Tendências
+          <Target size={18} className="text-purple-600 dark:text-purple-400" /> Tendências
         </h3>
-        <p className="text-zinc-500 text-[9px] md:text-[10px] font-bold uppercase tracking-wider">Últimos 10 jogos</p>
+        <p className="text-zinc-500 dark:text-zinc-400 text-[9px] md:text-[10px] font-bold uppercase tracking-wider">Últimos 10 jogos</p>
       </div>
-      <span className="text-[8px] font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full uppercase tracking-wider border border-purple-100">
+      <span className="text-[8px] font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30 px-2 py-0.5 rounded-full uppercase tracking-wider border border-purple-100 dark:border-purple-800/50">
         Live
       </span>
     </div>
