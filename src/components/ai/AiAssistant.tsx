@@ -58,7 +58,7 @@ export const AiAssistant = ({
             </div>
             <h2 className="text-2xl md:text-3xl font-display font-bold text-zinc-900 dark:text-zinc-100">Intelligence AI</h2>
           </div>
-          <p className="text-zinc-500 dark:text-zinc-400 text-[10px] uppercase font-bold tracking-[0.2em] ml-1">Processamento de Texto Simples e Otimizado</p>
+          <p className="text-zinc-500 dark:text-zinc-400 text-[10px] uppercase font-bold tracking-[0.2em] ml-1">PROCESSAMENTO DE JOGOS POR ESPECIALISTA MASTER</p>
         </div>
         <div className="flex items-center gap-2">
           {aiChat.length > 0 && (
