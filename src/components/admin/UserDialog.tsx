@@ -88,7 +88,7 @@ export const UserDialog = ({
             </SelectTrigger>
             <SelectContent className="rounded-xl">
               <SelectItem value="admin">Administrador</SelectItem>
-              <SelectItem value="demo">Demonstrativo (VIP)</SelectItem>
+              <SelectItem value="demo">Usuário</SelectItem>
             </SelectContent>
           </Select>
         </div>

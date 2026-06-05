@@ -75,7 +75,7 @@ export const UserTable = ({ users, onEdit, onToggleStatus, onDelete }: UserTable
                   "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider",
                   u.role === 'admin' ? "bg-purple-100 text-purple-700" : "bg-zinc-100 text-zinc-700"
                 )}>
-                  {u.role === 'admin' ? 'Admin' : 'Demo'}
+                  {u.role === 'admin' ? 'Admin' : 'Usuário'}
                 </span>
               </td>
               <td className="px-6 py-5">
@@ -127,7 +127,7 @@ export const UserTable = ({ users, onEdit, onToggleStatus, onDelete }: UserTable
                 "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider",
                 u.role === 'admin' ? "bg-purple-100 text-purple-700" : "bg-zinc-100 text-zinc-700"
               )}>
-                {u.role === 'admin' ? 'Admin' : 'Demo'}
+                {u.role === 'admin' ? 'Admin' : 'Usuário'}
               </span>
             </div>
             <div>
