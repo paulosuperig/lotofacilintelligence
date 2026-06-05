@@ -60,7 +60,8 @@ const Index = () => {
     users,
     createOrUpdateUser,
     deleteUser,
-    toggleUserStatus
+    toggleUserStatus,
+    resetPassword
   } = useAdmin();
 
   const { saveAiGameToHistory } = useAiGameSaver(saveToHistory);
