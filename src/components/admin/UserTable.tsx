@@ -44,14 +44,14 @@ export const UserTable = ({ users, onEdit, onToggleStatus, onDelete }: UserTable
     <div className="hidden lg:block overflow-x-auto rounded-xl border border-purple-100 dark:border-zinc-800">
       <table className="w-full text-left border-collapse min-w-[600px]">
         <thead>
-          <tr className="bg-purple-50/50 dark:bg-zinc-800/50">
-            <th className="px-6 py-4 text-[10px] font-bold text-purple-400 uppercase tracking-widest border-b border-purple-100">Usuário</th>
-            <th className="px-6 py-4 text-[10px] font-bold text-purple-400 uppercase tracking-widest border-b border-purple-100">Perfil</th>
-            <th className="px-6 py-4 text-[10px] font-bold text-purple-400 uppercase tracking-widest border-b border-purple-100">Status</th>
-            <th className="px-6 py-4 text-[10px] font-bold text-purple-400 uppercase tracking-widest border-b border-purple-100 text-right">Ações</th>
+          <tr className="bg-purple-50/50 dark:bg-zinc-800/80">
+            <th className="px-6 py-4 text-[10px] font-bold text-purple-400 dark:text-purple-300 uppercase tracking-widest border-b border-purple-100 dark:border-zinc-700">Usuário</th>
+            <th className="px-6 py-4 text-[10px] font-bold text-purple-400 dark:text-purple-300 uppercase tracking-widest border-b border-purple-100 dark:border-zinc-700">Perfil</th>
+            <th className="px-6 py-4 text-[10px] font-bold text-purple-400 dark:text-purple-300 uppercase tracking-widest border-b border-purple-100 dark:border-zinc-700">Status</th>
+            <th className="px-6 py-4 text-[10px] font-bold text-purple-400 dark:text-purple-300 uppercase tracking-widest border-b border-purple-100 dark:border-zinc-700 text-right">Ações</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-purple-50">
+        <tbody className="divide-y divide-purple-50 dark:divide-zinc-800">
           {users.map((u) => (
             <tr key={u.id} className="hover:bg-purple-50/30 dark:hover:bg-zinc-800/30 transition-colors">
               <td className="px-6 py-5">
@@ -73,7 +73,7 @@ export const UserTable = ({ users, onEdit, onToggleStatus, onDelete }: UserTable
               <td className="px-6 py-5">
                 <span className={cn(
                   "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider",
-                  u.role === 'admin' ? "bg-purple-100 text-purple-700" : "bg-zinc-100 text-zinc-700"
+                  u.role === 'admin' ? "bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
                 )}>
                   {u.role === 'admin' ? 'Admin' : 'Usuário'}
                 </span>
@@ -84,7 +84,7 @@ export const UserTable = ({ users, onEdit, onToggleStatus, onDelete }: UserTable
                     "w-2 h-2 rounded-full",
                     u.status === 'active' ? "bg-emerald-500" : "bg-red-500"
                   )}></span>
-                  <span className="text-[10px] font-bold text-zinc-600 uppercase">
+                  <span className="text-[10px] font-bold text-zinc-600 dark:text-zinc-400 uppercase">
                     {u.status === 'active' ? 'Ativo' : 'Bloqueado'}
                   </span>
                 </div>
@@ -125,7 +125,7 @@ export const UserTable = ({ users, onEdit, onToggleStatus, onDelete }: UserTable
               <p className="text-[9px] uppercase tracking-[0.15em] text-zinc-400 font-bold mb-1">Perfil</p>
               <span className={cn(
                 "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider",
-                u.role === 'admin' ? "bg-purple-100 text-purple-700" : "bg-zinc-100 text-zinc-700"
+                u.role === 'admin' ? "bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
               )}>
                 {u.role === 'admin' ? 'Admin' : 'Usuário'}
               </span>
@@ -137,14 +137,14 @@ export const UserTable = ({ users, onEdit, onToggleStatus, onDelete }: UserTable
                   "w-1.5 h-1.5 rounded-full",
                   u.status === 'active' ? "bg-emerald-500" : "bg-red-500"
                 )}></span>
-                <span className="text-[10px] font-bold text-zinc-600 uppercase">
+                <span className="text-[10px] font-bold text-zinc-600 dark:text-zinc-400 uppercase">
                   {u.status === 'active' ? 'Ativo' : 'Bloqueado'}
                 </span>
               </div>
             </div>
             <div className="col-span-2">
               <p className="text-[9px] uppercase tracking-[0.15em] text-zinc-400 font-bold mb-1">Cadastro</p>
-              <p className="text-[10px] font-bold text-zinc-500">{new Date(u.createdAt).toLocaleDateString('pt-BR')}</p>
+              <p className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400">{new Date(u.createdAt).toLocaleDateString('pt-BR')}</p>
             </div>
           </div>
         </div>

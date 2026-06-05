@@ -17,7 +17,7 @@ export const ResultCard = ({ latestResult, isLoading }: ResultCardProps) => (
     
     <div className="relative z-10 h-full flex flex-col">
       <div className="mb-4 md:mb-6">
-        <div className="inline-flex items-center gap-2 px-2 py-0.5 md:px-2.5 md:py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-600 text-[8px] font-bold mb-3 md:mb-4 uppercase tracking-widest">
+        <div className="inline-flex items-center gap-2 px-2 py-0.5 md:px-2.5 md:py-1 rounded-full bg-purple-500/10 dark:bg-purple-400/10 border border-purple-500/20 dark:border-purple-400/20 text-purple-600 dark:text-purple-400 text-[8px] font-bold mb-3 md:mb-4 uppercase tracking-widest">
           <History size={10} /> Sorteio
         </div>
         <h2 className="text-lg xs:text-xl md:text-2xl font-display font-bold text-zinc-900 dark:text-zinc-100 mb-1 md:mb-2">

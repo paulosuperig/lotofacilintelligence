@@ -88,7 +88,7 @@ export const GameGenerator = () => {
   }, []);
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-zinc-900 overflow-y-auto pb-24 xs:pb-32">
+    <div className="flex flex-col h-full bg-white dark:bg-zinc-900 overflow-y-auto pb-24 xs:pb-32 text-zinc-900 dark:text-zinc-100">
       <AlertDialog open={showDuplicateModal} onOpenChange={setShowDuplicateModal}>
         <AlertDialogContent className="rounded-[2rem] border-zinc-100 dark:border-zinc-800 shadow-2xl">
           <AlertDialogHeader>
@@ -113,7 +113,7 @@ export const GameGenerator = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      <div className="p-5 sm:p-8 md:p-12 border-b border-purple-50 dark:border-zinc-800/50">
+      <div className="p-5 sm:p-8 md:p-12 border-b border-purple-50 dark:border-zinc-800">
         <div className="flex flex-col gap-6 mb-8">
           <div>
             <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 mb-2">
@@ -135,7 +135,7 @@ export const GameGenerator = () => {
           </Button>
         </div>
 
-        <div className="min-h-[140px] md:min-h-[200px] flex flex-wrap justify-center content-center gap-2 sm:gap-4 md:gap-6 bg-zinc-50 dark:bg-zinc-950/50 rounded-2xl md:rounded-[2rem] p-4 sm:p-8 md:p-12 border border-zinc-100 dark:border-zinc-800/50 shadow-inner relative overflow-hidden">
+        <div className="min-h-[140px] md:min-h-[200px] flex flex-wrap justify-center content-center gap-2 sm:gap-4 md:gap-6 bg-zinc-50 dark:bg-zinc-950/30 rounded-2xl md:rounded-[2rem] p-4 sm:p-8 md:p-12 border border-zinc-100 dark:border-zinc-800 shadow-inner relative overflow-hidden">
           <AnimatePresence mode="wait">
             {currentResult ? (
               <motion.div 
