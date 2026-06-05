@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UserPlus, Settings, Users, ArrowLeft } from 'lucide-react';
+import { UserPlus, Settings, Users, ArrowLeft, Download } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { UserDialog } from './UserDialog';
 import { UserTable } from './UserTable';
@@ -45,6 +45,32 @@ export const AdminPanel = ({
     setIsUserDialogOpen(true);
   };
 
+  const handleExportContacts = () => {
+    if (!users || users.length === 0) return;
+
+    const headers = ['ID', 'Email', 'WhatsApp', 'Perfil', 'Status', 'Cadastro'];
+    const csvContent = [
+      headers.join(','),
+      ...users.map(u => [
+        u.id,
+        u.email,
+        u.whatsapp || '',
+        u.role === 'admin' ? 'Admin' : 'Usuário',
+        u.status === 'active' ? 'Ativo' : 'Bloqueado',
+        new Date(u.createdAt).toLocaleDateString('pt-BR')
+      ].map(field => `"${field}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `contatos_usuarios_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const handleUserDialogSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onCreateOrUpdateUser(userFormData, editingUser);
@@ -66,10 +92,20 @@ export const AdminPanel = ({
         </div>
         <div className="flex items-center gap-3">
           {activeTab === 'users' && (
-            <Button onClick={() => setIsUserDialogOpen(true)} className="bg-purple-600 hover:bg-purple-700 text-white rounded-xl shadow-lg shadow-purple-500/20 transition-all hover:scale-[1.02]">
-              <UserPlus size={18} className="mr-2" />
-              Novo Usuário
-            </Button>
+            <>
+              <Button 
+                variant="outline" 
+                onClick={handleExportContacts} 
+                className="rounded-xl border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800"
+              >
+                <Download size={18} className="mr-2" />
+                Exportar
+              </Button>
+              <Button onClick={() => setIsUserDialogOpen(true)} className="bg-purple-600 hover:bg-purple-700 text-white rounded-xl shadow-lg shadow-purple-500/20 transition-all hover:scale-[1.02]">
+                <UserPlus size={18} className="mr-2" />
+                Novo Usuário
+              </Button>
+            </>
           )}
           <Button variant="outline" onClick={onBack} className="rounded-xl border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800">
             <ArrowLeft size={18} className="mr-2" />
