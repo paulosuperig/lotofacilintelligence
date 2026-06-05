@@ -6,7 +6,9 @@ import {
   Edit, 
   Ban, 
   CheckCircle, 
-  Trash2 
+  Trash2,
+  MessageCircle,
+  Mail 
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
@@ -46,6 +48,7 @@ export const UserTable = ({ users, onEdit, onToggleStatus, onDelete }: UserTable
         <thead>
           <tr className="bg-purple-50/50 dark:bg-zinc-800/80">
             <th className="px-6 py-4 text-[10px] font-bold text-purple-400 dark:text-purple-300 uppercase tracking-widest border-b border-purple-100 dark:border-zinc-700">Usuário</th>
+            <th className="px-6 py-4 text-[10px] font-bold text-purple-400 dark:text-purple-300 uppercase tracking-widest border-b border-purple-100 dark:border-zinc-700">Contato</th>
             <th className="px-6 py-4 text-[10px] font-bold text-purple-400 dark:text-purple-300 uppercase tracking-widest border-b border-purple-100 dark:border-zinc-700">Perfil</th>
             <th className="px-6 py-4 text-[10px] font-bold text-purple-400 dark:text-purple-300 uppercase tracking-widest border-b border-purple-100 dark:border-zinc-700">Status</th>
             <th className="px-6 py-4 text-[10px] font-bold text-purple-400 dark:text-purple-300 uppercase tracking-widest border-b border-purple-100 dark:border-zinc-700 text-right">Ações</th>
@@ -63,12 +66,36 @@ export const UserTable = ({ users, onEdit, onToggleStatus, onDelete }: UserTable
                     {u.role === 'admin' ? <ShieldCheck size={16} /> : <Sparkles size={16} />}
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{maskSensitiveData(u.email)}</p>
+                    <div className="flex items-center gap-1.5">
+                      <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{u.email}</p>
+                      <a 
+                        href={`mailto:${u.email}`}
+                        className="p-1 hover:bg-purple-100 dark:hover:bg-zinc-800 rounded-md text-zinc-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                        title="Enviar E-mail"
+                      >
+                        <Mail size={12} />
+                      </a>
+                    </div>
                     <p className="text-[10px] text-zinc-500 dark:text-zinc-400">
                       ID: {u.id.substring(0, 8)}... | Cadastrado em {new Date(u.createdAt).toLocaleDateString('pt-BR')}
                     </p>
                   </div>
                 </div>
+              </td>
+              <td className="px-6 py-5">
+                {u.whatsapp ? (
+                  <a 
+                    href={`https://wa.me/55${u.whatsapp.replace(/\D/g, '')}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 text-xs font-medium hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors"
+                  >
+                    <MessageCircle size={14} />
+                    {u.whatsapp}
+                  </a>
+                ) : (
+                  <span className="text-[10px] text-zinc-400 italic">Não informado</span>
+                )}
               </td>
               <td className="px-6 py-5">
                 <span className={cn(
@@ -111,7 +138,7 @@ export const UserTable = ({ users, onEdit, onToggleStatus, onDelete }: UserTable
                 {u.role === 'admin' ? <ShieldCheck size={20} /> : <Sparkles size={20} />}
               </div>
               <div>
-                <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100 break-all">{maskSensitiveData(u.email)}</p>
+                <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100 break-all">{u.email}</p>
                 <p className="text-[10px] text-zinc-500 dark:text-zinc-400 uppercase tracking-wider font-medium">
                   ID: {u.id.substring(0, 8)}
                 </p>
@@ -141,6 +168,22 @@ export const UserTable = ({ users, onEdit, onToggleStatus, onDelete }: UserTable
                   {u.status === 'active' ? 'Ativo' : 'Bloqueado'}
                 </span>
               </div>
+            </div>
+            <div className="col-span-2">
+              <p className="text-[9px] uppercase tracking-[0.15em] text-zinc-400 font-bold mb-1">WhatsApp</p>
+              {u.whatsapp ? (
+                <a 
+                  href={`https://wa.me/55${u.whatsapp.replace(/\D/g, '')}`} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline"
+                >
+                  <MessageCircle size={12} />
+                  {u.whatsapp}
+                </a>
+              ) : (
+                <span className="text-[10px] text-zinc-400 italic">Não informado</span>
+              )}
             </div>
             <div className="col-span-2">
               <p className="text-[9px] uppercase tracking-[0.15em] text-zinc-400 font-bold mb-1">Cadastro</p>
