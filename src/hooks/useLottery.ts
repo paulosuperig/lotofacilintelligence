@@ -45,6 +45,7 @@ export const useLottery = () => {
         setHistory([]);
         return;
       }
+      // Ensure we only load the history for the CURRENT logged-in user
       const data = await historyService.fetchHistory(session.user.id);
       setHistory(data);
     } catch (error) {
