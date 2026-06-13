@@ -60,10 +60,12 @@ export const userService = {
   async updatePassword(userId: string, password: string) {
     if (!isSupabaseEnabled() || !supabase) return { error: new Error('Supabase not enabled') };
 
-    // This requires service role normally, but in Supabase client 
-    // we use a workaround if we have a function or we just return error if not possible
-    // Note: Standard Supabase client cannot update OTHER users' passwords.
-    // We'll return an informative error for now since we don't have a secure RPC/Edge function for this yet.
-    return { error: new Error('A alteração de senha deve ser feita via dashboard do Supabase por segurança.') };
+    // Chama edge function segura que valida admin via has_role e usa service_role
+    const { data, error } = await supabase.functions.invoke('admin-reset-password', {
+      body: { userId, newPassword: password },
+    });
+    if (error) return { error };
+    if (data?.error) return { error: new Error(data.error) };
+    return { error: null };
   }
 };
