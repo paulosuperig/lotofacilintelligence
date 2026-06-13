@@ -83,33 +83,33 @@ export const AdminPanel = ({
 
   return (
     <div className="bg-white dark:bg-zinc-900 border border-purple-200 dark:border-zinc-800 rounded-2xl md:rounded-[2rem] p-5 sm:p-8 md:p-12 shadow-xl shadow-purple-500/5">
-      <div className="flex flex-col lg:flex-row items-center justify-between mb-8 md:mb-10 gap-6">
-        <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
-          <h2 className="text-2xl md:text-3xl font-display font-bold text-zinc-900 dark:text-zinc-100 mb-1 md:mb-2">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8 md:mb-10 gap-6">
+        <div className="flex flex-col items-center lg:items-start text-center lg:text-left min-w-0">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold text-zinc-900 dark:text-zinc-100 mb-1 md:mb-2 break-words">
             {activeTab === 'users' ? 'Usuários Cadastrados' : 'Painel Administrativo'}
           </h2>
-          <p className="text-zinc-500 dark:text-zinc-400 text-sm">
+          <p className="text-zinc-500 dark:text-zinc-400 text-xs sm:text-sm">
             {activeTab === 'users' ? 'Gerencie usuários e permissões de acesso' : 'Gerencie usuários, acessos e configurações do sistema'}
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center justify-center lg:justify-end gap-2 sm:gap-3 w-full lg:w-auto">
           {activeTab === 'users' && (
             <>
               <Button 
                 variant="outline" 
                 onClick={handleExportContacts} 
-                className="rounded-xl border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800"
+                className="flex-1 sm:flex-none rounded-xl border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800"
               >
                 <Download size={18} className="mr-2" />
                 Exportar
               </Button>
-              <Button onClick={() => setIsUserDialogOpen(true)} className="bg-purple-600 hover:bg-purple-700 text-white rounded-xl shadow-lg shadow-purple-500/20 transition-all hover:scale-[1.02]">
+              <Button onClick={() => setIsUserDialogOpen(true)} className="flex-1 sm:flex-none bg-purple-600 hover:bg-purple-700 text-white rounded-xl shadow-lg shadow-purple-500/20 transition-all hover:scale-[1.02]">
                 <UserPlus size={18} className="mr-2" />
-                Novo Usuário
+                <span className="whitespace-nowrap">Novo Usuário</span>
               </Button>
             </>
           )}
-          <Button variant="outline" onClick={onBack} className="rounded-xl border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800">
+          <Button variant="outline" onClick={onBack} className="flex-1 sm:flex-none rounded-xl border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800">
             <ArrowLeft size={18} className="mr-2" />
             Voltar
           </Button>

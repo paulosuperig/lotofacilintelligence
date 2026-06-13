@@ -53,7 +53,7 @@ export const UserDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] rounded-3xl">
+      <DialogContent className="w-[calc(100%-1.5rem)] sm:max-w-[425px] rounded-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-zinc-900 dark:text-zinc-100">{editingUser ? 'Editar Usuário' : 'Criar Novo Usuário'}</DialogTitle>
           <DialogDescription>
@@ -112,7 +112,7 @@ export const UserDialog = ({
           {editingUser && (
             <div className="space-y-2 pt-2 border-t border-zinc-100 dark:border-zinc-800 mt-4">
               <Label className="text-zinc-700 dark:text-zinc-300">Resetar Senha</Label>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <div className="relative flex-grow">
                   <Key className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
                   <Input 
@@ -129,7 +129,7 @@ export const UserDialog = ({
                       type="button"
                       disabled={!newPassword || newPassword.length < 6}
                       variant="outline"
-                      className="rounded-xl border-purple-200 dark:border-purple-900/30 text-purple-600 dark:text-purple-400 h-10"
+                      className="w-full sm:w-auto rounded-xl border-purple-200 dark:border-purple-900/30 text-purple-600 dark:text-purple-400 h-10"
                     >
                       Resetar
                     </Button>
