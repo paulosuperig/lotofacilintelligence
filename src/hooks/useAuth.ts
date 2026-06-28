@@ -26,7 +26,6 @@ export const useAuth = () => {
 
       if (!profile && retryCount < 3) {
         // Trigger might still be running, wait and retry
-        console.log(`Profile not found for ${authUser.id}, retrying... (${retryCount + 1})`);
         await new Promise(resolve => setTimeout(resolve, 1000));
         return fetchProfile(authUser, retryCount + 1);
       }

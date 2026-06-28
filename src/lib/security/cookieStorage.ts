@@ -21,8 +21,6 @@ export const cookieStorage = {
     // Using Secure and SameSite=Strict to mitigate CSRF and MITM
     // We append HttpOnly in the comment to indicate architectural intent
     document.cookie = `${key}=${encodeURIComponent(value)}${expires}; path=/; Secure; SameSite=Strict`;
-    
-    console.log(`[Security] Session stored in cookie: ${key} (Flags: Secure, SameSite=Strict)`);
   },
 
   /**
