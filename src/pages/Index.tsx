@@ -74,8 +74,6 @@ const Index = () => {
     });
   };
 
-  // dummy comment
-  // dummy comment 2
 
   if (loading) return null; // Prevent flicker during auth check
   
