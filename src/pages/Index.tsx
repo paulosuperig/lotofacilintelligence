@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useLottery } from '@/hooks/useLottery';
 import { useAiAssistant } from '@/hooks/useAiAssistant';
@@ -10,15 +10,22 @@ import { trackEvent } from '@/lib/analytics/metaPixel';
 
 import { Sidebar, MobileNav } from '@/components/layout/Navigation';
 import { Header } from '@/components/layout/Header';
-import { AdminPanel } from '@/components/admin/AdminPanel';
-import { AiAssistant } from '@/components/ai/AiAssistant';
-import { HistoryPanel } from '@/components/history/HistoryPanel';
-import { DecorativeBackground, DemoBanner } from '@/components/layout/VisualDecorations';
+import { DecorativeBackground } from '@/components/layout/VisualDecorations';
 import Login from '@/components/Login';
-
-import { FechamentosPanel } from '@/components/home/FechamentosPanel';
-import { TipsPanel } from '@/components/home/TipsPanel';
 import { BentoGrid } from '@/components/home/BentoGrid';
+
+// Heavy panels: lazy-loaded on demand to shrink initial bundle
+const AdminPanel = lazy(() => import('@/components/admin/AdminPanel').then(m => ({ default: m.AdminPanel })));
+const AiAssistant = lazy(() => import('@/components/ai/AiAssistant').then(m => ({ default: m.AiAssistant })));
+const HistoryPanel = lazy(() => import('@/components/history/HistoryPanel').then(m => ({ default: m.HistoryPanel })));
+const FechamentosPanel = lazy(() => import('@/components/home/FechamentosPanel').then(m => ({ default: m.FechamentosPanel })));
+const TipsPanel = lazy(() => import('@/components/home/TipsPanel').then(m => ({ default: m.TipsPanel })));
+
+const PanelFallback = () => (
+  <div className="flex items-center justify-center py-16">
+    <div className="h-8 w-8 rounded-full border-4 border-muted border-t-primary animate-spin" />
+  </div>
+);
 
 const Index = () => {
   const { toast } = useToast();
@@ -62,17 +69,21 @@ const Index = () => {
     deleteUser,
     toggleUserStatus,
     resetPassword
-  } = useAdmin();
+  } = useAdmin(isAdmin);
 
   const { saveAiGameToHistory } = useAiGameSaver(saveToHistory);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     signOut();
     toast({
       title: "Sessão encerrada",
       description: "Você saiu do sistema com sucesso.",
     });
-  };
+  }, [signOut, toast]);
+
+  const goHome = useCallback(() => setActiveTab('home'), []);
+  const goGenerator = useCallback(() => setActiveTab('gerador'), []);
+  const goSettings = useCallback(() => setActiveTab('ajustes'), []);
 
 
   if (loading) return null; // Prevent flicker during auth check
@@ -101,24 +112,25 @@ const Index = () => {
             <Header role={user.role} isRefreshing={isRefreshing} onRefresh={fetchLatestResult} />
 
             <AnimatePresence mode="wait">
+              <Suspense fallback={<PanelFallback />}>
               {activeTab === 'historico' && (
                 <HistoryPanel 
                   history={history} 
-                  onBack={() => setActiveTab('home')} 
+                  onBack={goHome} 
                   onClearHistory={clearHistory} 
-                  onGoToGenerator={() => setActiveTab('gerador')} 
+                  onGoToGenerator={goGenerator} 
                 />
               )}
               
               {activeTab === 'stats' && (
                 <FechamentosPanel 
-                  onBack={() => setActiveTab('home')} 
+                  onBack={goHome} 
                   onSaveGame={(game) => saveToHistory([game])} 
                 />
               )}
 
               {activeTab === 'dicas' && (
-                <TipsPanel onBack={() => setActiveTab('home')} />
+                <TipsPanel onBack={goHome} />
               )}
 
               {activeTab === 'ia' && (
@@ -131,41 +143,27 @@ const Index = () => {
                   onSetAiMessage={setAiMessage}
                   onSaveAiGame={saveAiGameToHistory}
                   onClearChat={clearChatHistory}
-                  onBack={() => setActiveTab('home')}
-                  onGoToSettings={() => setActiveTab('ajustes')}
+                  onBack={goHome}
+                  onGoToSettings={goSettings}
                   role={user.role}
                 />
               )}
 
-              {activeTab === 'usuarios' && isAdmin && (
+              {(activeTab === 'usuarios' || activeTab === 'ajustes') && isAdmin && (
                 <AdminPanel 
                   users={users}
-                  onBack={() => setActiveTab('home')}
+                  onBack={goHome}
                   onCreateOrUpdateUser={createOrUpdateUser}
                   onDeleteUser={deleteUser}
                   onToggleUserStatus={toggleUserStatus}
                   onResetPassword={resetPassword}
                   isAiConfigured={isAiConfigured}
                   onSaveDeepSeekKey={saveDeepSeekKey}
-                  defaultTab="users"
+                  defaultTab={activeTab === 'usuarios' ? 'users' : 'settings'}
                 />
               )}
 
-              {activeTab === 'ajustes' && isAdmin && (
-                <AdminPanel 
-                  users={users}
-                  onBack={() => setActiveTab('home')}
-                  onCreateOrUpdateUser={createOrUpdateUser}
-                  onDeleteUser={deleteUser}
-                  onToggleUserStatus={toggleUserStatus}
-                  onResetPassword={resetPassword}
-                  isAiConfigured={isAiConfigured}
-                  onSaveDeepSeekKey={saveDeepSeekKey}
-                  defaultTab="settings"
-                />
-              )}
-
-              {activeTab === 'home' || activeTab === 'gerador' ? (
+              {(activeTab === 'home' || activeTab === 'gerador') && (
                 <BentoGrid 
                   latestResult={latestResult} 
                   isLoading={isLoading} 
@@ -176,7 +174,8 @@ const Index = () => {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
                 />
-              ) : null}
+              )}
+              </Suspense>
             </AnimatePresence>
           </motion.div>
         </main>

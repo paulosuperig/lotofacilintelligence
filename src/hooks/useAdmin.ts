@@ -3,7 +3,7 @@ import { useToast } from './use-toast';
 import { UserProfile } from '@/types/lottery';
 import { userService } from '@/services/userService';
 
-export const useAdmin = () => {
+export const useAdmin = (enabled: boolean = true) => {
   const { toast } = useToast();
   const [users, setUsers] = useState<UserProfile[]>([]);
 
@@ -18,8 +18,8 @@ export const useAdmin = () => {
   };
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    if (enabled) fetchUsers();
+  }, [enabled]);
 
   const createOrUpdateUser = async (userData: any, editingUser: any = null) => {
     if (editingUser) {
