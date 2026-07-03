@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useLottery } from '@/hooks/useLottery';
 import { useAiAssistant } from '@/hooks/useAiAssistant';
@@ -10,15 +10,22 @@ import { trackEvent } from '@/lib/analytics/metaPixel';
 
 import { Sidebar, MobileNav } from '@/components/layout/Navigation';
 import { Header } from '@/components/layout/Header';
-import { AdminPanel } from '@/components/admin/AdminPanel';
-import { AiAssistant } from '@/components/ai/AiAssistant';
-import { HistoryPanel } from '@/components/history/HistoryPanel';
-import { DecorativeBackground, DemoBanner } from '@/components/layout/VisualDecorations';
+import { DecorativeBackground } from '@/components/layout/VisualDecorations';
 import Login from '@/components/Login';
-
-import { FechamentosPanel } from '@/components/home/FechamentosPanel';
-import { TipsPanel } from '@/components/home/TipsPanel';
 import { BentoGrid } from '@/components/home/BentoGrid';
+
+// Heavy panels: lazy-loaded on demand to shrink initial bundle
+const AdminPanel = lazy(() => import('@/components/admin/AdminPanel').then(m => ({ default: m.AdminPanel })));
+const AiAssistant = lazy(() => import('@/components/ai/AiAssistant').then(m => ({ default: m.AiAssistant })));
+const HistoryPanel = lazy(() => import('@/components/history/HistoryPanel').then(m => ({ default: m.HistoryPanel })));
+const FechamentosPanel = lazy(() => import('@/components/home/FechamentosPanel').then(m => ({ default: m.FechamentosPanel })));
+const TipsPanel = lazy(() => import('@/components/home/TipsPanel').then(m => ({ default: m.TipsPanel })));
+
+const PanelFallback = () => (
+  <div className="flex items-center justify-center py-16">
+    <div className="h-8 w-8 rounded-full border-4 border-muted border-t-primary animate-spin" />
+  </div>
+);
 
 const Index = () => {
   const { toast } = useToast();
