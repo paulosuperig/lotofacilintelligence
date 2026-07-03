@@ -112,24 +112,25 @@ const Index = () => {
             <Header role={user.role} isRefreshing={isRefreshing} onRefresh={fetchLatestResult} />
 
             <AnimatePresence mode="wait">
+              <Suspense fallback={<PanelFallback />}>
               {activeTab === 'historico' && (
                 <HistoryPanel 
                   history={history} 
-                  onBack={() => setActiveTab('home')} 
+                  onBack={goHome} 
                   onClearHistory={clearHistory} 
-                  onGoToGenerator={() => setActiveTab('gerador')} 
+                  onGoToGenerator={goGenerator} 
                 />
               )}
               
               {activeTab === 'stats' && (
                 <FechamentosPanel 
-                  onBack={() => setActiveTab('home')} 
+                  onBack={goHome} 
                   onSaveGame={(game) => saveToHistory([game])} 
                 />
               )}
 
               {activeTab === 'dicas' && (
-                <TipsPanel onBack={() => setActiveTab('home')} />
+                <TipsPanel onBack={goHome} />
               )}
 
               {activeTab === 'ia' && (
@@ -142,41 +143,27 @@ const Index = () => {
                   onSetAiMessage={setAiMessage}
                   onSaveAiGame={saveAiGameToHistory}
                   onClearChat={clearChatHistory}
-                  onBack={() => setActiveTab('home')}
-                  onGoToSettings={() => setActiveTab('ajustes')}
+                  onBack={goHome}
+                  onGoToSettings={goSettings}
                   role={user.role}
                 />
               )}
 
-              {activeTab === 'usuarios' && isAdmin && (
+              {(activeTab === 'usuarios' || activeTab === 'ajustes') && isAdmin && (
                 <AdminPanel 
                   users={users}
-                  onBack={() => setActiveTab('home')}
+                  onBack={goHome}
                   onCreateOrUpdateUser={createOrUpdateUser}
                   onDeleteUser={deleteUser}
                   onToggleUserStatus={toggleUserStatus}
                   onResetPassword={resetPassword}
                   isAiConfigured={isAiConfigured}
                   onSaveDeepSeekKey={saveDeepSeekKey}
-                  defaultTab="users"
+                  defaultTab={activeTab === 'usuarios' ? 'users' : 'settings'}
                 />
               )}
 
-              {activeTab === 'ajustes' && isAdmin && (
-                <AdminPanel 
-                  users={users}
-                  onBack={() => setActiveTab('home')}
-                  onCreateOrUpdateUser={createOrUpdateUser}
-                  onDeleteUser={deleteUser}
-                  onToggleUserStatus={toggleUserStatus}
-                  onResetPassword={resetPassword}
-                  isAiConfigured={isAiConfigured}
-                  onSaveDeepSeekKey={saveDeepSeekKey}
-                  defaultTab="settings"
-                />
-              )}
-
-              {activeTab === 'home' || activeTab === 'gerador' ? (
+              {(activeTab === 'home' || activeTab === 'gerador') && (
                 <BentoGrid 
                   latestResult={latestResult} 
                   isLoading={isLoading} 
@@ -187,7 +174,8 @@ const Index = () => {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
                 />
-              ) : null}
+              )}
+              </Suspense>
             </AnimatePresence>
           </motion.div>
         </main>
