@@ -69,7 +69,7 @@ const Index = () => {
     deleteUser,
     toggleUserStatus,
     resetPassword
-  } = useAdmin();
+  } = useAdmin(isAdmin);
 
   const { saveAiGameToHistory } = useAiGameSaver(saveToHistory);
 
