@@ -73,13 +73,17 @@ const Index = () => {
 
   const { saveAiGameToHistory } = useAiGameSaver(saveToHistory);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     signOut();
     toast({
       title: "Sessão encerrada",
       description: "Você saiu do sistema com sucesso.",
     });
-  };
+  }, [signOut, toast]);
+
+  const goHome = useCallback(() => setActiveTab('home'), []);
+  const goGenerator = useCallback(() => setActiveTab('gerador'), []);
+  const goSettings = useCallback(() => setActiveTab('ajustes'), []);
 
 
   if (loading) return null; // Prevent flicker during auth check
