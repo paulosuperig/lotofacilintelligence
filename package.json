@@ -12,6 +12,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "setup:supabase": "node scripts/setup-supabase.mjs",
+    "validate:supabase": "node scripts/validate-supabase.mjs",
+    "prebuild": "node scripts/validate-supabase.mjs",
     "postinstall": "node scripts/setup-supabase.mjs || true"
   },
   "dependencies": {
