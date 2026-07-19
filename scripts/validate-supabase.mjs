@@ -45,13 +45,13 @@ const record = (msg) => { failures.push(msg); fail(msg); };
 async function main() {
   console.log(`\n🔍 Validando credenciais Supabase…\n`);
   const env = loadEnv();
-  const URL = env.VITE_SUPABASE_URL;
+  const SUPA_URL = env.VITE_SUPABASE_URL;
   const KEY = env.VITE_SUPABASE_PUBLISHABLE_KEY || env.VITE_SUPABASE_ANON_KEY;
   const PID = env.VITE_SUPABASE_PROJECT_ID;
 
   // 1. Presença
-  if (!URL) record('VITE_SUPABASE_URL ausente');
-  else ok(`VITE_SUPABASE_URL = ${URL}`);
+  if (!SUPA_URL) record('VITE_SUPABASE_URL ausente');
+  else ok(`VITE_SUPABASE_URL = ${SUPA_URL}`);
   if (!KEY) record('VITE_SUPABASE_PUBLISHABLE_KEY ausente');
   else ok(`VITE_SUPABASE_PUBLISHABLE_KEY = ${KEY.slice(0, 18)}…`);
   if (!PID) record('VITE_SUPABASE_PROJECT_ID ausente');
@@ -59,14 +59,16 @@ async function main() {
   if (failures.length) return;
 
   // 2. URL coerente
+  let host = '';
   try {
-    const u = new URL(URL);
-    if (!u.hostname.endsWith('.supabase.co')) warn(`hostname incomum: ${u.hostname}`);
-    if (PID && !u.hostname.startsWith(PID)) {
-      record(`URL (${u.hostname}) não bate com PROJECT_ID (${PID})`);
+    const u = new URL(SUPA_URL);
+    host = u.hostname;
+    if (!host.endsWith('.supabase.co')) warn(`hostname incomum: ${host}`);
+    if (PID && !host.startsWith(PID)) {
+      record(`URL (${host}) não bate com PROJECT_ID (${PID})`);
     } else ok('URL coerente com project id');
-  } catch {
-    record(`URL inválida: ${URL}`);
+  } catch (e) {
+    record(`URL inválida: ${SUPA_URL} (${e.message})`);
   }
 
   // 3. JWT válido / não expirado / role anon
@@ -81,20 +83,20 @@ async function main() {
     record(`falha ao decodificar JWT: ${e.message}`);
   }
 
-  // 4. REST endpoint
+  // 4. REST reachability (200 ou 401 = servidor up; 4xx específicos indicam key inválida)
   try {
-    const r = await fetch(`${URL}/rest/v1/`, { headers: { apikey: KEY, Authorization: `Bearer ${KEY}` } });
-    if (r.ok) ok(`REST /rest/v1/ respondeu ${r.status}`);
+    const r = await fetch(`${SUPA_URL}/rest/v1/`, { headers: { apikey: KEY, Authorization: `Bearer ${KEY}` } });
+    if (r.status === 200 || r.status === 401 || r.status === 404) ok(`REST /rest/v1/ acessível (HTTP ${r.status})`);
     else record(`REST /rest/v1/ retornou ${r.status} ${r.statusText}`);
   } catch (e) {
     record(`REST inacessível: ${e.message}`);
   }
 
-  // 5. GoTrue settings
+  // 5. GoTrue settings — valida efetivamente que a apikey é aceita
   try {
-    const r = await fetch(`${URL}/auth/v1/settings`, { headers: { apikey: KEY } });
-    if (r.ok) ok(`Auth /auth/v1/settings respondeu ${r.status}`);
-    else record(`Auth /auth/v1/settings retornou ${r.status}`);
+    const r = await fetch(`${SUPA_URL}/auth/v1/settings`, { headers: { apikey: KEY } });
+    if (r.ok) ok(`Auth /auth/v1/settings respondeu ${r.status} (apikey aceita)`);
+    else record(`Auth /auth/v1/settings retornou ${r.status} — apikey pode estar inválida`);
   } catch (e) {
     record(`Auth inacessível: ${e.message}`);
   }
