@@ -42,6 +42,25 @@ function decodeJwt(token) {
 const failures = [];
 const record = (msg) => { failures.push(msg); fail(msg); };
 
+// Checagens de rede: puladas automaticamente em builds da Vercel (ou via
+// SKIP_SUPABASE_NETWORK_CHECK=1) para nunca pendurar/atrasar um deploy. As
+// validações offline (presença, JWT, URL) continuam rodando sempre.
+const SKIP_NETWORK =
+  process.env.VERCEL === '1' ||
+  process.env.CI === '1' ||
+  process.env.SKIP_SUPABASE_NETWORK_CHECK === '1';
+
+const NETWORK_TIMEOUT_MS = 5000;
+async function fetchWithTimeout(url, options) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), NETWORK_TIMEOUT_MS);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function main() {
   console.log(`\n🔍 Validando credenciais Supabase…\n`);
   const env = loadEnv();
@@ -83,9 +102,14 @@ async function main() {
     record(`falha ao decodificar JWT: ${e.message}`);
   }
 
+  if (SKIP_NETWORK) {
+    info('checagens de rede puladas (ambiente de build/CI) — validações offline OK');
+    return;
+  }
+
   // 4. REST reachability (200 ou 401 = servidor up; 4xx específicos indicam key inválida)
   try {
-    const r = await fetch(`${SUPA_URL}/rest/v1/`, { headers: { apikey: KEY, Authorization: `Bearer ${KEY}` } });
+    const r = await fetchWithTimeout(`${SUPA_URL}/rest/v1/`, { headers: { apikey: KEY, Authorization: `Bearer ${KEY}` } });
     if (r.status === 200 || r.status === 401 || r.status === 404) ok(`REST /rest/v1/ acessível (HTTP ${r.status})`);
     else record(`REST /rest/v1/ retornou ${r.status} ${r.statusText}`);
   } catch (e) {
@@ -94,7 +118,7 @@ async function main() {
 
   // 5. GoTrue settings — valida efetivamente que a apikey é aceita
   try {
-    const r = await fetch(`${SUPA_URL}/auth/v1/settings`, { headers: { apikey: KEY } });
+    const r = await fetchWithTimeout(`${SUPA_URL}/auth/v1/settings`, { headers: { apikey: KEY } });
     if (r.ok) ok(`Auth /auth/v1/settings respondeu ${r.status} (apikey aceita)`);
     else record(`Auth /auth/v1/settings retornou ${r.status} — apikey pode estar inválida`);
   } catch (e) {
