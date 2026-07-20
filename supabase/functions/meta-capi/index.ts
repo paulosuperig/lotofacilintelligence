@@ -1,5 +1,4 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
   buildCorsHeaders,
   clientIpFrom,
@@ -10,7 +9,7 @@ import {
   rateLimit,
 } from "../_shared/security.ts";
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   const origin = req.headers.get("Origin");
   const cors = buildCorsHeaders(origin);
 

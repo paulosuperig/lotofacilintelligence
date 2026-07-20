@@ -192,9 +192,34 @@ export const useLottery = () => {
 
   useEffect(() => {
     let isMounted = true;
+    let channel: any;
+
     const init = async () => {
       await fetchLatestResult();
-      if (isMounted && !isClearingRef.current) await loadHistory();
+      if (!isMounted || isClearingRef.current) return;
+      await loadHistory();
+
+      // Only open a Realtime channel scoped to the current user's rows.
+      if (!isSupabaseEnabled() || !supabase) return;
+      const { data: { session } } = await supabase.auth.getSession();
+      const userId = session?.user?.id;
+      if (!userId || !isMounted) return;
+
+      channel = supabase
+        .channel(`games-history-${userId}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'games_history',
+            filter: `user_id=eq.${userId}`,
+          },
+          () => {
+            if (!isClearingRef.current) loadHistory();
+          },
+        )
+        .subscribe();
     };
     init();
 
@@ -203,16 +228,6 @@ export const useLottery = () => {
       if (!isClearingRef.current) loadHistory();
     };
     window.addEventListener('lottery-history-updated', handleHistoryUpdate);
-
-    let channel: any;
-    if (isSupabaseEnabled() && supabase) {
-      channel = supabase
-        .channel(`games-history-${Math.random().toString(36).slice(2)}`)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'games_history' }, () => {
-          if (!isClearingRef.current) loadHistory();
-        })
-        .subscribe();
-    }
 
     return () => {
       isMounted = false;

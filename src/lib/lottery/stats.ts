@@ -7,20 +7,21 @@ export const calculateGameStats = (nums: number[]) => {
   const moldCount = nums.filter(n => moldNumbers.includes(n)).length;
   const sum = nums.reduce((a, b) => a + b, 0);
   
-  let maxSeq = 1;
-  let currentSeq = 1;
-  for (let i = 1; i < nums.length; i++) {
-    if (nums[i] === nums[i - 1] + 1) {
+  const sorted = [...nums].sort((a, b) => a - b);
+  let maxSeq = sorted.length > 0 ? 1 : 0;
+  let currentSeq = sorted.length > 0 ? 1 : 0;
+  for (let i = 1; i < sorted.length; i++) {
+    if (sorted[i] === sorted[i - 1] + 1) {
       currentSeq++;
       maxSeq = Math.max(maxSeq, currentSeq);
     } else {
       currentSeq = 1;
     }
   }
-  
+
   return {
     pairs: evenCount,
-    odd: 15 - evenCount,
+    odd: nums.length - evenCount,
     primes: pCount,
     sum,
     mold: moldCount,
