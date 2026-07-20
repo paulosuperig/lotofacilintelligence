@@ -9,7 +9,7 @@ import {
   rateLimit,
 } from "../_shared/security.ts";
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   const origin = req.headers.get("Origin");
   const cors = buildCorsHeaders(origin);
 
