@@ -1,6 +1,6 @@
 // Edge Function: admin-reset-password
 // Permite que um admin autenticado resete a senha de outro usuário via service_role.
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
   buildCorsHeaders,
   forbiddenOrigin,
