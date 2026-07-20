@@ -1,60 +1,46 @@
 import { supabase } from "@/lib/supabase";
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
-const SUPABASE_ANON_KEY = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
-  import.meta.env.VITE_SUPABASE_ANON_KEY) as string;
-
-// DeepSeek pode levar > 60s em respostas longas. Usamos fetch direto (bypassa
-// timeouts internos do supabase-js) com AbortController de 3min para evitar
-// o erro "Failed to send a request to the Edge Function".
-const REQUEST_TIMEOUT_MS = 180_000;
-
+/**
+ * Chama a Edge Function `intelligence-ai` via supabase.functions.invoke,
+ * que gerencia auth/CORS/headers automaticamente e é resiliente a
+ * respostas longas do DeepSeek.
+ */
 export const aiService = {
   async callAiGateway(messages: any[], maxTokens: number): Promise<string> {
     if (!supabase) throw new Error("Supabase não inicializado.");
-    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-      throw new Error("Configuração Supabase ausente.");
-    }
 
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.access_token) {
       throw new Error("Sessão expirada. Faça login novamente.");
     }
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-
-    let response: Response;
+    let data: any;
+    let error: any;
     try {
-      response = await fetch(`${SUPABASE_URL}/functions/v1/intelligence-ai`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${session.access_token}`,
-          "apikey": SUPABASE_ANON_KEY,
-        },
-        body: JSON.stringify({ messages, max_tokens: maxTokens }),
-        signal: controller.signal,
+      const res = await supabase.functions.invoke("intelligence-ai", {
+        body: { messages, max_tokens: maxTokens },
       });
+      data = res.data;
+      error = res.error;
     } catch (err: any) {
-      clearTimeout(timeoutId);
-      if (err?.name === "AbortError") {
-        throw new Error("A IA demorou muito para responder. Tente novamente.");
-      }
+      console.error("[aiService] invoke threw:", err);
       throw new Error("Falha de rede ao contactar a IA. Verifique sua conexão.");
     }
-    clearTimeout(timeoutId);
 
-    let data: any = null;
-    try {
-      data = await response.json();
-    } catch {
-      // ignore parse error; será tratado abaixo
-    }
-
-    if (!response.ok) {
-      const msg = data?.message || data?.error || `Erro HTTP ${response.status}`;
-      throw new Error(msg);
+    if (error) {
+      console.error("[aiService] function error:", error);
+      // supabase-js embute a resposta em error.context (Response)
+      let serverMsg: string | undefined;
+      try {
+        const ctx: any = (error as any).context;
+        if (ctx && typeof ctx.json === "function") {
+          const body = await ctx.json();
+          serverMsg = body?.message || body?.error;
+        }
+      } catch {
+        /* ignore */
+      }
+      throw new Error(serverMsg || error.message || "Erro no serviço de IA.");
     }
 
     if (data?.error) {
