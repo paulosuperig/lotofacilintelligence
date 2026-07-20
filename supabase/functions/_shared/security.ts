@@ -11,8 +11,17 @@ const ALLOWED_EXACT = new Set<string>([
   "http://127.0.0.1:5173",
 ]);
 
-// Any *.lovable.app (preview URLs) and *.lovableproject.com (sandbox) are allowed.
-const ALLOWED_SUFFIX = [".lovable.app", ".lovableproject.com"];
+// Origens extras de produção/domínio custom via env (separadas por vírgula),
+// ex.: ALLOWED_ORIGINS="https://meudominio.com.br,https://www.meudominio.com.br".
+// Permite liberar o domínio final sem editar/re-deployar código.
+for (const o of (Deno.env.get("ALLOWED_ORIGINS") ?? "").split(",")) {
+  const trimmed = o.trim();
+  if (trimmed) ALLOWED_EXACT.add(trimmed);
+}
+
+// Sufixos liberados: previews da Lovable (*.lovable.app / *.lovableproject.com)
+// e qualquer deploy da Vercel (*.vercel.app — preview e produção padrão).
+const ALLOWED_SUFFIX = [".lovable.app", ".lovableproject.com", ".vercel.app"];
 
 export function isOriginAllowed(origin: string | null): boolean {
   if (!origin) return false;
