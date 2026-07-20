@@ -4,6 +4,7 @@ import { UserSchema, type ValidatedUser } from '@/lib/security/schemas';
 import { toast } from 'sonner';
 import { type User, type Session } from '@supabase/supabase-js';
 import { trackEvent, trackCustom, setAdvancedMatching, clearAdvancedMatching } from '@/lib/analytics/metaPixel';
+import { setUser as setObsUser, clearUser as clearObsUser } from '@/lib/observability/errorTracking';
 
 /**
  * Skill: Advanced Authentication & Token Management
@@ -62,6 +63,8 @@ export const useAuth = () => {
         if (!isMounted) return;
         setSession(currentSession);
         if (currentSession?.user) {
+          // Observabilidade: associa apenas o UUID do usuário (nunca email/PII).
+          setObsUser(currentSession.user.id);
           // Advanced Matching (SHA-256) — melhora match rate em campanhas Meta
           setAdvancedMatching({
             email: currentSession.user.email,
@@ -87,6 +90,7 @@ export const useAuth = () => {
           if (event === 'SIGNED_OUT') {
             trackCustom('UserLogout', { content_category: 'auth' });
             clearAdvancedMatching();
+            clearObsUser();
           }
           setUser(null);
           setLoading(false);

@@ -8,9 +8,11 @@ funções privilegiadas rodam sobre Supabase.
 ## Stack
 
 - **Frontend:** Vite + React 18 + TypeScript (strict) + Tailwind + shadcn/ui + framer-motion
-- **Estado servidor:** TanStack Query (client provisionado) + Supabase JS
+- **Estado servidor:** TanStack Query (resultado da loteria, histórico e usuários) + Supabase JS
 - **Backend:** Supabase (Auth, Postgres com RLS, Edge Functions em Deno, Realtime)
 - **Analytics:** Meta Pixel + Conversions API (CAPI) com hashing de PII
+- **Observabilidade:** camada própria de error tracking (`src/lib/observability`) com
+  scrubbing de PII e ponto de extensão para Sentry via `registerForwarder`
 - **Deploy:** Vercel (SPA rewrite + headers de segurança/CSP em `vercel.json`)
 
 ## Rodando localmente
