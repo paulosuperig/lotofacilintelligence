@@ -6,12 +6,15 @@ import { UserTable } from './UserTable';
 import { DeepSeekConfig } from './DeepSeekConfig';
 import { SecurityBanner } from './SecurityBanner';
 import { MetaPixelConfig } from './MetaPixelConfig';
+import type { UserProfile } from '@/types/lottery';
+
+type UserFormData = { email: string; password: string; role: 'admin' | 'demo'; status: 'active' | 'blocked' };
 
 
 interface AdminPanelProps {
-  users: any[];
+  users: UserProfile[];
   onBack: () => void;
-  onCreateOrUpdateUser: (userData: any, editingUser: any) => void;
+  onCreateOrUpdateUser: (userData: UserFormData, editingUser: UserProfile | null) => void;
   onDeleteUser: (userId: string) => void;
   onToggleUserStatus: (userId: string) => void;
   onResetPassword: (userId: string, newPassword: string) => void;
@@ -32,8 +35,8 @@ export const AdminPanel = ({
   defaultTab = 'users'
 }: AdminPanelProps) => {
   const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<any>(null);
-  const [userFormData, setUserFormData] = useState({ email: '', password: '', role: 'demo', status: 'active' });
+  const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
+  const [userFormData, setUserFormData] = useState<UserFormData>({ email: '', password: '', role: 'demo', status: 'active' });
   const [activeTab, setActiveTab] = useState<'users' | 'settings'>(defaultTab);
 
   // Sync with defaultTab prop when it changes
@@ -41,7 +44,7 @@ export const AdminPanel = ({
     setActiveTab(defaultTab);
   }, [defaultTab]);
 
-  const handleEditUser = (user: any) => {
+  const handleEditUser = (user: UserProfile) => {
     setEditingUser(user);
     setUserFormData({ email: user.email, password: '', role: user.role, status: user.status });
     setIsUserDialogOpen(true);
@@ -129,7 +132,7 @@ export const AdminPanel = ({
         userFormData={userFormData}
         setUserFormData={setUserFormData}
         onSubmit={handleUserDialogSubmit}
-        onResetPassword={(newPassword) => onResetPassword(editingUser.id, newPassword)}
+        onResetPassword={(newPassword) => editingUser && onResetPassword(editingUser.id, newPassword)}
       />
 
       {activeTab === 'users' ? (

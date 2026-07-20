@@ -32,6 +32,9 @@ export interface UserProfile {
   status: 'active' | 'blocked';
   createdAt: string;
   created_at?: string; // Fallback for Supabase queries
+  whatsapp?: string | null;
+  full_name?: string | null;
+  last_active_at?: string | null;
 }
 
 export interface Statistics {

@@ -3,7 +3,9 @@ import { useToast } from '@/hooks/use-toast';
 import { generateSecureId } from '@/lib/security/utils';
 import { SavedGame } from '@/types/lottery';
 
-export const useAiGameSaver = (saveToHistory: (games: SavedGame[]) => Promise<any>) => {
+type SaveResult = { success: boolean; duplicate: boolean };
+
+export const useAiGameSaver = (saveToHistory: (games: SavedGame[]) => Promise<SaveResult>) => {
   const { toast } = useToast();
 
   const saveAiGameToHistory = useCallback(async (content: string) => {

@@ -15,8 +15,8 @@
 
 declare global {
   interface Window {
-    fbq?: any;
-    _fbq?: any;
+    fbq?: (...args: unknown[]) => void;
+    _fbq?: unknown;
     __META_PIXEL_INITIALIZED__?: boolean;
     __META_PIXEL_ID__?: string | null;
   }
@@ -41,7 +41,7 @@ const sha256 = async (input: string): Promise<string> => {
 
 /** UUID v4 — usado como eventID para deduplicação Pixel ↔ CAPI. */
 export const generateEventId = (): string => {
-  if (isBrowser() && (window.crypto as any)?.randomUUID) return (window.crypto as any).randomUUID();
+  if (isBrowser() && window.crypto?.randomUUID) return window.crypto.randomUUID();
   return 'evt-' + Math.random().toString(36).slice(2) + '-' + Date.now().toString(36);
 };
 
@@ -92,9 +92,9 @@ export const initMetaPixel = (pixelId: string): boolean => {
   /* eslint-enable */
 
   // autoConfig: true habilita microdata enrichment do Meta (recomendado).
-  window.fbq('set', 'autoConfig', true, id);
-  window.fbq('init', id);
-  window.fbq('track', 'PageView');
+  window.fbq?.('set', 'autoConfig', true, id);
+  window.fbq?.('init', id);
+  window.fbq?.('track', 'PageView');
 
   window.__META_PIXEL_INITIALIZED__ = true;
   window.__META_PIXEL_ID__ = id;
@@ -172,13 +172,13 @@ export interface BaseEventParams {
   /** Status de conclusão (CompleteRegistration). */
   status?: boolean | string;
   /** Quaisquer parâmetros customizados extras. */
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 const buildParams = (params?: BaseEventParams) => {
   if (!params) return { params: {}, eventID: generateEventId() };
   const { eventID, eventSourceUrl, ...rest } = params;
-  const finalParams: Record<string, any> = { ...rest };
+  const finalParams: Record<string, unknown> = { ...rest };
   if (finalParams.value != null && !finalParams.currency) finalParams.currency = DEFAULT_CURRENCY;
   return {
     params: finalParams,

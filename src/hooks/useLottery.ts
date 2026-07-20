@@ -192,7 +192,7 @@ export const useLottery = () => {
 
   useEffect(() => {
     let isMounted = true;
-    let channel: any;
+    let channel: ReturnType<NonNullable<typeof supabase>['channel']> | undefined;
 
     const init = async () => {
       await fetchLatestResult();
@@ -223,8 +223,8 @@ export const useLottery = () => {
     };
     init();
 
-    const handleHistoryUpdate = (e?: any) => {
-      if (e?.detail?.action === 'clear') { setHistory([]); return; }
+    const handleHistoryUpdate = (e?: Event) => {
+      if ((e as CustomEvent)?.detail?.action === "clear") { setHistory([]); return; }
       if (!isClearingRef.current) loadHistory();
     };
     window.addEventListener('lottery-history-updated', handleHistoryUpdate);

@@ -3,8 +3,20 @@ import { LotteryResult } from "@/types/lottery";
 
 const API_BASE = "https://loteriascaixa-api.herokuapp.com/api";
 const FALLBACK_API_BASE = "https://servicebus2.caixa.gov.br/portalloterias/api/lotofacil";
+const REQUEST_TIMEOUT_MS = 10_000;
 
-const normalizeResult = (data: any): LotteryResult => {
+/** fetch com timeout via AbortController — evita a UI travar se a API pendurar. */
+const fetchWithTimeout = async (url: string, timeout = REQUEST_TIMEOUT_MS): Promise<Response> => {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeout);
+  try {
+    return await fetch(url, { signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+};
+
+const normalizeResult = (data: Record<string, unknown>): LotteryResult => {
   // Se os dados vierem da Heroku API
   if (data.dezenas) {
     return LotteryResultSchema.parse({
@@ -33,7 +45,7 @@ const normalizeResult = (data: any): LotteryResult => {
 export const lotteryService = {
   async getLatestResult(): Promise<LotteryResult> {
     try {
-      const response = await fetch(`${API_BASE}/lotofacil/latest`);
+      const response = await fetchWithTimeout(`${API_BASE}/lotofacil/latest`);
       if (!response.ok) throw new Error("API Primary Offline");
       const data = await response.json();
       return normalizeResult(data);
@@ -41,7 +53,7 @@ export const lotteryService = {
       console.error("[LotteryService] Primary API failed, trying official Caixa API...", error);
       try {
         // Nota: A API da Caixa pode exigir headers ou ter CORS restrito em alguns ambientes
-        const response = await fetch(FALLBACK_API_BASE);
+        const response = await fetchWithTimeout(FALLBACK_API_BASE);
         if (!response.ok) throw new Error("Caixa API Offline");
         const data = await response.json();
         return normalizeResult(data);
@@ -53,7 +65,7 @@ export const lotteryService = {
   },
 
   async getAllResults(): Promise<LotteryResult[]> {
-    const response = await fetch(`${API_BASE}/lotofacil`);
+    const response = await fetchWithTimeout(`${API_BASE}/lotofacil`);
     if (!response.ok) throw new Error("Failed to fetch all results");
     return response.json();
   }

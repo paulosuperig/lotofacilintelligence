@@ -27,10 +27,10 @@ const ResetPassword = () => {
         description: "Sua nova senha foi salva com sucesso.",
       });
       navigate('/');
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "Erro",
-        description: error.message,
+        description: error instanceof Error ? error.message : "Erro ao redefinir a senha.",
         variant: "destructive",
       });
     } finally {

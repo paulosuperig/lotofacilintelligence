@@ -63,13 +63,13 @@ const isGameLine = (text: string) => {
 };
 
 const makeMarkdownComponents = (onSave: (text: string) => void) => ({
-  code: ({ inline, className, children, ...props }: any) => {
+  code: ({ className, children, ...props }: React.ComponentPropsWithoutRef<'code'>) => {
     const raw = String(children ?? '');
     if (isGameLine(raw)) return <GameLine raw={raw} onSave={onSave} />;
     return <code className={className} {...props}>{children}</code>;
   },
-  pre: ({ children, ...props }: any) => {
-    const child: any = Array.isArray(children) ? children[0] : children;
+  pre: ({ children, ...props }: React.ComponentPropsWithoutRef<'pre'>) => {
+    const child = (Array.isArray(children) ? children[0] : children) as React.ReactElement<{ children?: React.ReactNode }> | undefined;
     const inner = child?.props?.children;
     const raw = Array.isArray(inner) ? inner.join('') : String(inner ?? '');
     if (isGameLine(raw)) return <GameLine raw={raw} onSave={onSave} />;
@@ -77,8 +77,10 @@ const makeMarkdownComponents = (onSave: (text: string) => void) => ({
   },
 });
 
+type ChatMsg = { role: "user" | "assistant"; content: string };
+
 interface ChatMessageProps {
-  msg: any;
+  msg: ChatMsg;
   onSaveAiGame: (content: string) => void;
 }
 

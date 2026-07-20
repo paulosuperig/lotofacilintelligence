@@ -4,7 +4,55 @@ import {
   forbiddenOrigin,
   internalError,
   isOriginAllowed,
+  rateLimit,
 } from "../_shared/security.ts";
+
+const ALLOWED_MODELS = new Set(["deepseek-chat", "deepseek-reasoner"]);
+const MAX_MESSAGES = 40;
+const MAX_TOKENS_CAP = 4096;
+const MAX_CONTENT_LEN = 12_000;
+
+type ChatMessage = { role: string; content: string };
+
+function validatePayload(body: unknown):
+  | { ok: true; messages: ChatMessage[]; maxTokens: number; model: string }
+  | { ok: false; error: string } {
+  if (!body || typeof body !== "object") return { ok: false, error: "Invalid body" };
+  const b = body as Record<string, unknown>;
+
+  if (!Array.isArray(b.messages) || b.messages.length === 0) {
+    return { ok: false, error: "messages must be a non-empty array" };
+  }
+  if (b.messages.length > MAX_MESSAGES) {
+    return { ok: false, error: `messages exceeds max of ${MAX_MESSAGES}` };
+  }
+  const messages: ChatMessage[] = [];
+  for (const m of b.messages) {
+    if (!m || typeof m !== "object") return { ok: false, error: "invalid message entry" };
+    const mm = m as Record<string, unknown>;
+    if (typeof mm.role !== "string" || !["system", "user", "assistant"].includes(mm.role)) {
+      return { ok: false, error: "invalid message role" };
+    }
+    if (typeof mm.content !== "string" || mm.content.length === 0) {
+      return { ok: false, error: "invalid message content" };
+    }
+    if (mm.content.length > MAX_CONTENT_LEN) {
+      return { ok: false, error: "message content too long" };
+    }
+    messages.push({ role: mm.role, content: mm.content });
+  }
+
+  const maxTokens = Math.min(
+    Math.max(Number(b.max_tokens) || 2048, 1),
+    MAX_TOKENS_CAP,
+  );
+
+  const model = typeof b.model === "string" && ALLOWED_MODELS.has(b.model)
+    ? b.model
+    : "deepseek-chat";
+
+  return { ok: true, messages, maxTokens, model };
+}
 
 Deno.serve(async (req) => {
   const origin = req.headers.get("Origin");
@@ -41,7 +89,23 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { messages, max_tokens, model: requestedModel } = await req.json();
+    // Rate limit por usuário autenticado: 20 req / 60s (protege custo da API).
+    const rl = rateLimit(`ai:${user.id}`, 20, 60_000);
+    if (!rl.ok) {
+      return new Response(
+        JSON.stringify({ error: "RATE_LIMITED", fallback: true, message: "Muitas requisições. Aguarde alguns segundos." }),
+        { status: 429, headers: { ...cors, "Content-Type": "application/json", "Retry-After": String(rl.retryAfterSec) } },
+      );
+    }
+
+    const parsed = validatePayload(await req.json());
+    if (!parsed.ok) {
+      return new Response(JSON.stringify({ error: "INVALID_PAYLOAD", message: parsed.error }), {
+        status: 400,
+        headers: { ...cors, "Content-Type": "application/json" },
+      });
+    }
+    const { messages, maxTokens, model } = parsed;
 
     const adminClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     const { data: cfg } = await adminClient
@@ -50,12 +114,11 @@ Deno.serve(async (req) => {
       .eq("key", "deepseek_api_key")
       .maybeSingle();
 
+    const cfgValue = cfg?.value as { key?: string } | string | null | undefined;
     const DEEPSEEK_API_KEY =
-      (cfg?.value as any)?.key ||
-      (typeof cfg?.value === "string" ? cfg.value : null) ||
+      (typeof cfgValue === "object" && cfgValue?.key) ||
+      (typeof cfgValue === "string" ? cfgValue : null) ||
       Deno.env.get("DEEPSEEK_API_KEY");
-
-    const model = requestedModel || "deepseek-chat";
 
     if (!DEEPSEEK_API_KEY) {
       return new Response(
@@ -77,7 +140,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         model,
         messages,
-        max_tokens: max_tokens || 2048,
+        max_tokens: maxTokens,
         temperature: 0.2,
       }),
     });

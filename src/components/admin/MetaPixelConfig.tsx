@@ -25,7 +25,9 @@ export const MetaPixelConfig = () => {
       setCurrentId(id);
       setCapiStatus(status);
       if (status.testCode) setTestCode(status.testCode);
-    } catch (err) {}
+    } catch (err) {
+      console.warn('[MetaPixelConfig] load config failed:', err);
+    }
   };
 
   useEffect(() => {
@@ -45,8 +47,8 @@ export const MetaPixelConfig = () => {
       setPixelId('');
       initMetaPixel(clean);
       toast({ title: 'Pixel configurado', description: 'O Meta Pixel foi salvo e ativado.' });
-    } catch (err: any) {
-      toast({ title: 'Erro ao salvar', description: err?.message || 'Verifique suas permissões de admin.', variant: 'destructive' });
+    } catch (err) {
+      toast({ title: 'Erro ao salvar', description: err instanceof Error ? err.message : 'Verifique suas permissões de admin.', variant: 'destructive' });
     } finally {
       setSaving(false);
     }
@@ -65,8 +67,8 @@ export const MetaPixelConfig = () => {
       }
       await loadConfig();
       toast({ title: 'CAPI configurado', description: 'As configurações de Conversions API foram salvas.' });
-    } catch (err: any) {
-      toast({ title: 'Erro ao salvar CAPI', description: err?.message, variant: 'destructive' });
+    } catch (err) {
+      toast({ title: 'Erro ao salvar CAPI', description: err instanceof Error ? err.message : 'Erro ao salvar.', variant: 'destructive' });
     } finally {
       setSaving(false);
     }

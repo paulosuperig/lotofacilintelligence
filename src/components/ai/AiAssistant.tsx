@@ -6,9 +6,11 @@ import { ChatMessage } from './ChatMessage';
 import { cn } from "@/lib/utils";
 import { Sparkles, Flame, PieChart, ShieldCheck } from 'lucide-react';
 
+type ChatMsg = { role: 'user' | 'assistant'; content: string };
+
 interface AiAssistantProps {
   isAiConfigured: boolean;
-  aiChat: any[];
+  aiChat: ChatMsg[];
   isAiLoading: boolean;
   aiMessage: string;
   onSendMessage: (e?: React.FormEvent, customMessage?: string) => void;

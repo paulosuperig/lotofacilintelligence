@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
 import { generateSecureId } from '@/lib/security/utils';
 import { FECHAMENTO_MODELS } from '@/constants/fechamentos';
+import type { SavedGame } from '@/types/lottery';
 
 interface FechamentosPanelProps {
   onBack: () => void;
-  onSaveGame: (game: any) => void;
+  onSaveGame: (game: SavedGame) => void;
 }
 
 export const FechamentosPanel = ({ onBack, onSaveGame }: FechamentosPanelProps) => {

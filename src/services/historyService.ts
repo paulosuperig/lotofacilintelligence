@@ -39,7 +39,7 @@ export const historyService = {
       numbers: game.numbers,
       sum_value: game.sum,
       model_name: game.model,
-      type: game.type,
+      type: game.type ?? 'Manual',
       created_at: new Date(game.timestamp).toISOString(),
     }));
 

@@ -13,9 +13,9 @@ export const userService = {
     
     if (error) throw error;
     
-    return (data || []).map((u: any) => ({
+    return (data || []).map((u: Record<string, unknown>) => ({
       ...u,
-      createdAt: u.created_at || new Date().toISOString()
+      createdAt: (u.created_at as string) || new Date().toISOString()
     })) as UserProfile[];
   },
 
@@ -35,15 +35,18 @@ export const userService = {
     if (error) throw error;
   },
 
-  async deleteProfile(userId: string) {
-    if (!isSupabaseEnabled() || !supabase) return;
+  async deleteProfile(userId: string): Promise<{ error: Error | null }> {
+    if (!isSupabaseEnabled() || !supabase) return { error: new Error('Supabase not enabled') };
 
-    const { error } = await supabase
-      .from('profiles')
-      .delete()
-      .eq('id', userId);
-    
-    if (error) throw error;
+    // Exclui a conta de auth.users via edge function segura (valida admin com
+    // has_role + usa service_role). O perfil em `profiles` cai em cascata.
+    // Apagar só a linha de `profiles` deixaria o login ativo — por isso a função.
+    const { data, error } = await supabase.functions.invoke('admin-delete-user', {
+      body: { userId },
+    });
+    if (error) return { error };
+    if (data?.error) return { error: new Error(data.error) };
+    return { error: null };
   },
 
   async updateStatus(userId: string, status: 'active' | 'blocked') {

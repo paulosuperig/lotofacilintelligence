@@ -6,7 +6,8 @@ export const aiService = {
    * A chave da API DeepSeek é gerenciada exclusivamente no Supabase
    * (system_configs) e nunca trafega pelo cliente.
    */
-  async callAiGateway(messages: any[], maxTokens: number): Promise<string> {
+  async callAiGateway(messages: { role: string; content: string }[], maxTokens: number): Promise<string> {
+    if (!supabase) throw new Error('Supabase indisponível.');
     const { data, error } = await supabase.functions.invoke('intelligence-ai', {
       body: { messages, max_tokens: maxTokens },
     });

@@ -32,10 +32,10 @@ const Login = () => {
         title: "Bem-vindo!",
         description: "Acesso autorizado com sucesso.",
       });
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "Erro de autenticação",
-        description: error.message || "E-mail ou senha incorretos.",
+        description: error instanceof Error ? error.message : "E-mail ou senha incorretos.",
         variant: "destructive",
       });
     } finally {
@@ -59,10 +59,10 @@ const Login = () => {
         description: `As instruções de recuperação foram enviadas para ${email}.`,
       });
       setView('login');
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "Erro",
-        description: error.message,
+        description: error instanceof Error ? error.message : "Ocorreu um erro. Tente novamente.",
         variant: "destructive",
       });
     } finally {
@@ -102,10 +102,10 @@ const Login = () => {
         });
         setView('login');
       }
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "Erro no cadastro",
-        description: error.message,
+        description: error instanceof Error ? error.message : "Ocorreu um erro. Tente novamente.",
         variant: "destructive",
       });
     } finally {

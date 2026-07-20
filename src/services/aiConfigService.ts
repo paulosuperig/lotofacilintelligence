@@ -1,4 +1,5 @@
 import { supabase, isSupabaseEnabled } from '@/lib/supabase';
+import type { Json } from '@/integrations/supabase/types';
 
 const KEY = 'deepseek_api_key';
 const PIXEL_KEY = 'meta_pixel_id';
@@ -19,8 +20,8 @@ export const aiConfigService = {
       .eq('key', KEY)
       .maybeSingle();
     if (error || !data) return false;
-    const v: any = data.value;
-    return !!(v && (typeof v === 'string' ? v : v.key));
+    const v = data.value as string | { key?: string } | null;
+    return !!(v && (typeof v === "string" ? v : v.key));
   },
 
   async saveKey(apiKey: string): Promise<void> {
@@ -31,7 +32,7 @@ export const aiConfigService = {
     const { error } = await supabase
       .from('system_configs')
       .upsert(
-        { key: KEY, value: { key: clean } as any, updated_at: new Date().toISOString() },
+        { key: KEY, value: { key: clean } as Json, updated_at: new Date().toISOString() },
         { onConflict: 'key' }
       );
     if (error) throw error;
@@ -40,7 +41,7 @@ export const aiConfigService = {
   /** Lê o Pixel ID via RPC pública (não requer auth). */
   async getMetaPixelId(): Promise<string | null> {
     if (!isSupabaseEnabled() || !supabase) return null;
-    const { data, error } = await (supabase as any).rpc('get_meta_pixel_id');
+    const { data, error } = await supabase.rpc('get_meta_pixel_id');
     if (error) {
       console.warn('[Pixel] RPC error:', error.message);
       return null;
@@ -57,7 +58,7 @@ export const aiConfigService = {
     const { error } = await supabase
       .from('system_configs')
       .upsert(
-        { key: PIXEL_KEY, value: { id: clean } as any, updated_at: new Date().toISOString() },
+        { key: PIXEL_KEY, value: { id: clean } as Json, updated_at: new Date().toISOString() },
         { onConflict: 'key' }
       );
     if (error) throw error;
@@ -77,7 +78,7 @@ export const aiConfigService = {
     const { error } = await supabase
       .from('system_configs')
       .upsert(
-        { key: CAPI_KEY, value: { token: clean } as any, updated_at: new Date().toISOString() },
+        { key: CAPI_KEY, value: { token: clean } as Json, updated_at: new Date().toISOString() },
         { onConflict: 'key' }
       );
     if (error) throw error;
@@ -90,7 +91,7 @@ export const aiConfigService = {
     const { error } = await supabase
       .from('system_configs')
       .upsert(
-        { key: TEST_CODE_KEY, value: { code: clean } as any, updated_at: new Date().toISOString() },
+        { key: TEST_CODE_KEY, value: { code: clean } as Json, updated_at: new Date().toISOString() },
         { onConflict: 'key' }
       );
     if (error) throw error;
@@ -118,7 +119,7 @@ export const aiConfigService = {
 
     return {
       token: !!tokenData,
-      testCode: (testData?.value as any)?.code || null
+      testCode: (testData?.value as { code?: string } | null)?.code || null
     };
   },
 };

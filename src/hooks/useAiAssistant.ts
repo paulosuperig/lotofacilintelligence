@@ -59,7 +59,8 @@ const formatIntentForPrompt = (intent: UserIntent): string => {
 
 export const useAiAssistant = (latestResult?: LotteryResult | null) => {
   const { toast } = useToast();
-  const [aiChat, setAiChat] = useState<{ role: 'user' | 'assistant', content: string }[]>([]);
+  type ChatMsg = { role: "user" | "assistant"; content: string };
+  const [aiChat, setAiChat] = useState<ChatMsg[]>([]);
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [aiMessage, setAiMessage] = useState('');
   const [isAiConfigured, setIsAiConfigured] = useState(false);
@@ -84,7 +85,7 @@ export const useAiAssistant = (latestResult?: LotteryResult | null) => {
           .eq('user_id', session.user.id)
           .order('created_at', { ascending: true })
           .limit(30);
-        if (isMounted && !error && data) setAiChat(data as any);
+        if (isMounted && !error && data) setAiChat(data as ChatMsg[]);
       } catch (err) {
         console.error("[AI] History load error:", err);
       }
@@ -165,10 +166,10 @@ ${intentBlock}
 ${statsBlock}`;
   }, [latestResult]);
 
-  const callAiGateway = useCallback(async (messages: any[], maxTokens: number, attempt = 0): Promise<string> => {
+  const callAiGateway = useCallback(async (messages: { role: string; content: string }[], maxTokens: number, attempt = 0): Promise<string> => {
     try {
       return await aiService.callAiGateway(messages, maxTokens);
-    } catch (err: any) {
+    } catch (err) {
       if (attempt < MAX_RETRIES) {
         await sleep(1000 * Math.pow(2, attempt));
         return callAiGateway(messages, maxTokens, attempt + 1);
@@ -214,14 +215,14 @@ ${statsBlock}`;
         soma_min: intent.somaMin ?? null,
         soma_max: intent.somaMax ?? null,
       });
-    } catch (error: any) {
-      trackCustom('ConsultaIAFalhou', {
-        content_category: 'ai_chat',
-        error: error?.message?.slice(0, 100) || 'unknown',
+    } catch (error) {
+      trackCustom("ConsultaIAFalhou", {
+        content_category: "ai_chat",
+        error: (error instanceof Error ? error.message : "").slice(0, 100) || "unknown",
       });
       toast({
         title: 'Erro na IA',
-        description: error?.message || 'Tente novamente em instantes.',
+        description: (error instanceof Error ? error.message : '') || 'Tente novamente em instantes.',
         variant: 'destructive',
       });
     } finally {
@@ -246,10 +247,10 @@ ${statsBlock}`;
           title: "Configuração salva",
           description: "A chave da API DeepSeek foi armazenada com segurança no Supabase.",
         });
-      } catch (err: any) {
+      } catch (err) {
         toast({
           title: "Erro ao salvar",
-          description: err?.message || "Verifique suas permissões de admin.",
+          description: (err instanceof Error ? err.message : "") || "Verifique suas permissões de admin.",
           variant: "destructive",
         });
       }

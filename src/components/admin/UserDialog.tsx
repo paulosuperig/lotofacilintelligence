@@ -30,12 +30,16 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
+import type { UserProfile } from '@/types/lottery';
+
+type UserFormData = { email: string; password: string; role: "admin" | "demo"; status: "active" | "blocked" };
+
 interface UserDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  editingUser: any;
-  userFormData: any;
-  setUserFormData: (data: any) => void;
+  editingUser: UserProfile | null;
+  userFormData: UserFormData;
+  setUserFormData: (data: UserFormData) => void;
   onSubmit: (e: React.FormEvent) => void;
   onResetPassword?: (newPassword: string) => void;
 }
@@ -97,7 +101,7 @@ export const UserDialog = ({
             <Label htmlFor="role" className="text-zinc-700 dark:text-zinc-300">Perfil de Acesso</Label>
             <Select 
               value={userFormData.role} 
-              onValueChange={(value: any) => setUserFormData({...userFormData, role: value})}
+              onValueChange={(value) => setUserFormData({...userFormData, role: value as "admin" | "demo"})}
             >
               <SelectTrigger className="rounded-xl bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100">
                 <SelectValue placeholder="Selecione o perfil" />

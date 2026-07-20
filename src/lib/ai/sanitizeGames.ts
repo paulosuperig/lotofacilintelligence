@@ -18,7 +18,7 @@ const isGameLineCandidate = (line: string) => {
 };
 
 const sanitizeLine = (line: string): { text: string; sum: number } => {
-  const labelMatch = line.match(/^(\s*(?:jogo\s*)?\d{1,2}\s*[\)\.\-:])/i);
+  const labelMatch = line.match(/^(\s*(?:jogo\s*)?\d{1,2}\s*[).\-:])/i);
   const label = labelMatch ? labelMatch[1].trim() : '';
 
   const tokens = line.match(/\b\d{1,2}\b/g) || [];
