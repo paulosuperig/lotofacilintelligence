@@ -1,5 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
-
+/* Fonte carregada via <link> no index.html (preconnect + preload) — mais rápido
+   que @import, que é render-blocking e descoberto tarde no pipeline de CSS. */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

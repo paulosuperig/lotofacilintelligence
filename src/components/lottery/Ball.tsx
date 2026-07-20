@@ -29,7 +29,7 @@ export const Ball = memo(({
       whileTap={{ scale: 0.95 }}
       onClick={onClick}
       className={cn(
-        "rounded-full flex items-center justify-center font-display font-bold transition-all duration-500 cursor-default select-none border shrink-0",
+        "rounded-full flex items-center justify-center font-display font-bold transition-colors duration-300 cursor-default select-none border shrink-0",
         active 
           ? "bg-gradient-to-br from-purple-600 to-fuchsia-600 text-white shadow-lg shadow-purple-500/30 border-2 border-white/20 will-change-transform" 
           : "bg-white dark:bg-zinc-800/50 text-zinc-400 dark:text-zinc-400 border border-zinc-100 dark:border-zinc-800",
