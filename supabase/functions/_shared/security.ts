@@ -11,12 +11,20 @@ const ALLOWED_EXACT = new Set<string>([
   "http://127.0.0.1:5173",
 ]);
 
-// Any *.lovable.app (preview URLs) and *.lovableproject.com (sandbox) are allowed.
-const ALLOWED_SUFFIX = [".lovable.app", ".lovableproject.com"];
+// Preview/deploy hosts used by Lovable and Vercel. Auth/JWT still gates protected APIs.
+const ALLOWED_SUFFIX = [".lovable.app", ".lovableproject.com", ".vercel.app"];
+
+function getConfiguredOrigins(): string[] {
+  return (Deno.env.get("APP_ALLOWED_ORIGINS") ?? "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+}
 
 export function isOriginAllowed(origin: string | null): boolean {
   if (!origin) return false;
   if (ALLOWED_EXACT.has(origin)) return true;
+  if (getConfiguredOrigins().includes(origin)) return true;
   try {
     const u = new URL(origin);
     const host = u.hostname;
