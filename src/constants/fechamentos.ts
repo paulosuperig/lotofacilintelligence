@@ -1,56 +1,56 @@
-export const FECHAMENTO_MODELS = [
-  { 
-    title: "R7 - 14 Pontos", 
-    desc: "Fechamento matemático focado em garantir o prêmio de 14 pontos com redução estratégica.", 
-    numbers: 15,
-    warranty: "14 Pontos Garantidos",
-    condition: "Acertando 15 dezenas",
-    risk: "Moderado",
-    tag: "Mais Popular"
+/**
+ * Presets de FECHAMENTO reais. Cada modelo define o tamanho do pool (nº de
+ * dezenas escolhidas) e a quantidade de jogos gerados. A GARANTIA não é fixada
+ * aqui — ela é **calculada e verificada** em tempo de execução pelo motor
+ * (`src/lib/lottery/wheel.ts`) e exibida honestamente ao usuário.
+ *
+ * Pools até 20 dezenas são verificados exaustivamente de forma instantânea no
+ * navegador (C(20,15) = 15.504 sorteios possíveis).
+ */
+export interface FechamentoModel {
+  title: string;
+  desc: string;
+  /** nº de dezenas do pool (16..20) */
+  poolSize: number;
+  /** nº de jogos gerados no fechamento */
+  numGames: number;
+  tag?: string;
+}
+
+export const FECHAMENTO_MODELS: FechamentoModel[] = [
+  {
+    title: '16 Dezenas • 6 Jogos',
+    desc: 'Fechamento enxuto: reduz 16 dezenas a 6 jogos com alta garantia se as 15 saírem no pool.',
+    poolSize: 16,
+    numGames: 6,
+    tag: 'Econômico',
   },
-  { 
-    title: "Especial Ímpares", 
-    desc: "Estratégia baseada na tendência histórica de 8 ou 9 números ímpares por concurso.", 
-    numbers: 20,
-    warranty: "Foco em Tendência",
-    condition: "Equilíbrio 9Í / 6P",
-    risk: "Estatístico",
-    tag: "Tendência"
+  {
+    title: '17 Dezenas • 8 Jogos',
+    desc: 'Equilíbrio entre custo e cobertura ampliando o pool para 17 dezenas.',
+    poolSize: 17,
+    numGames: 8,
+    tag: 'Equilibrado',
   },
-  { 
-    title: "Redução Quadrantes", 
-    desc: "Distribuição técnica de dezenas cobrindo todos os quadrantes do volante.", 
-    numbers: 18,
-    warranty: "Cobertura Total",
-    condition: "Máximo de Quadrantes",
-    risk: "Baixo",
-    tag: "Segurança"
+  {
+    title: '18 Dezenas • 12 Jogos',
+    desc: 'O fechamento mais popular do mercado: 18 dezenas com boa garantia matemática.',
+    poolSize: 18,
+    numGames: 12,
+    tag: 'Mais Popular',
   },
-  { 
-    title: "Ciclo Mestre", 
-    desc: "Análise baseada nas dezenas remanescentes para o fechamento do ciclo atual.", 
-    numbers: 22,
-    warranty: "Alta Probabilidade",
-    condition: "Foco em Atrasadas",
-    risk: "Agressivo",
-    tag: "Especial"
+  {
+    title: '19 Dezenas • 16 Jogos',
+    desc: 'Cobertura ampla de 19 dezenas para quem busca mais segurança na faixa premiada.',
+    poolSize: 19,
+    numGames: 16,
+    tag: 'Cobertura',
   },
-  { 
-    title: "VIP 25-15-14", 
-    desc: "O modelo mais avançado que trabalha com todas as 25 dezenas em jogos reduzidos.", 
-    numbers: 25,
-    warranty: "Performance Máxima",
-    condition: "Filtros Avançados",
-    risk: "Alta Performance",
-    tag: "Premium"
+  {
+    title: '20 Dezenas • 24 Jogos',
+    desc: 'Fechamento amplo de 20 dezenas — máxima cobertura com garantia verificada.',
+    poolSize: 20,
+    numGames: 24,
+    tag: 'Premium',
   },
-  { 
-    title: "Filtro de Soma", 
-    desc: "Jogos otimizados para se manterem dentro da média de soma (175 a 215).", 
-    numbers: 15,
-    warranty: "Equilíbrio Real",
-    condition: "Soma 180-210",
-    risk: "Conservador",
-    tag: "Matemático"
-  }
 ];

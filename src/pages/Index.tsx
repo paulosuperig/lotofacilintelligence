@@ -124,9 +124,9 @@ const Index = () => {
               )}
               
               {activeTab === 'stats' && (
-                <FechamentosPanel 
-                  onBack={goHome} 
-                  onSaveGame={(game) => saveToHistory([game])} 
+                <FechamentosPanel
+                  onBack={goHome}
+                  onSaveGames={(games) => saveToHistory(games)}
                 />
               )}
 

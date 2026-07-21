@@ -147,7 +147,29 @@ diferencial de confiança, não uma fraqueza.
 > diferença marginal — que o `scripts/backtest.ts` mede objetivamente. A recomendação
 > é publicar sempre o número real, sem promessas de ganho.
 
-## 8. Próximos passos sugeridos
-- **Fechamentos/wheeling** matemáticos reais (hoje `fechamentos.ts` é apenas copy).
+## 8. Fechamentos reais + CI (rodada de robustez)
+
+### 8.1 Motor de fechamento (wheeling) verificado — `src/lib/lottery/wheel.ts`
+Substitui a farsa anterior (`Math.random()` gerando 1 jogo, com selo
+"14 Pontos Garantidos" **falso**) por um motor real de teoria de cobertura:
+- Reduz um pool de N dezenas (16–20) a um conjunto menor de jogos.
+- A **garantia é calculada e verificada exaustivamente** (todas as C(N,15)
+  formas de as 15 caírem dentro do pool) — nunca exibimos garantia não verificada.
+- Construção gulosa maximin em espaço de bitmask; orçamento de candidatos
+  adaptativo mantém o cálculo abaixo de ~0,5 s no navegador.
+- UI honesta: "garante G pontos **se** as 15 saírem entre as N escolhidas —
+  isto não garante prêmio". Pool montado a partir de quentes + atrasadas.
+- 7 testes cobrindo a matemática da garantia (ex.: N=16 ⇒ garantia 14; todos os
+  jogos ⇒ 15; garantia verificada = garantia reportada).
+
+### 8.2 Integração Contínua — `.github/workflows/ci.yml`
+Antes não havia CI de qualidade (só deploy Vercel). Agora todo push/PR roda:
+- **Typecheck (`tsc`)** e **testes (`vitest`)** como **gate bloqueante**;
+- **lint** informativo (o projeto ainda carrega avisos legados nos componentes
+  shadcn gerados, então não bloqueia — mas fica visível).
+
+## 9. Próximos passos sugeridos
 - Persistir a análise no **Supabase** (edge function) para reduzir chamadas à API pública.
 - Conferência de um **jogo avulso** (o usuário digita 15 dezenas e confere na hora).
+- Fechamentos com pools maiores (22/25) via **covering designs pré-computados** da literatura.
+- Zerar gradualmente os avisos de lint legados para tornar o lint um gate bloqueante.
