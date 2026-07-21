@@ -1,10 +1,14 @@
 // Post-processing of AI assistant output to guarantee mathematically valid
 // Lotofácil game lines (15 unique numbers in [1,25], sorted, with correct sum).
 
+export type EstrategiaJogo = 'quentes' | 'atrasadas' | 'equilibrada' | 'agressiva';
+
 export interface UserIntent {
   quantidade?: number;
   somaMin?: number;
   somaMax?: number;
+  /** estratégia preferida pelo usuário, quando detectada na mensagem */
+  estrategia?: EstrategiaJogo;
 }
 
 export const INCOMPLETE_MARKER = '⚠️ Resposta incompleta';

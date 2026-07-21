@@ -60,7 +60,7 @@ export const BentoGrid = ({
       </motion.div>
 
       <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-1 xl:col-span-4">
-        <TrendsCard />
+        <TrendsCard onNavigate={() => onNavigate('estatisticas')} />
       </motion.div>
 
       <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-1 xl:col-span-4">

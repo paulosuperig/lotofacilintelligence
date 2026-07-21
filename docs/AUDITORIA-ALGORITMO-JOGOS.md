@@ -191,12 +191,34 @@ expectativa de ganho.
 únicas em 1..25) e reporta quantos foram **descartados** — sorteios malformados
 vindos da API não distorcem mais frequências e atrasos. Coberto por teste.
 
-## 10. Próximos passos sugeridos
+## 10. Painel de estatísticas + IA data-grounded (rodada de profundidade)
+
+### 10.1 Painel de Estatísticas — `src/components/home/StatsPanel.tsx`
+Painel rico com **recharts** (lazy-loaded), acessível pelo card "Tendências":
+- **Frequência por dezena** (barras, quentes destacadas).
+- **Atraso atual** (barras, atrasadas destacadas).
+- **Mapa de calor** no volante 5x5 (intensidade sequencial de uma matiz = frequência).
+- **Co-ocorrência**: pares de dezenas que mais saem juntos.
+- Segue a metodologia de dataviz (matiz única para magnitude, eixos recessivos,
+  tooltips, dark mode) e traz aviso de que são estatísticas descritivas, não previsão.
+- Suporte: `analyzeHistory` passou a computar **co-ocorrência** (`topPairs`).
+
+### 10.2 Intelligence AI mais dinâmico e assertivo
+Antes, o prompt mandava a IA "identificar quentes/frias" **sem dado algum** — ela
+chutava. Agora:
+- `formatAnalysisForPrompt` injeta os **dados reais** (quentes com %, frias,
+  atrasadas com atraso, pares fortes) no prompt.
+- **Estratégias dinâmicas** detectadas na mensagem (`quentes`, `atrasadas`,
+  `equilibrada`, `agressiva`) geram diretrizes de composição específicas.
+- Lógica de intenção extraída para `src/lib/ai/intent.ts` (pura e **testada**).
+- Reforço de transparência no prompt (chance de 15 acertos = 1 em 3.268.760).
+- 66 testes no total (novos: intent, co-ocorrência, formatação da análise).
+
+## 11. Próximos passos sugeridos
 - **Fonte oficial da Caixa** via edge function (proxy + cache) e **persistência do
   histórico no Supabase** — maior ganho restante de confiabilidade (requer o
   ambiente Supabase para testar/deployar).
 - Conferência de **jogo avulso** e contra **qualquer concurso**, exibindo o
   **valor real do prêmio** (a API já traz `premiacoes`).
-- **Painel de estatísticas** rico (recharts): frequência, mapa de calor, co-ocorrência.
 - Fechamentos com pools 22/25 via **covering designs** pré-computados.
 - Zerar os avisos de lint legados para tornar o lint um gate bloqueante.

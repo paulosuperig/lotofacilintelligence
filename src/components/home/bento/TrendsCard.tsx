@@ -1,5 +1,5 @@
 import React from 'react';
-import { Target, PieChart, Flame, Snowflake } from 'lucide-react';
+import { Target, PieChart, Flame, Snowflake, ArrowUpRight } from 'lucide-react';
 import { Ball } from "@/components/lottery/Ball";
 import { useLotteryStats } from "@/hooks/useLotteryStats";
 
@@ -9,7 +9,11 @@ const pad = (n: number) => String(n).padStart(2, '0');
 const FALLBACK_HOT = [20, 10, 25, 1, 13];
 const FALLBACK_COLD = [4, 7, 12, 18, 22];
 
-export const TrendsCard = () => {
+interface TrendsCardProps {
+  onNavigate?: () => void;
+}
+
+export const TrendsCard = ({ onNavigate }: TrendsCardProps) => {
   const { analysis } = useLotteryStats();
 
   const hot = (analysis?.quentes.slice(0, 5) ?? FALLBACK_HOT);
@@ -19,7 +23,13 @@ export const TrendsCard = () => {
   const janela = analysis?.totalConcursos ?? 0;
 
   return (
-    <div className="bg-white dark:bg-zinc-900 border border-purple-100 dark:border-zinc-800 rounded-3xl md:rounded-[2rem] p-6 md:p-7 flex flex-col group overflow-hidden relative shadow-sm h-full">
+    <div
+      onClick={onNavigate}
+      role={onNavigate ? 'button' : undefined}
+      tabIndex={onNavigate ? 0 : undefined}
+      onKeyDown={onNavigate ? (e) => { if (e.key === 'Enter' || e.key === ' ') onNavigate(); } : undefined}
+      className={`bg-white dark:bg-zinc-900 border border-purple-100 dark:border-zinc-800 rounded-3xl md:rounded-[2rem] p-6 md:p-7 flex flex-col group overflow-hidden relative shadow-sm h-full ${onNavigate ? 'cursor-pointer hover:border-purple-300 dark:hover:border-purple-600 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-purple-500' : ''}`}
+    >
       <div className="absolute -right-6 -bottom-6 opacity-[0.04] group-hover:scale-110 transition-transform duration-700 text-purple-900 pointer-events-none hidden md:block">
         <PieChart size={160} strokeWidth={1} />
       </div>
@@ -28,6 +38,7 @@ export const TrendsCard = () => {
         <div className="flex flex-col items-center md:items-start">
           <h3 className="text-lg md:text-xl font-display font-bold mb-1 flex items-center gap-2">
             <Target size={18} className="text-purple-600 dark:text-purple-400" /> Tendências
+            {onNavigate && <ArrowUpRight size={14} className="text-zinc-400 group-hover:text-purple-600 transition-colors" />}
           </h3>
           <p className="text-zinc-500 dark:text-zinc-400 text-[9px] md:text-[10px] font-bold uppercase tracking-wider">
             {isLive ? `Últimos ${janela} concursos` : 'Carregando histórico…'}

@@ -10,7 +10,7 @@ const ANALYSIS_WINDOW = 100;
 /** TTL do cache da análise de histórico (30 min). */
 const ANALYSIS_TTL_MS = 30 * 60 * 1000;
 /** Chave de persistência da análise em localStorage. */
-const ANALYSIS_STORAGE_KEY = "lf_history_analysis_v1";
+const ANALYSIS_STORAGE_KEY = "lf_history_analysis_v2";
 
 /**
  * fetch com timeout e retry/backoff exponencial. A API primária é instável
