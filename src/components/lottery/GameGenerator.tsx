@@ -30,10 +30,13 @@ import { calculateGameStats } from '@/lib/lottery/stats';
 import { buildSingleGameMessage, openWhatsApp } from '@/lib/whatsapp';
 import { trackCustom, trackEvent } from '@/lib/analytics/metaPixel';
 
+const BATCH_SIZE = 5;
+
 export const GameGenerator = () => {
-  const { history, saveToHistory, generateSmartGame } = useLottery();
+  const { history, saveToHistory, generateSmartGame, generateSmartBatch } = useLottery();
   const [currentResult, setCurrentResult] = useState<SavedGame | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isBatchGenerating, setIsBatchGenerating] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const { toast } = useToast();
@@ -69,6 +72,31 @@ export const GameGenerator = () => {
       type: newGame.type,
     });
     setIsGenerating(false);
+  };
+
+  const handleGenerateBatch = async () => {
+    if (isGenerating || isBatchGenerating) return;
+    setIsBatchGenerating(true);
+    setIsCopied(false);
+
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    const games = generateSmartBatch(BATCH_SIZE);
+    if (games.length > 0) setCurrentResult(games[0]);
+    const { success } = await saveToHistory(games);
+
+    trackCustom('GerarLote', {
+      content_category: 'game_generator',
+      num_items: games.length,
+    });
+
+    toast({
+      title: success ? `${games.length} jogos gerados!` : 'Lote gerado',
+      description: success
+        ? 'Jogos diversificados salvos no seu histórico.'
+        : 'Alguns jogos já existiam no histórico.',
+    });
+    setIsBatchGenerating(false);
   };
 
   const copyToClipboard = () => {
@@ -125,14 +153,25 @@ export const GameGenerator = () => {
             </h2>
           </div>
           
-          <Button 
-            onClick={handleGenerate} 
-            disabled={isGenerating}
-            className="w-full bg-purple-600 text-white hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-600 h-14 rounded-2xl shadow-xl shadow-purple-500/10 font-bold text-xs sm:text-sm uppercase tracking-widest transition-all active:scale-95 touch-manipulation"
-          >
-            {isGenerating ? <RefreshCcw className="animate-spin mr-3" size={18} /> : <Zap className="mr-3" size={18} fill="currentColor" />}
-            {isGenerating ? "Analisando Tendências..." : "Gerar Jogo Otimizado"}
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button
+              onClick={handleGenerate}
+              disabled={isGenerating || isBatchGenerating}
+              className="flex-1 bg-purple-600 text-white hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-600 h-14 rounded-2xl shadow-xl shadow-purple-500/10 font-bold text-xs sm:text-sm uppercase tracking-widest transition-all active:scale-95 touch-manipulation"
+            >
+              {isGenerating ? <RefreshCcw className="animate-spin mr-3" size={18} /> : <Zap className="mr-3" size={18} fill="currentColor" />}
+              {isGenerating ? "Analisando Tendências..." : "Gerar Jogo Otimizado"}
+            </Button>
+            <Button
+              onClick={handleGenerateBatch}
+              disabled={isGenerating || isBatchGenerating}
+              variant="outline"
+              className="sm:w-auto h-14 px-6 rounded-2xl border-purple-200 dark:border-purple-900/50 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/20 font-bold text-xs uppercase tracking-widest transition-all active:scale-95 touch-manipulation"
+            >
+              {isBatchGenerating ? <RefreshCcw className="animate-spin mr-2" size={18} /> : <Copy className="mr-2" size={18} />}
+              {isBatchGenerating ? "Gerando..." : `Lote de ${BATCH_SIZE}`}
+            </Button>
+          </div>
         </div>
 
         <div className="min-h-[140px] md:min-h-[200px] flex flex-wrap justify-center content-center gap-2 sm:gap-4 md:gap-6 bg-zinc-50 dark:bg-zinc-950/30 rounded-2xl md:rounded-[2rem] p-4 sm:p-8 md:p-12 border border-zinc-100 dark:border-zinc-800 shadow-inner relative overflow-hidden">

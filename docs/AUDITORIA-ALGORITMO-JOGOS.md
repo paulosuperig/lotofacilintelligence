@@ -78,7 +78,38 @@ Fibonacci, maior sequência, e **repetidas vs. concurso anterior**). Mantém
 determinismo por semente, aderência às faixas, âncora de repetidas, deduplicação e
 ponderação por frequência). Rodar com `npm test`.
 
-## 6. Próximos passos sugeridos
-- Geração **em lote** e **fechamentos/wheeling** reais (hoje `fechamentos.ts` é copy).
-- Persistir a análise (Supabase) para reduzir chamadas à API pública.
-- Backtesting: medir acertos médios do gerador vs. aleatório puro em concursos passados.
+## 6. Robustez e assertividade (2ª rodada)
+
+Melhorias adicionais para tornar o sistema mais robusto e "assertivo" (mensurável),
+seguindo padrões de mercado — inclusive o conferidor da própria Caixa:
+
+### 6.1 Conferidor oficial — `src/lib/lottery/checker.ts` + `prizes.ts`
+`checkGame` mede os **acertos reais** (0–15) de qualquer jogo contra um resultado
+sorteado, identifica a **faixa de premiação** (11–15) e as dezenas certas/erradas.
+`checkGames` agrega um resumo (melhor acerto, nº de premiados, distribuição).
+Ligado à UI: no **Meu Histórico**, cada jogo salvo é conferido automaticamente
+contra o último concurso — selo de acertos, dezenas certas em destaque e um
+resumo no topo (melhor pontuação e total de premiados).
+
+### 6.2 Geração em lote diversificada — `generateBatch`
+Ferramentas profissionais nunca entregam uma linha só. `generateBatch` produz um
+conjunto de jogos otimizados em que nenhum par repete mais que `maxOverlap`
+dezenas (relaxado automaticamente se necessário), **maximizando a cobertura**.
+Exposto no gerador via botão "Lote de 5".
+
+### 6.3 Robustez da camada de dados
+- `fetchWithRetry`: **timeout + retry com backoff exponencial** (a API primária é
+  um herokuapp instável), com fallback para a API oficial da Caixa.
+- **Persistência em `localStorage`** da análise de histórico (carga instantânea e
+  funcionamento **offline** após o primeiro acesso).
+- Degradação graciosa: em falha de rede, usa o último dado conhecido.
+
+### 6.4 Cobertura de testes
+32 testes no total (métricas, análise, gerador, **lote** e **conferidor**).
+
+## 7. Próximos passos sugeridos
+- **Fechamentos/wheeling** matemáticos reais (hoje `fechamentos.ts` é apenas copy).
+- Persistir a análise no **Supabase** (edge function) para reduzir chamadas à API pública.
+- **Backtesting em massa**: medir o acerto médio do gerador data-driven vs. aleatório
+  puro sobre N concursos passados, publicando a métrica de forma transparente.
+- Conferência de um **jogo avulso** (o usuário digita 15 dezenas e confere na hora).

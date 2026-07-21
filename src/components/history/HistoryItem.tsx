@@ -1,16 +1,36 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar } from 'lucide-react';
+import { Calendar, Trophy } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { WhatsAppIcon } from "@/components/ui/icons";
 import { SavedGame } from '@/types/lottery';
+import { checkGame } from '@/lib/lottery/checker';
 
 interface HistoryItemProps {
   item: SavedGame;
   onShare: (game: number[]) => void;
+  /** dezenas do último resultado oficial, para conferência automática */
+  drawResult?: Array<string | number> | null;
+  /** número do concurso conferido (para rótulo) */
+  drawConcurso?: number | null;
 }
 
-export const HistoryItem = ({ item, onShare }: HistoryItemProps) => (
+/** Cor do selo de acertos conforme a faixa. */
+const hitStyle = (hits: number): string => {
+  if (hits >= 15) return 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800/50';
+  if (hits >= 13) return 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/50';
+  if (hits >= 11) return 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-800/50';
+  return 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700';
+};
+
+export const HistoryItem = ({ item, onShare, drawResult, drawConcurso }: HistoryItemProps) => {
+  const check = useMemo(
+    () => (drawResult && drawResult.length > 0 ? checkGame(item.numbers, drawResult) : null),
+    [item.numbers, drawResult]
+  );
+  const matchedSet = useMemo(() => new Set(check?.matched ?? []), [check]);
+
+  return (
   <motion.div 
     layout
     initial={{ opacity: 0, y: 20 }}
@@ -43,6 +63,16 @@ export const HistoryItem = ({ item, onShare }: HistoryItemProps) => (
               <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400 tabular-nums">{item.sum}</span>
             </div>
           )}
+          {check && (
+            <div
+              className={`flex items-center gap-1.5 px-2 py-0.5 rounded-lg border w-fit ${hitStyle(check.hits)}`}
+              title={drawConcurso ? `Conferido com o concurso ${drawConcurso}` : 'Conferência com o último resultado'}
+            >
+              {check.awarded && <Trophy size={9} className="shrink-0" />}
+              <span className="text-[8px] font-bold uppercase tracking-tighter">Acertos</span>
+              <span className="text-[10px] font-bold tabular-nums">{check.hits}</span>
+            </div>
+          )}
         </div>
       </div>
       <Button 
@@ -57,11 +87,22 @@ export const HistoryItem = ({ item, onShare }: HistoryItemProps) => (
     </div>
     
     <div className="flex flex-wrap gap-2">
-      {item.numbers.map((num, i) => (
-        <span key={i} className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center text-[10px] sm:text-xs font-bold text-purple-700 dark:text-purple-400 shadow-sm">
-          {num.toString().padStart(2, '0')}
-        </span>
-      ))}
+      {item.numbers.map((num, i) => {
+        const isHit = matchedSet.has(num);
+        return (
+          <span
+            key={i}
+            className={
+              isHit
+                ? "w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-emerald-500 border border-emerald-500 flex items-center justify-center text-[10px] sm:text-xs font-bold text-white shadow-sm"
+                : "w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center text-[10px] sm:text-xs font-bold text-purple-700 dark:text-purple-400 shadow-sm"
+            }
+          >
+            {num.toString().padStart(2, '0')}
+          </span>
+        );
+      })}
     </div>
   </motion.div>
-);
+  );
+};

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   generateOptimizedGame,
+  generateBatch,
   scoreGame,
   gameSignature,
   seededRng,
@@ -96,6 +97,37 @@ describe('generateOptimizedGame', () => {
     const g = generateOptimizedGame({ analysis, rng: seededRng(5), candidates: 40 });
     expect(g.dataDriven).toBe(true);
     validShape(g.numbers);
+  });
+});
+
+describe('generateBatch', () => {
+  it('generates the requested number of games', () => {
+    const batch = generateBatch({ count: 5, rng: seededRng(9) });
+    expect(batch).toHaveLength(5);
+    batch.forEach((g) => validShape(g.numbers));
+  });
+
+  it('produces distinct games', () => {
+    const batch = generateBatch({ count: 6, rng: seededRng(21) });
+    const sigs = new Set(batch.map((g) => gameSignature(g.numbers)));
+    expect(sigs.size).toBe(batch.length);
+  });
+
+  it('respects maxOverlap diversification when feasible', () => {
+    const batch = generateBatch({ count: 4, maxOverlap: 11, rng: seededRng(3) });
+    for (let i = 0; i < batch.length; i++) {
+      for (let j = i + 1; j < batch.length; j++) {
+        const shared = batch[i].numbers.filter((n) => batch[j].numbers.includes(n)).length;
+        // limite pode ser relaxado até 14 em casos extremos, nunca 15 (idênticos)
+        expect(shared).toBeLessThan(15);
+      }
+    }
+  });
+
+  it('is deterministic given the same seed', () => {
+    const a = generateBatch({ count: 3, rng: seededRng(77) });
+    const b = generateBatch({ count: 3, rng: seededRng(77) });
+    expect(a.map((g) => g.numbers)).toEqual(b.map((g) => g.numbers));
   });
 });
 

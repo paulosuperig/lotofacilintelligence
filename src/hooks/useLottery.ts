@@ -6,7 +6,7 @@ import { supabase, isSupabaseEnabled } from '@/lib/supabase';
 import { lotteryService } from '@/services/lotteryService';
 import { historyService } from '@/services/historyService';
 import { trackCustom } from '@/lib/analytics/metaPixel';
-import { generateOptimizedGame, gameSignature } from '@/lib/lottery/generator';
+import { generateOptimizedGame, generateBatch, gameSignature } from '@/lib/lottery/generator';
 import { normalizeDraw, type HistoryAnalysis } from '@/lib/lottery/analysis';
 
 export const useLottery = () => {
@@ -162,6 +162,20 @@ export const useLottery = () => {
     };
   }, [history, analysis, latestResult]);
 
+  const generateSmartBatch = useCallback((count: number): SavedGame[] => {
+    const avoid = new Set(history.map(g => gameSignature(g.numbers)));
+    const previousDraw = latestResult ? normalizeDraw(latestResult.dezenas) : null;
+
+    const games = generateBatch({ count, analysis, previousDraw, avoid });
+    return games.map((g) => ({
+      id: generateSecureId(),
+      numbers: g.numbers,
+      timestamp: Date.now(),
+      sum: g.sum,
+      type: g.dataDriven ? 'Lote Inteligente (dados)' : 'Lote Inteligente',
+    }));
+  }, [history, analysis, latestResult]);
+
   useEffect(() => {
     let isMounted = true;
     let channel: any;
@@ -226,6 +240,7 @@ export const useLottery = () => {
     loadHistory,
     saveToHistory,
     generateSmartGame,
+    generateSmartBatch,
     isGameDuplicate,
   };
 };

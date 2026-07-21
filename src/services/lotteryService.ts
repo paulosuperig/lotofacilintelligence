@@ -9,6 +9,54 @@ const FALLBACK_API_BASE = "https://servicebus2.caixa.gov.br/portalloterias/api/l
 const ANALYSIS_WINDOW = 100;
 /** TTL do cache da análise de histórico (30 min). */
 const ANALYSIS_TTL_MS = 30 * 60 * 1000;
+/** Chave de persistência da análise em localStorage. */
+const ANALYSIS_STORAGE_KEY = "lf_history_analysis_v1";
+
+/**
+ * fetch com timeout e retry/backoff exponencial. A API primária é instável
+ * (herokuapp), então tolerar falhas transitórias melhora muito a robustez.
+ */
+const fetchWithRetry = async (
+  url: string,
+  { retries = 2, timeoutMs = 8000 }: { retries?: number; timeoutMs?: number } = {}
+): Promise<Response> => {
+  let lastError: unknown;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const response = await fetch(url, { signal: controller.signal });
+      clearTimeout(timer);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return response;
+    } catch (error) {
+      clearTimeout(timer);
+      lastError = error;
+      if (attempt < retries) {
+        await new Promise((r) => setTimeout(r, 400 * Math.pow(2, attempt)));
+      }
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error("fetch failed");
+};
+
+const readStoredAnalysis = (): { at: number; data: HistoryAnalysis } | null => {
+  try {
+    if (typeof localStorage === "undefined") return null;
+    const raw = localStorage.getItem(ANALYSIS_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed.at === "number" && parsed.data) return parsed;
+  } catch { /* ignore corrupted cache */ }
+  return null;
+};
+
+const writeStoredAnalysis = (entry: { at: number; data: HistoryAnalysis }): void => {
+  try {
+    if (typeof localStorage === "undefined") return;
+    localStorage.setItem(ANALYSIS_STORAGE_KEY, JSON.stringify(entry));
+  } catch { /* quota/serialization errors são não-fatais */ }
+};
 
 const normalizeResult = (data: any): LotteryResult => {
   // Se os dados vierem da Heroku API
@@ -49,16 +97,14 @@ let analysisCache: { at: number; data: HistoryAnalysis } | null = null;
 export const lotteryService = {
   async getLatestResult(): Promise<LotteryResult> {
     try {
-      const response = await fetch(`${API_BASE}/lotofacil/latest`);
-      if (!response.ok) throw new Error("API Primary Offline");
+      const response = await fetchWithRetry(`${API_BASE}/lotofacil/latest`);
       const data = await response.json();
       return normalizeResult(data);
     } catch (error) {
       console.error("[LotteryService] Primary API failed, trying official Caixa API...", error);
       try {
         // Nota: A API da Caixa pode exigir headers ou ter CORS restrito em alguns ambientes
-        const response = await fetch(FALLBACK_API_BASE);
-        if (!response.ok) throw new Error("Caixa API Offline");
+        const response = await fetchWithRetry(FALLBACK_API_BASE, { retries: 1 });
         const data = await response.json();
         return normalizeResult(data);
       } catch (fallbackError) {
@@ -70,17 +116,20 @@ export const lotteryService = {
 
   /** Retorna a lista bruta de todos os concursos (mais recente primeiro). */
   async getAllResults(): Promise<unknown[]> {
-    const response = await fetch(`${API_BASE}/lotofacil`);
-    if (!response.ok) throw new Error("Failed to fetch all results");
+    const response = await fetchWithRetry(`${API_BASE}/lotofacil`, { timeoutMs: 15000 });
     const data = await response.json();
     return Array.isArray(data) ? data : [];
   },
 
   /**
    * Análise estatística do histórico recente (frequência, atraso, quentes/frias
-   * e atrasadas). Cacheada em memória por `ANALYSIS_TTL_MS`.
+   * e atrasadas). Cache em memória + localStorage (`ANALYSIS_TTL_MS`), com
+   * degradação graciosa: em falha de rede, devolve o último dado conhecido.
    */
   async getHistoryAnalysis(force = false): Promise<HistoryAnalysis | null> {
+    // Hidrata do localStorage na primeira chamada (carga instantânea/offline).
+    if (!analysisCache) analysisCache = readStoredAnalysis();
+
     if (!force && analysisCache && Date.now() - analysisCache.at < ANALYSIS_TTL_MS) {
       return analysisCache.data;
     }
@@ -93,11 +142,13 @@ export const lotteryService = {
         window: ANALYSIS_WINDOW,
         topN: 8,
       });
-      analysisCache = { at: Date.now(), data };
+      const entry = { at: Date.now(), data };
+      analysisCache = entry;
+      writeStoredAnalysis(entry);
       return data;
     } catch (error) {
       console.error("[LotteryService] Falha ao analisar histórico:", error);
-      return analysisCache?.data ?? null;
+      return analysisCache?.data ?? null; // usa cache antigo (mesmo expirado)
     }
   },
 };
