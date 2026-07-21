@@ -28,7 +28,7 @@ export const TrendsCard = ({ onNavigate }: TrendsCardProps) => {
       role={onNavigate ? 'button' : undefined}
       tabIndex={onNavigate ? 0 : undefined}
       onKeyDown={onNavigate ? (e) => { if (e.key === 'Enter' || e.key === ' ') onNavigate(); } : undefined}
-      className={`bg-white dark:bg-zinc-900 border border-purple-100 dark:border-zinc-800 rounded-3xl md:rounded-[2rem] p-6 md:p-7 flex flex-col group overflow-hidden relative shadow-sm h-full ${onNavigate ? 'cursor-pointer hover:border-purple-300 dark:hover:border-purple-600 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-purple-500' : ''}`}
+      className={`bg-white dark:bg-zinc-900 border border-purple-100 dark:border-zinc-800 rounded-3xl md:rounded-[2rem] p-5 sm:p-6 md:p-7 flex flex-col group overflow-hidden relative shadow-sm h-full ${onNavigate ? 'cursor-pointer hover:border-purple-300 dark:hover:border-purple-600 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-purple-500' : ''}`}
     >
       <div className="absolute -right-6 -bottom-6 opacity-[0.04] group-hover:scale-110 transition-transform duration-700 text-purple-900 pointer-events-none hidden md:block">
         <PieChart size={160} strokeWidth={1} />

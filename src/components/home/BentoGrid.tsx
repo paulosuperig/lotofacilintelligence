@@ -44,34 +44,39 @@ export const BentoGrid = ({
   onNavigate 
 }: BentoGridProps) => {
   return (
-    <motion.div 
+    <motion.div
       variants={containerVariants}
       initial="hidden"
       animate="visible"
       exit="hidden"
-      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-3 xs:gap-4 md:gap-6 auto-rows-[minmax(130px,auto)]"
+      className="grid grid-cols-2 lg:grid-cols-12 gap-3 sm:gap-4 lg:gap-6 auto-rows-auto lg:auto-rows-[minmax(140px,auto)]"
     >
-      <motion.div id="generator-section" variants={itemVariants} className="lg:col-span-8 lg:row-span-3">
+      {/* Gerador: destaque, largura total (no desktop ocupa 8/12) */}
+      <motion.div id="generator-section" variants={itemVariants} className="col-span-2 lg:col-span-8 lg:row-span-3">
         <GeneratorCard />
       </motion.div>
 
-      <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-2">
+      {/* Último resultado: largura total no mobile (15 dezenas precisam de espaço) */}
+      <motion.div variants={itemVariants} className="col-span-2 lg:col-span-4 lg:row-span-2">
         <ResultCard latestResult={latestResult} isLoading={isLoading} />
       </motion.div>
 
-      <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-1 xl:col-span-4">
+      {/* Tendências: conteúdo rico → largura total no mobile */}
+      <motion.div variants={itemVariants} className="col-span-2 lg:col-span-4">
         <TrendsCard onNavigate={() => onNavigate('estatisticas')} />
       </motion.div>
 
-      <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-1 xl:col-span-4">
+      {/* Cards compactos lado a lado (2-up) no mobile */}
+      <motion.div variants={itemVariants} className="col-span-1 lg:col-span-4">
         <HistoryStatusCard historyLength={historyLength} onClearHistory={onClearHistory} />
       </motion.div>
 
-      <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-1 xl:col-span-4">
+      <motion.div variants={itemVariants} className="col-span-1 lg:col-span-4">
         <FechamentosCard onNavigate={() => onNavigate('stats')} />
       </motion.div>
 
-      <motion.div variants={itemVariants} className="lg:col-span-4 lg:row-span-1">
+      {/* CTA de dicas: largura total no mobile para dar impacto */}
+      <motion.div variants={itemVariants} className="col-span-2 lg:col-span-4">
         <TipsCard onNavigate={() => onNavigate('dicas')} />
       </motion.div>
     </motion.div>

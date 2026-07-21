@@ -8,7 +8,11 @@ interface TipsCardProps {
 export const TipsCard = ({ onNavigate }: TipsCardProps) => (
   <div 
     onClick={onNavigate}
-    className="bg-gradient-to-br from-purple-600 to-indigo-700 border border-purple-500 rounded-3xl md:rounded-[2rem] p-6 md:p-8 flex flex-col justify-between text-white relative overflow-hidden group shadow-xl shadow-purple-500/10 cursor-pointer h-full"
+    role="button"
+    tabIndex={0}
+    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onNavigate(); }}
+    aria-label="Ver dicas do especialista"
+    className="bg-gradient-to-br from-purple-600 to-indigo-700 border border-purple-500 rounded-3xl md:rounded-[2rem] p-5 sm:p-6 md:p-8 flex flex-col justify-between text-white relative overflow-hidden group shadow-xl shadow-purple-500/10 cursor-pointer h-full outline-none focus-visible:ring-2 focus-visible:ring-purple-300"
   >
     <div className="absolute top-0 right-0 p-6 opacity-20 group-hover:rotate-12 transition-transform duration-700">
       <Sparkles size={80} />
