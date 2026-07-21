@@ -50,6 +50,15 @@ describe('analyzeHistory', () => {
   it('handles empty history', () => {
     const a = analyzeHistory([], {});
     expect(a.totalConcursos).toBe(0);
+    expect(a.descartados).toBe(0);
     expect(a.ultimoSorteio).toBeNull();
+  });
+
+  it('descarta concursos malformados (robustez)', () => {
+    const malformado = ['01', '02', '03']; // só 3 dezenas
+    const valido = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15'];
+    const a = analyzeHistory([valido, malformado, valido], { newestFirst: true });
+    expect(a.totalConcursos).toBe(2); // apenas os válidos
+    expect(a.descartados).toBe(1);
   });
 });

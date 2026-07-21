@@ -5,7 +5,7 @@
  * quente/fria por dezena — a base factual que o gerador "inteligente" e os
  * painéis de tendência passam a consumir (antes eram números fixos no código).
  */
-import { TOTAL_NUMBERS } from './constants';
+import { TOTAL_NUMBERS, NUMBERS_PER_GAME } from './constants';
 
 /** Um concurso reduzido às suas 15 dezenas (ordenadas, 1..25). */
 export type DrawNumbers = number[];
@@ -24,8 +24,10 @@ export interface NumberStat {
 }
 
 export interface HistoryAnalysis {
-  /** total de concursos considerados */
+  /** total de concursos considerados (apenas válidos, com 15 dezenas) */
   totalConcursos: number;
+  /** concursos descartados por estarem malformados (data quality) */
+  descartados: number;
   /** estatística por dezena, indexada por número (1..25) */
   porNumero: Record<number, NumberStat>;
   /** todas as dezenas ordenadas por frequência desc */
@@ -68,8 +70,12 @@ export const analyzeHistory = (
 ): HistoryAnalysis => {
   const { newestFirst = true, topN = 8, window } = options;
 
-  // Normaliza e ordena cronologicamente (mais antigo -> mais recente).
-  let draws = rawDraws.map(normalizeDraw).filter((d) => d.length > 0);
+  // Robustez: só consideramos concursos VÁLIDOS (exatamente 15 dezenas únicas
+  // em 1..25). Sorteios malformados vindos da API são descartados para não
+  // distorcer frequências e atrasos.
+  const normalized = rawDraws.map(normalizeDraw);
+  let draws = normalized.filter((d) => d.length === NUMBERS_PER_GAME);
+  const descartados = normalized.length - draws.length;
   if (newestFirst) draws = draws.reverse();
   // Opcionalmente restringe a uma janela dos últimos N concursos.
   if (window && window > 0 && draws.length > window) {
@@ -130,6 +136,7 @@ export const analyzeHistory = (
 
   return {
     totalConcursos: total,
+    descartados,
     porNumero,
     ranking,
     quentes,
