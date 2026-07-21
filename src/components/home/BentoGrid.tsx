@@ -49,20 +49,19 @@ export const BentoGrid = ({
       initial="hidden"
       animate="visible"
       exit="hidden"
-      className="grid grid-cols-2 lg:grid-cols-12 gap-3 sm:gap-4 lg:gap-6 auto-rows-auto lg:auto-rows-[minmax(140px,auto)]"
+      className="grid grid-cols-2 lg:grid-cols-12 gap-3 sm:gap-4 lg:gap-6 lg:items-start"
     >
       {/* Gerador: destaque, largura total (no desktop ocupa 8/12) */}
-      <motion.div id="generator-section" variants={itemVariants} className="col-span-2 lg:col-span-8 lg:row-span-3">
+      <motion.div id="generator-section" variants={itemVariants} className="col-span-2 lg:col-span-8">
         <GeneratorCard />
       </motion.div>
 
-      {/* Último resultado: largura total no mobile (15 dezenas precisam de espaço) */}
-      <motion.div variants={itemVariants} className="col-span-2 lg:col-span-4 lg:row-span-2">
+      {/* Coluna direita: Resultado + Tendências empilhados num container próprio.
+          Desacopla a altura desta coluna da do gerador — com lg:items-start no
+          grid, esta coluna fica com altura natural no topo, então o card de
+          resultado NÃO é esticado nem "desce" quando o gerador cresce. */}
+      <motion.div variants={itemVariants} className="col-span-2 lg:col-span-4 flex flex-col gap-3 sm:gap-4 lg:gap-6">
         <ResultCard latestResult={latestResult} isLoading={isLoading} />
-      </motion.div>
-
-      {/* Tendências: conteúdo rico → largura total no mobile */}
-      <motion.div variants={itemVariants} className="col-span-2 lg:col-span-4">
         <TrendsCard onNavigate={() => onNavigate('estatisticas')} />
       </motion.div>
 
