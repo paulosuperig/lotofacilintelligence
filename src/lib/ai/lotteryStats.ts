@@ -1,6 +1,7 @@
 // Utility helpers to derive Lotofácil statistical context for the AI assistant.
 import type { LotteryResult } from '@/types/lottery';
 import { PRIME_SET as PRIMES, MOLDURA_SET as MOLDURA, BANDS } from '@/lib/lottery/constants';
+import type { HistoryAnalysis } from '@/lib/lottery/analysis';
 
 export interface LotteryContextStats {
   concurso?: number;
@@ -68,5 +69,39 @@ export const formatStatsForPrompt = (stats: LotteryContextStats | null): string 
     `- Primos: ${BANDS.primos.idealMin}–${BANDS.primos.idealMax} dezenas.`,
     `- Repetidas em relação ao concurso anterior: tipicamente ${BANDS.repetidas.idealMin}–${BANDS.repetidas.idealMax}.`,
     `- Moldura: ${BANDS.moldura.idealMin}–${BANDS.moldura.idealMax} dezenas; miolo: ${BANDS.miolo.idealMin}–${BANDS.miolo.idealMax} dezenas.`,
+  ].join('\n');
+};
+
+const pad = (n: number) => String(n).padStart(2, '0');
+
+/**
+ * Formata a análise REAL do histórico (frequência, atraso, co-ocorrência) para
+ * o prompt da IA. Sem isto, o modelo apenas "chuta" quais dezenas são quentes ou
+ * atrasadas. Com dados reais, os jogos ficam factualmente ancorados e assertivos.
+ */
+export const formatAnalysisForPrompt = (analysis: HistoryAnalysis | null): string => {
+  if (!analysis || analysis.totalConcursos === 0) {
+    return 'DADOS_HISTORICOS: indisponíveis (modo offline). Trabalhe apenas com o último concurso e os parâmetros de referência.';
+  }
+  const quentes = analysis.quentes
+    .map((n) => `${pad(n)} (${Math.round((analysis.porNumero[n]?.percentual ?? 0) * 100)}%)`)
+    .join(', ');
+  const frias = analysis.frias.map((n) => pad(n)).join(', ');
+  const atrasadas = analysis.atrasadas
+    .map((n) => `${pad(n)} (${analysis.porNumero[n]?.atraso ?? 0}c)`)
+    .join(', ');
+  const pares = analysis.topPairs
+    .slice(0, 8)
+    .map((p) => `${pad(p.a)}-${pad(p.b)} (${p.count}x)`)
+    .join(', ');
+
+  return [
+    `DADOS_HISTORICOS_REAIS (base factual — ${analysis.totalConcursos} concursos analisados):`,
+    `- Dezenas QUENTES (mais frequentes, % de presença): ${quentes}`,
+    `- Dezenas FRIAS (menos frequentes): ${frias}`,
+    `- Dezenas ATRASADAS (concursos sem sair): ${atrasadas}`,
+    `- PARES que mais saem juntos: ${pares}`,
+    'Use ESTES números — não invente frequências. Combine quentes (recorrência),',
+    'atrasadas (pressão estatística) e pares fortes na composição dos jogos.',
   ].join('\n');
 };

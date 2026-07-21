@@ -54,6 +54,18 @@ describe('analyzeHistory', () => {
     expect(a.ultimoSorteio).toBeNull();
   });
 
+  it('computa pares de co-ocorrência (top pairs)', () => {
+    // 1 e 2 aparecem juntos nos 2 primeiros concursos; 1-15 em 2 concursos.
+    const a = analyzeHistory(draws, { newestFirst: true });
+    expect(a.topPairs.length).toBeGreaterThan(0);
+    const par12 = a.topPairs.find((p) => p.a === 1 && p.b === 2);
+    expect(par12?.count).toBe(2);
+    // pares ordenados por contagem desc
+    for (let i = 1; i < a.topPairs.length; i++) {
+      expect(a.topPairs[i - 1].count).toBeGreaterThanOrEqual(a.topPairs[i].count);
+    }
+  });
+
   it('descarta concursos malformados (robustez)', () => {
     const malformado = ['01', '02', '03']; // só 3 dezenas
     const valido = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15'];

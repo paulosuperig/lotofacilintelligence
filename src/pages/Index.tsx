@@ -20,6 +20,7 @@ const AiAssistant = lazy(() => import('@/components/ai/AiAssistant').then(m => (
 const HistoryPanel = lazy(() => import('@/components/history/HistoryPanel').then(m => ({ default: m.HistoryPanel })));
 const FechamentosPanel = lazy(() => import('@/components/home/FechamentosPanel').then(m => ({ default: m.FechamentosPanel })));
 const TipsPanel = lazy(() => import('@/components/home/TipsPanel').then(m => ({ default: m.TipsPanel })));
+const StatsPanel = lazy(() => import('@/components/home/StatsPanel').then(m => ({ default: m.StatsPanel })));
 
 const PanelFallback = () => (
   <div className="flex items-center justify-center py-16">
@@ -132,6 +133,10 @@ const Index = () => {
 
               {activeTab === 'dicas' && (
                 <TipsPanel onBack={goHome} />
+              )}
+
+              {activeTab === 'estatisticas' && (
+                <StatsPanel onBack={goHome} />
               )}
 
               {activeTab === 'ia' && (

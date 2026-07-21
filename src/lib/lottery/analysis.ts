@@ -23,6 +23,17 @@ export interface NumberStat {
   maiorAtraso: number;
 }
 
+export interface CoPair {
+  /** menor dezena do par */
+  a: number;
+  /** maior dezena do par */
+  b: number;
+  /** concursos em que as duas saíram juntas */
+  count: number;
+  /** percentual de concursos com o par (0..1) */
+  percentual: number;
+}
+
 export interface HistoryAnalysis {
   /** total de concursos considerados (apenas válidos, com 15 dezenas) */
   totalConcursos: number;
@@ -38,6 +49,8 @@ export interface HistoryAnalysis {
   frias: number[];
   /** dezenas mais atrasadas (maior atraso atual) */
   atrasadas: number[];
+  /** pares de dezenas que mais saem juntas (co-ocorrência), desc */
+  topPairs: CoPair[];
   /** último sorteio conhecido (para cálculo de repetidas) */
   ultimoSorteio: DrawNumbers | null;
 }
@@ -95,6 +108,9 @@ export const analyzeHistory = (
     prevSeen[n] = -1;
   }
 
+  // Co-ocorrência: quantas vezes cada par (a<b) saiu no mesmo concurso.
+  const coCount = new Map<number, number>();
+
   draws.forEach((draw, idx) => {
     const present = new Set(draw);
     for (let n = 1; n <= TOTAL_NUMBERS; n++) {
@@ -106,6 +122,13 @@ export const analyzeHistory = (
         }
         prevSeen[n] = idx;
         lastSeenIndex[n] = idx;
+      }
+    }
+    // acumula pares (draw já está ordenado)
+    for (let i = 0; i < draw.length; i++) {
+      for (let j = i + 1; j < draw.length; j++) {
+        const key = draw[i] * 100 + draw[j];
+        coCount.set(key, (coCount.get(key) ?? 0) + 1);
       }
     }
   });
@@ -134,6 +157,16 @@ export const analyzeHistory = (
     .slice(0, topN)
     .map((s) => s.numero);
 
+  const topPairs: CoPair[] = Array.from(coCount.entries())
+    .map(([key, count]) => ({
+      a: Math.floor(key / 100),
+      b: key % 100,
+      count,
+      percentual: total > 0 ? count / total : 0,
+    }))
+    .sort((x, y) => y.count - x.count || x.a - y.a || x.b - y.b)
+    .slice(0, 12);
+
   return {
     totalConcursos: total,
     descartados,
@@ -142,6 +175,7 @@ export const analyzeHistory = (
     quentes,
     frias,
     atrasadas,
+    topPairs,
     ultimoSorteio: draws.length > 0 ? draws[draws.length - 1] : null,
   };
 };
