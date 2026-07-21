@@ -2,21 +2,16 @@ import React from 'react';
 import { cn } from "@/lib/utils";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Loader2, Save } from 'lucide-react';
+import { Save } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { extractGameFromLine, isGameLine } from "@/lib/ai/extractGames";
 
 const GameLine = ({ raw, onSave }: { raw: string; onSave?: (text: string) => void }) => {
   const text = String(raw);
+  const game = extractGameFromLine(text);
+  if (!game) return <div className="text-zinc-500 italic my-1 font-mono">{text}</div>;
+
   const sumMatch = text.match(/soma[:\s]*?(\d{2,3})/i);
-  const tokens = text.match(/\b\d{1,2}\b/g) || [];
-  const nums = tokens
-    .map((n) => parseInt(n, 10))
-    .filter((n) => n >= 1 && n <= 25);
-  
-  const unique = Array.from(new Set(nums));
-  if (unique.length < 15) return <div className="text-zinc-500 italic my-1 font-mono">{text}</div>;
-  
-  const game = unique.slice(0, 15).sort((a, b) => a - b);
   const sum = sumMatch ? parseInt(sumMatch[1], 10) : game.reduce((a, b) => a + b, 0);
 
   return (
@@ -45,7 +40,7 @@ const GameLine = ({ raw, onSave }: { raw: string; onSave?: (text: string) => voi
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 px-2.5 text-[10px] text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg gap-1.5"
+            className="h-7 px-2.5 text-[10px] font-bold text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-700 dark:hover:text-purple-300 rounded-lg gap-1.5"
             onClick={() => onSave(game.map((n) => String(n).padStart(2, '0')).join(' '))}
           >
             <Save size={11} /> Salvar este jogo
@@ -54,12 +49,6 @@ const GameLine = ({ raw, onSave }: { raw: string; onSave?: (text: string) => voi
       )}
     </div>
   );
-};
-
-const isGameLine = (text: string) => {
-  const tokens = text.match(/\b\d{1,2}\b/g) || [];
-  const valid = tokens.map((n) => parseInt(n, 10)).filter((n) => n >= 1 && n <= 25);
-  return new Set(valid).size >= 15;
 };
 
 const makeMarkdownComponents = (onSave: (text: string) => void) => ({
@@ -95,12 +84,12 @@ export const ChatMessage = ({ msg, onSaveAiGame }: ChatMessageProps) => (
           <div className="prose prose-sm max-w-none dark:prose-invert">
             <ReactMarkdown remarkPlugins={[remarkGfm]} components={makeMarkdownComponents(onSaveAiGame)}>{msg.content}</ReactMarkdown>
           </div>
-          <div className="flex justify-between items-center mt-3 pt-3 border-t border-zinc-50 dark:border-zinc-700">
+          <div className="flex justify-between items-center gap-2 mt-3 pt-3 border-t border-zinc-100 dark:border-zinc-700">
             <span className="text-[10px] text-zinc-400 font-medium">Intelligence AI Otimizada</span>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="h-8 px-3 text-[10px] text-zinc-600 hover:bg-zinc-50 rounded-lg gap-2"
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 px-3 text-[10px] font-bold text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-700 dark:hover:text-purple-300 rounded-lg gap-2"
               onClick={() => onSaveAiGame(msg.content)}
             >
               <Save size={12} /> Salvar todos os jogos
