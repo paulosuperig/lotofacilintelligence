@@ -107,9 +107,47 @@ Exposto no gerador via botão "Lote de 5".
 ### 6.4 Cobertura de testes
 32 testes no total (métricas, análise, gerador, **lote** e **conferidor**).
 
-## 7. Próximos passos sugeridos
+## 7. Backtesting em massa (walk-forward)
+
+`src/lib/lottery/backtest.ts` + `scripts/backtest.ts` implementam um backtest
+**walk-forward** (sem vazamento de futuro): para cada concurso de teste, usa apenas
+o histórico anterior para gerar K jogos e os confere contra o resultado real,
+comparando com um baseline **aleatório uniforme**.
+
+### Como rodar com dados reais
+```bash
+bun run scripts/backtest.ts 400 3   # últimos 400 concursos, 3 jogos cada
+```
+> O script baixa o histórico da API pública da Caixa. Rode-o na sua máquina/CI —
+> o ambiente de sandbox desta entrega não tem acesso de rede a essa API.
+
+### Resultado (simulação uniforme de larga escala — 1.500 concursos, 5 jogos/concurso)
+
+| Estratégia | Média de acertos | Taxa de prêmio (≥11) | Melhor |
+|-----------|-----------------:|---------------------:|-------:|
+| Gerador inteligente | 8,989 | 10,44% | 13 |
+| Aleatório puro | 9,003 | 10,89% | 13 |
+| **Diferença** | **−0,014** | **−0,45 p.p.** | — |
+
+### Interpretação honesta (princípio de integridade)
+O sorteio da Lotofácil é **essencialmente uniforme**, então o valor **esperado**
+de acertos é `15 × 15/25 = 9` para **qualquer** conjunto de 15 dezenas — e
+**nenhuma estratégia altera a probabilidade de prêmio**. O backtest confirma isso:
+inteligente ≈ aleatório, dentro do ruído estatístico.
+
+**O que a "inteligência" entrega de fato** não é maior chance de ganhar, e sim
+**qualidade de construção**: jogos equilibrados (soma, paridade, primos,
+moldura/miolo), ancorados na regularidade das repetidas, diversificados no lote e
+livres de combinações estatisticamente absurdas. É assim que as melhores
+ferramentas do mercado agregam valor — e comunicá-lo com transparência é um
+diferencial de confiança, não uma fraqueza.
+
+> Observação: a simulação acima usa um modelo uniforme (fiel à natureza do sorteio).
+> Sobre o histórico **real**, pequenos vieses de frequência podem produzir uma
+> diferença marginal — que o `scripts/backtest.ts` mede objetivamente. A recomendação
+> é publicar sempre o número real, sem promessas de ganho.
+
+## 8. Próximos passos sugeridos
 - **Fechamentos/wheeling** matemáticos reais (hoje `fechamentos.ts` é apenas copy).
 - Persistir a análise no **Supabase** (edge function) para reduzir chamadas à API pública.
-- **Backtesting em massa**: medir o acerto médio do gerador data-driven vs. aleatório
-  puro sobre N concursos passados, publicando a métrica de forma transparente.
 - Conferência de um **jogo avulso** (o usuário digita 15 dezenas e confere na hora).
