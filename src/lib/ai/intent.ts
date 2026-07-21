@@ -4,6 +4,9 @@
  */
 import type { UserIntent, EstrategiaJogo } from './sanitizeGames';
 
+/** Teto de jogos por resposta — acima disso o modelo trunca por falta de tokens. */
+export const MAX_JOGOS = 12;
+
 const PT_NUMBERS: Record<string, number> = {
   um: 1, uma: 1, dois: 2, duas: 2, três: 3, tres: 3, quatro: 4,
   cinco: 5, seis: 6, sete: 7, oito: 8, nove: 9, dez: 10,
@@ -20,7 +23,9 @@ export const parseUserIntent = (message: string): UserIntent => {
   if (qtyMatch) {
     const val = qtyMatch[1];
     const n = PT_NUMBERS[val] || parseInt(val, 10);
-    if (n >= 1 && n <= 30) intent.quantidade = n;
+    // Clamp para evitar truncamento garantido da resposta (e valores absurdos):
+    // acima de MAX_JOGOS o modelo estoura o teto de tokens e entrega jogos pela metade.
+    if (n >= 1) intent.quantidade = Math.min(n, MAX_JOGOS);
   }
 
   const between = m.match(/soma\s*entre\s*(\d{2,3})\s*(?:e|a|-)\s*(\d{2,3})/);
