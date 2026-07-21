@@ -8,6 +8,7 @@ import { FECHAMENTO_MODELS, type FechamentoModel } from '@/constants/fechamentos
 import { generateWheel } from '@/lib/lottery/wheel';
 import { cryptoRng } from '@/lib/lottery/generator';
 import { useLotteryStats } from '@/hooks/useLotteryStats';
+import { ResponsibleGaming } from '@/components/lottery/ResponsibleGaming';
 import type { HistoryAnalysis } from '@/lib/lottery/analysis';
 import type { SavedGame } from '@/types/lottery';
 
@@ -170,6 +171,8 @@ export const FechamentosPanel = ({ onBack, onSaveGames }: FechamentosPanelProps)
             </details>
           </motion.div>
         )}
+
+        {result && <ResponsibleGaming games={result.games.length} className="mb-8" />}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {FECHAMENTO_MODELS.map((model, i) => {

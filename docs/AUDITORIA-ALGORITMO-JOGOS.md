@@ -168,8 +168,35 @@ Antes não havia CI de qualidade (só deploy Vercel). Agora todo push/PR roda:
 - **lint** informativo (o projeto ainda carrega avisos legados nos componentes
   shadcn gerados, então não bloqueia — mas fica visível).
 
-## 9. Próximos passos sugeridos
-- Persistir a análise no **Supabase** (edge function) para reduzir chamadas à API pública.
-- Conferência de um **jogo avulso** (o usuário digita 15 dezenas e confere na hora).
-- Fechamentos com pools maiores (22/25) via **covering designs pré-computados** da literatura.
-- Zerar gradualmente os avisos de lint legados para tornar o lint um gate bloqueante.
+## 9. Confiabilidade, transparência e robustez de dados (rodada de qualificação)
+
+Melhorias para elevar o produto ao padrão de integridade da Caixa e blindar o
+núcleo contra dados ruins.
+
+### 9.1 Probabilidades oficiais — `src/lib/lottery/probabilities.ts`
+Chances calculadas por combinatória exata (hipergeométrica) e **conferidas contra
+os valores oficiais da Caixa** (15 → 1 em 3.268.760; 14 → 1 em 21.792; 13 → 692;
+12 → 60; 11 → 11). 11 testes, incluindo a verificação de que a soma de todas as
+probabilidades é 1.
+
+### 9.2 Transparência + jogo responsável — `ResponsibleGaming.tsx`
+Componente exibido ao gerar jogos e ao montar fechamentos: mostra a **chance real**
+(contextualizada pelo nº de jogos no fechamento) e reforça, no padrão da Caixa,
+que se trata de um **jogo de azar** (nenhuma estratégia altera a probabilidade),
+com aviso **+18** e apelo ao jogo responsável. Remove qualquer indução a
+expectativa de ganho.
+
+### 9.3 Robustez de dados (defensive programming)
+`analyzeHistory` agora só considera concursos **válidos** (exatamente 15 dezenas
+únicas em 1..25) e reporta quantos foram **descartados** — sorteios malformados
+vindos da API não distorcem mais frequências e atrasos. Coberto por teste.
+
+## 10. Próximos passos sugeridos
+- **Fonte oficial da Caixa** via edge function (proxy + cache) e **persistência do
+  histórico no Supabase** — maior ganho restante de confiabilidade (requer o
+  ambiente Supabase para testar/deployar).
+- Conferência de **jogo avulso** e contra **qualquer concurso**, exibindo o
+  **valor real do prêmio** (a API já traz `premiacoes`).
+- **Painel de estatísticas** rico (recharts): frequência, mapa de calor, co-ocorrência.
+- Fechamentos com pools 22/25 via **covering designs** pré-computados.
+- Zerar os avisos de lint legados para tornar o lint um gate bloqueante.

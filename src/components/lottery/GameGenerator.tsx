@@ -27,6 +27,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useLottery } from '@/hooks/useLottery';
 import { SavedGame } from '@/types/lottery';
 import { calculateGameStats } from '@/lib/lottery/stats';
+import { ResponsibleGaming } from './ResponsibleGaming';
 import { buildSingleGameMessage, openWhatsApp } from '@/lib/whatsapp';
 import { trackCustom, trackEvent } from '@/lib/analytics/metaPixel';
 
@@ -245,6 +246,8 @@ export const GameGenerator = () => {
             </Button>
           </div>
         )}
+
+        {currentResult && <ResponsibleGaming className="mb-10" />}
 
         {history.length > 0 && (
           <div className="space-y-6">
