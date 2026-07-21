@@ -4,7 +4,28 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ChatMessage } from './ChatMessage';
 import { cn } from "@/lib/utils";
-import { Sparkles, Flame, PieChart, ShieldCheck } from 'lucide-react';
+import { Sparkles, Flame, ShieldCheck, Snowflake, Zap, Link2 } from 'lucide-react';
+
+// Mapa ESTÁTICO de cores (classes dinâmicas `bg-${x}-50` são purgadas pelo Tailwind).
+const SUGGESTION_COLORS: Record<string, string> = {
+  purple: 'bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400',
+  sky: 'bg-sky-50 text-sky-600 dark:bg-sky-900/20 dark:text-sky-400',
+  rose: 'bg-rose-50 text-rose-600 dark:bg-rose-900/20 dark:text-rose-400',
+  amber: 'bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400',
+  emerald: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400',
+  indigo: 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400',
+};
+
+// Prompts otimizados: acionam as novas capacidades da IA (estratégias dinâmicas,
+// co-ocorrência, filtros de soma/quantidade) e a análise data-grounded.
+const SUGGESTIONS = [
+  { label: "Jogos equilibrados", text: "Gere 3 jogos equilibrados para o próximo concurso, com soma entre 180 e 210.", icon: <Sparkles size={18} />, color: "purple" },
+  { label: "Foco em atrasadas", text: "Gere 3 jogos priorizando as dezenas atrasadas.", icon: <Snowflake size={18} />, color: "sky" },
+  { label: "Jogo ousado (zebra)", text: "Gere um jogo mais arriscado, no estilo zebra.", icon: <Zap size={18} />, color: "rose" },
+  { label: "Quentes & frias", text: "Quais são as dezenas mais quentes e mais frias no momento?", icon: <Flame size={18} />, color: "amber" },
+  { label: "Pares que saem juntos", text: "Quais pares de dezenas mais saem juntos historicamente?", icon: <Link2 size={18} />, color: "emerald" },
+  { label: "Fechamentos", text: "Explique os fechamentos disponíveis e a garantia de cada um.", icon: <ShieldCheck size={18} />, color: "indigo" },
+];
 
 interface AiAssistantProps {
   isAiConfigured: boolean;
@@ -40,13 +61,6 @@ export const AiAssistant = ({
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [aiChat, isAiLoading]);
-
-  const SUGGESTIONS = [
-    { label: "Sugestões de Jogos", text: "Gere 3 sugestões de jogos baseadas em tendências atuais.", icon: <Sparkles size={18} />, color: "orange" },
-    { label: "Dezenas Quentes", text: "Quais são as dezenas mais quentes?", icon: <Flame size={18} />, color: "orange" },
-    { label: "Padrões de Somas", text: "Quais padrões de somas mais saem?", icon: <PieChart size={18} />, color: "blue" },
-    { label: "Dicas de Fechamento", text: "Explique os melhores fechamentos.", icon: <ShieldCheck size={18} />, color: "emerald" }
-  ];
 
   return (
     <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl md:rounded-[2rem] p-4 sm:p-6 md:p-10 shadow-xl shadow-purple-500/5 min-h-[500px] flex flex-col">
@@ -86,16 +100,17 @@ export const AiAssistant = ({
               
               <div className="w-full max-w-2xl grid grid-cols-1 xs:grid-cols-2 gap-3 mb-8 px-2">
                 {SUGGESTIONS.map((item, idx) => (
-                  <button 
+                  <button
                     key={idx}
                     onClick={() => onSendMessage(undefined, item.text)}
-                    className="p-4 bg-white dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700 rounded-2xl text-left hover:border-zinc-300 transition-all group"
+                    disabled={isAiLoading}
+                    className="p-4 bg-white dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700 rounded-2xl text-left hover:border-purple-300 dark:hover:border-purple-600 hover:shadow-md transition-all group outline-none focus-visible:ring-2 focus-visible:ring-purple-500 disabled:opacity-50 disabled:pointer-events-none"
                   >
-                    <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center mb-2 group-hover:scale-105 transition-transform", `bg-${item.color}-50 text-${item.color}-500`)}>
+                    <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center mb-2.5 group-hover:scale-110 transition-transform", SUGGESTION_COLORS[item.color])}>
                       {item.icon}
                     </div>
-                    <p className="text-[11px] font-bold text-zinc-700 uppercase tracking-wider mb-1">{item.label}</p>
-                    <p className="text-[10px] text-zinc-400 truncate">{item.text}</p>
+                    <p className="text-[11px] font-bold text-zinc-700 dark:text-zinc-200 uppercase tracking-wider mb-1">{item.label}</p>
+                    <p className="text-[10px] text-zinc-400 dark:text-zinc-500 line-clamp-2 leading-snug">{item.text}</p>
                   </button>
                 ))}
               </div>

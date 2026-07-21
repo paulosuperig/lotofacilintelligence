@@ -1,18 +1,16 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Ball } from './Ball';
 import { StatCard } from './StatCard';
 import { Button } from '@/components/ui/button';
 import { WhatsAppIcon } from '@/components/ui/icons';
-import { 
-  Zap, 
-  RefreshCcw, 
-  TrendingUp, 
-  History, 
-  Copy, 
-  Calendar, 
+import {
+  Zap,
+  RefreshCcw,
+  TrendingUp,
+  Copy,
   Check,
-  AlertCircle 
+  AlertCircle
 } from 'lucide-react';
 import {
   AlertDialog,
@@ -28,13 +26,13 @@ import { useLottery } from '@/hooks/useLottery';
 import { SavedGame } from '@/types/lottery';
 import { calculateGameStats } from '@/lib/lottery/stats';
 import { ResponsibleGaming } from './ResponsibleGaming';
-import { buildSingleGameMessage, openWhatsApp } from '@/lib/whatsapp';
+import { buildSingleGameMessage, formatInlinePlain, openWhatsApp } from '@/lib/whatsapp';
 import { trackCustom, trackEvent } from '@/lib/analytics/metaPixel';
 
 const BATCH_SIZE = 5;
 
 export const GameGenerator = () => {
-  const { history, saveToHistory, generateSmartGame, generateSmartBatch } = useLottery();
+  const { saveToHistory, generateSmartGame, generateSmartBatch } = useLottery();
   const [currentResult, setCurrentResult] = useState<SavedGame | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isBatchGenerating, setIsBatchGenerating] = useState(false);
@@ -102,7 +100,7 @@ export const GameGenerator = () => {
 
   const copyToClipboard = () => {
     if (!currentResult) return;
-    const text = currentResult.numbers.map(n => n.toString().padStart(2, '0')).join(' ');
+    const text = formatInlinePlain(currentResult.numbers);
     navigator.clipboard.writeText(text);
     setIsCopied(true);
     toast({
@@ -111,10 +109,6 @@ export const GameGenerator = () => {
     });
     setTimeout(() => setIsCopied(false), 2000);
   };
-
-  const shareOnWhatsApp = useCallback((game: number[]) => {
-    openWhatsApp(buildSingleGameMessage(game));
-  }, []);
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-zinc-900 overflow-y-auto pb-24 xs:pb-32 text-zinc-900 dark:text-zinc-100">
@@ -235,72 +229,26 @@ export const GameGenerator = () => {
         )}
 
         {currentResult && (
-          <div className="flex justify-center mb-12">
-            <Button 
-              variant="outline" 
+          <div className="flex flex-col sm:flex-row justify-center gap-3 mb-12">
+            <Button
+              variant="outline"
               onClick={copyToClipboard}
-              className="w-full md:w-auto h-12 sm:h-14 px-12 rounded-2xl bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 font-bold text-[10px] sm:text-xs uppercase tracking-widest hover:bg-purple-50 dark:hover:bg-purple-950/20 hover:text-purple-600 dark:hover:text-purple-400 transition-all shadow-sm"
+              className="w-full sm:w-auto h-12 sm:h-14 px-8 rounded-2xl bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 font-bold text-[10px] sm:text-xs uppercase tracking-widest hover:bg-purple-50 dark:hover:bg-purple-950/20 hover:text-purple-600 dark:hover:text-purple-400 transition-all shadow-sm"
             >
               {isCopied ? <Check className="mr-3 text-emerald-500" size={18} /> : <Copy className="mr-3" size={18} />}
               {isCopied ? "Copiado!" : "Copiar Números"}
             </Button>
+            <Button
+              onClick={() => openWhatsApp(buildSingleGameMessage(currentResult.numbers))}
+              className="w-full sm:w-auto h-12 sm:h-14 px-8 rounded-2xl bg-[#25D366] hover:bg-[#1da851] text-white font-bold text-[10px] sm:text-xs uppercase tracking-widest transition-all shadow-sm active:scale-95"
+            >
+              <WhatsAppIcon size={18} className="mr-3" />
+              Compartilhar
+            </Button>
           </div>
         )}
 
-        {currentResult && <ResponsibleGaming className="mb-10" />}
-
-        {history.length > 0 && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 pb-4">
-              <div className="flex items-center gap-3">
-                <History size={18} className="text-purple-500" />
-                <h3 className="text-xs uppercase font-bold tracking-widest text-zinc-500">Histórico Recente</h3>
-              </div>
-              <span className="text-[10px] font-bold text-purple-600 bg-purple-50 dark:bg-purple-900/20 px-3 py-1 rounded-full">
-                {history.length} Jogos
-              </span>
-            </div>
-            
-            <div className="space-y-4">
-              <AnimatePresence initial={false}>
-                {history.slice(0, 10).map((item) => (
-                  <motion.div
-                    key={item.id}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 10 }}
-                    className="flex items-center justify-between p-5 bg-white dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800 rounded-2xl shadow-sm hover:border-purple-200 dark:hover:border-purple-900/50 transition-all group"
-                  >
-                    <div className="flex flex-col gap-3 flex-grow pr-4">
-                      <div className="flex items-center gap-2">
-                        <Calendar size={12} className="text-zinc-400" />
-                        <span className="text-[10px] font-bold text-zinc-400 uppercase">
-                          {new Date(item.timestamp).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {item.numbers.map((num, i) => (
-                          <span key={i} className="text-[11px] font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30 w-7 h-7 flex items-center justify-center rounded-lg border border-purple-100 dark:border-purple-900/50">
-                            {num.toString().padStart(2, '0')}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={() => shareOnWhatsApp(item.numbers)}
-                      className="text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 rounded-xl transition-all"
-                      aria-label="Compartilhar jogo no WhatsApp"
-                    >
-                      <WhatsAppIcon />
-                    </Button>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
-          </div>
-        )}
+        {currentResult && <ResponsibleGaming />}
       </div>
     </div>
   );

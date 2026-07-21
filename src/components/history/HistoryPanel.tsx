@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { SavedGame, LotteryResult } from '@/types/lottery';
 import { HistoryItem } from './HistoryItem';
-import { buildHistoryMessage, buildSingleGameMessage, openWhatsApp } from '@/lib/whatsapp';
+import { buildHistoryMessage, buildHistoryPlain, buildSingleGameMessage, openWhatsApp } from '@/lib/whatsapp';
 import { checkGames } from '@/lib/lottery/checker';
 
 interface HistoryPanelProps {
@@ -50,7 +50,7 @@ export const HistoryPanel = ({
     : null;
 
   const copyAllToClipboard = () => {
-    const text = buildHistoryMessage(history);
+    const text = buildHistoryPlain(history);
     if (!text) return;
 
     navigator.clipboard.writeText(text).then(() => {
