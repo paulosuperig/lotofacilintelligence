@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
   formatInlinePlain,
-  formatGrid,
   gameStatsLine,
   buildSingleGameMessage,
   buildHistoryMessage,
@@ -20,24 +19,11 @@ const savedGame = (numbers: number[], i: number): SavedGame => ({
 });
 
 describe('formatInlinePlain', () => {
-  it('ordena e usa padStart(2) com espaço simples, sem markdown', () => {
+  it('coloca as 15 dezenas em uma única linha, ordenadas, sem markdown', () => {
     const out = formatInlinePlain(GAME);
     expect(out).toBe('01 02 05 08 10 11 13 14 17 20 21 22 23 24 25');
-    expect(out).not.toMatch(/[*`_-]/);
-  });
-});
-
-describe('formatGrid', () => {
-  it('produz grade monospace 3×5 dentro de cercas ```', () => {
-    const grid = formatGrid(GAME);
-    const lines = grid.split('\n');
-    expect(lines[0]).toBe('```');
-    expect(lines[lines.length - 1]).toBe('```');
-    const rows = lines.slice(1, -1);
-    expect(rows).toHaveLength(3); // 15 dezenas / 5
-    rows.forEach((r) => expect(r.trim().split(/\s+/)).toHaveLength(5));
-    // ordenado: primeira dezena é 01
-    expect(rows[0].startsWith('01')).toBe(true);
+    expect(out).not.toMatch(/\n/); // uma única linha
+    expect(out).not.toMatch(/[*`_-]/); // texto puro, copiável
   });
 });
 
@@ -54,23 +40,18 @@ describe('gameStatsLine', () => {
 describe('buildSingleGameMessage', () => {
   const msg = buildSingleGameMessage(GAME);
 
-  it('tem cabeçalho em negrito e grade monospace, sem o separador antigo " - "', () => {
-    expect(msg).toContain('*LOTOFÁCIL INTELLIGENCE*');
-    expect(msg).toContain('```');
+  it('não usa mais bloco monospace nem o separador antigo " - "', () => {
+    expect(msg).not.toContain('```');
     expect(msg).not.toContain(' - ');
   });
 
-  it('contém todas as 15 dezenas ordenadas', () => {
-    for (const n of GAME_SORTED) {
-      expect(msg).toContain(n.toString().padStart(2, '0'));
-    }
+  it('tem as dezenas em uma única linha de texto puro', () => {
+    expect(msg).toContain('01 02 05 08 10 11 13 14 17 20 21 22 23 24 25');
   });
 
-  it('nenhuma linha da grade excede 5 dezenas (evita quebra)', () => {
-    const grid = msg.split('```')[1];
-    grid.trim().split('\n').forEach((r) => {
-      expect(r.trim().split(/\s+/).length).toBeLessThanOrEqual(5);
-    });
+  it('cabeçalho em negrito e todas as 15 dezenas presentes', () => {
+    expect(msg).toContain('*LOTOFÁCIL INTELLIGENCE*');
+    for (const n of GAME_SORTED) expect(msg).toContain(n.toString().padStart(2, '0'));
   });
 });
 
@@ -79,23 +60,28 @@ describe('buildHistoryMessage', () => {
     expect(buildHistoryMessage([])).toBe('');
   });
 
-  it('numera os jogos e usa bloco monospace', () => {
+  it('coloca cada jogo em uma única linha (NN) ...), sem monospace', () => {
     const history = [savedGame(GAME, 0), savedGame([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], 1)];
     const msg = buildHistoryMessage(history);
+    expect(msg).not.toContain('```');
     expect(msg).toContain('Histórico · 2 jogos');
-    expect(msg).toContain('01) 01 02 05');
-    expect(msg).toContain('02) 01 02 03');
-    expect(msg).toContain('```');
+    expect(msg).toContain('01) 01 02 05 08 10 11 13 14 17 20 21 22 23 24 25');
+    expect(msg).toContain('02) 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15');
+    // cada jogo é exatamente uma linha
+    const jogoLines = msg.split('\n').filter((l) => /^\d{2}\)/.test(l));
+    expect(jogoLines).toHaveLength(2);
   });
 });
 
 describe('buildHistoryPlain', () => {
-  it('não contém markdown nem emoji (cópia limpa)', () => {
-    const history = [savedGame(GAME, 0)];
+  it('números puros, um jogo por linha, sem rótulo/markdown/emoji', () => {
+    const history = [savedGame(GAME, 0), savedGame(GAME_SORTED, 1)];
     const plain = buildHistoryPlain(history);
-    expect(plain).toBe('01) 01 02 05 08 10 11 13 14 17 20 21 22 23 24 25');
-    expect(plain).not.toMatch(/[*`_]/);
-    expect(plain).not.toMatch(/🍀/);
+    const lines = plain.split('\n');
+    expect(lines).toHaveLength(2);
+    expect(lines[0]).toBe('01 02 05 08 10 11 13 14 17 20 21 22 23 24 25');
+    expect(plain).not.toMatch(/[*`_)]/);
+    expect(plain).not.toContain('🍀');
   });
 
   it('vazio para histórico vazio', () => {

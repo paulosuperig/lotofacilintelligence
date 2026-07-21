@@ -92,25 +92,29 @@ export const AdminPanel = ({
             {activeTab === 'users' ? 'Gerencie usuários e permissões de acesso' : 'Gerencie usuários, acessos e configurações do sistema'}
           </p>
         </div>
-        <div className="flex flex-wrap items-center justify-center lg:justify-end gap-2 sm:gap-3 w-full lg:w-auto">
+        <div className="grid grid-cols-1 min-[360px]:grid-cols-2 sm:flex sm:flex-wrap items-center justify-center lg:justify-end gap-2 sm:gap-3 w-full lg:w-auto">
           {activeTab === 'users' && (
             <>
-              <Button 
-                variant="outline" 
-                onClick={handleExportContacts} 
-                className="flex-1 sm:flex-none rounded-xl border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800"
+              <Button
+                variant="outline"
+                onClick={handleExportContacts}
+                className="w-full sm:w-auto px-3 sm:px-4 rounded-xl border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800"
               >
-                <Download size={18} className="mr-2" />
+                <Download size={18} className="mr-2 shrink-0" />
                 Exportar
               </Button>
-              <Button onClick={() => setIsUserDialogOpen(true)} className="flex-1 sm:flex-none bg-purple-600 hover:bg-purple-700 text-white rounded-xl shadow-lg shadow-purple-500/20 transition-all hover:scale-[1.02]">
-                <UserPlus size={18} className="mr-2" />
+              <Button onClick={() => setIsUserDialogOpen(true)} className="w-full sm:w-auto px-3 sm:px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-xl shadow-lg shadow-purple-500/20 transition-all hover:scale-[1.02]">
+                <UserPlus size={18} className="mr-2 shrink-0" />
                 <span className="whitespace-nowrap">Novo Usuário</span>
               </Button>
             </>
           )}
-          <Button variant="outline" onClick={onBack} className="flex-1 sm:flex-none rounded-xl border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800">
-            <ArrowLeft size={18} className="mr-2" />
+          <Button
+            variant="outline"
+            onClick={onBack}
+            className={`w-full sm:w-auto px-3 sm:px-4 rounded-xl border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 ${activeTab === 'users' ? 'min-[360px]:col-span-2 sm:col-auto' : ''}`}
+          >
+            <ArrowLeft size={18} className="mr-2 shrink-0" />
             Voltar
           </Button>
         </div>
