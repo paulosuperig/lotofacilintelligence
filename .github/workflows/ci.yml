@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  quality:
+    name: Typecheck, testes e lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # Usamos `npm install` (e não `npm ci`) porque o lockfile versionado do
+      # projeto é o bun.lockb; o package-lock.json não é mantido em sincronia.
+      - name: Instalar dependências
+        run: npm install --no-audit --no-fund
+        env:
+          # o postinstall (setup-supabase) não deve quebrar o CI
+          SKIP_SUPABASE_VALIDATION: '1'
+
+      - name: Typecheck (gate)
+        run: npx tsc -p tsconfig.app.json --noEmit
+
+      - name: Testes (gate)
+        run: npm test
+
+      # Lint é informativo: o projeto ainda carrega avisos legados (ex.: nos
+      # componentes shadcn gerados). Não bloqueia o merge, mas fica visível.
+      - name: Lint (informativo)
+        run: npm run lint
+        continue-on-error: true

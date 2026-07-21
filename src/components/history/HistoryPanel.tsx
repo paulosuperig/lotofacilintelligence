@@ -20,25 +20,34 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { SavedGame } from '@/types/lottery';
+import { SavedGame, LotteryResult } from '@/types/lottery';
 import { HistoryItem } from './HistoryItem';
 import { buildHistoryMessage, buildSingleGameMessage, openWhatsApp } from '@/lib/whatsapp';
+import { checkGames } from '@/lib/lottery/checker';
 
 interface HistoryPanelProps {
   history: SavedGame[];
   onBack: () => void;
   onClearHistory: () => void;
   onGoToGenerator: () => void;
+  /** último resultado oficial, para conferência automática dos jogos salvos */
+  latestResult?: LotteryResult | null;
 }
 
-export const HistoryPanel = ({ 
-  history, 
-  onBack, 
-  onClearHistory, 
-  onGoToGenerator 
+export const HistoryPanel = ({
+  history,
+  onBack,
+  onClearHistory,
+  onGoToGenerator,
+  latestResult,
 }: HistoryPanelProps) => {
   const shareAllOnWhatsApp = () => openWhatsApp(buildHistoryMessage(history));
   const shareSingleOnWhatsApp = (game: number[]) => openWhatsApp(buildSingleGameMessage(game));
+
+  const drawResult = latestResult?.dezenas ?? null;
+  const summary = drawResult && drawResult.length > 0 && history.length > 0
+    ? checkGames(history.map((g) => g.numbers), drawResult)
+    : null;
 
   const copyAllToClipboard = () => {
     const text = buildHistoryMessage(history);
@@ -117,15 +126,38 @@ export const HistoryPanel = ({
         )}
       </div>
 
+      {summary && (
+        <div className="mb-8 p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-purple-50 to-emerald-50 dark:from-zinc-800/50 dark:to-zinc-800/20 border border-purple-100 dark:border-zinc-700 flex flex-wrap items-center justify-center sm:justify-between gap-4 text-center">
+          <div className="flex flex-col">
+            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Conferência automática</span>
+            <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200">
+              Concurso {latestResult?.concurso} • {summary.total} jogo(s)
+            </span>
+          </div>
+          <div className="flex items-center gap-3 sm:gap-5">
+            <div className="flex flex-col items-center">
+              <span className="text-2xl font-display font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">{summary.melhorAcerto}</span>
+              <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Melhor</span>
+            </div>
+            <div className="flex flex-col items-center">
+              <span className="text-2xl font-display font-bold text-purple-600 dark:text-purple-400 tabular-nums">{summary.premiados}</span>
+              <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Premiados</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex-grow">
         {history.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 xs:gap-6">
             <AnimatePresence>
               {history.map((item) => (
-                <HistoryItem 
-                  key={item.id} 
-                  item={item} 
-                  onShare={shareSingleOnWhatsApp} 
+                <HistoryItem
+                  key={item.id}
+                  item={item}
+                  onShare={shareSingleOnWhatsApp}
+                  drawResult={drawResult}
+                  drawConcurso={latestResult?.concurso ?? null}
                 />
               ))}
             </AnimatePresence>

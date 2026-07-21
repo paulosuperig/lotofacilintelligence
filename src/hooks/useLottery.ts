@@ -6,6 +6,8 @@ import { supabase, isSupabaseEnabled } from '@/lib/supabase';
 import { lotteryService } from '@/services/lotteryService';
 import { historyService } from '@/services/historyService';
 import { trackCustom } from '@/lib/analytics/metaPixel';
+import { generateOptimizedGame, generateBatch, gameSignature } from '@/lib/lottery/generator';
+import { normalizeDraw, type HistoryAnalysis } from '@/lib/lottery/analysis';
 
 export const useLottery = () => {
   const { toast } = useToast();
@@ -13,6 +15,7 @@ export const useLottery = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [history, setHistory] = useState<SavedGame[]>([]);
+  const [analysis, setAnalysis] = useState<HistoryAnalysis | null>(null);
   const isClearingRef = useRef(false);
 
   const fetchLatestResult = useCallback(async () => {
@@ -141,54 +144,37 @@ export const useLottery = () => {
   };
 
   const generateSmartGame = useCallback(() => {
-    const pool = Array.from({ length: 25 }, (_, i) => i + 1);
-    const primes = [2, 3, 5, 7, 11, 13, 17, 19, 23];
-    const moldNumbers = [1, 2, 3, 4, 5, 6, 10, 11, 15, 16, 20, 21, 22, 23, 24, 25];
-    const historySignatures = new Set(history.map(g => [...g.numbers].sort((a, b) => a - b).join(',')));
+    const avoid = new Set(history.map(g => gameSignature(g.numbers)));
+    const previousDraw = latestResult ? normalizeDraw(latestResult.dezenas) : null;
 
-    let attempts = 0;
-    let finalGame: number[] = [];
-    let valid = false;
-
-    while (!valid && attempts < 500) {
-      attempts++;
-      const numbers: number[] = [];
-      const randomValues = new Uint32Array(15);
-      window.crypto.getRandomValues(randomValues);
-      const localPool = [...pool];
-      for (let i = 0; i < 15; i++) {
-        const randomIndex = randomValues[i] % localPool.length;
-        numbers.push(localPool.splice(randomIndex, 1)[0]);
-      }
-      const sorted = numbers.sort((a, b) => a - b);
-      const signature = sorted.join(',');
-      if (historySignatures.has(signature)) continue;
-
-      const evenCount = sorted.filter(n => n % 2 === 0).length;
-      const sum = sorted.reduce((a, b) => a + b, 0);
-      const pCount = sorted.filter(n => primes.includes(n)).length;
-      const moldCount = sorted.filter(n => moldNumbers.includes(n)).length;
-
-      const checkParity = (evenCount >= 7 && evenCount <= 8);
-      const checkPrimes = (pCount >= 5 && pCount <= 6);
-      const checkMold = (moldCount >= 9 && moldCount <= 11);
-      const checkSum = (sum >= 170 && sum <= 220);
-
-      if (attempts < 250) {
-        if (checkParity && checkPrimes && checkSum && checkMold) { finalGame = sorted; valid = true; }
-      } else if ((checkParity && checkSum) || attempts > 450) {
-        finalGame = sorted; valid = true;
-      }
-    }
+    const result = generateOptimizedGame({
+      analysis,
+      previousDraw,
+      avoid,
+    });
 
     return {
       id: generateSecureId(),
-      numbers: finalGame,
+      numbers: result.numbers,
       timestamp: Date.now(),
-      sum: finalGame.reduce((a, b) => a + b, 0),
-      type: 'Gerador Inteligente',
+      sum: result.sum,
+      type: result.dataDriven ? 'Gerador Inteligente (dados)' : 'Gerador Inteligente',
     };
-  }, [history]);
+  }, [history, analysis, latestResult]);
+
+  const generateSmartBatch = useCallback((count: number): SavedGame[] => {
+    const avoid = new Set(history.map(g => gameSignature(g.numbers)));
+    const previousDraw = latestResult ? normalizeDraw(latestResult.dezenas) : null;
+
+    const games = generateBatch({ count, analysis, previousDraw, avoid });
+    return games.map((g) => ({
+      id: generateSecureId(),
+      numbers: g.numbers,
+      timestamp: Date.now(),
+      sum: g.sum,
+      type: g.dataDriven ? 'Lote Inteligente (dados)' : 'Lote Inteligente',
+    }));
+  }, [history, analysis, latestResult]);
 
   useEffect(() => {
     let isMounted = true;
@@ -198,6 +184,13 @@ export const useLottery = () => {
       await fetchLatestResult();
       if (!isMounted || isClearingRef.current) return;
       await loadHistory();
+
+      // Carrega a análise de histórico (frequência/atraso) para o gerador
+      // e os painéis de tendências. Falha silenciosa mantém o modo heurístico.
+      lotteryService
+        .getHistoryAnalysis()
+        .then((a) => { if (isMounted && a) setAnalysis(a); })
+        .catch(() => { /* mantém modo heurístico */ });
 
       // Only open a Realtime channel scoped to the current user's rows.
       if (!isSupabaseEnabled() || !supabase) return;
@@ -241,11 +234,13 @@ export const useLottery = () => {
     isLoading,
     isRefreshing,
     history,
+    analysis,
     fetchLatestResult,
     clearHistory,
     loadHistory,
     saveToHistory,
     generateSmartGame,
+    generateSmartBatch,
     isGameDuplicate,
   };
 };

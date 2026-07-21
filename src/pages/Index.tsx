@@ -114,18 +114,19 @@ const Index = () => {
             <AnimatePresence mode="wait">
               <Suspense fallback={<PanelFallback />}>
               {activeTab === 'historico' && (
-                <HistoryPanel 
-                  history={history} 
-                  onBack={goHome} 
-                  onClearHistory={clearHistory} 
-                  onGoToGenerator={goGenerator} 
+                <HistoryPanel
+                  history={history}
+                  onBack={goHome}
+                  onClearHistory={clearHistory}
+                  onGoToGenerator={goGenerator}
+                  latestResult={latestResult}
                 />
               )}
               
               {activeTab === 'stats' && (
-                <FechamentosPanel 
-                  onBack={goHome} 
-                  onSaveGame={(game) => saveToHistory([game])} 
+                <FechamentosPanel
+                  onBack={goHome}
+                  onSaveGames={(games) => saveToHistory(games)}
                 />
               )}
 
