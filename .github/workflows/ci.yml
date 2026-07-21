@@ -17,11 +17,13 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
+      # Usamos `npm install` (e não `npm ci`) porque o lockfile versionado do
+      # projeto é o bun.lockb; o package-lock.json não é mantido em sincronia.
       - name: Instalar dependências
-        run: npm ci
+        run: npm install --no-audit --no-fund
         env:
           # o postinstall (setup-supabase) não deve quebrar o CI
           SKIP_SUPABASE_VALIDATION: '1'
