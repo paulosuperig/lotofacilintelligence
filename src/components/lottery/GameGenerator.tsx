@@ -28,7 +28,7 @@ import { useLottery } from '@/hooks/useLottery';
 import { SavedGame } from '@/types/lottery';
 import { calculateGameStats } from '@/lib/lottery/stats';
 import { ResponsibleGaming } from './ResponsibleGaming';
-import { buildSingleGameMessage, openWhatsApp } from '@/lib/whatsapp';
+import { buildSingleGameMessage, formatInlinePlain, openWhatsApp } from '@/lib/whatsapp';
 import { trackCustom, trackEvent } from '@/lib/analytics/metaPixel';
 
 const BATCH_SIZE = 5;
@@ -102,7 +102,7 @@ export const GameGenerator = () => {
 
   const copyToClipboard = () => {
     if (!currentResult) return;
-    const text = currentResult.numbers.map(n => n.toString().padStart(2, '0')).join(' ');
+    const text = formatInlinePlain(currentResult.numbers);
     navigator.clipboard.writeText(text);
     setIsCopied(true);
     toast({
