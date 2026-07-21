@@ -4,6 +4,19 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * iOS Safari faz auto-zoom ao focar um campo com fonte < 16px. Forçamos 16px
+ * em todos os controles de formulário no mobile para eliminar o zoom
+ * indesejado, mantendo os tamanhos menores (text-sm) apenas no desktop.
+ */
+@media (max-width: 767px) {
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
 */
