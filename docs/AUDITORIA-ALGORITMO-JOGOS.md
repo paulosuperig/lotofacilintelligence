@@ -214,6 +214,31 @@ chutava. Agora:
 - Reforço de transparência no prompt (chance de 15 acertos = 1 em 3.268.760).
 - 66 testes no total (novos: intent, co-ocorrência, formatação da análise).
 
+### 10.3 Auditoria do fluxo Intelligence AI — robustez (rodada atual)
+Auditoria ponta a ponta do fluxo `parseUserIntent → buildSystemPrompt → edge
+function → sanitizeAiGamesDetailed → render`. Correções aplicadas:
+- **Fonte única de parâmetros no prompt** — os critérios de composição do system
+  prompt passam a ser derivados de `BANDS` via `formatCriteriaForPrompt()`.
+  Eliminado o *drift* que fixava "soma 180-220" enquanto o resto do app usa
+  180-210 (o fallback sem stats também foi alinhado).
+- **Conferência automática do sistema** — `sanitizeAiGamesDetailed` agora calcula
+  as métricas REAIS de cada jogo (`computeGameMetrics`) e anexa uma tabela
+  autoritativa (soma, P/Í, primos, moldura, miolo, sequência e **repetidas** vs.
+  o último concurso), marcando ⚠️ o que sai da faixa. Antes só a soma era checada
+  e a "validação" era auto-relatada pelo modelo (não verificada). O prompt deixou
+  de pedir a tabela ao modelo — o sistema é a fonte da verdade.
+- **Sem fabricação de dezenas** — removida a lógica que completava linhas
+  incompletas com 1,2,3…, que podia exibir um jogo que o modelo nunca gerou.
+- **Blindagem anti prompt-injection** — o prompt passa a ignorar instruções do
+  usuário que tentem revelar/alterar/ignorar as diretrizes ou o system prompt.
+- **Clamp de quantidade** (`MAX_JOGOS = 12`) — evita truncamento garantido da
+  resposta quando o usuário pede dezenas de jogos.
+- **Resiliência da edge function** — `AbortController` com timeout de 55s no fetch
+  ao DeepSeek e validação de `messages`, evitando funções penduradas e payloads
+  malformados.
+- Cobertura: novos testes em `sanitizeGames.test.ts` e clamp em `intent.test.ts`
+  (93 testes no total, verdes).
+
 ## 11. Próximos passos sugeridos
 - **Fonte oficial da Caixa** via edge function (proxy + cache) e **persistência do
   histórico no Supabase** — maior ganho restante de confiabilidade (requer o

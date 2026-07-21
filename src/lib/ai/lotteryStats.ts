@@ -52,9 +52,26 @@ export const computeLotteryStats = (result: LotteryResult | null): LotteryContex
   };
 };
 
+/**
+ * Regras estatísticas de composição derivadas da FONTE ÚNICA (`BANDS`), para
+ * injeção no system prompt. Evita que os números do prompt divirjam do
+ * validador/gerador — antes o prompt fixava "soma 180-220" enquanto o resto do
+ * app usa 180-210.
+ */
+export const formatCriteriaForPrompt = (): string =>
+  [
+    `- Soma entre ${BANDS.soma.idealMin} e ${BANDS.soma.idealMax} (faixa de ~70% dos concursos históricos).`,
+    `- Distribuição par/ímpar equilibrada: ${BANDS.pares.idealMin}-${BANDS.pares.idealMax} pares (logo ${15 - BANDS.pares.idealMax}-${15 - BANDS.pares.idealMin} ímpares).`,
+    `- Primos: ${BANDS.primos.idealMin} a ${BANDS.primos.idealMax} (de {2,3,5,7,11,13,17,19,23}).`,
+    `- Moldura (16 nº externos): ${BANDS.moldura.idealMin} a ${BANDS.moldura.idealMax}; Miolo (9 nº centrais): ${BANDS.miolo.idealMin} a ${BANDS.miolo.idealMax}.`,
+    `- Repetidas do último concurso: ${BANDS.repetidas.idealMin} a ${BANDS.repetidas.idealMax}.`,
+    `- Máximo ${BANDS.sequencia.idealMax} dezenas em sequência consecutiva.`,
+    '- Inclua ao menos 2 dezenas "em atraso" (dos ausentes do último concurso).',
+  ].join('\n');
+
 export const formatStatsForPrompt = (stats: LotteryContextStats | null): string => {
   if (!stats) {
-    return 'CONTEXTO_OFICIAL: indisponível no momento. Baseie sugestões em princípios estatísticos clássicos da Lotofácil (15 dezenas de 1-25, equilíbrio par/ímpar 7-8 ou 8-7, soma ideal 180-220, 4-5 primos, distribuição equilibrada moldura/miolo).';
+    return `CONTEXTO_OFICIAL: indisponível no momento. Baseie sugestões nos parâmetros estatísticos clássicos da Lotofácil (15 dezenas de 1-25, pares ${BANDS.pares.idealMin}-${BANDS.pares.idealMax}, soma ${BANDS.soma.idealMin}-${BANDS.soma.idealMax}, ${BANDS.primos.idealMin}-${BANDS.primos.idealMax} primos, distribuição equilibrada moldura/miolo).`;
   }
   return [
     'CONTEXTO_OFICIAL_ULTIMO_CONCURSO (use como base factual — não invente outros números):',

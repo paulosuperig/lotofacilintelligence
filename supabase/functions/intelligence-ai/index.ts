@@ -43,6 +43,14 @@ Deno.serve(async (req) => {
 
     const { messages, max_tokens, model: requestedModel } = await req.json();
 
+    // Validação de entrada: evita repassar payloads malformados/abusivos ao upstream.
+    if (!Array.isArray(messages) || messages.length === 0) {
+      return new Response(
+        JSON.stringify({ error: "INVALID_REQUEST", message: "Requisição inválida: 'messages' ausente." }),
+        { status: 400, headers: { ...cors, "Content-Type": "application/json" } },
+      );
+    }
+
     const adminClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     const { data: cfg } = await adminClient
       .from("system_configs")
@@ -68,19 +76,43 @@ Deno.serve(async (req) => {
       );
     }
 
-    const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${DEEPSEEK_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model,
-        messages,
-        max_tokens: max_tokens || 2048,
-        temperature: 0.2,
-      }),
-    });
+    // Timeout defensivo: sem isto, um upstream travado penduraria a função até
+    // o limite de plataforma. 55s deixa margem para responder antes disso.
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 55_000);
+
+    let response: Response;
+    try {
+      response = await fetch("https://api.deepseek.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${DEEPSEEK_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages,
+          max_tokens: max_tokens || 2048,
+          temperature: 0.2,
+        }),
+        signal: controller.signal,
+      });
+    } catch (err) {
+      const aborted = (err as Error)?.name === "AbortError";
+      console.error("DeepSeek fetch failed:", aborted ? "timeout" : err);
+      return new Response(
+        JSON.stringify({
+          error: aborted ? "AI_TIMEOUT" : "AI_SERVICE_UNAVAILABLE",
+          fallback: true,
+          message: aborted
+            ? "A IA demorou demais para responder. Tente novamente em instantes."
+            : "Falha ao contactar o serviço de IA. Tente novamente.",
+        }),
+        { status: 200, headers: { ...cors, "Content-Type": "application/json" } },
+      );
+    } finally {
+      clearTimeout(timeout);
+    }
 
     if (!response.ok) {
       const errorText = await response.text();

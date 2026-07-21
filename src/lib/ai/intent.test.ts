@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseUserIntent, estrategiaDirective, formatIntentForPrompt } from './intent';
+import { parseUserIntent, estrategiaDirective, formatIntentForPrompt, MAX_JOGOS } from './intent';
 
 describe('parseUserIntent', () => {
   it('extrai quantidade numérica e por extenso', () => {
@@ -28,6 +28,11 @@ describe('parseUserIntent', () => {
 
   it('retorna vazio quando não há sinais', () => {
     expect(parseUserIntent('olá, tudo bem?')).toEqual({});
+  });
+
+  it('limita a quantidade ao teto (evita truncamento)', () => {
+    expect(parseUserIntent('gere 30 jogos').quantidade).toBe(MAX_JOGOS);
+    expect(parseUserIntent('quero 8 jogos').quantidade).toBe(8);
   });
 });
 

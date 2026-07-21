@@ -5,6 +5,7 @@ import remarkGfm from 'remark-gfm';
 import { Save } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { extractGameFromLine, isGameLine } from "@/lib/ai/extractGames";
+import type { AiChatMessage } from "@/hooks/useAiAssistant";
 
 const GameLine = ({ raw, onSave }: { raw: string; onSave?: (text: string) => void }) => {
   const text = String(raw);
@@ -51,23 +52,33 @@ const GameLine = ({ raw, onSave }: { raw: string; onSave?: (text: string) => voi
   );
 };
 
+type CodeProps = React.ComponentPropsWithoutRef<'code'> & { inline?: boolean };
+type PreProps = React.ComponentPropsWithoutRef<'pre'>;
+
+/** Extrai o texto bruto de um nó de children do react-markdown. */
+const childrenToText = (children: React.ReactNode): string => {
+  if (Array.isArray(children)) return children.map(childrenToText).join('');
+  if (React.isValidElement(children)) {
+    return childrenToText((children.props as { children?: React.ReactNode }).children);
+  }
+  return children == null ? '' : String(children);
+};
+
 const makeMarkdownComponents = (onSave: (text: string) => void) => ({
-  code: ({ inline, className, children, ...props }: any) => {
-    const raw = String(children ?? '');
+  code: ({ className, children, ...props }: CodeProps) => {
+    const raw = childrenToText(children);
     if (isGameLine(raw)) return <GameLine raw={raw} onSave={onSave} />;
     return <code className={className} {...props}>{children}</code>;
   },
-  pre: ({ children, ...props }: any) => {
-    const child: any = Array.isArray(children) ? children[0] : children;
-    const inner = child?.props?.children;
-    const raw = Array.isArray(inner) ? inner.join('') : String(inner ?? '');
+  pre: ({ children, ...props }: PreProps) => {
+    const raw = childrenToText(children);
     if (isGameLine(raw)) return <GameLine raw={raw} onSave={onSave} />;
     return <pre {...props}>{children}</pre>;
   },
 });
 
 interface ChatMessageProps {
-  msg: any;
+  msg: AiChatMessage;
   onSaveAiGame: (content: string) => void;
 }
 
