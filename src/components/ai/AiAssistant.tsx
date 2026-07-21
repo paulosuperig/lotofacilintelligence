@@ -3,6 +3,7 @@ import { Cpu, Loader2, Send } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ChatMessage } from './ChatMessage';
+import type { AiChatMessage } from '@/hooks/useAiAssistant';
 import { cn } from "@/lib/utils";
 import { Sparkles, Flame, ShieldCheck, Snowflake, Zap, Link2 } from 'lucide-react';
 
@@ -29,7 +30,7 @@ const SUGGESTIONS = [
 
 interface AiAssistantProps {
   isAiConfigured: boolean;
-  aiChat: any[];
+  aiChat: AiChatMessage[];
   isAiLoading: boolean;
   aiMessage: string;
   onSendMessage: (e?: React.FormEvent, customMessage?: string) => void;
@@ -121,9 +122,14 @@ export const AiAssistant = ({
             ))
           )}
           {isAiLoading && (
-            <div className="flex items-center gap-3 p-4 bg-white dark:bg-zinc-800 rounded-2xl w-fit border border-zinc-100">
+            <div
+              role="status"
+              aria-live="polite"
+              className="flex items-center gap-3 p-4 bg-white dark:bg-zinc-800 rounded-2xl w-fit border border-zinc-100"
+            >
               <Loader2 size={16} className="animate-spin text-zinc-400" />
               <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">Processando...</span>
+              <span className="sr-only">Gerando resposta da Intelligence AI</span>
             </div>
           )}
         </div>
@@ -137,12 +143,14 @@ export const AiAssistant = ({
               value={aiMessage}
               onChange={(e) => onSetAiMessage(e.target.value)}
               placeholder="Digite sua dúvida ou peça sugestões..."
+              aria-label="Mensagem para a Intelligence AI"
               className="flex-grow h-12 md:h-14 px-4 rounded-xl md:rounded-2xl border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 focus:ring-1 focus:ring-zinc-400 transition-all text-sm"
               disabled={isAiLoading}
             />
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={isAiLoading || !aiMessage.trim()}
+              aria-label="Enviar mensagem"
               className="h-12 md:h-14 w-12 md:w-14 rounded-xl md:rounded-2xl bg-zinc-800 hover:bg-zinc-900 text-white shadow-lg transition-all flex items-center justify-center p-0"
             >
               {isAiLoading ? <Loader2 className="animate-spin" size={20} /> : <Send size={20} />}

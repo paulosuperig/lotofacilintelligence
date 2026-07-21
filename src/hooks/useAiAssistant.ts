@@ -15,10 +15,19 @@ const MAX_HISTORY_MESSAGES = 15;
 const MAX_RETRIES = 2;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+/** Mensagem do chat exibida ao usuário. */
+export type AiChatMessage = { role: 'user' | 'assistant'; content: string };
+/** Mensagem enviada ao gateway (inclui o papel `system`). */
+type AiGatewayMessage = { role: 'system' | 'user' | 'assistant'; content: string };
+
+/** Extrai a mensagem de erro de um `unknown` de forma segura (TS strict). */
+const errorMessage = (e: unknown): string | undefined =>
+  e instanceof Error ? e.message : typeof e === 'string' ? e : undefined;
+
 export const useAiAssistant = (latestResult?: LotteryResult | null) => {
   const { toast } = useToast();
   const { analysis } = useLotteryStats();
-  const [aiChat, setAiChat] = useState<{ role: 'user' | 'assistant', content: string }[]>([]);
+  const [aiChat, setAiChat] = useState<AiChatMessage[]>([]);
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [aiMessage, setAiMessage] = useState('');
   const [isAiConfigured, setIsAiConfigured] = useState(false);
@@ -43,7 +52,7 @@ export const useAiAssistant = (latestResult?: LotteryResult | null) => {
           .eq('user_id', session.user.id)
           .order('created_at', { ascending: true })
           .limit(30);
-        if (isMounted && !error && data) setAiChat(data as any);
+        if (isMounted && !error && data) setAiChat(data as AiChatMessage[]);
       } catch (err) {
         console.error("[AI] History load error:", err);
       }
@@ -126,10 +135,10 @@ ${statsBlock}
 ${analysisBlock}`;
   }, [latestResult, analysis]);
 
-  const callAiGateway = useCallback(async (messages: any[], maxTokens: number, attempt = 0): Promise<string> => {
+  const callAiGateway = useCallback(async (messages: AiGatewayMessage[], maxTokens: number, attempt = 0): Promise<string> => {
     try {
       return await aiService.callAiGateway(messages, maxTokens);
-    } catch (err: any) {
+    } catch (err) {
       if (attempt < MAX_RETRIES) {
         await sleep(1000 * Math.pow(2, attempt));
         return callAiGateway(messages, maxTokens, attempt + 1);
@@ -157,12 +166,16 @@ ${analysisBlock}`;
     });
 
     try {
+      const stats = computeLotteryStats(latestResult ?? null);
       const systemPrompt = buildSystemPrompt(intent);
-      const payload = [{ role: 'system', content: systemPrompt }, ...aiChat.slice(-MAX_HISTORY_MESSAGES), newMessage];
+      const payload: AiGatewayMessage[] = [
+        { role: 'system', content: systemPrompt },
+        ...aiChat.slice(-MAX_HISTORY_MESSAGES),
+        newMessage,
+      ];
       const dynamicTokens = Math.min(4096, 900 + (intent.quantidade ?? 3) * 180);
       const raw = await callAiGateway(payload, dynamicTokens);
-      const previousDraw = computeLotteryStats(latestResult ?? null)?.dezenas;
-      const result = sanitizeAiGamesDetailed(raw, intent, previousDraw);
+      const result = sanitizeAiGamesDetailed(raw, intent, stats?.dezenas);
       setAiChat(prev => [...prev, { role: 'assistant', content: result.content }]);
       persistChatMessage('assistant', result.content);
       trackEvent('Contact', {
@@ -176,14 +189,15 @@ ${analysisBlock}`;
         soma_min: intent.somaMin ?? null,
         soma_max: intent.somaMax ?? null,
       });
-    } catch (error: any) {
+    } catch (error) {
+      const message = errorMessage(error);
       trackCustom('ConsultaIAFalhou', {
         content_category: 'ai_chat',
-        error: error?.message?.slice(0, 100) || 'unknown',
+        error: message?.slice(0, 100) || 'unknown',
       });
       toast({
         title: 'Erro na IA',
-        description: error?.message || 'Tente novamente em instantes.',
+        description: message || 'Tente novamente em instantes.',
         variant: 'destructive',
       });
     } finally {
@@ -208,10 +222,10 @@ ${analysisBlock}`;
           title: "Configuração salva",
           description: "A chave da API DeepSeek foi armazenada com segurança no Supabase.",
         });
-      } catch (err: any) {
+      } catch (err) {
         toast({
           title: "Erro ao salvar",
-          description: err?.message || "Verifique suas permissões de admin.",
+          description: errorMessage(err) || "Verifique suas permissões de admin.",
           variant: "destructive",
         });
       }
