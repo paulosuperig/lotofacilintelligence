@@ -1,10 +1,6 @@
 // Utility helpers to derive Lotofácil statistical context for the AI assistant.
 import type { LotteryResult } from '@/types/lottery';
-
-const PRIMES = new Set([2, 3, 5, 7, 11, 13, 17, 19, 23]);
-// Moldura (frame) numbers in a 5x5 Lotofácil grid (1..25):
-// 1,2,3,4,5,6,10,11,15,16,20,21,22,23,24,25
-const MOLDURA = new Set([1, 2, 3, 4, 5, 6, 10, 11, 15, 16, 20, 21, 22, 23, 24, 25]);
+import { PRIME_SET as PRIMES, MOLDURA_SET as MOLDURA, BANDS } from '@/lib/lottery/constants';
 
 export interface LotteryContextStats {
   concurso?: number;
@@ -67,10 +63,10 @@ export const formatStatsForPrompt = (stats: LotteryContextStats | null): string 
     `- Dezenas ausentes (candidatas a "atraso"): ${stats.ausentes.map((n) => String(n).padStart(2, '0')).join(', ')}`,
     '',
     'PARÂMETROS ESTATÍSTICOS DE REFERÊNCIA (Lotofácil):',
-    '- Soma típica: 180–220.',
-    '- Equilíbrio par/ímpar mais comum: 7-8 ou 8-7.',
-    '- Primos: 4–5 dezenas.',
-    '- Repetidas em relação ao concurso anterior: tipicamente 8–10.',
-    '- Moldura: 9–11 dezenas; miolo: 4–6 dezenas.',
+    `- Soma típica: ${BANDS.soma.idealMin}–${BANDS.soma.idealMax}.`,
+    `- Pares: ${BANDS.pares.idealMin}–${BANDS.pares.idealMax}; ímpares: ${BANDS.impares.idealMin}–${BANDS.impares.idealMax}.`,
+    `- Primos: ${BANDS.primos.idealMin}–${BANDS.primos.idealMax} dezenas.`,
+    `- Repetidas em relação ao concurso anterior: tipicamente ${BANDS.repetidas.idealMin}–${BANDS.repetidas.idealMax}.`,
+    `- Moldura: ${BANDS.moldura.idealMin}–${BANDS.moldura.idealMax} dezenas; miolo: ${BANDS.miolo.idealMin}–${BANDS.miolo.idealMax} dezenas.`,
   ].join('\n');
 };
