@@ -130,35 +130,39 @@ export const Sidebar = ({ activeTab, setActiveTab, role, onLogout }: SidebarProp
 
 export const MobileNav = ({ activeTab, setActiveTab, role, onLogout }: SidebarProps) => {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 h-[calc(4.5rem+env(safe-area-inset-bottom))] bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl border-t border-purple-100 dark:border-zinc-800/50 z-[100] flex items-center px-2 pb-[env(safe-area-inset-bottom)] md:hidden transition-all duration-300 ease-in-out">
-      {/* Grupo esquerdo (flex-1) — mantém o FAB central sempre centralizado */}
-      <div className="flex flex-1 items-center justify-around">
-        <NavIcon icon={<Clover size={20} />} active={activeTab === 'home'} label="Início" onClick={() => setActiveTab('home')} />
-        <NavIcon icon={<History size={20} />} active={activeTab === 'historico'} label="Histórico" onClick={() => setActiveTab('historico')} />
-      </div>
+    // Barra inferior FLUTUANTE (pill destacado do rodapé), md:hidden.
+    // Wrapper não captura toques na área vazia (pointer-events-none); só o pill.
+    <div className="fixed inset-x-0 bottom-0 z-[100] md:hidden pointer-events-none px-3 pb-[calc(env(safe-area-inset-bottom)+0.6rem)]">
+      <nav className="pointer-events-auto mx-auto flex w-full max-w-sm items-center h-16 rounded-[1.75rem] bg-white/85 dark:bg-zinc-900/85 backdrop-blur-2xl border border-purple-100/80 dark:border-zinc-800 shadow-2xl shadow-purple-950/10 px-1.5">
+        {/* Grupo esquerdo (flex-1) — mantém o FAB central sempre centralizado */}
+        <div className="flex flex-1 items-center justify-around">
+          <NavIcon icon={<Clover size={20} />} active={activeTab === 'home'} label="Início" onClick={() => setActiveTab('home')} />
+          <NavIcon icon={<History size={20} />} active={activeTab === 'historico'} label="Histórico" onClick={() => setActiveTab('historico')} />
+        </div>
 
-      {/* FAB central */}
-      <div className="relative -top-2 shrink-0 mx-1">
-        <div className="absolute inset-0 bg-purple-500 blur-lg opacity-20 rounded-full animate-pulse" />
-        <NavIcon
-          icon={<Cpu size={24} className="text-white" />}
-          active={activeTab === 'ia'}
-          label="IA"
-          onClick={() => setActiveTab('ia')}
-          className="bg-gradient-to-br from-purple-600 to-fuchsia-600 rounded-full w-14 h-14 shadow-lg shadow-purple-500/40 border-4 border-white dark:border-zinc-900"
-        />
-      </div>
+        {/* FAB central elevado acima do pill */}
+        <div className="relative -top-5 shrink-0 mx-0.5">
+          <div className="absolute inset-0 bg-purple-500 blur-lg opacity-25 rounded-full animate-pulse" />
+          <NavIcon
+            icon={<Cpu size={24} className="text-white" />}
+            active={activeTab === 'ia'}
+            label="IA"
+            onClick={() => setActiveTab('ia')}
+            className="bg-gradient-to-br from-purple-600 to-fuchsia-600 rounded-full w-14 h-14 shadow-lg shadow-purple-500/40 border-4 border-white dark:border-zinc-900"
+          />
+        </div>
 
-      {/* Grupo direito (flex-1) */}
-      <div className="flex flex-1 items-center justify-around">
-        {role === 'admin' && (
-          <>
-            <NavIcon icon={<Users size={20} />} active={activeTab === 'usuarios'} label="Usuários" onClick={() => setActiveTab('usuarios')} />
-            <NavIcon icon={<Settings size={20} />} active={activeTab === 'ajustes'} label="Ajustes" onClick={() => setActiveTab('ajustes')} />
-          </>
-        )}
-        <NavIcon icon={<LogOut size={20} />} label="Sair" onClick={onLogout} />
-      </div>
-    </nav>
+        {/* Grupo direito (flex-1) */}
+        <div className="flex flex-1 items-center justify-around">
+          {role === 'admin' && (
+            <>
+              <NavIcon icon={<Users size={20} />} active={activeTab === 'usuarios'} label="Usuários" onClick={() => setActiveTab('usuarios')} />
+              <NavIcon icon={<Settings size={20} />} active={activeTab === 'ajustes'} label="Ajustes" onClick={() => setActiveTab('ajustes')} />
+            </>
+          )}
+          <NavIcon icon={<LogOut size={20} />} label="Sair" onClick={onLogout} />
+        </div>
+      </nav>
+    </div>
   );
 };

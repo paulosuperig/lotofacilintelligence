@@ -17,6 +17,19 @@
   }
 }
 
+/* Blindagem de responsividade: nunca permitir scroll horizontal / vazamento
+ * de layout em nenhum dispositivo, e limitar mídias à largura do container. */
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
 */
