@@ -106,8 +106,8 @@ Deno.serve(async (req) => {
         },
         body: JSON.stringify({
           model,
-          messages,
-          max_tokens: max_tokens || 2048,
+          messages: cleanMessages,
+          max_tokens: Math.min(max_tokens || 2048, 4096),
           temperature: 0.2,
         }),
         signal: controller.signal,
