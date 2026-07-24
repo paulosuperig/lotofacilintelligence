@@ -107,7 +107,13 @@ Deno.serve(async (req) => {
         body: JSON.stringify({
           model,
           messages: cleanMessages,
-          max_tokens: Math.min(max_tokens || 2048, 4096),
+          // O deepseek-v4-pro é um modelo de RACIOCÍNIO: por padrão gasta tokens
+          // em "thinking" e o max_tokens cobre reasoning + content juntos — com
+          // teto baixo, o content voltava VAZIO. Para gerar jogos em formato
+          // fixo não precisamos de cadeia de raciocínio, então desligamos o
+          // thinking (resposta vai direto ao content) e damos folga de tokens.
+          thinking: { type: "disabled" },
+          max_tokens: Math.min(max_tokens || 4096, 8192),
           temperature: 0.2,
         }),
         signal: controller.signal,
