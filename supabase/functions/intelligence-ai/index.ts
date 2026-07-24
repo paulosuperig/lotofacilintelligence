@@ -65,7 +65,7 @@ Deno.serve(async (req) => {
 
     // DeepSeek depreciou "deepseek-chat" — aceita apenas deepseek-v4-pro | deepseek-v4-flash.
     const ALLOWED_MODELS = new Set(["deepseek-v4-pro", "deepseek-v4-flash"]);
-    const model = ALLOWED_MODELS.has(requestedModel) ? requestedModel : "deepseek-v4-flash";
+    const model = ALLOWED_MODELS.has(requestedModel) ? requestedModel : "deepseek-v4-pro";
 
     // Filtra mensagens inválidas (content vazio/nulo ou papel desconhecido) que o upstream rejeita.
     const validRoles = new Set(["system", "user", "assistant"]);
