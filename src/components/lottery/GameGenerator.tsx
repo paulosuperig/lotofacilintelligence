@@ -38,7 +38,14 @@ import { buildSingleGameMessage, formatInlinePlain, openWhatsApp } from '@/lib/w
 import { trackCustom, trackEvent } from '@/lib/analytics/metaPixel';
 import { NumberBoard } from './NumberBoard';
 import { emptySelection, type Selection } from '@/lib/lottery/selection';
-import { SlidersHorizontal, X } from 'lucide-react';
+import { GenerationFilters } from './GenerationFilters';
+import {
+  filtersFromSelection,
+  hasActiveFilters,
+  EMPTY_FILTER_SELECTION,
+  type FilterSelection,
+} from '@/lib/lottery/generationPresets';
+import { SlidersHorizontal, Filter, X } from 'lucide-react';
 
 const BATCH_SIZES = [3, 5, 10, 15] as const;
 
@@ -70,11 +77,19 @@ export const GameGenerator = () => {
   const [batchSize, setBatchSize] = useState<number>(5);
   const [selection, setSelection] = useState<Selection>(emptySelection());
   const [showBoard, setShowBoard] = useState(false);
+  const [filterSel, setFilterSel] = useState<FilterSelection>(EMPTY_FILTER_SELECTION);
+  const [showFilters, setShowFilters] = useState(false);
   const { toast } = useToast();
 
   const activeHint = STRATEGIES.find((s) => s.value === strategy)?.hint ?? '';
   const hasConstraints = selection.fixed.length > 0 || selection.excluded.length > 0;
-  const smartOpts = { strategy, fixed: selection.fixed, excluded: selection.excluded };
+  const filtersActive = hasActiveFilters(filterSel);
+  const smartOpts = {
+    strategy,
+    fixed: selection.fixed,
+    excluded: selection.excluded,
+    ...filtersFromSelection(filterSel),
+  };
 
   const stats = useMemo(() => {
     if (!currentResult) return null;
@@ -251,6 +266,45 @@ export const GameGenerator = () => {
                     <X size={12} /> Limpar seleção
                   </button>
                 )}
+              </div>
+            )}
+          </div>
+
+          {/* Filtros avançados (opcional) */}
+          <div>
+            <button
+              type="button"
+              onClick={() => setShowFilters((v) => !v)}
+              aria-expanded={showFilters}
+              className="w-full flex items-center justify-between px-1 py-1 group"
+            >
+              <span className="flex items-center gap-2 text-[10px] uppercase font-bold tracking-[0.2em] text-zinc-400 dark:text-zinc-500 group-hover:text-purple-500 transition-colors">
+                <Filter size={13} /> Filtros avançados
+              </span>
+              <span className="text-[10px] font-bold text-purple-500">
+                {filtersActive ? 'ativos' : showFilters ? 'ocultar' : 'opcional'}
+              </span>
+            </button>
+
+            {showFilters && (
+              <div className="mt-3 p-3 sm:p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-950/40 border border-zinc-100 dark:border-zinc-800">
+                <GenerationFilters
+                  value={filterSel}
+                  onChange={setFilterSel}
+                  disabled={isGenerating || isBatchGenerating}
+                />
+                {filtersActive && (
+                  <button
+                    type="button"
+                    onClick={() => setFilterSel(EMPTY_FILTER_SELECTION)}
+                    className="mx-auto mt-3 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-zinc-400 hover:text-rose-500 transition-colors"
+                  >
+                    <X size={12} /> Limpar filtros
+                  </button>
+                )}
+                <p className="text-[10px] text-zinc-400 dark:text-zinc-500 mt-3 text-center leading-relaxed">
+                  Filtros são preferências: o gerador prioriza jogos na faixa, sem descartar jogos válidos nem alterar a probabilidade do sorteio.
+                </p>
               </div>
             )}
           </div>

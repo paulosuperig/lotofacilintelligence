@@ -293,6 +293,24 @@ Completa a UI do gerador com as opções que o motor já suportava:
   respeitadas por construção pelo gerador.
 - Cobertura: 113 testes verdes (6 novos em `selection`).
 
+### 10.7 Benchmark do nicho + filtros avançados de geração
+Comparação com os líderes do nicho (apps/sites de Lotofácil). **Onde já
+lideramos**: estatística honesta (a maioria vende "número quente garantido"),
+fechamentos com **garantia verificada** (não selo falso), gerador data-driven
+com estratégias e âncora de repetidas, IA com conferência automática. **Maior
+gap fechado nesta rodada**: filtros configuráveis de geração — recurso central
+dos apps premium — que tínhamos no motor (bandas) mas não expúnhamos.
+- **Filtros avançados** (soma, paridade, primos) como **restrições soft**: o
+  gerador prioriza no ranking os jogos dentro das faixas pedidas, sem descartar
+  jogos válidos nem alterar a probabilidade do sorteio. `generateOptimizedGame`
+  ganhou `paresMin/Max` e `primosMin/Max` (soma já existia), com penalidade
+  proporcional (`rangePenalty`).
+- **Presets** (`generationPresets.ts`, puro/testável): Soma (Baixa/Ideal/Alta),
+  Paridade (Equilíbrio/+Pares/+Ímpares), Primos (Ideal 4–6) → mapeados para as
+  faixas soft. UI `GenerationFilters` com chips acessíveis (`radiogroup`).
+- Cobertura: 121 testes verdes (novos: penalidade de paridade/primos no gerador
+  e mapeamento dos presets).
+
 ## 11. Próximos passos sugeridos
 - **Fechamentos personalizados** (pool no volante + garantia-alvo) e presets
   21/22 via covering designs pré-computados.

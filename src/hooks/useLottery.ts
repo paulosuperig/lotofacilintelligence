@@ -10,12 +10,32 @@ import { generateOptimizedGame, generateBatch, gameSignature, type GenStrategy }
 import { normalizeDraw, type HistoryAnalysis } from '@/lib/lottery/analysis';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
-/** Opções de composição escolhidas na UI (estratégia + restrições). */
-interface SmartOptions {
+/** Filtros avançados (faixas soft) escolhidos pelo usuário. */
+export interface SmartFilters {
+  sumMin?: number;
+  sumMax?: number;
+  paresMin?: number;
+  paresMax?: number;
+  primosMin?: number;
+  primosMax?: number;
+}
+
+/** Opções de composição escolhidas na UI (estratégia + restrições + filtros). */
+interface SmartOptions extends SmartFilters {
   strategy?: GenStrategy;
   fixed?: number[];
   excluded?: number[];
 }
+
+/** Extrai apenas os campos de filtro (faixas soft) das opções. */
+const pickFilters = (o: SmartOptions): SmartFilters => ({
+  sumMin: o.sumMin,
+  sumMax: o.sumMax,
+  paresMin: o.paresMin,
+  paresMax: o.paresMax,
+  primosMin: o.primosMin,
+  primosMax: o.primosMax,
+});
 
 const STRATEGY_LABEL: Record<GenStrategy, string> = {
   equilibrada: 'Equilibrada',
@@ -172,6 +192,7 @@ export const useLottery = () => {
       strategy,
       fixed: opts.fixed,
       excluded: opts.excluded,
+      ...pickFilters(opts),
     });
 
     const label = STRATEGY_LABEL[strategy];
@@ -197,6 +218,7 @@ export const useLottery = () => {
       strategy,
       fixed: opts.fixed,
       excluded: opts.excluded,
+      ...pickFilters(opts),
     });
     const label = STRATEGY_LABEL[strategy];
     return games.map((g) => ({

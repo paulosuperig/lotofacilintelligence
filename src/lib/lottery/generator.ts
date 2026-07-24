@@ -108,6 +108,12 @@ export interface GenerateOptions {
   /** faixa de soma preferida (soft): candidatos fora recebem penalidade no ranking. */
   sumMin?: number;
   sumMax?: number;
+  /** faixa de PARES preferida (soft). Ímpares = 15 − pares. */
+  paresMin?: number;
+  paresMax?: number;
+  /** faixa de PRIMOS preferida (soft). */
+  primosMin?: number;
+  primosMax?: number;
 }
 
 export interface GeneratedGame {
@@ -337,6 +343,10 @@ export const generateOptimizedGame = (options: GenerateOptions = {}): GeneratedG
     strategy = 'equilibrada',
     sumMin,
     sumMax,
+    paresMin,
+    paresMax,
+    primosMin,
+    primosMax,
   } = options;
 
   // Restrições do usuário sanitizadas: excluídas nunca engolem as fixas, e o
@@ -352,14 +362,28 @@ export const generateOptimizedGame = (options: GenerateOptions = {}): GeneratedG
   const weights = buildWeights(analysis, strategy);
   const dataDriven = !!analysis && analysis.totalConcursos > 0;
 
-  // Penalidade soft por soma fora da faixa pedida (~1 ponto por 100 de desvio).
-  const sumPenalty = (sum: number): number => {
-    if (sumMin != null && sum < sumMin) return (sumMin - sum) / 100;
-    if (sumMax != null && sum > sumMax) return (sum - sumMax) / 100;
+  // Penalidades soft por métrica fora da faixa pedida pelo usuário. `scale`
+  // calibra o peso: soma varia ~100 (÷100), pares/primos variam ~poucas unidades
+  // (÷2, logo cada unidade fora ≈ 0.5 de penalidade).
+  const rangePenalty = (
+    value: number,
+    min: number | undefined,
+    max: number | undefined,
+    scale: number
+  ): number => {
+    if (min != null && value < min) return (min - value) / scale;
+    if (max != null && value > max) return (value - max) / scale;
     return 0;
   };
-  const effScore = (nums: number[]): number =>
-    scoreGame(nums, previousDraw) - sumPenalty(nums.reduce((a, b) => a + b, 0));
+  const effScore = (nums: number[]): number => {
+    const m = computeGameMetrics(nums, previousDraw);
+    return (
+      scoreGame(nums, previousDraw) -
+      rangePenalty(m.soma, sumMin, sumMax, 100) -
+      rangePenalty(m.pares, paresMin, paresMax, 2) -
+      rangePenalty(m.primos, primosMin, primosMax, 2)
+    );
+  };
 
   let best: number[] | null = null;
   let bestScore = -Infinity;
