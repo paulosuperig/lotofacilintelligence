@@ -281,7 +281,24 @@ Intelligence AI, no motor puro/testável usado pelo botão "Gerador Inteligente"
 - Cobertura: 107 testes verdes (7 novos no gerador: fixas, excluídas,
   precedência, clamp, viés de repetidas, penalidade de soma).
 
+### 10.6 Gerador — volante de fixar/excluir e lote configurável
+Completa a UI do gerador com as opções que o motor já suportava:
+- **Volante 5x5 (`NumberBoard`)**: um toque cicla a dezena neutra → fixa (verde)
+  → excluída (vermelho) → neutra. Lógica pura e testada em
+  `lib/lottery/selection.ts` (limites: 14 fixas, 10 excluídas, para o pool nunca
+  ficar < 15; quando as excluídas enchem, tocar numa fixa a mantém — não perde a
+  seleção). Acessível (`aria-pressed`, foco visível).
+- **Quantidade do lote configurável** (3/5/10/15), substituindo o valor fixo.
+- Fixas/excluídas fluem para `generateSmartGame`/`generateSmartBatch` e são
+  respeitadas por construção pelo gerador.
+- Cobertura: 113 testes verdes (6 novos em `selection`).
+
 ## 11. Próximos passos sugeridos
+- **Fechamentos personalizados** (pool no volante + garantia-alvo) e presets
+  21/22 via covering designs pré-computados.
+- **Prova Real no app**: expor o backtest (inteligente vs aleatório) num painel.
+- **Conferidor avançado**: qualquer concurso + valor real do prêmio + jogo avulso.
+- **Persistir histórico** de concursos no Supabase (proxy + cache).
 - **Fonte oficial da Caixa** via edge function (proxy + cache) e **persistência do
   histórico no Supabase** — maior ganho restante de confiabilidade (requer o
   ambiente Supabase para testar/deployar).

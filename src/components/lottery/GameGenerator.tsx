@@ -36,8 +36,11 @@ import { calculateGameStats } from '@/lib/lottery/stats';
 import { ResponsibleGaming } from './ResponsibleGaming';
 import { buildSingleGameMessage, formatInlinePlain, openWhatsApp } from '@/lib/whatsapp';
 import { trackCustom, trackEvent } from '@/lib/analytics/metaPixel';
+import { NumberBoard } from './NumberBoard';
+import { emptySelection, type Selection } from '@/lib/lottery/selection';
+import { SlidersHorizontal, X } from 'lucide-react';
 
-const BATCH_SIZE = 5;
+const BATCH_SIZES = [3, 5, 10, 15] as const;
 
 interface StrategyOption {
   value: GenStrategy;
@@ -64,9 +67,14 @@ export const GameGenerator = () => {
   const [isCopied, setIsCopied] = useState(false);
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [strategy, setStrategy] = useState<GenStrategy>('equilibrada');
+  const [batchSize, setBatchSize] = useState<number>(5);
+  const [selection, setSelection] = useState<Selection>(emptySelection());
+  const [showBoard, setShowBoard] = useState(false);
   const { toast } = useToast();
 
   const activeHint = STRATEGIES.find((s) => s.value === strategy)?.hint ?? '';
+  const hasConstraints = selection.fixed.length > 0 || selection.excluded.length > 0;
+  const smartOpts = { strategy, fixed: selection.fixed, excluded: selection.excluded };
 
   const stats = useMemo(() => {
     if (!currentResult) return null;
@@ -80,7 +88,7 @@ export const GameGenerator = () => {
     
     await new Promise(resolve => setTimeout(resolve, 800));
     
-    const newGame = generateSmartGame({ strategy });
+    const newGame = generateSmartGame(smartOpts);
     setCurrentResult(newGame);
     await saveToHistory([newGame]);
     trackEvent('Lead', {
@@ -108,7 +116,7 @@ export const GameGenerator = () => {
 
     await new Promise(resolve => setTimeout(resolve, 800));
 
-    const games = generateSmartBatch(BATCH_SIZE, { strategy });
+    const games = generateSmartBatch(batchSize, smartOpts);
     if (games.length > 0) setCurrentResult(games[0]);
     const { success } = await saveToHistory(games);
 
@@ -209,6 +217,72 @@ export const GameGenerator = () => {
             <p className="text-[10px] text-zinc-400 dark:text-zinc-500 mt-2 px-1 sm:hidden">{activeHint}</p>
           </div>
 
+          {/* Fixar & excluir dezenas (opcional) */}
+          <div>
+            <button
+              type="button"
+              onClick={() => setShowBoard((v) => !v)}
+              aria-expanded={showBoard}
+              className="w-full flex items-center justify-between px-1 py-1 group"
+            >
+              <span className="flex items-center gap-2 text-[10px] uppercase font-bold tracking-[0.2em] text-zinc-400 dark:text-zinc-500 group-hover:text-purple-500 transition-colors">
+                <SlidersHorizontal size={13} /> Fixar & excluir dezenas
+              </span>
+              <span className="text-[10px] font-bold text-purple-500">
+                {hasConstraints
+                  ? `${selection.fixed.length} fixas · ${selection.excluded.length} excl.`
+                  : showBoard ? 'ocultar' : 'opcional'}
+              </span>
+            </button>
+
+            {showBoard && (
+              <div className="mt-3 p-3 sm:p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-950/40 border border-zinc-100 dark:border-zinc-800">
+                <NumberBoard
+                  selection={selection}
+                  onChange={setSelection}
+                  disabled={isGenerating || isBatchGenerating}
+                />
+                {hasConstraints && (
+                  <button
+                    type="button"
+                    onClick={() => setSelection(emptySelection())}
+                    className="mx-auto mt-3 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-zinc-400 hover:text-rose-500 transition-colors"
+                  >
+                    <X size={12} /> Limpar seleção
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Quantidade do lote */}
+          <div>
+            <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-zinc-400 dark:text-zinc-500 px-1 mb-2 block">Jogos no lote</span>
+            <div role="radiogroup" aria-label="Quantidade de jogos no lote" className="flex gap-2">
+              {BATCH_SIZES.map((n) => {
+                const active = n === batchSize;
+                return (
+                  <button
+                    key={n}
+                    type="button"
+                    role="radio"
+                    aria-checked={active}
+                    onClick={() => setBatchSize(n)}
+                    disabled={isGenerating || isBatchGenerating}
+                    className={cn(
+                      "flex-1 h-10 rounded-xl border text-xs font-bold tabular-nums transition-all active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-purple-500 disabled:opacity-50 disabled:pointer-events-none",
+                      active
+                        ? "bg-purple-600 border-purple-600 text-white shadow-md shadow-purple-500/20"
+                        : "bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-purple-300 dark:hover:border-purple-700"
+                    )}
+                  >
+                    {n}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="flex flex-col sm:flex-row gap-3">
             <Button
               onClick={handleGenerate}
@@ -225,7 +299,7 @@ export const GameGenerator = () => {
               className="sm:w-auto h-14 px-6 rounded-2xl border-purple-200 dark:border-purple-900/50 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/20 font-bold text-xs uppercase tracking-widest transition-all active:scale-95 touch-manipulation"
             >
               {isBatchGenerating ? <RefreshCcw className="animate-spin mr-2" size={18} /> : <Copy className="mr-2" size={18} />}
-              {isBatchGenerating ? "Gerando..." : `Lote de ${BATCH_SIZE}`}
+              {isBatchGenerating ? "Gerando..." : `Lote de ${batchSize}`}
             </Button>
           </div>
         </div>
