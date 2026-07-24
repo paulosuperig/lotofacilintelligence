@@ -134,6 +134,7 @@ Deno.serve(async (req) => {
       console.error("DeepSeek error:", response.status, errorText);
 
       const errorMap: Record<number, { error: string; message: string }> = {
+        400: { error: "BAD_REQUEST", message: "Requisição inválida ao provedor de IA — parâmetros ajustados." },
         401: { error: "INVALID_API_KEY", message: "Chave da API DeepSeek inválida ou expirada." },
         429: { error: "RATE_LIMITED", message: "Limite de requisições atingido na DeepSeek." },
         402: { error: "INSUFFICIENT_CREDITS", message: "Créditos insuficientes na conta DeepSeek." },
