@@ -182,7 +182,9 @@ ${analysisBlock}`;
         newMessage,
       ];
       // ~220 tokens/jogo cobre a linha do jogo + o "Racional" curto de cada um.
-      const dynamicTokens = Math.min(4096, 900 + (intent.quantidade ?? 3) * 220);
+      // Teto de 8192 dá folga ao deepseek-v4-pro para completar respostas longas
+      // (análise + jogos + conferência) sem truncar.
+      const dynamicTokens = Math.min(8192, 1200 + (intent.quantidade ?? 3) * 260);
       const raw = await callAiGateway(payload, dynamicTokens);
       const result = sanitizeAiGamesDetailed(raw, intent, stats?.dezenas);
       setAiChat(prev => [...prev, { role: 'assistant', content: result.content }]);

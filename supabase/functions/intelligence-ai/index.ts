@@ -63,7 +63,11 @@ Deno.serve(async (req) => {
       (typeof cfg?.value === "string" ? cfg.value : null) ||
       Deno.env.get("DEEPSEEK_API_KEY");
 
-    const model = requestedModel || "deepseek-chat";
+    // Modelo padrão: deepseek-v4-pro (mais qualificado). Os antigos
+    // deepseek-chat/deepseek-reasoner foram descontinuados em 2026-07-24 e
+    // mapeavam para o v4-flash, que truncava respostas longas. Overridable
+    // pelo corpo da requisição (campo `model`).
+    const model = requestedModel || "deepseek-v4-pro";
 
     if (!DEEPSEEK_API_KEY) {
       return new Response(
@@ -92,7 +96,7 @@ Deno.serve(async (req) => {
         body: JSON.stringify({
           model,
           messages,
-          max_tokens: max_tokens || 2048,
+          max_tokens: max_tokens || 4096,
           temperature: 0.2,
         }),
         signal: controller.signal,
