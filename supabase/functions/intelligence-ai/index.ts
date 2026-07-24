@@ -63,7 +63,22 @@ Deno.serve(async (req) => {
       (typeof cfg?.value === "string" ? cfg.value : null) ||
       Deno.env.get("DEEPSEEK_API_KEY");
 
-    const model = requestedModel || "deepseek-chat";
+    // DeepSeek depreciou "deepseek-chat" — aceita apenas deepseek-v4-pro | deepseek-v4-flash.
+    const ALLOWED_MODELS = new Set(["deepseek-v4-pro", "deepseek-v4-flash"]);
+    const model = ALLOWED_MODELS.has(requestedModel) ? requestedModel : "deepseek-v4-flash";
+
+    // Filtra mensagens inválidas (content vazio/nulo ou papel desconhecido) que o upstream rejeita.
+    const validRoles = new Set(["system", "user", "assistant"]);
+    const cleanMessages = messages.filter(
+      (m: { role?: string; content?: string }) =>
+        m && validRoles.has(m.role ?? "") && typeof m.content === "string" && m.content.trim().length > 0,
+    );
+    if (cleanMessages.length === 0) {
+      return new Response(
+        JSON.stringify({ error: "INVALID_REQUEST", message: "Nenhuma mensagem válida para enviar à IA." }),
+        { status: 400, headers: { ...cors, "Content-Type": "application/json" } },
+      );
+    }
 
     if (!DEEPSEEK_API_KEY) {
       return new Response(
