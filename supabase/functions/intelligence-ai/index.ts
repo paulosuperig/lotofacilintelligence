@@ -63,7 +63,22 @@ Deno.serve(async (req) => {
       (typeof cfg?.value === "string" ? cfg.value : null) ||
       Deno.env.get("DEEPSEEK_API_KEY");
 
-    const model = requestedModel || "deepseek-chat";
+    // DeepSeek depreciou "deepseek-chat" — aceita apenas deepseek-v4-pro | deepseek-v4-flash.
+    const ALLOWED_MODELS = new Set(["deepseek-v4-pro", "deepseek-v4-flash"]);
+    const model = ALLOWED_MODELS.has(requestedModel) ? requestedModel : "deepseek-v4-flash";
+
+    // Filtra mensagens inválidas (content vazio/nulo ou papel desconhecido) que o upstream rejeita.
+    const validRoles = new Set(["system", "user", "assistant"]);
+    const cleanMessages = messages.filter(
+      (m: { role?: string; content?: string }) =>
+        m && validRoles.has(m.role ?? "") && typeof m.content === "string" && m.content.trim().length > 0,
+    );
+    if (cleanMessages.length === 0) {
+      return new Response(
+        JSON.stringify({ error: "INVALID_REQUEST", message: "Nenhuma mensagem válida para enviar à IA." }),
+        { status: 400, headers: { ...cors, "Content-Type": "application/json" } },
+      );
+    }
 
     if (!DEEPSEEK_API_KEY) {
       return new Response(
@@ -91,8 +106,8 @@ Deno.serve(async (req) => {
         },
         body: JSON.stringify({
           model,
-          messages,
-          max_tokens: max_tokens || 2048,
+          messages: cleanMessages,
+          max_tokens: Math.min(max_tokens || 2048, 4096),
           temperature: 0.2,
         }),
         signal: controller.signal,
@@ -119,6 +134,7 @@ Deno.serve(async (req) => {
       console.error("DeepSeek error:", response.status, errorText);
 
       const errorMap: Record<number, { error: string; message: string }> = {
+        400: { error: "BAD_REQUEST", message: "Requisição inválida ao provedor de IA — parâmetros ajustados." },
         401: { error: "INVALID_API_KEY", message: "Chave da API DeepSeek inválida ou expirada." },
         429: { error: "RATE_LIMITED", message: "Limite de requisições atingido na DeepSeek." },
         402: { error: "INSUFFICIENT_CREDITS", message: "Créditos insuficientes na conta DeepSeek." },
