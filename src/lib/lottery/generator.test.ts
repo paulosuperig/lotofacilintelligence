@@ -197,6 +197,34 @@ describe('restrições e estratégias', () => {
     };
     expect(avgSum({ sumMin: 210 })).toBeGreaterThan(avgSum({ sumMax: 180 }));
   });
+
+  it('desloca a paridade média conforme o filtro de pares', () => {
+    const avgPares = (opts: Parameters<typeof generateOptimizedGame>[0]) => {
+      let total = 0;
+      const N = 25;
+      for (let seed = 1; seed <= N; seed++) {
+        const g = generateOptimizedGame({ ...opts, rng: seededRng(seed * 17), candidates: 60 });
+        total += g.numbers.filter((n) => n % 2 === 0).length;
+      }
+      return total / N;
+    };
+    // "+ pares" (paresMin 9) deve elevar a média de pares vs. "+ ímpares" (paresMax 6).
+    expect(avgPares({ paresMin: 9 })).toBeGreaterThan(avgPares({ paresMax: 6 }));
+  });
+
+  it('desloca a média de primos conforme o filtro', () => {
+    const avgPrimos = (opts: Parameters<typeof generateOptimizedGame>[0]) => {
+      const PRIMES = new Set([2, 3, 5, 7, 11, 13, 17, 19, 23]);
+      let total = 0;
+      const N = 25;
+      for (let seed = 1; seed <= N; seed++) {
+        const g = generateOptimizedGame({ ...opts, rng: seededRng(seed * 19), candidates: 60 });
+        total += g.numbers.filter((n) => PRIMES.has(n)).length;
+      }
+      return total / N;
+    };
+    expect(avgPrimos({ primosMin: 7 })).toBeGreaterThan(avgPrimos({ primosMax: 3 }));
+  });
 });
 
 describe('buildWeights', () => {
