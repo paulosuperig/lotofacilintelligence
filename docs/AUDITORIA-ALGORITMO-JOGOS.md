@@ -262,6 +262,25 @@ sorteada**; o que se otimiza é a qualidade do LOTE. Mudanças:
 - Cobertura: 100 testes verdes (novos: fixas/excluídas, estratégias novas,
   validação na conferência).
 
+### 10.5 Gerador determinístico — estratégias, restrições e alvo de soma
+O gerador "inteligente" (`generator.ts`) passou a oferecer as MESMAS opções do
+Intelligence AI, no motor puro/testável usado pelo botão "Gerador Inteligente":
+- **6 estratégias** (`equilibrada`, `quentes`, `atrasadas`, `repetidas`,
+  `ciclo`, `agressiva`) que enviesam os pesos de amostragem (frequência/atraso)
+  e o alvo de dezenas repetidas do último concurso (viés high/mid/low).
+- **Dezenas fixas e excluídas**: `generateOptimizedGame`/`generateBatch` aceitam
+  `fixed`/`excluded`. A geração é feita por construção (nunca fabrica repetição,
+  nunca inclui excluída, sempre inclui fixa); excluídas são limitadas a 10 para
+  manter pool ≥ 15, e fixas têm precedência em conflito.
+- **Alvo de soma** (`sumMin`/`sumMax`): penalidade soft no ranking dos
+  candidatos, sem descartar jogos válidos.
+- **UI**: seletor de estratégia (6 chips acessíveis, `radiogroup`) no
+  `GameGenerator`, com dica contextual; o rótulo do jogo salvo reflete a
+  estratégia usada.
+- Limpeza: 2 `any` legados de `useLottery` tipados (RealtimeChannel, CustomEvent).
+- Cobertura: 107 testes verdes (7 novos no gerador: fixas, excluídas,
+  precedência, clamp, viés de repetidas, penalidade de soma).
+
 ## 11. Próximos passos sugeridos
 - **Fonte oficial da Caixa** via edge function (proxy + cache) e **persistência do
   histórico no Supabase** — maior ganho restante de confiabilidade (requer o

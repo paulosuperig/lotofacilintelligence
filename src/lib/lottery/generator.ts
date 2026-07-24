@@ -21,6 +21,51 @@ import type { HistoryAnalysis } from './analysis';
 
 export type Rng = () => number;
 
+/**
+ * Estratégias de composição do gerador — espelham as do Intelligence AI, dando
+ * ao usuário as mesmas opções no gerador determinístico.
+ */
+export type GenStrategy =
+  | 'equilibrada'
+  | 'quentes'
+  | 'atrasadas'
+  | 'repetidas'
+  | 'ciclo'
+  | 'agressiva';
+
+interface StrategyConfig {
+  /** peso da frequência (favorece "quentes") na amostragem */
+  freqW: number;
+  /** peso do atraso (favorece "atrasadas") na amostragem */
+  atrasoW: number;
+  /** viés do alvo de repetidas do último concurso */
+  repeatBias: 'high' | 'mid' | 'low';
+}
+
+const STRATEGY: Record<GenStrategy, StrategyConfig> = {
+  equilibrada: { freqW: 0.6, atrasoW: 0.25, repeatBias: 'mid' },
+  quentes: { freqW: 1.1, atrasoW: 0.1, repeatBias: 'mid' },
+  atrasadas: { freqW: 0.15, atrasoW: 1.1, repeatBias: 'mid' },
+  repetidas: { freqW: 0.6, atrasoW: 0.25, repeatBias: 'high' },
+  ciclo: { freqW: 0.4, atrasoW: 0.8, repeatBias: 'low' },
+  agressiva: { freqW: 0.25, atrasoW: 0.7, repeatBias: 'low' },
+};
+
+/** Alvo de dezenas repetidas do último concurso, conforme o viés da estratégia. */
+const repeatTargetFor = (strategy: GenStrategy, rng: Rng): number => {
+  const { idealMin, idealMax } = BANDS.repetidas;
+  const span = idealMax - idealMin;
+  const bias = STRATEGY[strategy].repeatBias;
+  const jitter = Math.floor(rng() * Math.min(2, span + 1));
+  if (bias === 'high') return idealMax - jitter;
+  if (bias === 'low') return idealMin + jitter;
+  return idealMin + Math.floor(rng() * (span + 1));
+};
+
+/** Normaliza uma lista de dezenas para inteiros válidos e únicos (1..25). */
+const cleanDezenas = (arr?: number[] | null): number[] =>
+  Array.from(new Set((arr ?? []).filter((n) => Number.isInteger(n) && n >= 1 && n <= TOTAL_NUMBERS)));
+
 /** RNG criptográfico padrão (uniforme em [0,1)). */
 export const cryptoRng: Rng = () => {
   if (typeof globalThis.crypto?.getRandomValues === 'function') {
@@ -54,6 +99,15 @@ export interface GenerateOptions {
   rng?: Rng;
   /** quantos candidatos gerar e pontuar (default 80). */
   candidates?: number;
+  /** estratégia de composição (default: equilibrada). */
+  strategy?: GenStrategy;
+  /** dezenas que DEVEM aparecer em todos os jogos. */
+  fixed?: number[];
+  /** dezenas que NÃO PODEM aparecer em nenhum jogo. */
+  excluded?: number[];
+  /** faixa de soma preferida (soft): candidatos fora recebem penalidade no ranking. */
+  sumMin?: number;
+  sumMax?: number;
 }
 
 export interface GeneratedGame {
@@ -77,10 +131,14 @@ export const gameSignature = (nums: number[]): string =>
  *  - atraso (dezenas muito atrasadas ganham leve vantagem — equilíbrio).
  * Sem histórico, todas as dezenas têm peso 1 (uniforme).
  */
-export const buildWeights = (analysis?: HistoryAnalysis | null): number[] => {
+export const buildWeights = (
+  analysis?: HistoryAnalysis | null,
+  strategy: GenStrategy = 'equilibrada'
+): number[] => {
   const weights = new Array(TOTAL_NUMBERS + 1).fill(1); // índice 0 não usado
   if (!analysis || analysis.totalConcursos === 0) return weights;
 
+  const cfg = STRATEGY[strategy];
   const stats = analysis.ranking;
   const maxFreq = Math.max(...stats.map((s) => s.frequencia), 1);
   const maxAtraso = Math.max(...stats.map((s) => s.atraso), 1);
@@ -89,8 +147,8 @@ export const buildWeights = (analysis?: HistoryAnalysis | null): number[] => {
     // frequência normalizada (0..1) e atraso normalizado (0..1)
     const fNorm = s.frequencia / maxFreq;
     const aNorm = s.atraso / maxAtraso;
-    // base 1 + 0.6*frequência + 0.25*atraso => favorece quentes sem excluir frias
-    weights[s.numero] = 1 + 0.6 * fNorm + 0.25 * aNorm;
+    // base 1 + pesos da estratégia => enviesa quentes/atrasadas sem zerar ninguém
+    weights[s.numero] = 1 + cfg.freqW * fNorm + cfg.atrasoW * aNorm;
   }
   return weights;
 };
@@ -156,28 +214,58 @@ export const scoreGame = (nums: number[], previousDraw?: number[] | null): numbe
   return Math.max(0, Math.min(1, score));
 };
 
-/** Gera UM candidato ponderado, possivelmente ancorado no último concurso. */
+interface CandidateConstraints {
+  fixed: number[];
+  excludedSet: Set<number>;
+  strategy: GenStrategy;
+}
+
+/**
+ * Gera UM candidato ponderado, honrando dezenas fixas/excluídas e ancorando no
+ * último concurso conforme a estratégia. Nunca inclui uma excluída nem omite
+ * uma fixa; nunca fabrica repetição (só amostra do pool permitido).
+ */
 const generateCandidate = (
   weights: number[],
   previousDraw: number[] | null | undefined,
-  rng: Rng
+  rng: Rng,
+  constraints: CandidateConstraints
 ): number[] => {
-  const fullPool = Array.from({ length: TOTAL_NUMBERS }, (_, i) => i + 1);
+  const { fixed, excludedSet, strategy } = constraints;
+  const base = fixed.slice(0, NUMBERS_PER_GAME);
+  const baseSet = new Set(base);
+  const need = NUMBERS_PER_GAME - base.length;
+
+  const allowed = (n: number) => !excludedSet.has(n) && !baseSet.has(n);
+  const fullPool: number[] = [];
+  for (let n = 1; n <= TOTAL_NUMBERS; n++) if (allowed(n)) fullPool.push(n);
+
+  if (need <= 0) return base.slice(0, NUMBERS_PER_GAME).sort((a, b) => a - b);
+
+  const finish = (chosen: number[]): number[] => {
+    if (chosen.length < NUMBERS_PER_GAME) {
+      const have = new Set(chosen);
+      const rest = fullPool.filter((n) => !have.has(n));
+      chosen = [...chosen, ...weightedSample(rest, weights, NUMBERS_PER_GAME - chosen.length, rng)];
+    }
+    return chosen.slice(0, NUMBERS_PER_GAME).sort((a, b) => a - b);
+  };
 
   if (previousDraw && previousDraw.length >= NUMBERS_PER_GAME) {
-    // Alvo de repetidas dentro da faixa ideal (8..10), sorteado.
-    const { idealMin, idealMax } = BANDS.repetidas;
-    const repeatTarget = idealMin + Math.floor(rng() * (idealMax - idealMin + 1));
     const prevSet = new Set(previousDraw);
-    const notPrev = fullPool.filter((n) => !prevSet.has(n));
+    const baseFromPrev = base.filter((n) => prevSet.has(n)).length;
+    const repeatTarget = repeatTargetFor(strategy, rng);
+    const remainingRepeats = Math.max(0, Math.min(repeatTarget - baseFromPrev, need));
 
-    const fromPrev = weightedSample([...previousDraw], weights, repeatTarget, rng);
-    const remaining = NUMBERS_PER_GAME - fromPrev.length;
-    const fromNew = weightedSample(notPrev, weights, remaining, rng);
-    return [...fromPrev, ...fromNew].sort((a, b) => a - b);
+    const prevPool = fullPool.filter((n) => prevSet.has(n));
+    const newPool = fullPool.filter((n) => !prevSet.has(n));
+
+    const fromPrev = weightedSample(prevPool, weights, remainingRepeats, rng);
+    const fromNew = weightedSample(newPool, weights, need - fromPrev.length, rng);
+    return finish([...base, ...fromPrev, ...fromNew]);
   }
 
-  return weightedSample(fullPool, weights, NUMBERS_PER_GAME, rng).sort((a, b) => a - b);
+  return finish([...base, ...weightedSample(fullPool, weights, need, rng)]);
 };
 
 /**
@@ -246,10 +334,32 @@ export const generateOptimizedGame = (options: GenerateOptions = {}): GeneratedG
     avoid = new Set<string>(),
     rng = cryptoRng,
     candidates = 80,
+    strategy = 'equilibrada',
+    sumMin,
+    sumMax,
   } = options;
 
-  const weights = buildWeights(analysis);
+  // Restrições do usuário sanitizadas: excluídas nunca engolem as fixas, e o
+  // total de excluídas é limitado para que sempre reste pool >= 15.
+  const fixed = cleanDezenas(options.fixed).slice(0, NUMBERS_PER_GAME);
+  const fixedSet = new Set(fixed);
+  const maxExcluded = TOTAL_NUMBERS - NUMBERS_PER_GAME; // 10
+  const excludedSet = new Set(
+    cleanDezenas(options.excluded).filter((n) => !fixedSet.has(n)).slice(0, maxExcluded)
+  );
+  const constraints: CandidateConstraints = { fixed, excludedSet, strategy };
+
+  const weights = buildWeights(analysis, strategy);
   const dataDriven = !!analysis && analysis.totalConcursos > 0;
+
+  // Penalidade soft por soma fora da faixa pedida (~1 ponto por 100 de desvio).
+  const sumPenalty = (sum: number): number => {
+    if (sumMin != null && sum < sumMin) return (sumMin - sum) / 100;
+    if (sumMax != null && sum > sumMax) return (sum - sumMax) / 100;
+    return 0;
+  };
+  const effScore = (nums: number[]): number =>
+    scoreGame(nums, previousDraw) - sumPenalty(nums.reduce((a, b) => a + b, 0));
 
   let best: number[] | null = null;
   let bestScore = -Infinity;
@@ -258,9 +368,9 @@ export const generateOptimizedGame = (options: GenerateOptions = {}): GeneratedG
 
   const n = Math.max(1, candidates);
   for (let i = 0; i < n; i++) {
-    const cand = generateCandidate(weights, previousDraw, rng);
+    const cand = generateCandidate(weights, previousDraw, rng, constraints);
     if (cand.length !== NUMBERS_PER_GAME) continue;
-    const s = scoreGame(cand, previousDraw);
+    const s = effScore(cand);
 
     if (s > bestFallbackScore) {
       bestFallbackScore = s;
@@ -272,7 +382,7 @@ export const generateOptimizedGame = (options: GenerateOptions = {}): GeneratedG
     }
   }
 
-  const chosen = best ?? bestFallback ?? generateCandidate(weights, previousDraw, rng);
+  const chosen = best ?? bestFallback ?? generateCandidate(weights, previousDraw, rng, constraints);
   const finalScore = best ? bestScore : bestFallbackScore;
 
   return {

@@ -131,6 +131,74 @@ describe('generateBatch', () => {
   });
 });
 
+describe('restrições e estratégias', () => {
+  it('inclui todas as dezenas fixas em todo jogo', () => {
+    const fixed = [1, 2, 25];
+    for (let seed = 1; seed <= 25; seed++) {
+      const g = generateOptimizedGame({ fixed, rng: seededRng(seed), candidates: 30 });
+      validShape(g.numbers);
+      for (const f of fixed) expect(g.numbers).toContain(f);
+    }
+  });
+
+  it('nunca inclui dezenas excluídas', () => {
+    const excluded = [3, 4, 5, 6, 7];
+    for (let seed = 1; seed <= 25; seed++) {
+      const g = generateOptimizedGame({ excluded, rng: seededRng(seed * 3), candidates: 30 });
+      validShape(g.numbers);
+      for (const e of excluded) expect(g.numbers).not.toContain(e);
+    }
+  });
+
+  it('respeita fixas e excluídas simultaneamente', () => {
+    const g = generateOptimizedGame({ fixed: [10, 20], excluded: [1, 2, 3], rng: seededRng(9), candidates: 40 });
+    validShape(g.numbers);
+    expect(g.numbers).toContain(10);
+    expect(g.numbers).toContain(20);
+    expect(g.numbers).not.toContain(1);
+  });
+
+  it('fixas têm precedência sobre excluídas em conflito', () => {
+    // 10 pedido como fixo E excluído: fixo vence.
+    const g = generateOptimizedGame({ fixed: [10], excluded: [10], rng: seededRng(4), candidates: 20 });
+    expect(g.numbers).toContain(10);
+  });
+
+  it('clampa excesso de excluídas para manter pool >= 15', () => {
+    // 12 excluídas > teto 10; ainda assim produz jogo válido.
+    const g = generateOptimizedGame({ excluded: [1,2,3,4,5,6,7,8,9,10,11,12], rng: seededRng(2), candidates: 20 });
+    validShape(g.numbers);
+  });
+
+  it('estratégia "repetidas" aumenta a âncora no último concurso', () => {
+    const previousDraw = [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 2, 4];
+    const avg = (strategy: 'repetidas' | 'ciclo') => {
+      let total = 0;
+      const N = 30;
+      for (let seed = 1; seed <= N; seed++) {
+        const g = generateOptimizedGame({ previousDraw, strategy, rng: seededRng(seed * 5), candidates: 40 });
+        total += g.numbers.filter((n) => previousDraw.includes(n)).length;
+      }
+      return total / N;
+    };
+    // "repetidas" (viés high) deve repetir mais que "ciclo" (viés low).
+    expect(avg('repetidas')).toBeGreaterThan(avg('ciclo'));
+  });
+
+  it('penaliza soma fora da faixa pedida no ranking', () => {
+    // pedindo soma alta, a soma média sobe vs. sem restrição.
+    const avgSum = (opts: Parameters<typeof generateOptimizedGame>[0]) => {
+      let total = 0;
+      const N = 25;
+      for (let seed = 1; seed <= N; seed++) {
+        total += generateOptimizedGame({ ...opts, rng: seededRng(seed * 11), candidates: 60 }).sum;
+      }
+      return total / N;
+    };
+    expect(avgSum({ sumMin: 210 })).toBeGreaterThan(avgSum({ sumMax: 180 }));
+  });
+});
+
 describe('buildWeights', () => {
   it('returns uniform weights without history', () => {
     const w = buildWeights(null);

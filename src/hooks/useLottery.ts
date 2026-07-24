@@ -6,8 +6,25 @@ import { supabase, isSupabaseEnabled } from '@/lib/supabase';
 import { lotteryService } from '@/services/lotteryService';
 import { historyService } from '@/services/historyService';
 import { trackCustom } from '@/lib/analytics/metaPixel';
-import { generateOptimizedGame, generateBatch, gameSignature } from '@/lib/lottery/generator';
+import { generateOptimizedGame, generateBatch, gameSignature, type GenStrategy } from '@/lib/lottery/generator';
 import { normalizeDraw, type HistoryAnalysis } from '@/lib/lottery/analysis';
+import type { RealtimeChannel } from '@supabase/supabase-js';
+
+/** Opções de composição escolhidas na UI (estratégia + restrições). */
+interface SmartOptions {
+  strategy?: GenStrategy;
+  fixed?: number[];
+  excluded?: number[];
+}
+
+const STRATEGY_LABEL: Record<GenStrategy, string> = {
+  equilibrada: 'Equilibrada',
+  quentes: 'Quentes',
+  atrasadas: 'Atrasadas',
+  repetidas: 'Repetidas',
+  ciclo: 'Ciclo',
+  agressiva: 'Agressiva',
+};
 
 export const useLottery = () => {
   const { toast } = useToast();
@@ -143,42 +160,57 @@ export const useLottery = () => {
     }
   };
 
-  const generateSmartGame = useCallback(() => {
+  const generateSmartGame = useCallback((opts: SmartOptions = {}) => {
     const avoid = new Set(history.map(g => gameSignature(g.numbers)));
     const previousDraw = latestResult ? normalizeDraw(latestResult.dezenas) : null;
+    const strategy = opts.strategy ?? 'equilibrada';
 
     const result = generateOptimizedGame({
       analysis,
       previousDraw,
       avoid,
+      strategy,
+      fixed: opts.fixed,
+      excluded: opts.excluded,
     });
 
+    const label = STRATEGY_LABEL[strategy];
     return {
       id: generateSecureId(),
       numbers: result.numbers,
       timestamp: Date.now(),
       sum: result.sum,
-      type: result.dataDriven ? 'Gerador Inteligente (dados)' : 'Gerador Inteligente',
+      type: result.dataDriven ? `Gerador ${label} (dados)` : `Gerador ${label}`,
     };
   }, [history, analysis, latestResult]);
 
-  const generateSmartBatch = useCallback((count: number): SavedGame[] => {
+  const generateSmartBatch = useCallback((count: number, opts: SmartOptions = {}): SavedGame[] => {
     const avoid = new Set(history.map(g => gameSignature(g.numbers)));
     const previousDraw = latestResult ? normalizeDraw(latestResult.dezenas) : null;
+    const strategy = opts.strategy ?? 'equilibrada';
 
-    const games = generateBatch({ count, analysis, previousDraw, avoid });
+    const games = generateBatch({
+      count,
+      analysis,
+      previousDraw,
+      avoid,
+      strategy,
+      fixed: opts.fixed,
+      excluded: opts.excluded,
+    });
+    const label = STRATEGY_LABEL[strategy];
     return games.map((g) => ({
       id: generateSecureId(),
       numbers: g.numbers,
       timestamp: Date.now(),
       sum: g.sum,
-      type: g.dataDriven ? 'Lote Inteligente (dados)' : 'Lote Inteligente',
+      type: g.dataDriven ? `Lote ${label} (dados)` : `Lote ${label}`,
     }));
   }, [history, analysis, latestResult]);
 
   useEffect(() => {
     let isMounted = true;
-    let channel: any;
+    let channel: RealtimeChannel | undefined;
 
     const init = async () => {
       await fetchLatestResult();
@@ -216,8 +248,9 @@ export const useLottery = () => {
     };
     init();
 
-    const handleHistoryUpdate = (e?: any) => {
-      if (e?.detail?.action === 'clear') { setHistory([]); return; }
+    const handleHistoryUpdate = (e?: Event) => {
+      const detail = (e as CustomEvent<{ action?: string }> | undefined)?.detail;
+      if (detail?.action === 'clear') { setHistory([]); return; }
       if (!isClearingRef.current) loadHistory();
     };
     window.addEventListener('lottery-history-updated', handleHistoryUpdate);

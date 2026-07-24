@@ -10,8 +10,16 @@ import {
   TrendingUp,
   Copy,
   Check,
-  AlertCircle
+  AlertCircle,
+  Scale,
+  Flame,
+  Snowflake,
+  Repeat,
+  Orbit,
+  Dice5,
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import type { GenStrategy } from '@/lib/lottery/generator';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,6 +39,23 @@ import { trackCustom, trackEvent } from '@/lib/analytics/metaPixel';
 
 const BATCH_SIZE = 5;
 
+interface StrategyOption {
+  value: GenStrategy;
+  label: string;
+  hint: string;
+  icon: React.ReactNode;
+}
+
+// Estratégias disponíveis no gerador — espelham as do Intelligence AI.
+const STRATEGIES: StrategyOption[] = [
+  { value: 'equilibrada', label: 'Equilibrada', hint: 'Todas as métricas na faixa ideal', icon: <Scale size={15} /> },
+  { value: 'quentes', label: 'Quentes', hint: 'Prioriza as dezenas mais frequentes', icon: <Flame size={15} /> },
+  { value: 'atrasadas', label: 'Atrasadas', hint: 'Peso às dezenas de maior atraso', icon: <Snowflake size={15} /> },
+  { value: 'repetidas', label: 'Repetidas', hint: 'Âncora forte no último concurso', icon: <Repeat size={15} /> },
+  { value: 'ciclo', label: 'Ciclo', hint: 'Cobre as ausentes do último concurso', icon: <Orbit size={15} /> },
+  { value: 'agressiva', label: 'Agressiva', hint: 'Mais diversificação e risco', icon: <Dice5 size={15} /> },
+];
+
 export const GameGenerator = () => {
   const { saveToHistory, generateSmartGame, generateSmartBatch } = useLottery();
   const [currentResult, setCurrentResult] = useState<SavedGame | null>(null);
@@ -38,7 +63,10 @@ export const GameGenerator = () => {
   const [isBatchGenerating, setIsBatchGenerating] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [strategy, setStrategy] = useState<GenStrategy>('equilibrada');
   const { toast } = useToast();
+
+  const activeHint = STRATEGIES.find((s) => s.value === strategy)?.hint ?? '';
 
   const stats = useMemo(() => {
     if (!currentResult) return null;
@@ -52,7 +80,7 @@ export const GameGenerator = () => {
     
     await new Promise(resolve => setTimeout(resolve, 800));
     
-    const newGame = generateSmartGame();
+    const newGame = generateSmartGame({ strategy });
     setCurrentResult(newGame);
     await saveToHistory([newGame]);
     trackEvent('Lead', {
@@ -80,7 +108,7 @@ export const GameGenerator = () => {
 
     await new Promise(resolve => setTimeout(resolve, 800));
 
-    const games = generateSmartBatch(BATCH_SIZE);
+    const games = generateSmartBatch(BATCH_SIZE, { strategy });
     if (games.length > 0) setCurrentResult(games[0]);
     const { success } = await saveToHistory(games);
 
@@ -148,6 +176,39 @@ export const GameGenerator = () => {
             </h2>
           </div>
           
+          <div>
+            <div className="flex items-center justify-between mb-2 px-1">
+              <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-zinc-400 dark:text-zinc-500">Estratégia</span>
+              <span className="text-[10px] text-zinc-400 dark:text-zinc-500 hidden sm:block">{activeHint}</span>
+            </div>
+            <div role="radiogroup" aria-label="Estratégia de geração" className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+              {STRATEGIES.map((s) => {
+                const active = s.value === strategy;
+                return (
+                  <button
+                    key={s.value}
+                    type="button"
+                    role="radio"
+                    aria-checked={active}
+                    title={s.hint}
+                    onClick={() => setStrategy(s.value)}
+                    disabled={isGenerating || isBatchGenerating}
+                    className={cn(
+                      "flex flex-col items-center justify-center gap-1 py-2.5 px-1 rounded-xl border text-[10px] font-bold uppercase tracking-wider transition-all active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-purple-500 disabled:opacity-50 disabled:pointer-events-none",
+                      active
+                        ? "bg-purple-600 border-purple-600 text-white shadow-md shadow-purple-500/20"
+                        : "bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-purple-300 dark:hover:border-purple-700"
+                    )}
+                  >
+                    {s.icon}
+                    {s.label}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-[10px] text-zinc-400 dark:text-zinc-500 mt-2 px-1 sm:hidden">{activeHint}</p>
+          </div>
+
           <div className="flex flex-col sm:flex-row gap-3">
             <Button
               onClick={handleGenerate}
