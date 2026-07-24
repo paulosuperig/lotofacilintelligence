@@ -34,6 +34,29 @@ describe('parseUserIntent', () => {
     expect(parseUserIntent('gere 30 jogos').quantidade).toBe(MAX_JOGOS);
     expect(parseUserIntent('quero 8 jogos').quantidade).toBe(8);
   });
+
+  it('extrai dezenas fixas e excluídas', () => {
+    const i = parseUserIntent('gere 4 jogos fixando as dezenas 05 e 10, sem a dezena 23');
+    expect(i.incluirDezenas).toEqual([5, 10]);
+    expect(i.excluirDezenas).toEqual([23]);
+    expect(i.quantidade).toBe(4);
+  });
+
+  it('reconhece variações de inclusão/exclusão', () => {
+    expect(parseUserIntent('inclua 01, 02 e 03 nos jogos').incluirDezenas).toEqual([1, 2, 3]);
+    expect(parseUserIntent('excluindo 04 e 07').excluirDezenas).toEqual([4, 7]);
+  });
+
+  it('fixas têm precedência sobre excluídas em conflito', () => {
+    const i = parseUserIntent('fixe 05 e 10, sem o 10');
+    expect(i.incluirDezenas).toContain(10);
+    expect(i.excluirDezenas).toBeUndefined();
+  });
+
+  it('detecta as novas estratégias (repetidas e ciclo)', () => {
+    expect(parseUserIntent('priorize as dezenas repetidas do último concurso').estrategia).toBe('repetidas');
+    expect(parseUserIntent('faça um fechamento de ciclo').estrategia).toBe('ciclo');
+  });
 });
 
 describe('estrategiaDirective', () => {
@@ -41,6 +64,8 @@ describe('estrategiaDirective', () => {
     expect(estrategiaDirective('quentes')).toContain('QUENTES');
     expect(estrategiaDirective('atrasadas')).toContain('ATRASADAS');
     expect(estrategiaDirective('agressiva')).toContain('AGRESSIVA');
+    expect(estrategiaDirective('repetidas')).toContain('REPETIDAS');
+    expect(estrategiaDirective('ciclo')).toContain('CICLO');
     // default cai em equilibrada
     expect(estrategiaDirective(undefined)).toContain('EQUILIBRADA');
   });
@@ -57,5 +82,13 @@ describe('formatIntentForPrompt', () => {
 
   it('usa quantidade padrão 3', () => {
     expect(formatIntentForPrompt({})).toContain('Quantidade: 3');
+  });
+
+  it('inclui dezenas fixas e excluídas formatadas', () => {
+    const out = formatIntentForPrompt({ incluirDezenas: [5, 10], excluirDezenas: [23] });
+    expect(out).toContain('FIXAS');
+    expect(out).toContain('05, 10');
+    expect(out).toContain('EXCLUÍDAS');
+    expect(out).toContain('23');
   });
 });

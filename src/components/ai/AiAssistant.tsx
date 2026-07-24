@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { ChatMessage } from './ChatMessage';
 import type { AiChatMessage } from '@/hooks/useAiAssistant';
 import { cn } from "@/lib/utils";
-import { Sparkles, Flame, ShieldCheck, Snowflake, Zap, Link2 } from 'lucide-react';
+import { Sparkles, Flame, ShieldCheck, Snowflake, Zap, Link2, Repeat, Pin } from 'lucide-react';
 
 // Mapa ESTÁTICO de cores (classes dinâmicas `bg-${x}-50` são purgadas pelo Tailwind).
 const SUGGESTION_COLORS: Record<string, string> = {
@@ -26,6 +26,8 @@ const SUGGESTIONS = [
   { label: "Quentes & frias", text: "Quais são as dezenas mais quentes e mais frias no momento?", icon: <Flame size={18} />, color: "amber" },
   { label: "Pares que saem juntos", text: "Quais pares de dezenas mais saem juntos historicamente?", icon: <Link2 size={18} />, color: "emerald" },
   { label: "Fechamentos", text: "Explique os fechamentos disponíveis e a garantia de cada um.", icon: <ShieldCheck size={18} />, color: "indigo" },
+  { label: "Repetidas do último", text: "Gere 3 jogos priorizando as dezenas repetidas do último concurso.", icon: <Repeat size={18} />, color: "purple" },
+  { label: "Fixar & excluir dezenas", text: "Gere 4 jogos fixando as dezenas 05 e 10, sem a dezena 23.", icon: <Pin size={18} />, color: "amber" },
 ];
 
 interface AiAssistantProps {

@@ -8,7 +8,13 @@ import { computeGameMetrics } from '@/lib/lottery/metrics';
 import { BANDS } from '@/lib/lottery/constants';
 import { extractGameFromLine } from './extractGames';
 
-export type EstrategiaJogo = 'quentes' | 'atrasadas' | 'equilibrada' | 'agressiva';
+export type EstrategiaJogo =
+  | 'quentes'
+  | 'atrasadas'
+  | 'equilibrada'
+  | 'agressiva'
+  | 'repetidas'
+  | 'ciclo';
 
 export interface UserIntent {
   quantidade?: number;
@@ -16,6 +22,10 @@ export interface UserIntent {
   somaMax?: number;
   /** estratégia preferida pelo usuário, quando detectada na mensagem */
   estrategia?: EstrategiaJogo;
+  /** dezenas que DEVEM aparecer em todos os jogos (fixadas pelo usuário) */
+  incluirDezenas?: number[];
+  /** dezenas que NÃO PODEM aparecer em nenhum jogo (excluídas pelo usuário) */
+  excluirDezenas?: number[];
 }
 
 export const INCOMPLETE_MARKER = '⚠️ Resposta incompleta';
@@ -73,6 +83,10 @@ const checkGame = (
 
   if (intent?.somaMin != null && m.soma < intent.somaMin) violations.push('soma < filtro');
   if (intent?.somaMax != null && m.soma > intent.somaMax) violations.push('soma > filtro');
+
+  // Restrições explícitas do usuário: fixas ausentes ou excluídas presentes.
+  if (intent?.incluirDezenas?.some((n) => !nums.includes(n))) violations.push('fixadas ausentes');
+  if (intent?.excluirDezenas?.some((n) => nums.includes(n))) violations.push('contém excluídas');
 
   return {
     index,
@@ -180,6 +194,14 @@ export const sanitizeAiGamesDetailed = (
   }
   if (outOfRangeSums > 0) {
     body += `\n\n> ⚠️ ${outOfRangeSums} jogo(s) ficaram fora do filtro de soma solicitado.`;
+  }
+  const semFixadas = checks.filter((c) => c.violations.includes('fixadas ausentes')).length;
+  if (semFixadas > 0) {
+    body += `\n\n> ⚠️ ${semFixadas} jogo(s) não contêm todas as dezenas fixadas no pedido.`;
+  }
+  const comExcluidas = checks.filter((c) => c.violations.includes('contém excluídas')).length;
+  if (comExcluidas > 0) {
+    body += `\n\n> ⚠️ ${comExcluidas} jogo(s) contêm dezenas excluídas no pedido.`;
   }
 
   return { content: body, gamesFound, outOfRangeSums, incomplete, unhealthy };

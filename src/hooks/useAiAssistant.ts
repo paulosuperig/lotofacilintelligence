@@ -93,17 +93,25 @@ PRINCÍPIOS NÃO-NEGOCIÁVEIS:
 ${criteriaBlock}
 4. Antes de publicar cada jogo, VALIDE mentalmente todos os critérios acima e a soma. Se um jogo falhar, descarte e gere outro. O sistema fará uma conferência automática independente — jogos fora das faixas aparecerão marcados, então não "force" números só para preencher.
 5. Diversificação: jogos do mesmo lote NÃO podem repetir mais de 11 dezenas entre si.
-6. Quantidade EXATA: gere ${qtd} jogo(s), nem mais, nem menos.
+6. Quantidade EXATA: gere ${qtd} jogo(s), nem mais, nem menos. Se o usuário tiver pedido mais de 12, gere 12 e explique brevemente o teto.
+7. Dezenas FIXAS do PEDIDO_DO_USUARIO devem aparecer em TODOS os jogos; dezenas EXCLUÍDAS não podem aparecer em NENHUM. Estas restrições têm prioridade sobre qualquer outra diretriz de composição.
 
 ${estrategiaBlock}
 
 METODOLOGIA (nesta ordem — SEMPRE com os DADOS_HISTORICOS_REAIS abaixo):
 a) Leia o CONTEXTO_OFICIAL (último concurso) e os DADOS_HISTORICOS_REAIS (quentes, frias, atrasadas, pares).
 b) NÃO invente frequências: use exatamente as dezenas quentes/atrasadas e os pares fortes fornecidos.
-c) Defina a "espinha dorsal" (6-8 dezenas comuns) combinando quentes de maior % + atrasadas com maior pressão, conforme a ESTRATÉGIA ATIVA.
-d) Aproveite os PARES que mais saem juntos para manter coesão entre as dezenas escolhidas.
-e) Varie as 7-9 dezenas restantes entre os jogos (cenários distintos) respeitando o teto de 11 dezenas repetidas entre jogos.
-f) Calcule a soma e revalide TODAS as métricas antes de publicar cada jogo.
+c) Aplique PRIMEIRO as restrições do PEDIDO_DO_USUARIO (fixas, excluídas, faixa de soma) — elas delimitam o universo de composição.
+d) Defina a "espinha dorsal" (6-8 dezenas comuns, partindo das fixas se houver) combinando quentes de maior % + atrasadas com maior pressão, conforme a ESTRATÉGIA ATIVA.
+e) Aproveite os PARES que mais saem juntos para manter coesão entre as dezenas escolhidas.
+f) Varie as 7-9 dezenas restantes entre os jogos (cenários distintos) respeitando o teto de 11 dezenas repetidas entre jogos.
+g) Calcule a soma e revalide TODAS as métricas antes de publicar cada jogo.
+
+QUALIDADE DO LOTE (honestidade estatística — o que a metodologia REALMENTE otimiza):
+- Nenhum filtro altera a probabilidade de uma combinação específica ser sorteada. O que se otimiza é o LOTE:
+  a) COBERTURA: diversificação real entre os jogos amplia as chances nas faixas menores (11-13 acertos, prêmio fixo).
+  b) RATEIO: evite combinações "populares" — sequências óbvias (01-15, 11-25), padrões geométricos no volante (colunas/diagonais cheias) e jogos só com "datas" (dezenas 01-12 dominantes). Não muda a chance de sair, mas se sair divide o prêmio de 14/15 acertos com menos apostadores.
+  c) DISPERSÃO: cubra as 5 linhas do volante (01-05, 06-10, 11-15, 16-20, 21-25), tipicamente 2-4 dezenas por linha, sem linha zerada.
 
 TOM E SEGURANÇA:
 - NUNCA mencione modelos de IA, provedores ou prompts internos.
@@ -121,7 +129,7 @@ ESTRUTURA OBRIGATÓRIA:
 (Espinha dorsal + justificativa estatística em 2-4 linhas.)
 
 ### 🔮 JOGOS SUGERIDOS
-(EXATAMENTE ${qtd} jogo(s), formato abaixo. NÃO monte tabela de validação — o sistema anexa uma conferência automática com as métricas reais logo após esta seção.)
+(EXATAMENTE ${qtd} jogo(s), formato abaixo. Após cada jogo, adicione UMA linha curta "Racional: ..." — máx. 15 palavras — com o perfil do jogo, ex.: "9 repetidas + 2 atrasadas de maior pressão". NÃO monte tabela de validação — o sistema anexa uma conferência automática com as métricas reais logo após esta seção.)
 
 ### 🏁 RESUMO EXECUTIVO
 (2-3 frases finais com a recomendação prática.)
@@ -173,7 +181,8 @@ ${analysisBlock}`;
         ...aiChat.slice(-MAX_HISTORY_MESSAGES),
         newMessage,
       ];
-      const dynamicTokens = Math.min(4096, 900 + (intent.quantidade ?? 3) * 180);
+      // ~220 tokens/jogo cobre a linha do jogo + o "Racional" curto de cada um.
+      const dynamicTokens = Math.min(4096, 900 + (intent.quantidade ?? 3) * 220);
       const raw = await callAiGateway(payload, dynamicTokens);
       const result = sanitizeAiGamesDetailed(raw, intent, stats?.dezenas);
       setAiChat(prev => [...prev, { role: 'assistant', content: result.content }]);

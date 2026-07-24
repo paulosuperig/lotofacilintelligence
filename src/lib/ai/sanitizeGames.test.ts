@@ -63,4 +63,20 @@ describe('sanitizeAiGamesDetailed', () => {
     expect(res.gamesFound).toBe(0);
     expect(res.content).toBe('');
   });
+
+  it('marca jogo sem as dezenas fixadas e com dezenas excluídas', () => {
+    // HEALTHY não contém 02 (fixada violada) e contém 23 (excluída violada)
+    const res = sanitizeAiGamesDetailed(HEALTHY, { incluirDezenas: [2], excluirDezenas: [23] });
+    expect(res.unhealthy).toBe(1);
+    expect(res.content).toContain('não contêm todas as dezenas fixadas');
+    expect(res.content).toContain('contêm dezenas excluídas');
+  });
+
+  it('não acusa nada quando fixas/excluídas são respeitadas', () => {
+    // HEALTHY contém 01 (fixada ok) e não contém 02 (excluída ok)
+    const res = sanitizeAiGamesDetailed(HEALTHY, { incluirDezenas: [1], excluirDezenas: [2] });
+    expect(res.unhealthy).toBe(0);
+    expect(res.content).not.toContain('fixadas');
+    expect(res.content).not.toContain('excluídas');
+  });
 });
