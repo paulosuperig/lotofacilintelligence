@@ -239,6 +239,48 @@ function → sanitizeAiGamesDetailed → render`. Correções aplicadas:
 - Cobertura: novos testes em `sanitizeGames.test.ts` e clamp em `intent.test.ts`
   (93 testes no total, verdes).
 
+### 10.4 Prompt de geração — mais opções e otimização honesta do lote
+Segunda rodada sobre o prompt de geração de jogos. Premissa mantida com
+honestidade: **nenhum filtro altera a probabilidade de uma combinação ser
+sorteada**; o que se otimiza é a qualidade do LOTE. Mudanças:
+- **Novas estratégias**: `repetidas` (âncora em 9-10 repetidas do último
+  concurso — a regularidade empírica mais forte) e `ciclo` (fechamento de ciclo:
+  todas as ausentes distribuídas pelo lote), somando-se a quentes/atrasadas/
+  equilibrada/agressiva.
+- **Dezenas fixas e excluídas**: `parseUserIntent` entende "fixando 05 e 10",
+  "sem a dezena 23" etc. (fixas têm precedência em conflito; tetos MAX_FIXAS=12
+  e MAX_EXCLUIDAS=10). O prompt as trata como restrição prioritária e a
+  conferência automática valida cada jogo contra elas.
+- **Seção QUALIDADE DO LOTE no prompt**: cobertura (diversificação amplia
+  faixas 11-13), rateio (evitar combinações populares — sequências óbvias,
+  padrões geométricos, só "datas" — que dividiriam o prêmio de 14/15) e
+  dispersão (5 linhas do volante, 2-4 dezenas por linha).
+- **Racional por jogo**: uma linha curta explicando o perfil de cada jogo
+  (transparência do critério, não promessa de acerto).
+- UI: dois novos atalhos de sugestão ("Repetidas do último", "Fixar & excluir
+  dezenas"). Teto de tokens por jogo ajustado (220) para caber o racional.
+- Cobertura: 100 testes verdes (novos: fixas/excluídas, estratégias novas,
+  validação na conferência).
+
+### 10.5 Gerador determinístico — estratégias, restrições e alvo de soma
+O gerador "inteligente" (`generator.ts`) passou a oferecer as MESMAS opções do
+Intelligence AI, no motor puro/testável usado pelo botão "Gerador Inteligente":
+- **6 estratégias** (`equilibrada`, `quentes`, `atrasadas`, `repetidas`,
+  `ciclo`, `agressiva`) que enviesam os pesos de amostragem (frequência/atraso)
+  e o alvo de dezenas repetidas do último concurso (viés high/mid/low).
+- **Dezenas fixas e excluídas**: `generateOptimizedGame`/`generateBatch` aceitam
+  `fixed`/`excluded`. A geração é feita por construção (nunca fabrica repetição,
+  nunca inclui excluída, sempre inclui fixa); excluídas são limitadas a 10 para
+  manter pool ≥ 15, e fixas têm precedência em conflito.
+- **Alvo de soma** (`sumMin`/`sumMax`): penalidade soft no ranking dos
+  candidatos, sem descartar jogos válidos.
+- **UI**: seletor de estratégia (6 chips acessíveis, `radiogroup`) no
+  `GameGenerator`, com dica contextual; o rótulo do jogo salvo reflete a
+  estratégia usada.
+- Limpeza: 2 `any` legados de `useLottery` tipados (RealtimeChannel, CustomEvent).
+- Cobertura: 107 testes verdes (7 novos no gerador: fixas, excluídas,
+  precedência, clamp, viés de repetidas, penalidade de soma).
+
 ## 11. Próximos passos sugeridos
 - **Fonte oficial da Caixa** via edge function (proxy + cache) e **persistência do
   histórico no Supabase** — maior ganho restante de confiabilidade (requer o
