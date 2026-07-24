@@ -121,6 +121,12 @@ TOM E SEGURANÇA:
 - Se o pedido não envolver geração de jogos (ex.: dúvida conceitual), responda de forma técnica e objetiva SEM inventar jogos.
 - Tom: especialista técnico, objetivo, Markdown limpo.
 
+DISCIPLINA DE SAÍDA (obrigatória — respostas devem ser 100% claras e completas):
+- Responda SEMPRE em português do Brasil e entregue APENAS a resposta final — nada de rascunho, raciocínio passo a passo, "pensando..." ou texto entre colchetes de instrução.
+- Quando o pedido envolver gerar jogos, produza a ESTRUTURA OBRIGATÓRIA COMPLETA (todas as seções, nesta ordem), sem parar no meio.
+- NUNCA devolva resposta vazia. Se faltar algum dado, escreva a análise possível e siga com os jogos mesmo assim.
+- Cada linha de jogo DEVE seguir EXATAMENTE o FORMATO DO JOGO abaixo (15 dezenas de 01 a 25, com zero à esquerda, separadas por vírgula, em ordem crescente). Não use tabelas, listas com marcadores nem colchetes nas linhas de jogo.
+
 ESTRUTURA OBRIGATÓRIA:
 ### 📊 ANÁLISE TÉCNICA
 (Leitura do último concurso: soma, paridade, primos, moldura/miolo, atrasadas. 3-5 bullets curtos.)
@@ -145,7 +151,14 @@ ${analysisBlock}`;
 
   const callAiGateway = useCallback(async (messages: AiGatewayMessage[], maxTokens: number, attempt = 0): Promise<string> => {
     try {
-      return await aiService.callAiGateway(messages, maxTokens);
+      const content = await aiService.callAiGateway(messages, maxTokens);
+      // Resposta vazia é tratada como falha transitória e re-tentada (evita
+      // exibir um balão em branco quando o modelo devolve content vazio).
+      if ((!content || !content.trim()) && attempt < MAX_RETRIES) {
+        await sleep(1000 * Math.pow(2, attempt));
+        return callAiGateway(messages, maxTokens, attempt + 1);
+      }
+      return content;
     } catch (err) {
       if (attempt < MAX_RETRIES) {
         await sleep(1000 * Math.pow(2, attempt));
@@ -181,9 +194,16 @@ ${analysisBlock}`;
         ...aiChat.slice(-MAX_HISTORY_MESSAGES),
         newMessage,
       ];
-      // ~220 tokens/jogo cobre a linha do jogo + o "Racional" curto de cada um.
-      const dynamicTokens = Math.min(4096, 900 + (intent.quantidade ?? 3) * 220);
+      // ~260 tokens/jogo (linha do jogo + "Racional" curto). Teto de 8192 dá
+      // folga ao deepseek-v4-pro para entregar análise + jogos + conferência
+      // completos sem truncar.
+      const dynamicTokens = Math.min(8192, 1200 + (intent.quantidade ?? 3) * 260);
       const raw = await callAiGateway(payload, dynamicTokens);
+      // Guarda anti-resposta-vazia: se o modelo devolver conteúdo em branco,
+      // não exibimos um balão vazio — sinalizamos e deixamos o usuário reenviar.
+      if (!raw || !raw.trim()) {
+        throw new Error('A IA retornou uma resposta vazia. Toque em enviar novamente.');
+      }
       const result = sanitizeAiGamesDetailed(raw, intent, stats?.dezenas);
       setAiChat(prev => [...prev, { role: 'assistant', content: result.content }]);
       persistChatMessage('assistant', result.content);
