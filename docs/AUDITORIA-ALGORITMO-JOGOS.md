@@ -356,6 +356,20 @@ um **Conferidor** dedicado:
   prêmio + ganhadores**. Acessível por card no `BentoGrid` (rota `conferidor`).
 - Cobertura: 131 testes verdes (8 novos em `prizeValue`).
 
+### 10.11 Bolão — gestão de grupo
+Fecha o último grande item do benchmark. Ferramenta de gestão do organizador:
+- **Lib pura/testada** (`bolao.ts`): custo total, custo por cota, custo por
+  cotista; **rateio por maior resto em centavos** (a soma dos rateios é exatamente
+  o total, sem perder centavos); `conferirBolao` soma o prêmio de todos os jogos
+  contra um concurso e rateia por cota.
+- **Persistência local** (`bolaoService`, localStorage) + hook `useBoloes` (CRUD).
+- **UI** (`BolaoPanel`, lazy): criar bolões; por bolão, adicionar **cotistas**
+  (nome + cotas) e **jogos** (dos salvos ou avulso no volante), ver o **rateio de
+  custo** e **conferir contra um concurso** exibindo o prêmio total, jogos
+  premiados e o **rateio do prêmio por cotista**. Acesso por card no `BentoGrid`
+  (rota `bolao`).
+- Cobertura: 141 testes verdes (10 novos em `bolao`).
+
 ## 11. Próximos passos sugeridos
 - **Fechamentos personalizados** (pool no volante + garantia-alvo) e presets
   21/22 via covering designs pré-computados.
