@@ -325,6 +325,22 @@ aderência (0–1)** por jogo, mas a UI o descartava. Tornamos essa assertividad
   controle, junto de soma/paridade/primos.
 - Cobertura: 123 testes verdes (novos: penalidade de sequência e preset).
 
+### 10.9 Painel "Prova Real" — backtest exposto na UI
+O backtest walk-forward (`runBacktest`) existia na lib + script CLI, mas nunca
+tinha sido exposto ao usuário. Agora há um **painel dedicado** (`BacktestPanel`):
+- **Rodar sob demanda**: busca os concursos em ordem cronológica
+  (`lotteryService.getChronologicalDraws`) e roda o backtest com parâmetros
+  conservadores (100 concursos, 3 jogos/concurso, janela 60, 18 candidatos) para
+  manter o cálculo no navegador em ~1-2s, com estado de carregamento.
+- **Compara** gerador inteligente vs. aleatório puro (média de acertos, taxa de
+  prêmio ≥11, melhor acerto, nº de jogos) + as diferenças.
+- **Interpretação honesta**: reforça que o sorteio é uniforme (valor esperado = 9
+  para qualquer jogo) e que nenhuma estratégia altera a probabilidade de prêmio —
+  a "inteligência" entrega qualidade de construção e diversificação, não mais
+  chance de ganhar. É a maior peça de transparência do app.
+- Acessível por um card no `BentoGrid` (`provareal`); painel lazy-loaded (chunk
+  próprio). Limpeza: `normalizeResult` do serviço tipado (removido `any` legado).
+
 ## 11. Próximos passos sugeridos
 - **Fechamentos personalizados** (pool no volante + garantia-alvo) e presets
   21/22 via covering designs pré-computados.

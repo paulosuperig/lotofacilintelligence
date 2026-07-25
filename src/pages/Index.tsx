@@ -21,6 +21,7 @@ const HistoryPanel = lazy(() => import('@/components/history/HistoryPanel').then
 const FechamentosPanel = lazy(() => import('@/components/home/FechamentosPanel').then(m => ({ default: m.FechamentosPanel })));
 const TipsPanel = lazy(() => import('@/components/home/TipsPanel').then(m => ({ default: m.TipsPanel })));
 const StatsPanel = lazy(() => import('@/components/home/StatsPanel').then(m => ({ default: m.StatsPanel })));
+const BacktestPanel = lazy(() => import('@/components/home/BacktestPanel').then(m => ({ default: m.BacktestPanel })));
 
 const PanelFallback = () => (
   <div className="flex items-center justify-center py-16">
@@ -137,6 +138,10 @@ const Index = () => {
 
               {activeTab === 'estatisticas' && (
                 <StatsPanel onBack={goHome} />
+              )}
+
+              {activeTab === 'provareal' && (
+                <BacktestPanel onBack={goHome} />
               )}
 
               {activeTab === 'ia' && (

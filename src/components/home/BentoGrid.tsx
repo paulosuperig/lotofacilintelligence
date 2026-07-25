@@ -7,6 +7,7 @@ import { TrendsCard } from "./bento/TrendsCard";
 import { HistoryStatusCard } from "./bento/HistoryStatusCard";
 import { FechamentosCard } from "./bento/FechamentosCard";
 import { TipsCard } from "./bento/TipsCard";
+import { BacktestCard } from "./bento/BacktestCard";
 
 interface BentoGridProps {
   latestResult: LotteryResult | null;
@@ -77,6 +78,11 @@ export const BentoGrid = ({
       {/* CTA de dicas: largura total no mobile para dar impacto */}
       <motion.div variants={itemVariants} className="col-span-2 lg:col-span-4">
         <TipsCard onNavigate={() => onNavigate('dicas')} />
+      </motion.div>
+
+      {/* Prova Real (backtest) — transparência/assertividade */}
+      <motion.div variants={itemVariants} className="col-span-2 lg:col-span-4">
+        <BacktestCard onNavigate={() => onNavigate('provareal')} />
       </motion.div>
     </motion.div>
   );
