@@ -8,6 +8,7 @@ import { HistoryStatusCard } from "./bento/HistoryStatusCard";
 import { FechamentosCard } from "./bento/FechamentosCard";
 import { TipsCard } from "./bento/TipsCard";
 import { BacktestCard } from "./bento/BacktestCard";
+import { ConferidorCard } from "./bento/ConferidorCard";
 
 interface BentoGridProps {
   latestResult: LotteryResult | null;
@@ -81,8 +82,13 @@ export const BentoGrid = ({
       </motion.div>
 
       {/* Prova Real (backtest) — transparência/assertividade */}
-      <motion.div variants={itemVariants} className="col-span-2 lg:col-span-4">
+      <motion.div variants={itemVariants} className="col-span-1 lg:col-span-4">
         <BacktestCard onNavigate={() => onNavigate('provareal')} />
+      </motion.div>
+
+      {/* Conferidor — checar jogo contra qualquer concurso + prêmio */}
+      <motion.div variants={itemVariants} className="col-span-1 lg:col-span-4">
+        <ConferidorCard onNavigate={() => onNavigate('conferidor')} />
       </motion.div>
     </motion.div>
   );
