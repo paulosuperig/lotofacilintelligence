@@ -1,6 +1,6 @@
 import { LotteryResultSchema } from "@/lib/security/schemas";
 import { LotteryResult } from "@/types/lottery";
-import { analyzeHistory, type HistoryAnalysis } from "@/lib/lottery/analysis";
+import { analyzeHistory, normalizeDraw, type HistoryAnalysis } from "@/lib/lottery/analysis";
 
 const API_BASE = "https://loteriascaixa-api.herokuapp.com/api";
 const FALLBACK_API_BASE = "https://servicebus2.caixa.gov.br/portalloterias/api/lotofacil";
@@ -58,7 +58,8 @@ const writeStoredAnalysis = (entry: { at: number; data: HistoryAnalysis }): void
   } catch { /* quota/serialization errors são não-fatais */ }
 };
 
-const normalizeResult = (data: any): LotteryResult => {
+const normalizeResult = (raw: unknown): LotteryResult => {
+  const data = (raw ?? {}) as Record<string, unknown>;
   // Se os dados vierem da Heroku API
   if (data.dezenas) {
     return LotteryResultSchema.parse({
@@ -119,6 +120,19 @@ export const lotteryService = {
     const response = await fetchWithRetry(`${API_BASE}/lotofacil`, { timeoutMs: 15000 });
     const data = await response.json();
     return Array.isArray(data) ? data : [];
+  },
+
+  /**
+   * Concursos em ordem CRONOLÓGICA (mais antigo → mais recente), só os válidos
+   * (15 dezenas). É o formato que o backtest walk-forward (`runBacktest`) espera.
+   */
+  async getChronologicalDraws(): Promise<number[][]> {
+    const all = await this.getAllResults(); // mais recente primeiro
+    const draws = all
+      .map(extractDezenas)
+      .map(normalizeDraw)
+      .filter((d) => d.length === 15);
+    return draws.reverse(); // antigo → recente
   },
 
   /**
