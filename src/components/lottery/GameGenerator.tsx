@@ -18,6 +18,7 @@ import {
   Orbit,
   Dice5,
   BadgeCheck,
+  Shuffle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { GenStrategy } from '@/lib/lottery/generator';
@@ -65,7 +66,11 @@ const STRATEGIES: StrategyOption[] = [
   { value: 'repetidas', label: 'Repetidas', hint: 'Âncora forte no último concurso', icon: <Repeat size={15} /> },
   { value: 'ciclo', label: 'Ciclo', hint: 'Cobre as ausentes do último concurso', icon: <Orbit size={15} /> },
   { value: 'agressiva', label: 'Agressiva', hint: 'Mais diversificação e risco', icon: <Dice5 size={15} /> },
+  { value: 'surpresinha', label: 'Surpresinha', hint: 'Aleatório puro, como a geração oficial da Caixa', icon: <Shuffle size={15} /> },
 ];
+
+/** Estratégias que ignoram os filtros avançados (geração puramente aleatória). */
+const STRATEGIES_SEM_FILTRO = new Set<GenStrategy>(['surpresinha']);
 
 /**
  * Rótulo honesto da qualidade do jogo. É ADERÊNCIA às faixas estatísticas
@@ -98,11 +103,13 @@ export const GameGenerator = () => {
   const activeHint = STRATEGIES.find((s) => s.value === strategy)?.hint ?? '';
   const hasConstraints = selection.fixed.length > 0 || selection.excluded.length > 0;
   const filtersActive = hasActiveFilters(filterSel);
+  const ignoraFiltros = STRATEGIES_SEM_FILTRO.has(strategy);
   const smartOpts = {
     strategy,
     fixed: selection.fixed,
     excluded: selection.excluded,
-    ...filtersFromSelection(filterSel),
+    // Surpresinha é aleatória pura: não aplica os filtros soft.
+    ...(ignoraFiltros ? {} : filtersFromSelection(filterSel)),
   };
 
   const stats = useMemo(() => {
@@ -306,16 +313,21 @@ export const GameGenerator = () => {
                 <Filter size={13} /> Filtros avançados
               </span>
               <span className="text-[10px] font-bold text-purple-500">
-                {filtersActive ? 'ativos' : showFilters ? 'ocultar' : 'opcional'}
+                {ignoraFiltros ? 'não se aplica' : filtersActive ? 'ativos' : showFilters ? 'ocultar' : 'opcional'}
               </span>
             </button>
 
             {showFilters && (
               <div className="mt-3 p-3 sm:p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-950/40 border border-zinc-100 dark:border-zinc-800">
+                {ignoraFiltros && (
+                  <p className="text-[10px] text-amber-600 dark:text-amber-400 mb-3 text-center">
+                    A Surpresinha é aleatória pura (padrão da Caixa) — os filtros abaixo não se aplicam a ela.
+                  </p>
+                )}
                 <GenerationFilters
                   value={filterSel}
                   onChange={setFilterSel}
-                  disabled={isGenerating || isBatchGenerating}
+                  disabled={isGenerating || isBatchGenerating || ignoraFiltros}
                 />
                 {filtersActive && (
                   <button

@@ -370,6 +370,19 @@ Fecha o último grande item do benchmark. Ferramenta de gestão do organizador:
   (rota `bolao`).
 - Cobertura: 141 testes verdes (10 novos em `bolao`).
 
+### 10.12 Surpresinha — geração aleatória no padrão da Caixa
+Nova opção no Gerador Inteligente: **Surpresinha**, a geração **aleatória
+uniforme** idêntica à oficial da Caixa (todas as 15 dezenas de 1–25 com a mesma
+chance, via `crypto.getRandomValues`).
+- `GenStrategy` ganhou `'surpresinha'`; `generateOptimizedGame` tem um **caminho
+  dedicado** que ignora pesos estatísticos, âncora de repetidas, filtros soft e a
+  seleção "melhor de N" — devolve um único sorteio uniforme (honrando fixas/
+  excluídas), sem viés. `dataDriven = false`.
+- UI: chip "Surpresinha" no seletor de estratégia; quando ativa, os filtros
+  avançados ficam desabilitados com aviso ("não se aplica").
+- Cobertura: 145 testes verdes (novos: validade, honra fixas/excluídas, não é
+  data-driven, e score médio menor que "equilibrada").
+
 ## 11. Próximos passos sugeridos
 - **Fechamentos personalizados** (pool no volante + garantia-alvo) e presets
   21/22 via covering designs pré-computados.
