@@ -22,6 +22,7 @@ const FechamentosPanel = lazy(() => import('@/components/home/FechamentosPanel')
 const TipsPanel = lazy(() => import('@/components/home/TipsPanel').then(m => ({ default: m.TipsPanel })));
 const StatsPanel = lazy(() => import('@/components/home/StatsPanel').then(m => ({ default: m.StatsPanel })));
 const BacktestPanel = lazy(() => import('@/components/home/BacktestPanel').then(m => ({ default: m.BacktestPanel })));
+const ConferidorPanel = lazy(() => import('@/components/home/ConferidorPanel').then(m => ({ default: m.ConferidorPanel })));
 
 const PanelFallback = () => (
   <div className="flex items-center justify-center py-16">
@@ -142,6 +143,14 @@ const Index = () => {
 
               {activeTab === 'provareal' && (
                 <BacktestPanel onBack={goHome} />
+              )}
+
+              {activeTab === 'conferidor' && (
+                <ConferidorPanel
+                  onBack={goHome}
+                  defaultConcurso={latestResult?.concurso}
+                  history={history}
+                />
               )}
 
               {activeTab === 'ia' && (

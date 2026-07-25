@@ -341,6 +341,21 @@ tinha sido exposto ao usuário. Agora há um **painel dedicado** (`BacktestPanel
 - Acessível por um card no `BentoGrid` (`provareal`); painel lazy-loaded (chunk
   próprio). Limpeza: `normalizeResult` do serviço tipado (removido `any` legado).
 
+### 10.10 Conferidor contra qualquer concurso + valor do prêmio
+Antes só era possível conferir os jogos salvos contra o ÚLTIMO concurso. Agora há
+um **Conferidor** dedicado:
+- **Qualquer concurso**: `lotteryService.getResultByConcurso(n)` busca o resultado
+  específico (com `premiacoes`). O `LotteryResultSchema` passou a **preservar
+  `premiacoes`** (antes o zod as descartava).
+- **Valor do prêmio**: `prizeValue.ts` (puro/testado) deduz a faixa de acertos
+  de cada premiação (por `descricao` "15 acertos" ou por `faixa` 1..5) e retorna
+  valor + ganhadores; `formatBRL` exibe em reais.
+- **UI** (`ConferidorPanel`, lazy): seletor de 15 dezenas (jogo avulso) ou
+  preenchimento a partir de um jogo salvo, campo de concurso (default = último),
+  e resultado com acertos, dezenas certas/erradas, faixa premiada e **valor do
+  prêmio + ganhadores**. Acessível por card no `BentoGrid` (rota `conferidor`).
+- Cobertura: 131 testes verdes (8 novos em `prizeValue`).
+
 ## 11. Próximos passos sugeridos
 - **Fechamentos personalizados** (pool no volante + garantia-alvo) e presets
   21/22 via covering designs pré-computados.

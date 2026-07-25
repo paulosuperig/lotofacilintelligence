@@ -22,6 +22,13 @@ export const SavedGameSchema = z.object({
   type: z.string().optional(),
 });
 
+export const PremiacaoSchema = z.object({
+  descricao: z.string().optional(),
+  faixa: z.number().optional(),
+  ganhadores: z.number().optional(),
+  valorPremio: z.number().optional(),
+}).passthrough();
+
 export const LotteryResultSchema = z.object({
   concurso: z.number().or(z.string()),
   data: z.string(),
@@ -30,6 +37,7 @@ export const LotteryResultSchema = z.object({
   proximoConcurso: z.number().or(z.string()).optional(),
   valorEstimadoProximoConcurso: z.number().optional(),
   valor_estimado: z.number().optional(),
+  premiacoes: z.array(PremiacaoSchema).optional(),
 });
 
 export type ValidatedUser = z.infer<typeof UserSchema>;

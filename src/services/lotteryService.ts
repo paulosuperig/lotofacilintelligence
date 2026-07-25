@@ -115,6 +115,18 @@ export const lotteryService = {
     }
   },
 
+  /**
+   * Resultado de um concurso específico (inclui `premiacoes` com os valores).
+   * Usado pelo Conferidor para checar jogos contra qualquer concurso.
+   */
+  async getResultByConcurso(concurso: number): Promise<LotteryResult> {
+    const n = Math.floor(concurso);
+    if (!Number.isInteger(n) || n < 1) throw new Error("Concurso inválido.");
+    const response = await fetchWithRetry(`${API_BASE}/lotofacil/${n}`, { retries: 1 });
+    const data = await response.json();
+    return normalizeResult(data);
+  },
+
   /** Retorna a lista bruta de todos os concursos (mais recente primeiro). */
   async getAllResults(): Promise<unknown[]> {
     const response = await fetchWithRetry(`${API_BASE}/lotofacil`, { timeoutMs: 15000 });
