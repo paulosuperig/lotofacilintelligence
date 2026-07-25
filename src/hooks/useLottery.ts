@@ -18,6 +18,7 @@ export interface SmartFilters {
   paresMax?: number;
   primosMin?: number;
   primosMax?: number;
+  seqMax?: number;
 }
 
 /** Opções de composição escolhidas na UI (estratégia + restrições + filtros). */
@@ -35,6 +36,7 @@ const pickFilters = (o: SmartOptions): SmartFilters => ({
   paresMax: o.paresMax,
   primosMin: o.primosMin,
   primosMax: o.primosMax,
+  seqMax: o.seqMax,
 });
 
 const STRATEGY_LABEL: Record<GenStrategy, string> = {
@@ -201,6 +203,7 @@ export const useLottery = () => {
       numbers: result.numbers,
       timestamp: Date.now(),
       sum: result.sum,
+      quality: result.score,
       type: result.dataDriven ? `Gerador ${label} (dados)` : `Gerador ${label}`,
     };
   }, [history, analysis, latestResult]);
@@ -226,6 +229,7 @@ export const useLottery = () => {
       numbers: g.numbers,
       timestamp: Date.now(),
       sum: g.sum,
+      quality: g.score,
       type: g.dataDriven ? `Lote ${label} (dados)` : `Lote ${label}`,
     }));
   }, [history, analysis, latestResult]);

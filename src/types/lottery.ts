@@ -23,6 +23,8 @@ export interface SavedGame {
   model?: string;
   userId?: string;
   sum?: number;
+  /** aderência estatística às faixas ideais (0..1), quando gerado pelo motor. */
+  quality?: number;
 }
 
 export interface UserProfile {

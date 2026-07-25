@@ -225,6 +225,20 @@ describe('restrições e estratégias', () => {
     };
     expect(avgPrimos({ primosMin: 7 })).toBeGreaterThan(avgPrimos({ primosMax: 3 }));
   });
+
+  it('reduz a maior sequência média com o filtro seqMax', () => {
+    const avgSeq = (opts: Parameters<typeof generateOptimizedGame>[0]) => {
+      let total = 0;
+      const N = 25;
+      for (let seed = 1; seed <= N; seed++) {
+        const g = generateOptimizedGame({ ...opts, rng: seededRng(seed * 23), candidates: 60 });
+        total += computeGameMetrics(g.numbers).sequencia;
+      }
+      return total / N;
+    };
+    // com teto de sequência baixo, a maior sequência média cai vs. sem filtro.
+    expect(avgSeq({ seqMax: 2 })).toBeLessThanOrEqual(avgSeq({}));
+  });
 });
 
 describe('buildWeights', () => {

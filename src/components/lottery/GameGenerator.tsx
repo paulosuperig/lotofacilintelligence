@@ -17,6 +17,7 @@ import {
   Repeat,
   Orbit,
   Dice5,
+  BadgeCheck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { GenStrategy } from '@/lib/lottery/generator';
@@ -66,6 +67,19 @@ const STRATEGIES: StrategyOption[] = [
   { value: 'agressiva', label: 'Agressiva', hint: 'Mais diversificação e risco', icon: <Dice5 size={15} /> },
 ];
 
+/**
+ * Rótulo honesto da qualidade do jogo. É ADERÊNCIA às faixas estatísticas
+ * (equilíbrio), NÃO chance de ganhar — a probabilidade do sorteio é fixa.
+ */
+const qualityInfo = (q?: number): { pct: number; label: string; cls: string } | null => {
+  if (q == null) return null;
+  const pct = Math.round(Math.max(0, Math.min(1, q)) * 100);
+  if (pct >= 90) return { pct, label: 'Excelente aderência', cls: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400' };
+  if (pct >= 75) return { pct, label: 'Ótima aderência', cls: 'bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400' };
+  if (pct >= 60) return { pct, label: 'Boa aderência', cls: 'bg-sky-50 text-sky-600 dark:bg-sky-900/20 dark:text-sky-400' };
+  return { pct, label: 'Aderência moderada', cls: 'bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400' };
+};
+
 export const GameGenerator = () => {
   const { saveToHistory, generateSmartGame, generateSmartBatch } = useLottery();
   const [currentResult, setCurrentResult] = useState<SavedGame | null>(null);
@@ -95,6 +109,8 @@ export const GameGenerator = () => {
     if (!currentResult) return null;
     return calculateGameStats(currentResult.numbers);
   }, [currentResult]);
+
+  const quality = useMemo(() => qualityInfo(currentResult?.quality), [currentResult]);
 
   const handleGenerate = async () => {
     if (isGenerating) return;
@@ -135,15 +151,23 @@ export const GameGenerator = () => {
     if (games.length > 0) setCurrentResult(games[0]);
     const { success } = await saveToHistory(games);
 
+    const qualities = games.map((g) => g.quality).filter((q): q is number => q != null);
+    const avgQuality = qualities.length
+      ? Math.round((qualities.reduce((a, b) => a + b, 0) / qualities.length) * 100)
+      : null;
+
     trackCustom('GerarLote', {
       content_category: 'game_generator',
       num_items: games.length,
+      avg_quality: avgQuality,
     });
 
     toast({
       title: success ? `${games.length} jogos gerados!` : 'Lote gerado',
       description: success
-        ? 'Jogos diversificados salvos no seu histórico.'
+        ? avgQuality != null
+          ? `Lote diversificado salvo · aderência média ${avgQuality}%.`
+          : 'Jogos diversificados salvos no seu histórico.'
         : 'Alguns jogos já existiam no histórico.',
     });
     setIsBatchGenerating(false);
@@ -403,8 +427,23 @@ export const GameGenerator = () => {
       </div>
 
       <div className="p-5 sm:p-8 md:p-12 flex-grow flex flex-col">
+        {quality && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col items-center gap-1.5 mb-6"
+          >
+            <div className={cn('flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold', quality.cls)}>
+              <BadgeCheck size={15} />
+              {quality.label} · {quality.pct}%
+            </div>
+            <span className="text-[10px] text-zinc-400 dark:text-zinc-500">
+              Aderência às faixas estatísticas — não altera a probabilidade do sorteio
+            </span>
+          </motion.div>
+        )}
         {stats && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-5 gap-3 sm:gap-4 mb-10"
