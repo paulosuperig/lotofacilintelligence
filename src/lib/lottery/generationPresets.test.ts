@@ -24,7 +24,7 @@ describe('filtersFromSelection', () => {
   });
 
   it('chave inexistente é ignorada', () => {
-    expect(filtersFromSelection({ soma: 'zzz', paridade: 'any', primos: 'any' })).toEqual({});
+    expect(filtersFromSelection({ soma: 'zzz', paridade: 'any', primos: 'any', sequencia: 'any' })).toEqual({});
   });
 });
 
