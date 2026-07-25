@@ -9,6 +9,7 @@ import { FechamentosCard } from "./bento/FechamentosCard";
 import { TipsCard } from "./bento/TipsCard";
 import { BacktestCard } from "./bento/BacktestCard";
 import { ConferidorCard } from "./bento/ConferidorCard";
+import { BolaoCard } from "./bento/BolaoCard";
 
 interface BentoGridProps {
   latestResult: LotteryResult | null;
@@ -89,6 +90,11 @@ export const BentoGrid = ({
       {/* Conferidor — checar jogo contra qualquer concurso + prêmio */}
       <motion.div variants={itemVariants} className="col-span-1 lg:col-span-4">
         <ConferidorCard onNavigate={() => onNavigate('conferidor')} />
+      </motion.div>
+
+      {/* Bolão — gestão de grupo */}
+      <motion.div variants={itemVariants} className="col-span-2 lg:col-span-4">
+        <BolaoCard onNavigate={() => onNavigate('bolao')} />
       </motion.div>
     </motion.div>
   );
