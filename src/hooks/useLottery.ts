@@ -46,6 +46,7 @@ const STRATEGY_LABEL: Record<GenStrategy, string> = {
   repetidas: 'Repetidas',
   ciclo: 'Ciclo',
   agressiva: 'Agressiva',
+  surpresinha: 'Surpresinha',
 };
 
 export const useLottery = () => {

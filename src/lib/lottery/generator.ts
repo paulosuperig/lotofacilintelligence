@@ -31,7 +31,9 @@ export type GenStrategy =
   | 'atrasadas'
   | 'repetidas'
   | 'ciclo'
-  | 'agressiva';
+  | 'agressiva'
+  /** Surpresinha: aleatório UNIFORME, igual à geração oficial da Caixa. */
+  | 'surpresinha';
 
 interface StrategyConfig {
   /** peso da frequência (favorece "quentes") na amostragem */
@@ -49,6 +51,8 @@ const STRATEGY: Record<GenStrategy, StrategyConfig> = {
   repetidas: { freqW: 0.6, atrasoW: 0.25, repeatBias: 'high' },
   ciclo: { freqW: 0.4, atrasoW: 0.8, repeatBias: 'low' },
   agressiva: { freqW: 0.25, atrasoW: 0.7, repeatBias: 'low' },
+  // Surpresinha: pesos uniformes; o caminho dedicado ignora esta config.
+  surpresinha: { freqW: 0, atrasoW: 0, repeatBias: 'mid' },
 };
 
 /** Alvo de dezenas repetidas do último concurso, conforme o viés da estratégia. */
@@ -361,6 +365,26 @@ export const generateOptimizedGame = (options: GenerateOptions = {}): GeneratedG
     cleanDezenas(options.excluded).filter((n) => !fixedSet.has(n)).slice(0, maxExcluded)
   );
   const constraints: CandidateConstraints = { fixed, excludedSet, strategy };
+
+  // SURPRESINHA (padrão da Caixa): geração ALEATÓRIA UNIFORME. Ignora pesos
+  // estatísticos, âncora de repetidas, filtros e a seleção "melhor de N" — pega
+  // um único sorteio uniforme (honrando fixas/excluídas), como a geração oficial.
+  if (strategy === 'surpresinha') {
+    const uniform = new Array(TOTAL_NUMBERS + 1).fill(1);
+    let pick: number[] = [];
+    for (let i = 0; i < 40; i++) {
+      const cand = generateCandidate(uniform, null, rng, constraints);
+      pick = cand;
+      if (cand.length === NUMBERS_PER_GAME && !avoid.has(gameSignature(cand))) break;
+    }
+    return {
+      numbers: pick,
+      sum: pick.reduce((a, b) => a + b, 0),
+      metrics: computeGameMetrics(pick, previousDraw),
+      score: scoreGame(pick, previousDraw),
+      dataDriven: false,
+    };
+  }
 
   const weights = buildWeights(analysis, strategy);
   const dataDriven = !!analysis && analysis.totalConcursos > 0;

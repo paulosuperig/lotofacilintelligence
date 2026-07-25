@@ -241,6 +241,45 @@ describe('restrições e estratégias', () => {
   });
 });
 
+describe('surpresinha (aleatório uniforme — padrão da Caixa)', () => {
+  it('produz sempre um jogo válido', () => {
+    for (let seed = 1; seed <= 20; seed++) {
+      const g = generateOptimizedGame({ strategy: 'surpresinha', rng: seededRng(seed) });
+      validShape(g.numbers);
+    }
+  });
+
+  it('honra dezenas fixas e excluídas', () => {
+    const g = generateOptimizedGame({ strategy: 'surpresinha', fixed: [7], excluded: [1, 2, 3], rng: seededRng(4) });
+    validShape(g.numbers);
+    expect(g.numbers).toContain(7);
+    for (const e of [1, 2, 3]) expect(g.numbers).not.toContain(e);
+  });
+
+  it('não otimiza a aderência (aleatório puro) — score médio menor que "equilibrada"', () => {
+    const avgScore = (strategy: 'surpresinha' | 'equilibrada') => {
+      let total = 0;
+      const N = 30;
+      for (let seed = 1; seed <= N; seed++) {
+        total += generateOptimizedGame({ strategy, rng: seededRng(seed * 7) }).score;
+      }
+      return total / N;
+    };
+    // "equilibrada" escolhe o melhor de N candidatos por aderência; a surpresinha
+    // devolve um único sorteio uniforme (sem otimizar), logo score médio menor.
+    expect(avgScore('surpresinha')).toBeLessThan(avgScore('equilibrada'));
+  });
+
+  it('não é data-driven mesmo com análise disponível', () => {
+    const draws = Array.from({ length: 40 }, () =>
+      [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+    );
+    const analysis = analyzeHistory(draws, { newestFirst: true });
+    const g = generateOptimizedGame({ analysis, strategy: 'surpresinha', rng: seededRng(1) });
+    expect(g.dataDriven).toBe(false);
+  });
+});
+
 describe('buildWeights', () => {
   it('returns uniform weights without history', () => {
     const w = buildWeights(null);
