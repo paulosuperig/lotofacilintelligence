@@ -311,6 +311,20 @@ dos apps premium — que tínhamos no motor (bandas) mas não expúnhamos.
 - Cobertura: 121 testes verdes (novos: penalidade de paridade/primos no gerador
   e mapeamento dos presets).
 
+### 10.8 Assertividade visível + filtro de sequência
+Auditoria do fluxo de geração vs. mercado. O motor já calculava um **score de
+aderência (0–1)** por jogo, mas a UI o descartava. Tornamos essa assertividade
+**visível e honesta**, e adicionamos mais uma opção de filtro:
+- **Selo de qualidade** por jogo gerado: "Excelente/Ótima/Boa/Moderada aderência
+  · NN%", com nota explícita de que é **aderência às faixas estatísticas** (não
+  chance de ganhar — a probabilidade do sorteio é fixa). O `score` do gerador
+  passa a fluir por `SavedGame.quality` até a UI. O lote reporta a **aderência
+  média** no toast.
+- **Filtro de Sequência** (soft): Curta (≤3) / Média (≤5) → `seqMax` no gerador
+  (`rangePenalty` sobre a maior sequência consecutiva). Mais uma dimensão de
+  controle, junto de soma/paridade/primos.
+- Cobertura: 123 testes verdes (novos: penalidade de sequência e preset).
+
 ## 11. Próximos passos sugeridos
 - **Fechamentos personalizados** (pool no volante + garantia-alvo) e presets
   21/22 via covering designs pré-computados.

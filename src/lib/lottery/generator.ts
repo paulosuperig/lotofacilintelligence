@@ -114,6 +114,8 @@ export interface GenerateOptions {
   /** faixa de PRIMOS preferida (soft). */
   primosMin?: number;
   primosMax?: number;
+  /** maior sequência consecutiva máxima preferida (soft). */
+  seqMax?: number;
 }
 
 export interface GeneratedGame {
@@ -347,6 +349,7 @@ export const generateOptimizedGame = (options: GenerateOptions = {}): GeneratedG
     paresMax,
     primosMin,
     primosMax,
+    seqMax,
   } = options;
 
   // Restrições do usuário sanitizadas: excluídas nunca engolem as fixas, e o
@@ -381,7 +384,8 @@ export const generateOptimizedGame = (options: GenerateOptions = {}): GeneratedG
       scoreGame(nums, previousDraw) -
       rangePenalty(m.soma, sumMin, sumMax, 100) -
       rangePenalty(m.pares, paresMin, paresMax, 2) -
-      rangePenalty(m.primos, primosMin, primosMax, 2)
+      rangePenalty(m.primos, primosMin, primosMax, 2) -
+      rangePenalty(m.sequencia, undefined, seqMax, 2)
     );
   };
 

@@ -10,12 +10,14 @@ export interface FilterSelection {
   soma: string;
   paridade: string;
   primos: string;
+  sequencia: string;
 }
 
 export const EMPTY_FILTER_SELECTION: FilterSelection = {
   soma: 'any',
   paridade: 'any',
   primos: 'any',
+  sequencia: 'any',
 };
 
 export interface FilterPreset {
@@ -57,6 +59,15 @@ export const FILTER_GROUPS: {
       { key: 'ideal', label: 'Ideal (4–6)', filter: { primosMin: 4, primosMax: 6 } },
     ],
   },
+  {
+    id: 'sequencia',
+    label: 'Sequência',
+    presets: [
+      { key: 'any', label: 'Qualquer', filter: {} },
+      { key: 'curta', label: 'Curta (≤3)', filter: { seqMax: 3 } },
+      { key: 'media', label: 'Média (≤5)', filter: { seqMax: 5 } },
+    ],
+  },
 ];
 
 /** Converte a seleção de presets nas faixas soft consumidas pelo gerador. */
@@ -71,4 +82,4 @@ export const filtersFromSelection = (sel: FilterSelection): SmartFilters => {
 
 /** True se algum grupo está fora de "Qualquer". */
 export const hasActiveFilters = (sel: FilterSelection): boolean =>
-  sel.soma !== 'any' || sel.paridade !== 'any' || sel.primos !== 'any';
+  sel.soma !== 'any' || sel.paridade !== 'any' || sel.primos !== 'any' || sel.sequencia !== 'any';
