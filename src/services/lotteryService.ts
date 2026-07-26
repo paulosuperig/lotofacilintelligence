@@ -1,9 +1,16 @@
 import { LotteryResultSchema } from "@/lib/security/schemas";
 import { LotteryResult } from "@/types/lottery";
 import { analyzeHistory, normalizeDraw, type HistoryAnalysis } from "@/lib/lottery/analysis";
+import { readCache, writeCache } from "@/lib/cache/localCache";
 
 const API_BASE = "https://loteriascaixa-api.herokuapp.com/api";
 const FALLBACK_API_BASE = "https://servicebus2.caixa.gov.br/portalloterias/api/lotofacil";
+
+/** Cache do último resultado (resiliência a quedas da API). TTL de 30 min. */
+const LATEST_CACHE_KEY = "lf_latest_v1";
+const LATEST_TTL_MS = 30 * 60 * 1000;
+/** Prefixo do cache por concurso — concursos passados são IMUTÁVEIS. */
+const CONCURSO_CACHE_PREFIX = "lf_concurso_";
 
 /** Nº de concursos considerados na análise de tendências (janela recente). */
 const ANALYSIS_WINDOW = 100;
@@ -100,16 +107,27 @@ export const lotteryService = {
     try {
       const response = await fetchWithRetry(`${API_BASE}/lotofacil/latest`);
       const data = await response.json();
-      return normalizeResult(data);
+      const result = normalizeResult(data);
+      writeCache(LATEST_CACHE_KEY, result); // aquece o cache p/ resiliência
+      return result;
     } catch (error) {
       console.error("[LotteryService] Primary API failed, trying official Caixa API...", error);
       try {
         // Nota: A API da Caixa pode exigir headers ou ter CORS restrito em alguns ambientes
         const response = await fetchWithRetry(FALLBACK_API_BASE, { retries: 1 });
         const data = await response.json();
-        return normalizeResult(data);
+        const result = normalizeResult(data);
+        writeCache(LATEST_CACHE_KEY, result);
+        return result;
       } catch (fallbackError) {
-        console.error("[LotteryService] All APIs failed", fallbackError);
+        // Resiliência: se AMBAS as APIs caírem, serve o último resultado conhecido
+        // (cache local) em vez de quebrar a tela. Só falha se nunca houve sucesso.
+        const cached = readCache<LotteryResult>(LATEST_CACHE_KEY);
+        if (cached) {
+          console.warn("[LotteryService] APIs indisponíveis — servindo último resultado em cache.");
+          return cached.data;
+        }
+        console.error("[LotteryService] All APIs failed and no cache available", fallbackError);
         throw fallbackError;
       }
     }
@@ -122,9 +140,15 @@ export const lotteryService = {
   async getResultByConcurso(concurso: number): Promise<LotteryResult> {
     const n = Math.floor(concurso);
     if (!Number.isInteger(n) || n < 1) throw new Error("Concurso inválido.");
+    const cacheKey = `${CONCURSO_CACHE_PREFIX}${n}`;
+    // Concurso passado é imutável: se já temos, servimos direto do cache.
+    const cached = readCache<LotteryResult>(cacheKey);
+    if (cached) return cached.data;
     const response = await fetchWithRetry(`${API_BASE}/lotofacil/${n}`, { retries: 1 });
     const data = await response.json();
-    return normalizeResult(data);
+    const result = normalizeResult(data);
+    writeCache(cacheKey, result);
+    return result;
   },
 
   /** Retorna a lista bruta de todos os concursos (mais recente primeiro). */
