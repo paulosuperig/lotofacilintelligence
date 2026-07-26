@@ -383,6 +383,21 @@ chance, via `crypto.getRandomValues`).
 - Cobertura: 145 testes verdes (novos: validade, honra fixas/excluídas, não é
   data-driven, e score médio menor que "equilibrada").
 
+### 10.13 Resiliência da fonte de dados (cache de fallback)
+Primeiro passo (mais seguro) do endurecimento da fonte de dados, apontado na
+auditoria como maior risco (API herokuapp instável). Frontend-only, aditivo:
+- **`localCache.ts`** (puro/testado): cache genérico em localStorage com
+  timestamp e leitura `stale`-aware.
+- **`getLatestResult`**: grava o resultado no cache a cada sucesso e, se AMBAS as
+  APIs caírem, serve o **último resultado conhecido** em vez de quebrar a tela.
+- **`getResultByConcurso`**: concursos passados são **imutáveis** → cache-first
+  (serve do cache quando já visto), o que também faz o Conferidor/Bolão
+  funcionarem para concursos já consultados mesmo com a API fora.
+- Não altera o comportamento em condições normais (sempre tenta a rede primeiro);
+  só adiciona resiliência em falha. Cobertura: 150 testes verdes (5 novos).
+- Próximo passo (passo 2): proxy + cache durável no Supabase (edge function),
+  que exige migração — fora deste incremento por segurança.
+
 ## 11. Próximos passos sugeridos
 - **Fechamentos personalizados** (pool no volante + garantia-alvo) e presets
   21/22 via covering designs pré-computados.
