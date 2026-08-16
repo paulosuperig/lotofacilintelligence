@@ -1,66 +1,74 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { UserSchema, type ValidatedUser } from '@/lib/security/schemas';
+import { type ValidatedUser } from '@/lib/security/schemas';
 import { toast } from 'sonner';
-import { type User, type Session } from '@supabase/supabase-js';
+import { type Session } from '@supabase/supabase-js';
 import { trackEvent, trackCustom, setAdvancedMatching, clearAdvancedMatching } from '@/lib/analytics/metaPixel';
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+export const profileKey = (userId: string | null) => ['profile', userId] as const;
 
 /**
  * Skill: Advanced Authentication & Token Management
- * Migrated to Supabase Auth for persistent sessions and database integration.
+ * Sessão via subscription (`onAuthStateChange`); perfil via TanStack Query.
  */
 export const useAuth = () => {
-  const [user, setUser] = useState<ValidatedUser | null>(null);
+  const queryClient = useQueryClient();
   const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [authReady, setAuthReady] = useState(false);
 
-  const fetchProfile = useCallback(async (authUser: User, retryCount = 0) => {
-    try {
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('role, status')
-        .eq('id', authUser.id)
-        .maybeSingle();
+  const authUser = session?.user ?? null;
 
-      if (error) throw error;
+  const profileQuery = useQuery<ValidatedUser | null>({
+    queryKey: profileKey(authUser?.id ?? null),
+    enabled: !!authUser,
+    staleTime: 5 * 60 * 1000,
+    retry: 1,
+    queryFn: async () => {
+      if (!authUser) return null;
 
-      if (!profile && retryCount < 3) {
-        // Trigger might still be running, wait and retry
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        return fetchProfile(authUser, retryCount + 1);
+      // O trigger de criação de perfil pode ainda estar rodando logo após o
+      // cadastro — re-tentamos algumas vezes antes de assumir o papel padrão.
+      let profile: { role: string | null; status: string | null } | null = null;
+      for (let attempt = 0; attempt < 4; attempt++) {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('role, status')
+          .eq('id', authUser.id)
+          .maybeSingle();
+        if (error) throw error;
+        profile = data;
+        if (profile) break;
+        if (attempt < 3) await sleep(1000);
       }
 
-      const userData: ValidatedUser = {
+      if (profile?.status === 'blocked') {
+        toast.error('Acesso bloqueado', { description: 'Sua conta está desativada.' });
+        await supabase.auth.signOut();
+        return null;
+      }
+
+      return {
         email: authUser.email || '',
         role: (profile?.role as 'admin' | 'demo') || 'demo',
         token: 'supabase-managed',
         iat: Date.now(),
         exp: Date.now() + 3600000,
       };
-
-      if (profile?.status === 'blocked') {
-        toast.error("Acesso bloqueado", { description: "Sua conta está desativada." });
-        await supabase.auth.signOut();
-        setUser(null);
-        return;
-      }
-
-      setUser(userData);
-    } catch (error) {
-      console.error('Error fetching profile:', error);
-      setUser(null);
-    }
-  }, []);
+    },
+  });
 
   useEffect(() => {
     let isMounted = true;
 
     // 1. Listener PRIMEIRO (evita perder eventos durante o getSession inicial).
-    //    "Fire and forget" do fetchProfile dentro do callback para evitar deadlock.
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
         if (!isMounted) return;
         setSession(currentSession);
+        setAuthReady(true);
         if (currentSession?.user) {
           // Advanced Matching (SHA-256) — melhora match rate em campanhas Meta
           setAdvancedMatching({
@@ -80,35 +88,26 @@ export const useAuth = () => {
               method: 'supabase_password',
             });
           }
-          fetchProfile(currentSession.user).finally(() => {
-            if (isMounted) setLoading(false);
-          });
         } else {
           if (event === 'SIGNED_OUT') {
             trackCustom('UserLogout', { content_category: 'auth' });
             clearAdvancedMatching();
+            queryClient.removeQueries({ queryKey: ['profile'] });
           }
-          setUser(null);
-          setLoading(false);
         }
-      }
+      },
     );
 
-    // 2. Restaurar sessão existente. Só liberamos `loading=false` após o
-    //    fetchProfile resolver — evita o flicker da tela de login no F5.
+    // 2. Restaurar sessão existente.
     supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
       if (!isMounted) return;
       setSession(initialSession);
+      setAuthReady(true);
       if (initialSession?.user) {
         setAdvancedMatching({
           email: initialSession.user.email,
           externalId: initialSession.user.id,
         });
-        fetchProfile(initialSession.user).finally(() => {
-          if (isMounted) setLoading(false);
-        });
-      } else {
-        setLoading(false);
       }
     });
 
@@ -116,24 +115,28 @@ export const useAuth = () => {
       isMounted = false;
       subscription.unsubscribe();
     };
-  }, [fetchProfile]);
-
+  }, [queryClient]);
 
   const signOut = useCallback(async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
-      toast.error("Erro ao sair", { description: error.message });
+      toast.error('Erro ao sair', { description: error.message });
     } else {
-      setUser(null);
       setSession(null);
+      queryClient.removeQueries({ queryKey: ['profile'] });
     }
-  }, []);
+  }, [queryClient]);
 
-  return { 
-    user, 
+  // Só liberamos `loading=false` após o perfil resolver — evita o flicker da
+  // tela de login no F5.
+  const loading = !authReady || (!!authUser && profileQuery.isPending);
+  const user = authUser ? profileQuery.data ?? null : null;
+
+  return {
+    user,
     session,
-    loading, 
+    loading,
     isAdmin: user?.role === 'admin',
-    signOut 
+    signOut,
   };
 };

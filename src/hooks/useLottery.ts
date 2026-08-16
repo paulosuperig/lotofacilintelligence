@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useCallback, useEffect } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useToast } from './use-toast';
 import { LotteryResult, SavedGame } from '@/types/lottery';
 import { generateSecureId } from '@/lib/security/utils';
@@ -8,6 +9,7 @@ import { historyService } from '@/services/historyService';
 import { trackCustom } from '@/lib/analytics/metaPixel';
 import { generateOptimizedGame, generateBatch, gameSignature, type GenStrategy } from '@/lib/lottery/generator';
 import { normalizeDraw, type HistoryAnalysis } from '@/lib/lottery/analysis';
+import { useSessionUser } from './useSessionUser';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
 /** Filtros avançados (faixas soft) escolhidos pelo usuário. */
@@ -49,139 +51,182 @@ const STRATEGY_LABEL: Record<GenStrategy, string> = {
   surpresinha: 'Surpresinha',
 };
 
+/** Assinatura canônica de um jogo (usada na deduplicação do histórico). */
+const signatureOf = (numbers: number[]) => [...numbers].sort((a, b) => a - b).join(',');
+
+export const historyKey = (userId: string | null) => ['games_history', userId] as const;
+export const latestResultKey = ['latest_result'] as const;
+export const historyAnalysisKey = ['history_analysis'] as const;
+
+interface SaveResult { success: boolean; duplicate: boolean }
+
 export const useLottery = () => {
   const { toast } = useToast();
-  const [latestResult, setLatestResult] = useState<LotteryResult | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [history, setHistory] = useState<SavedGame[]>([]);
-  const [analysis, setAnalysis] = useState<HistoryAnalysis | null>(null);
-  const isClearingRef = useRef(false);
+  const queryClient = useQueryClient();
+  const { userId } = useSessionUser();
 
-  const fetchLatestResult = useCallback(async () => {
-    setIsRefreshing(true);
-    try {
-      const data = await lotteryService.getLatestResult();
-      setLatestResult(data);
-    } catch (error) {
-      console.error("[Lottery] Error fetching latest result:", error);
+  // ---------------------------------------------------------------- queries
+  const latestResultQuery = useQuery<LotteryResult | null>({
+    queryKey: latestResultKey,
+    queryFn: () => lotteryService.getLatestResult(),
+    staleTime: 10 * 60 * 1000,
+    retry: 2,
+  });
+
+  const analysisQuery = useQuery<HistoryAnalysis | null>({
+    queryKey: historyAnalysisKey,
+    queryFn: () => lotteryService.getHistoryAnalysis(),
+    staleTime: 30 * 60 * 1000,
+    retry: 1,
+  });
+
+  const historyQuery = useQuery<SavedGame[]>({
+    queryKey: historyKey(userId),
+    queryFn: () => (userId ? historyService.fetchHistory(userId) : Promise.resolve([])),
+    enabled: !!userId,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const history = historyQuery.data ?? [];
+  const latestResult = latestResultQuery.data ?? null;
+  const analysis = analysisQuery.data ?? null;
+
+  // Erro de rede no resultado oficial: mantém o feedback que a UI já exibia.
+  useEffect(() => {
+    if (latestResultQuery.isError) {
+      console.error('[Lottery] Error fetching latest result:', latestResultQuery.error);
       toast({
-        title: "Erro ao atualizar",
-        description: "Não foi possível buscar o último resultado. Verifique sua conexão.",
-        variant: "destructive",
+        title: 'Erro ao atualizar',
+        description: 'Não foi possível buscar o último resultado. Verifique sua conexão.',
+        variant: 'destructive',
       });
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
     }
-  }, [toast]);
+  }, [latestResultQuery.isError, latestResultQuery.error, toast]);
+
+  // -------------------------------------------------------------- realtime
+  useEffect(() => {
+    if (!userId || !isSupabaseEnabled() || !supabase) return;
+    const client = supabase;
+    const channel: RealtimeChannel = client
+      .channel(`games-history-${userId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'games_history', filter: `user_id=eq.${userId}` },
+        () => { queryClient.invalidateQueries({ queryKey: historyKey(userId) }); },
+      )
+      .subscribe();
+
+    return () => { client.removeChannel(channel); };
+  }, [userId, queryClient]);
+
+  // -------------------------------------------------------------- mutations
+  const saveMutation = useMutation<SavedGame[], Error, SavedGame[], { previous?: SavedGame[] }>({
+    mutationFn: async (games) => {
+      if (!userId) throw new Error('Sessão expirada. Faça login novamente.');
+      return historyService.saveGames(userId, games);
+    },
+    onMutate: async (games) => {
+      await queryClient.cancelQueries({ queryKey: historyKey(userId) });
+      const previous = queryClient.getQueryData<SavedGame[]>(historyKey(userId));
+      queryClient.setQueryData<SavedGame[]>(historyKey(userId), [...games, ...(previous ?? [])]);
+      return { previous };
+    },
+    onError: (error, _games, context) => {
+      queryClient.setQueryData<SavedGame[]>(historyKey(userId), context?.previous ?? []);
+      console.error('[Lottery] Error saving history:', error);
+      toast({
+        title: 'Erro na persistência',
+        description: 'Não foi possível sincronizar o histórico.',
+        variant: 'destructive',
+      });
+    },
+    onSuccess: (updatedHistory) => {
+      queryClient.setQueryData<SavedGame[]>(historyKey(userId), updatedHistory);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: historyKey(userId) });
+    },
+  });
+
+  const clearMutation = useMutation<void, Error, void, { previous?: SavedGame[] }>({
+    mutationFn: async () => { await historyService.clearHistory(userId); },
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: historyKey(userId) });
+      const previous = queryClient.getQueryData<SavedGame[]>(historyKey(userId));
+      queryClient.setQueryData<SavedGame[]>(historyKey(userId), []);
+      return { previous };
+    },
+    onError: (error, _vars, context) => {
+      queryClient.setQueryData<SavedGame[]>(historyKey(userId), context?.previous ?? []);
+      console.error('[useLottery] Erro ao limpar histórico:', error);
+      toast({
+        title: 'Erro ao limpar',
+        description: 'Não foi possível remover o histórico. Tente novamente.',
+        variant: 'destructive',
+      });
+    },
+    onSuccess: () => {
+      toast({ title: 'Histórico limpo', description: 'Todos os seus jogos foram removidos.' });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: historyKey(userId) });
+    },
+  });
+
+  // ---------------------------------------------------------------- actions
+  const fetchLatestResult = useCallback(async () => {
+    await latestResultQuery.refetch();
+  }, [latestResultQuery]);
 
   const loadHistory = useCallback(async () => {
-    if (isClearingRef.current) return;
-    try {
-      if (!isSupabaseEnabled() || !supabase) {
-        setHistory([]);
-        return;
-      }
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) {
-        setHistory([]);
-        return;
-      }
-      // Ensure we only load the history for the CURRENT logged-in user
-      const data = await historyService.fetchHistory(session.user.id);
-      setHistory(data);
-    } catch (error) {
-      console.error("Error loading history:", error);
-      setHistory([]);
-    }
-  }, []);
+    await queryClient.invalidateQueries({ queryKey: historyKey(userId) });
+  }, [queryClient, userId]);
 
   const clearHistory = useCallback(async () => {
-    if (isClearingRef.current) return;
-    isClearingRef.current = true;
-    const previousHistory = [...history];
-    setHistory([]);
+    await clearMutation.mutateAsync();
+  }, [clearMutation]);
 
-    try {
-      let userId: string | null = null;
-      if (isSupabaseEnabled() && supabase) {
-        const { data: { session } } = await supabase.auth.getSession();
-        userId = session?.user?.id || null;
-      }
-      await historyService.clearHistory(userId);
-      toast({
-        title: "Histórico limpo",
-        description: "Todos os seus jogos foram removidos.",
-      });
-      window.dispatchEvent(new CustomEvent('lottery-history-updated', { detail: { action: 'clear' } }));
-    } catch (error) {
-      console.error("[useLottery] Erro ao limpar histórico:", error);
-      setHistory(previousHistory);
-      toast({
-        title: "Erro ao limpar",
-        description: "Não foi possível remover o histórico. Tente novamente.",
-        variant: "destructive",
-      });
-    } finally {
-      setTimeout(() => { isClearingRef.current = false; }, 1000);
-    }
-  }, [toast, history]);
+  const isGameDuplicate = useCallback(
+    (numbers: number[]) => {
+      const signature = signatureOf(numbers);
+      return history.some((saved) => signatureOf(saved.numbers) === signature);
+    },
+    [history],
+  );
 
-  const isGameDuplicate = useCallback((numbers: number[]) => {
-    const signature = [...numbers].sort((a, b) => a - b).join(',');
-    return history.some(saved =>
-      [...saved.numbers].sort((a, b) => a - b).join(',') === signature
-    );
-  }, [history]);
-
-  const saveToHistory = async (newGames: SavedGame[]) => {
-    try {
+  const saveToHistory = useCallback(
+    async (newGames: SavedGame[]): Promise<SaveResult> => {
       if (!newGames || newGames.length === 0) return { success: false, duplicate: false };
 
-      const nonDuplicateNewGames = newGames.filter(newGame => {
-        const signature = [...newGame.numbers].sort((a, b) => a - b).join(',');
-        return !history.some(saved =>
-          [...saved.numbers].sort((a, b) => a - b).join(',') === signature
-        );
-      });
+      const existing = queryClient.getQueryData<SavedGame[]>(historyKey(userId)) ?? history;
+      const historySignatures = new Set(existing.map((saved) => signatureOf(saved.numbers)));
+      const nonDuplicateNewGames = newGames.filter((g) => !historySignatures.has(signatureOf(g.numbers)));
 
       if (nonDuplicateNewGames.length === 0) return { success: false, duplicate: true };
 
-      const securedGames: SavedGame[] = nonDuplicateNewGames.map(game => ({
+      const securedGames: SavedGame[] = nonDuplicateNewGames.map((game) => ({
         ...game,
         id: game.id || generateSecureId(),
         timestamp: game.timestamp || Date.now(),
       }));
 
-      let userId: string | null = null;
-      if (isSupabaseEnabled() && supabase) {
-        const { data: { session } } = await supabase.auth.getSession();
-        userId = session?.user?.id || null;
+      try {
+        await saveMutation.mutateAsync(securedGames);
+        trackCustom('SalvarJogo', {
+          content_category: 'history',
+          content_ids: securedGames.map((g) => g.id),
+          num_items: securedGames.length,
+          value: securedGames.length * 3.5,
+          currency: 'BRL',
+        });
+        return { success: true, duplicate: false };
+      } catch {
+        // toast/rollback já tratados no onError da mutation
+        return { success: false, duplicate: false };
       }
-      if (!userId) throw new Error('Sessão expirada. Faça login novamente.');
-
-      const updatedHistory = await historyService.saveGames(userId, securedGames);
-      setHistory(updatedHistory);
-      trackCustom('SalvarJogo', {
-        content_category: 'history',
-        content_ids: securedGames.map(g => g.id),
-        num_items: securedGames.length,
-        value: securedGames.length * 3.5,
-        currency: 'BRL',
-      });
-      window.dispatchEvent(new CustomEvent('lottery-history-updated'));
-      return { success: true, duplicate: false };
-    } catch (error) {
-      console.error("[Lottery] Error saving history:", error);
-      toast({
-        title: "Erro na persistência",
-        description: "Não foi possível sincronizar o histórico.",
-        variant: "destructive",
-      });
-      return { success: false, duplicate: false };
-    }
-  };
+    },
+    [history, queryClient, saveMutation, userId],
+  );
 
   const generateSmartGame = useCallback((opts: SmartOptions = {}) => {
     const avoid = new Set(history.map(g => gameSignature(g.numbers)));
@@ -235,64 +280,10 @@ export const useLottery = () => {
     }));
   }, [history, analysis, latestResult]);
 
-  useEffect(() => {
-    let isMounted = true;
-    let channel: RealtimeChannel | undefined;
-
-    const init = async () => {
-      await fetchLatestResult();
-      if (!isMounted || isClearingRef.current) return;
-      await loadHistory();
-
-      // Carrega a análise de histórico (frequência/atraso) para o gerador
-      // e os painéis de tendências. Falha silenciosa mantém o modo heurístico.
-      lotteryService
-        .getHistoryAnalysis()
-        .then((a) => { if (isMounted && a) setAnalysis(a); })
-        .catch(() => { /* mantém modo heurístico */ });
-
-      // Only open a Realtime channel scoped to the current user's rows.
-      if (!isSupabaseEnabled() || !supabase) return;
-      const { data: { session } } = await supabase.auth.getSession();
-      const userId = session?.user?.id;
-      if (!userId || !isMounted) return;
-
-      channel = supabase
-        .channel(`games-history-${userId}`)
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'games_history',
-            filter: `user_id=eq.${userId}`,
-          },
-          () => {
-            if (!isClearingRef.current) loadHistory();
-          },
-        )
-        .subscribe();
-    };
-    init();
-
-    const handleHistoryUpdate = (e?: Event) => {
-      const detail = (e as CustomEvent<{ action?: string }> | undefined)?.detail;
-      if (detail?.action === 'clear') { setHistory([]); return; }
-      if (!isClearingRef.current) loadHistory();
-    };
-    window.addEventListener('lottery-history-updated', handleHistoryUpdate);
-
-    return () => {
-      isMounted = false;
-      window.removeEventListener('lottery-history-updated', handleHistoryUpdate);
-      if (channel && supabase) supabase.removeChannel(channel);
-    };
-  }, [fetchLatestResult, loadHistory]);
-
   return {
     latestResult,
-    isLoading,
-    isRefreshing,
+    isLoading: latestResultQuery.isLoading,
+    isRefreshing: latestResultQuery.isFetching,
     history,
     analysis,
     fetchLatestResult,

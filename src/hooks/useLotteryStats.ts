@@ -1,25 +1,20 @@
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { lotteryService } from '@/services/lotteryService';
 import type { HistoryAnalysis } from '@/lib/lottery/analysis';
+import { historyAnalysisKey } from './useLottery';
 
 /**
  * Expõe a análise estatística do histórico (frequência, atraso, quentes/frias
- * e atrasadas) para componentes de UI. Usa o cache em memória do
- * `lotteryService`, então múltiplos consumidores não disparam novas requisições.
+ * e atrasadas) para componentes de UI. Compartilha a mesma entrada de cache do
+ * TanStack Query usada pelo `useLottery` — múltiplos consumidores, uma request.
  */
 export const useLotteryStats = () => {
-  const [analysis, setAnalysis] = useState<HistoryAnalysis | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data, isLoading } = useQuery<HistoryAnalysis | null>({
+    queryKey: historyAnalysisKey,
+    queryFn: () => lotteryService.getHistoryAnalysis(),
+    staleTime: 30 * 60 * 1000,
+    retry: 1,
+  });
 
-  useEffect(() => {
-    let mounted = true;
-    lotteryService
-      .getHistoryAnalysis()
-      .then((a) => { if (mounted) setAnalysis(a); })
-      .catch(() => { /* mantém null; UI usa fallback */ })
-      .finally(() => { if (mounted) setIsLoading(false); });
-    return () => { mounted = false; };
-  }, []);
-
-  return { analysis, isLoading };
+  return { analysis: data ?? null, isLoading };
 };

@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useToast } from './use-toast';
 import { sanitizeString } from '@/lib/security/utils';
 import type { LotteryResult } from '@/types/lottery';
@@ -9,6 +10,7 @@ import { aiConfigService } from '@/services/aiConfigService';
 import { sanitizeAiGamesDetailed, type UserIntent } from '@/lib/ai/sanitizeGames';
 import { parseUserIntent, estrategiaDirective, formatIntentForPrompt } from '@/lib/ai/intent';
 import { useLotteryStats } from '@/hooks/useLotteryStats';
+import { useSessionUser } from '@/hooks/useSessionUser';
 import { trackCustom, trackEvent } from '@/lib/analytics/metaPixel';
 
 const MAX_HISTORY_MESSAGES = 15;
@@ -20,6 +22,8 @@ export type AiChatMessage = { role: 'user' | 'assistant'; content: string };
 /** Mensagem enviada ao gateway (inclui o papel `system`). */
 type AiGatewayMessage = { role: 'system' | 'user' | 'assistant'; content: string };
 
+const aiChatKey = (userId: string | null) => ['ai_chat_history', userId] as const;
+
 /** Extrai a mensagem de erro de um `unknown` de forma segura (TS strict). */
 const errorMessage = (e: unknown): string | undefined =>
   e instanceof Error ? e.message : typeof e === 'string' ? e : undefined;
@@ -27,52 +31,63 @@ const errorMessage = (e: unknown): string | undefined =>
 export const useAiAssistant = (latestResult?: LotteryResult | null) => {
   const { toast } = useToast();
   const { analysis } = useLotteryStats();
-  const [aiChat, setAiChat] = useState<AiChatMessage[]>([]);
+  const queryClient = useQueryClient();
+  const { userId } = useSessionUser();
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [aiMessage, setAiMessage] = useState('');
-  const [isAiConfigured, setIsAiConfigured] = useState(false);
 
-  useEffect(() => {
-    let isMounted = true;
+  const configQuery = useQuery<boolean>({
+    queryKey: ['ai_config', 'configured'],
+    queryFn: () => aiConfigService.isConfigured(),
+    staleTime: 5 * 60 * 1000,
+  });
+  const isAiConfigured = configQuery.data ?? false;
 
-    const loadConfig = async () => {
-      const ok = await aiConfigService.isConfigured();
-      if (isMounted) setIsAiConfigured(ok);
-    };
-    loadConfig();
+  const chatQuery = useQuery<AiChatMessage[]>({
+    queryKey: aiChatKey(userId),
+    enabled: !!userId,
+    staleTime: 5 * 60 * 1000,
+    queryFn: async () => {
+      if (!isSupabaseEnabled() || !supabase || !userId) return [];
+      const { data, error } = await supabase
+        .from('ai_chat_history')
+        .select('role, content')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: true })
+        .limit(30);
+      if (error) throw error;
+      return (data ?? []) as AiChatMessage[];
+    },
+  });
 
-    const loadChatHistory = async () => {
-      if (!isSupabaseEnabled() || !supabase) return;
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session?.user) return;
-        const { data, error } = await supabase
-          .from('ai_chat_history')
-          .select('role, content')
-          .eq('user_id', session.user.id)
-          .order('created_at', { ascending: true })
-          .limit(30);
-        if (isMounted && !error && data) setAiChat(data as AiChatMessage[]);
-      } catch (err) {
-        console.error("[AI] History load error:", err);
-      }
-    };
-    loadChatHistory();
-    return () => { isMounted = false; };
-  }, []);
+  const aiChat = chatQuery.data ?? [];
 
-  const persistChatMessage = async (role: 'user' | 'assistant', content: string) => {
-    if (!isSupabaseEnabled() || !supabase) return;
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) return;
-      await supabase.from('ai_chat_history').insert({
-        user_id: session.user.id, role, content,
-      });
-    } catch (error) {
-      console.error("[AI] Error persisting chat message:", error);
-    }
-  };
+  /** Escreve no cache do Query — fonte única de verdade do chat. */
+  const appendMessage = useCallback(
+    (message: AiChatMessage) => {
+      queryClient.setQueryData<AiChatMessage[]>(aiChatKey(userId), (prev) => [...(prev ?? []), message]);
+    },
+    [queryClient, userId],
+  );
+
+  const persistMutation = useMutation<void, Error, AiChatMessage>({
+    mutationFn: async ({ role, content }) => {
+      if (!isSupabaseEnabled() || !supabase || !userId) return;
+      const { error } = await supabase.from('ai_chat_history').insert({ user_id: userId, role, content });
+      if (error) throw error;
+    },
+    onError: (error) => {
+      console.error('[AI] Error persisting chat message:', error);
+    },
+  });
+
+  const persistChatMessage = useCallback(
+    (role: 'user' | 'assistant', content: string) => {
+      persistMutation.mutate({ role, content });
+    },
+    [persistMutation],
+  );
+
 
   const buildSystemPrompt = useCallback((intent: UserIntent) => {
     const statsBlock = formatStatsForPrompt(computeLotteryStats(latestResult ?? null));
@@ -174,7 +189,7 @@ ${analysisBlock}`;
 
     const intent = parseUserIntent(sanitizedMessage);
     const newMessage = { role: 'user' as const, content: sanitizedMessage };
-    setAiChat(prev => [...prev, newMessage]);
+    appendMessage(newMessage);
     persistChatMessage('user', sanitizedMessage);
     setAiMessage('');
     setIsAiLoading(true);
@@ -205,7 +220,7 @@ ${analysisBlock}`;
         throw new Error('A IA retornou uma resposta vazia. Toque em enviar novamente.');
       }
       const result = sanitizeAiGamesDetailed(raw, intent, stats?.dezenas);
-      setAiChat(prev => [...prev, { role: 'assistant', content: result.content }]);
+      appendMessage({ role: 'assistant', content: result.content });
       persistChatMessage('assistant', result.content);
       trackEvent('Contact', {
         content_name: 'Intelligence AI Response',
@@ -232,7 +247,34 @@ ${analysisBlock}`;
     } finally {
       setIsAiLoading(false);
     }
-  }, [aiChat, buildSystemPrompt, callAiGateway, toast, latestResult]);
+  }, [aiChat, appendMessage, buildSystemPrompt, callAiGateway, persistChatMessage, toast, latestResult]);
+
+  const saveDeepSeekKey = useCallback(async (key: string) => {
+    try {
+      const clean = sanitizeString(key.trim());
+      await aiConfigService.saveKey(clean);
+      queryClient.setQueryData<boolean>(['ai_config', 'configured'], true);
+      queryClient.invalidateQueries({ queryKey: ['ai_config', 'configured'] });
+      toast({
+        title: "Configuração salva",
+        description: "A chave da API DeepSeek foi armazenada com segurança no Supabase.",
+      });
+    } catch (err) {
+      toast({
+        title: "Erro ao salvar",
+        description: errorMessage(err) || "Verifique suas permissões de admin.",
+        variant: "destructive",
+      });
+    }
+  }, [queryClient, toast]);
+
+  const clearChatHistory = useCallback(async () => {
+    if (isSupabaseEnabled() && supabase && userId) {
+      await supabase.from('ai_chat_history').delete().eq('user_id', userId);
+    }
+    queryClient.setQueryData<AiChatMessage[]>(aiChatKey(userId), []);
+    queryClient.invalidateQueries({ queryKey: aiChatKey(userId) });
+  }, [queryClient, userId]);
 
   return {
     aiChat,
@@ -240,32 +282,8 @@ ${analysisBlock}`;
     aiMessage,
     setAiMessage,
     sendMessage,
-    setAiChat,
     isAiConfigured,
-    saveDeepSeekKey: async (key: string) => {
-      try {
-        const clean = sanitizeString(key.trim());
-        await aiConfigService.saveKey(clean);
-        setIsAiConfigured(true);
-        toast({
-          title: "Configuração salva",
-          description: "A chave da API DeepSeek foi armazenada com segurança no Supabase.",
-        });
-      } catch (err) {
-        toast({
-          title: "Erro ao salvar",
-          description: errorMessage(err) || "Verifique suas permissões de admin.",
-          variant: "destructive",
-        });
-      }
-    },
-    clearChatHistory: async () => {
-      if (!supabase) return;
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        await supabase.from('ai_chat_history').delete().eq('user_id', session.user.id);
-      }
-      setAiChat([]);
-    },
+    saveDeepSeekKey,
+    clearChatHistory,
   };
 };
