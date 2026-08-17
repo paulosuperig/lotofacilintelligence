@@ -24,20 +24,5 @@ export default defineConfig(({ mode }) => ({
     sourcemap: false,
     cssCodeSplit: true,
     chunkSizeWarningLimit: 900,
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (!id.includes("node_modules")) return undefined;
-          if (/[\\/]node_modules[\\/](react|react-dom|react-router|react-router-dom|scheduler)[\\/]/.test(id)) return "react";
-          if (id.includes("@supabase")) return "supabase";
-          if (id.includes("@radix-ui")) return "ui";
-          if (id.includes("@tanstack")) return "query";
-          if (id.includes("recharts") || id.includes("d3-") || id.includes("victory-vendor")) return "charts";
-          if (id.includes("framer-motion")) return "motion";
-          if (id.includes("react-markdown") || id.includes("remark") || id.includes("micromark") || id.includes("mdast") || id.includes("hast") || id.includes("unist")) return "markdown";
-          return "vendor";
-        },
-      },
-    },
   },
 }));
