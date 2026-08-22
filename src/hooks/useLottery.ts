@@ -111,12 +111,26 @@ export const useLottery = () => {
       .channel(`games-history-${userId}`)
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'games_history', filter: `user_id=eq.${userId}` },
-        () => { queryClient.invalidateQueries({ queryKey: historyKey(userId) }); },
-      )
-      .subscribe();
+        {
+          event: '*',
+          schema: 'public',
+          table: 'games_history',
+          filter: `user_id=eq.${userId}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: historyKey(userId) });
+        },
+      );
 
-    return () => { client.removeChannel(channel); };
+    // Conecta o canal ANTES de inscrever no postgres_changes se necessário,
+    // mas o padrão recomendado é configurar tudo e depois chamar subscribe().
+    // O erro "cannot add callbacks after subscribe()" ocorre se .on() for chamado
+    // em um objeto de canal que já teve .subscribe() invocado.
+    channel.subscribe();
+
+    return () => {
+      client.removeChannel(channel);
+    };
   }, [userId, queryClient]);
 
   // -------------------------------------------------------------- mutations
