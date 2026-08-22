@@ -117,21 +117,27 @@ export const useLottery = () => {
           table: 'games_history',
           filter: `user_id=eq.${userId}`,
         },
-        () => {
+        (payload) => {
+          console.log('[Realtime] Mudança detectada no histórico:', payload.eventType);
           queryClient.invalidateQueries({ queryKey: historyKey(userId) });
         },
       );
 
-    // Conecta o canal ANTES de inscrever no postgres_changes se necessário,
-    // mas o padrão recomendado é configurar tudo e depois chamar subscribe().
-    // O erro "cannot add callbacks after subscribe()" ocorre se .on() for chamado
-    // em um objeto de canal que já teve .subscribe() invocado.
-    channel.subscribe();
+    channel.subscribe((status, err) => {
+      if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+        console.error(`[Realtime] Falha na inscrição (${status}):`, err);
+        toast({
+          title: 'Erro de Sincronização',
+          description: 'Não foi possível conectar ao servidor em tempo real. O histórico pode não atualizar automaticamente.',
+          variant: 'destructive',
+        });
+      }
+    });
 
     return () => {
       client.removeChannel(channel);
     };
-  }, [userId, queryClient]);
+  }, [userId, queryClient, toast]);
 
   // -------------------------------------------------------------- mutations
   const saveMutation = useMutation<SavedGame[], Error, SavedGame[], { previous?: SavedGame[] }>({
