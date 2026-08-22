@@ -106,38 +106,53 @@ export const useLottery = () => {
   // -------------------------------------------------------------- realtime
   useEffect(() => {
     if (!userId || !isSupabaseEnabled() || !supabase) return;
-    const client = supabase;
-    const channel: RealtimeChannel = client
-      .channel(`games-history-${userId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'games_history',
-          filter: `user_id=eq.${userId}`,
-        },
-        (payload) => {
-          console.log('[Realtime] Mudança detectada no histórico:', payload.eventType);
-          queryClient.invalidateQueries({ queryKey: historyKey(userId) });
-        },
-      );
 
-    channel.subscribe((status, err) => {
-      if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-        console.error(`[Realtime] Falha na inscrição (${status}):`, err);
-        toast({
-          title: 'Erro de Sincronização',
-          description: 'Não foi possível conectar ao servidor em tempo real. O histórico pode não atualizar automaticamente.',
-          variant: 'destructive',
+    let isSubscribed = true;
+    const client = supabase;
+    const channelName = `games-history-${userId}`;
+
+    const setupRealtime = async () => {
+      try {
+        const channel = client.channel(channelName);
+
+        channel.on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'games_history',
+            filter: `user_id=eq.${userId}`,
+          },
+          (payload) => {
+            if (!isSubscribed) return;
+            console.log('[Realtime] Mudança detectada no histórico:', payload.eventType);
+            queryClient.invalidateQueries({ queryKey: historyKey(userId) });
+          }
+        );
+
+        const status = await new Promise<string>((resolve) => {
+          channel.subscribe((s, err) => {
+            if (err) console.error('[Realtime] Erro na inscrição:', err);
+            resolve(s);
+          });
         });
+
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.error(`[Realtime] Falha na conexão (${status})`);
+          // Não mostramos toast aqui para não floodar se houver reconexões
+        }
+      } catch (err) {
+        console.error('[Realtime] Erro crítico no setup:', err);
       }
-    });
+    };
+
+    setupRealtime();
 
     return () => {
-      client.removeChannel(channel);
+      isSubscribed = false;
+      client.removeChannel(client.channel(channelName));
     };
-  }, [userId, queryClient, toast]);
+  }, [userId, queryClient]);
 
   // -------------------------------------------------------------- mutations
   const saveMutation = useMutation<SavedGame[], Error, SavedGame[], { previous?: SavedGame[] }>({
