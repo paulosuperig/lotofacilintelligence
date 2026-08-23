@@ -211,7 +211,7 @@ ${analysisBlock}`;
       ];
       // ~260 tokens/jogo (linha do jogo + "Racional" curto). Teto de 8192 dá
       // folga ao deepseek-v4-pro para entregar análise + jogos + conferência
-      // completos sem truncar.
+      // completos sem truncar. Limite total seguro de 8192 tokens.
       const dynamicTokens = Math.min(8192, 1200 + (intent.quantidade ?? 3) * 260);
       const raw = await callAiGateway(payload, dynamicTokens);
       // Guarda anti-resposta-vazia: se o modelo devolver conteúdo em branco,
