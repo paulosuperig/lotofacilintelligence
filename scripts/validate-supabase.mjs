@@ -45,6 +45,8 @@ const record = (msg) => { failures.push(msg); fail(msg); };
 async function main() {
   console.log(`\n🔍 Validando credenciais Supabase…\n`);
   const env = loadEnv();
+  auditEnvSecurity(env);
+
   const SUPA_URL = env.VITE_SUPABASE_URL;
   const KEY = env.VITE_SUPABASE_PUBLISHABLE_KEY || env.VITE_SUPABASE_ANON_KEY;
   const PID = env.VITE_SUPABASE_PROJECT_ID;
@@ -101,6 +103,20 @@ async function main() {
     record(`Auth inacessível: ${e.message}`);
   }
 }
+
+/**
+ * Skill: Multi-Agent Auditor - Resilience Enhancement
+ * Adicionada verificação de variáveis públicas vs privadas.
+ */
+function auditEnvSecurity(env) {
+  const secrets = ['SERVICE_ROLE', 'SECRET_KEY', 'DEEPSEEK_API_KEY'];
+  for (const s of secrets) {
+    if (Object.keys(env).some(k => k.startsWith('VITE_') && k.includes(s))) {
+      warn(`SEGURANÇA: Secret encontrada com prefixo VITE_ (${s}). Isso a expõe no bundle client!`);
+    }
+  }
+}
+
 
 // CI-friendly: never fail the build. Use `npm run validate:supabase` (STRICT=1) locally to enforce.
 const STRICT = process.env.STRICT_SUPABASE_VALIDATION === '1' || process.argv.includes('--strict');
