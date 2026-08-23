@@ -115,11 +115,25 @@ const Login = () => {
 
   return (
     <div className="relative min-h-dvh bg-[#f5f3ff] flex flex-col items-center justify-center p-4 pt-[env(safe-area-inset-top)] pb-[calc(env(safe-area-inset-bottom)+3rem)]">
+      {/* 
+         Script de monitoramento de erro em produção para auditoria Vercel.
+         Se o React falhar, exibe uma mensagem amigável em vez de tela branca.
+      */}
+      <script dangerouslySetInnerHTML={{ __html: `
+        window.onerror = function(msg, url, line) {
+          console.error("ERRO CRÍTICO:", msg, "em", url, ":", line);
+          var root = document.getElementById('root');
+          if (root && root.innerHTML.length < 100) {
+            root.innerHTML = '<div style="padding:2rem;text-align:center;font-family:sans-serif;"><h2>Erro de Carregamento</h2><p>O sistema encontrou um erro e não pôde carregar. Por favor, recarregue a página.</p></div>';
+          }
+        };
+      `}} />
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md bg-white rounded-[2rem] md:rounded-[2.5rem] p-5 sm:p-8 md:p-12 shadow-2xl shadow-purple-500/10 border border-purple-100 overflow-hidden relative z-10"
       >
+
         <AnimatePresence mode="wait">
           {view === 'login' ? (
             <motion.div
