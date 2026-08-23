@@ -44,10 +44,10 @@ export const TrendsCard = ({ onNavigate }: TrendsCardProps) => {
             {isLive ? `Últimos ${janela} concursos` : 'Carregando histórico…'}
           </p>
         </div>
-        <span className={`text-[8px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider border ${
+        <span className={`text-[8px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider border transition-colors ${
           isLive
-            ? 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30 border-purple-100 dark:border-purple-800/50'
-            : 'text-zinc-400 dark:text-zinc-500 bg-zinc-50 dark:bg-zinc-800/50 border-zinc-100 dark:border-zinc-700'
+            ? 'text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/40 border-purple-200 dark:border-purple-700'
+            : 'text-zinc-500 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700'
         }`}>
           {isLive ? 'Live' : '—'}
         </span>
