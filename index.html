@@ -50,8 +50,47 @@
   <meta name="twitter:description" content="Sistema exclusivo de inteligência artificial para análise e estatísticas da Lotofácil.">
 </head>
   <body>
-    <div id="root"></div>
-    <!-- Meta Pixel: noscript fallback (ID injetado dinamicamente pelo MetaPixelLoader; este fallback é opcional) -->
+    <div id="root">
+      <div id="boot-splash" style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font-family:system-ui,sans-serif;background:#f5f3ff;color:#3f3f46">
+        <div style="width:40px;height:40px;border:4px solid #e4e4e7;border-top-color:#9333ea;border-radius:9999px;animation:bootspin 1s linear infinite"></div>
+        <p id="boot-msg" style="font-size:14px;margin:0">Carregando Lotofácil Intelligence…</p>
+        <style>@keyframes bootspin{to{transform:rotate(360deg)}}</style>
+      </div>
+    </div>
+    <noscript>
+      <p style="font-family:system-ui,sans-serif;text-align:center;padding:24px">
+        Ative o JavaScript para usar o Lotofácil Intelligence.
+      </p>
+    </noscript>
+    <script>
+      // Watchdog anti-tela-branca: se o React não montar, mostra diagnóstico em vez de página vazia.
+      (function () {
+        var failed = false;
+        function report(detail) {
+          if (failed) return;
+          failed = true;
+          var el = document.getElementById('boot-msg');
+          var sp = document.getElementById('boot-splash');
+          if (!el || !sp) return;
+          sp.querySelector('div').style.display = 'none';
+          el.innerHTML =
+            'Não foi possível carregar a aplicação.<br><small style="opacity:.7">' +
+            String(detail || '').slice(0, 200) +
+            '</small><br><button style="margin-top:12px;padding:8px 16px;border-radius:8px;border:1px solid #d4d4d8;background:#fff;cursor:pointer" onclick="location.reload(true)">Recarregar</button>';
+        }
+        window.addEventListener('error', function (e) {
+          if (e && (e.target instanceof HTMLScriptElement || e.target instanceof HTMLLinkElement)) {
+            report('Falha ao carregar recurso: ' + (e.target.src || e.target.href));
+          } else if (e && e.message) {
+            report(e.message);
+          }
+        }, true);
+        setTimeout(function () {
+          if (document.getElementById('boot-splash')) report('Tempo esgotado ao iniciar.');
+        }, 12000);
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
+
 </html>
