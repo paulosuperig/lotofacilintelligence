@@ -8,4 +8,5 @@
 - [x] Validar tipos, lint, 150 testes e build de produção.
 - [x] Validar desktop, mobile e atualização direta de rota.
 - [x] Corrigir a instalação do CI/Vercel e sincronizar dependências compatíveis.
+- [x] Unificar a conexão Supabase para restaurar a persistência do histórico em ambientes sem variáveis de build.
 - [ ] Publicar a nova versão — aguardando ação explícita do usuário.
