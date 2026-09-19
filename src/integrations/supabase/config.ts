@@ -9,4 +9,4 @@
 export const SUPABASE_URL_FALLBACK = "https://wevgcjgutpdazhqkhzhm.supabase.co";
 
 export const SUPABASE_PUBLISHABLE_KEY_FALLBACK =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indldmdjamd1dHBkYXpocWtoemhtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxNTQ5NzUsImV4cCI6MjA3MzczMDk3NX0.PLACEHOLDER";
+  undefined;
