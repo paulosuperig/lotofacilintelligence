@@ -9,7 +9,7 @@ import { MetaPixelConfig } from './MetaPixelConfig';
 import { UserProfile, UserFormData } from '@/types/lottery';
 
 
-interface AdminPanelProps {
+export interface AdminPanelProps {
   users: UserProfile[];
   onBack: () => void;
   onCreateOrUpdateUser: (userData: UserFormData, editingUser: UserProfile | null) => void;
