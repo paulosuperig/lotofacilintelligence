@@ -83,9 +83,10 @@ Deno.serve(async (req) => {
       .eq("key", "deepseek_api_key")
       .maybeSingle();
 
+    const cfgValue = cfg?.value as { key?: string } | string | null | undefined;
     const DEEPSEEK_API_KEY =
-      (cfg?.value as any)?.key ||
-      (typeof cfg?.value === "string" ? cfg.value : null) ||
+      (typeof cfgValue === "object" && cfgValue !== null ? cfgValue.key : null) ||
+      (typeof cfgValue === "string" ? cfgValue : null) ||
       Deno.env.get("DEEPSEEK_API_KEY");
 
     // DeepSeek depreciou "deepseek-chat" — aceita apenas deepseek-v4-pro | deepseek-v4-flash.
