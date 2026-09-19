@@ -1,10 +1,13 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
   buildCorsHeaders,
+  clientIpFrom,
   forbiddenOrigin,
   internalError,
   isOriginAllowed,
+  rateLimit,
 } from "../_shared/security.ts";
+
 
 Deno.serve(async (req) => {
   const origin = req.headers.get("Origin");

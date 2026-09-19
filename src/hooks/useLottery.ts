@@ -110,10 +110,14 @@ export const useLottery = () => {
     let isSubscribed = true;
     const client = supabase;
     const channelName = `games-history-${userId}`;
+    // Guarda a referência real do canal: remover via `client.channel(name)` recria
+    // uma instância e pode deixar um canal "zumbi" inscrito (vazamento de WebSocket).
+    let activeChannel: ReturnType<typeof client.channel> | null = null;
 
     const setupRealtime = async () => {
       try {
         const channel = client.channel(channelName);
+        activeChannel = channel;
 
         channel.on(
           'postgres_changes',
@@ -137,6 +141,12 @@ export const useLottery = () => {
           });
         });
 
+        // Efeito já desmontado enquanto a inscrição estava em andamento.
+        if (!isSubscribed) {
+          client.removeChannel(channel);
+          return;
+        }
+
         if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
           console.error(`[Realtime] Falha na conexão (${status})`);
           // Não mostramos toast aqui para não floodar se houver reconexões
@@ -150,8 +160,12 @@ export const useLottery = () => {
 
     return () => {
       isSubscribed = false;
-      client.removeChannel(client.channel(channelName));
+      if (activeChannel) {
+        client.removeChannel(activeChannel);
+        activeChannel = null;
+      }
     };
+
   }, [userId, queryClient]);
 
   // -------------------------------------------------------------- mutations
