@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { getErrorMessage } from '@/lib/errors';
 
 const Login = () => {
   const currentYear = new Date().getFullYear();
@@ -32,10 +33,10 @@ const Login = () => {
         title: "Bem-vindo!",
         description: "Acesso autorizado com sucesso.",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Erro de autenticação",
-        description: error.message || "E-mail ou senha incorretos.",
+        description: getErrorMessage(error, "E-mail ou senha incorretos."),
         variant: "destructive",
       });
     } finally {
@@ -59,10 +60,10 @@ const Login = () => {
         description: `As instruções de recuperação foram enviadas para ${email}.`,
       });
       setView('login');
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Erro",
-        description: error.message,
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     } finally {
@@ -102,10 +103,10 @@ const Login = () => {
         });
         setView('login');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Erro no cadastro",
-        description: error.message,
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     } finally {

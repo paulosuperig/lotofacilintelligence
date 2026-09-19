@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { aiConfigService } from '@/services/aiConfigService';
 import { initMetaPixel } from '@/lib/analytics/metaPixel';
+import { getErrorMessage } from '@/lib/errors';
 
 export const MetaPixelConfig = () => {
   const { toast } = useToast();
@@ -25,7 +26,9 @@ export const MetaPixelConfig = () => {
       setCurrentId(id);
       setCapiStatus(status);
       if (status.testCode) setTestCode(status.testCode);
-    } catch (err) {}
+    } catch (err) {
+      console.warn('[MetaPixelConfig] Falha ao carregar configuração:', err);
+    }
   };
 
   useEffect(() => {
@@ -45,8 +48,8 @@ export const MetaPixelConfig = () => {
       setPixelId('');
       initMetaPixel(clean);
       toast({ title: 'Pixel configurado', description: 'O Meta Pixel foi salvo e ativado.' });
-    } catch (err: any) {
-      toast({ title: 'Erro ao salvar', description: err?.message || 'Verifique suas permissões de admin.', variant: 'destructive' });
+    } catch (err: unknown) {
+      toast({ title: 'Erro ao salvar', description: getErrorMessage(err, 'Verifique suas permissões de admin.'), variant: 'destructive' });
     } finally {
       setSaving(false);
     }
@@ -65,8 +68,8 @@ export const MetaPixelConfig = () => {
       }
       await loadConfig();
       toast({ title: 'CAPI configurado', description: 'As configurações de Conversions API foram salvas.' });
-    } catch (err: any) {
-      toast({ title: 'Erro ao salvar CAPI', description: err?.message, variant: 'destructive' });
+    } catch (err: unknown) {
+      toast({ title: 'Erro ao salvar CAPI', description: getErrorMessage(err), variant: 'destructive' });
     } finally {
       setSaving(false);
     }
