@@ -8,12 +8,14 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
     "setup:supabase": "node scripts/setup-supabase.mjs",
     "validate:supabase": "node scripts/validate-supabase.mjs --strict",
-    "prebuild": "node scripts/validate-supabase.mjs"
+    "prebuild": "node scripts/validate-supabase.mjs --strict",
+    "release:check": "npm run lint && npm run test && npm run validate:supabase"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -50,7 +52,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "crypto-js": "^4.2.0",
-    "date-fns": "^4.1.0",
+    "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.38.0",
     "input-otp": "^1.4.2",
