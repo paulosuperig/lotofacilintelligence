@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useLottery } from '@/hooks/useLottery';
 import { useAiAssistant } from '@/hooks/useAiAssistant';
@@ -12,24 +12,7 @@ import { Sidebar, MobileNav } from '@/components/layout/Navigation';
 import { Header } from '@/components/layout/Header';
 import { DecorativeBackground } from '@/components/layout/VisualDecorations';
 import Login from '@/components/Login';
-import { BentoGrid } from '@/components/home/BentoGrid';
-
-// Heavy panels: lazy-loaded on demand to shrink initial bundle
-const AdminPanel = lazy(() => import('@/components/admin/AdminPanel').then(m => ({ default: m.AdminPanel })));
-const AiAssistant = lazy(() => import('@/components/ai/AiAssistant').then(m => ({ default: m.AiAssistant })));
-const HistoryPanel = lazy(() => import('@/components/history/HistoryPanel').then(m => ({ default: m.HistoryPanel })));
-const FechamentosPanel = lazy(() => import('@/components/home/FechamentosPanel').then(m => ({ default: m.FechamentosPanel })));
-const TipsPanel = lazy(() => import('@/components/home/TipsPanel').then(m => ({ default: m.TipsPanel })));
-const StatsPanel = lazy(() => import('@/components/home/StatsPanel').then(m => ({ default: m.StatsPanel })));
-const BacktestPanel = lazy(() => import('@/components/home/BacktestPanel').then(m => ({ default: m.BacktestPanel })));
-const ConferidorPanel = lazy(() => import('@/components/home/ConferidorPanel').then(m => ({ default: m.ConferidorPanel })));
-const BolaoPanel = lazy(() => import('@/components/home/BolaoPanel').then(m => ({ default: m.BolaoPanel })));
-
-const PanelFallback = () => (
-  <div className="flex items-center justify-center py-16">
-    <div className="h-8 w-8 rounded-full border-4 border-muted border-t-primary animate-spin" />
-  </div>
-);
+import { AppPanels } from '@/components/home/AppPanels';
 
 const Index = () => {
   const { toast } = useToast();
