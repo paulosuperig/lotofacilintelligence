@@ -32,13 +32,13 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Lotofácil AI" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://lotofacilinteligence.vercel.app/" />
-    <meta property="og:image" content="https://lotofacilinteligence.vercel.app/og-image.jpg?v=2">
+    <meta property="og:url" content="https://lotofacilintelligence.lovable.app/" />
+    <meta property="og:image" content="https://lotofacilintelligence.lovable.app/og-image.jpg?v=2">
     <meta property="og:image:type" content="image/jpeg">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:image" content="https://lotofacilinteligence.vercel.app/og-image.jpg?v=2">
+    <meta name="twitter:image" content="https://lotofacilintelligence.lovable.app/og-image.jpg?v=2">
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -59,10 +59,11 @@
       }
     </script>
     <meta property="og:title" content="Lotofácil Intelligence">
-  <meta name="twitter:title" content="Lotofácil Intelligence">
-  <meta property="og:description" content="Sistema exclusivo de inteligência artificial para análise e estatísticas da Lotofácil.">
-  <meta name="twitter:description" content="Sistema exclusivo de inteligência artificial para análise e estatísticas da Lotofácil.">
-</head>
+    <meta name="twitter:title" content="Lotofácil Intelligence">
+    <meta property="og:description" content="Sistema exclusivo de inteligência artificial para análise e estatísticas da Lotofácil.">
+    <meta name="twitter:description" content="Sistema exclusivo de inteligência artificial para análise e estatísticas da Lotofácil.">
+    <link rel="canonical" href="https://lotofacilintelligence.lovable.app/" />
+  </head>
   <body>
     <div id="root">
       <div id="boot-splash" style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font-family:system-ui,sans-serif;background:#f5f3ff;color:#3f3f46">
@@ -99,9 +100,13 @@
             report(e.message);
           }
         }, true);
+        window.addEventListener('unhandledrejection', function (e) {
+          var reason = e && e.reason;
+          report(reason && reason.message ? reason.message : 'Falha inesperada ao iniciar.');
+        });
         setTimeout(function () {
           if (document.getElementById('boot-splash')) report('Tempo esgotado ao iniciar.');
-        }, 12000);
+        }, 20000);
       })();
     </script>
     <script type="module" src="/src/main.tsx"></script>
