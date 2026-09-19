@@ -30,7 +30,7 @@ const SUGGESTIONS = [
   { label: "Fixar & excluir dezenas", text: "Gere 4 jogos fixando as dezenas 05 e 10, sem a dezena 23.", icon: <Pin size={18} />, color: "amber" },
 ];
 
-interface AiAssistantProps {
+export interface AiAssistantProps {
   isAiConfigured: boolean;
   aiChat: AiChatMessage[];
   isAiLoading: boolean;

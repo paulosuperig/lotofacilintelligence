@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { LoadingFallback } from "@/components/ui/spinner";
 import { MetaPixelLoader } from "./components/analytics/MetaPixelLoader";
 
 const Index = lazy(() => import("./pages/Index.tsx"));
@@ -26,14 +27,7 @@ const queryClient = new QueryClient({
 });
 
 const RouteFallback = () => (
-  <div
-    role="status"
-    aria-live="polite"
-    className="min-h-screen flex items-center justify-center bg-background"
-  >
-    <div className="h-10 w-10 rounded-full border-4 border-muted border-t-primary animate-spin" />
-    <span className="sr-only">Carregando…</span>
-  </div>
+  <LoadingFallback className="min-h-screen bg-background" spinnerClassName="h-10 w-10" />
 );
 
 const App = () => (

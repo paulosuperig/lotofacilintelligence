@@ -1,414 +1,84 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Clover, Lock, User, Eye, EyeOff, LogIn, ArrowLeft, Mail, UserPlus, Phone } from 'lucide-react';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { getErrorMessage } from '@/lib/errors';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useAuthActions, type RegisterInput } from '@/hooks/useAuthActions';
+import { LoginForm } from '@/components/auth/LoginForm';
+import { ForgotPasswordForm } from '@/components/auth/ForgotPasswordForm';
+import { RegisterForm } from '@/components/auth/RegisterForm';
+
+type AuthView = 'login' | 'forgot-password' | 'register';
+
+const VIEW_MOTION: Record<AuthView, { initialX: number; exitX: number }> = {
+  login: { initialX: -20, exitX: 20 },
+  'forgot-password': { initialX: 20, exitX: -20 },
+  register: { initialX: 20, exitX: -20 },
+};
 
 const Login = () => {
   const currentYear = new Date().getFullYear();
+  const [view, setView] = useState<AuthView>('login');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [view, setView] = useState<'login' | 'forgot-password' | 'register'>('login');
-  const [registerData, setRegisterData] = useState({ name: '', email: '', whatsapp: '', password: '' });
-  const { toast } = useToast();
+  const { isLoading, signIn, requestPasswordReset, signUp } = useAuthActions();
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+  const goToLogin = () => setView('login');
 
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: email.trim().toLowerCase(),
-        password: password,
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Bem-vindo!",
-        description: "Acesso autorizado com sucesso.",
-      });
-    } catch (error: unknown) {
-      toast({
-        title: "Erro de autenticação",
-        description: getErrorMessage(error, "E-mail ou senha incorretos."),
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+  const handleForgotPassword = async (value: string) => {
+    const sent = await requestPasswordReset(value);
+    if (sent) goToLogin();
   };
 
-  const handleForgotPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "E-mail enviado",
-        description: `As instruções de recuperação foram enviadas para ${email}.`,
-      });
-      setView('login');
-    } catch (error: unknown) {
-      toast({
-        title: "Erro",
-        description: getErrorMessage(error),
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+  const handleRegister = async (data: RegisterInput) => {
+    const signedIn = await signUp(data);
+    if (!signedIn) goToLogin();
   };
 
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      // 1. Sign Up the user
-      const { data, error } = await supabase.auth.signUp({
-        email: registerData.email.trim().toLowerCase(),
-        password: registerData.password,
-        options: {
-          data: {
-            full_name: registerData.name,
-            whatsapp: registerData.whatsapp,
-          },
-          emailRedirectTo: window.location.origin,
-        }
-      });
-
-      if (error) throw error;
-
-      if (data.session) {
-        toast({
-          title: "Cadastro realizado!",
-          description: "Bem-vindo ao Lotofácil Intelligence.",
-        });
-      } else {
-        toast({
-          title: "Verifique seu e-mail",
-          description: "Enviamos um link de confirmação para o seu e-mail.",
-        });
-        setView('login');
-      }
-    } catch (error: unknown) {
-      toast({
-        title: "Erro no cadastro",
-        description: getErrorMessage(error),
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const motionProps = VIEW_MOTION[view];
 
   return (
     <div className="relative min-h-dvh bg-[#f5f3ff] flex flex-col items-center justify-center p-4 pt-[env(safe-area-inset-top)] pb-[calc(env(safe-area-inset-bottom)+3rem)]">
-      {/* 
-         Script de monitoramento de erro em produção para auditoria Vercel.
-         Se o React falhar, exibe uma mensagem amigável em vez de tela branca.
-      */}
-      <script dangerouslySetInnerHTML={{ __html: `
-        window.onerror = function(msg, url, line) {
-          console.error("ERRO CRÍTICO:", msg, "em", url, ":", line);
-          var root = document.getElementById('root');
-          if (root && root.innerHTML.length < 100) {
-            root.innerHTML = '<div style="padding:2rem;text-align:center;font-family:sans-serif;"><h2>Erro de Carregamento</h2><p>O sistema encontrou um erro e não pôde carregar. Por favor, recarregue a página.</p></div>';
-          }
-        };
-      `}} />
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md bg-white rounded-[2rem] md:rounded-[2.5rem] p-5 sm:p-8 md:p-12 shadow-2xl shadow-purple-500/10 border border-purple-100 overflow-hidden relative z-10"
       >
-
         <AnimatePresence mode="wait">
-          {view === 'login' ? (
-            <motion.div
-              key="login"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className="flex flex-col items-center mb-6 sm:mb-8 md:mb-10 text-center">
-                <motion.div 
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-purple-600 to-fuchsia-600 flex items-center justify-center shadow-lg shadow-purple-500/20 mb-3 sm:mb-4 md:mb-6"
-                >
-                  <Clover className="text-white w-7 h-7 md:w-8 md:h-8" />
-                </motion.div>
-                <h1 className="text-xl md:text-2xl font-display font-bold text-zinc-900 mb-2 tracking-tight">
-                  Lotofácil <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-fuchsia-600">Intelligence</span>
-                </h1>
-                <p className="text-zinc-500 text-xs md:text-sm">Faça login para acessar sua conta premium</p>
-              </div>
+          <motion.div
+            key={view}
+            initial={{ opacity: 0, x: motionProps.initialX }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: motionProps.exitX }}
+            transition={{ duration: 0.3 }}
+          >
+            {view === 'login' && (
+              <LoginForm
+                isLoading={isLoading}
+                email={email}
+                onEmailChange={setEmail}
+                onSubmit={signIn}
+                onForgotPassword={() => setView('forgot-password')}
+                onRegister={() => setView('register')}
+              />
+            )}
 
-              <form onSubmit={handleLogin} className="space-y-4 sm:space-y-6">
-                <div className="space-y-2">
-                  <label htmlFor="login-email" className="text-xs font-bold text-zinc-500 uppercase tracking-widest ml-1 block">E-mail</label>
-                  <div className="relative">
-                    <User aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
-                    <Input
-                      id="login-email"
-                      type="email"
-                      autoComplete="email"
-                      placeholder="seu@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="pl-12 h-12 sm:h-14 rounded-2xl border-purple-100 focus:ring-purple-500 focus:border-purple-500 bg-purple-50/30 text-[13px] sm:text-sm"
-                      required
-                    />
-                  </div>
-                </div>
+            {view === 'forgot-password' && (
+              <ForgotPasswordForm
+                isLoading={isLoading}
+                email={email}
+                onEmailChange={setEmail}
+                onSubmit={handleForgotPassword}
+                onBack={goToLogin}
+              />
+            )}
 
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center ml-1">
-                    <label htmlFor="login-password" className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Senha</label>
-                    <button 
-                      type="button"
-                      onClick={() => setView('forgot-password')}
-                      className="text-[10px] font-bold text-purple-600 uppercase tracking-widest hover:text-purple-700 transition-colors"
-                    >
-                      Esqueceu a senha?
-                    </button>
-                  </div>
-                  <div className="relative">
-                    <Lock aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
-                    <Input
-                      id="login-password"
-                      type={showPassword ? "text" : "password"}
-                      autoComplete="current-password"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="pl-12 pr-12 h-12 sm:h-14 rounded-2xl border-purple-100 focus:ring-purple-500 focus:border-purple-500 bg-purple-50/30 text-[13px] sm:text-sm"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
-                      aria-pressed={showPassword}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-purple-600 transition-colors"
-                    >
-                      {showPassword ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
-                    </button>
-                  </div>
-                </div>
-
-                <Button 
-                  type="submit" 
-                  disabled={isLoading}
-                  className="w-full h-12 sm:h-14 rounded-2xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white font-bold text-sm sm:text-base shadow-lg shadow-purple-500/25 transition-all active:scale-[0.98]"
-                >
-                  {isLoading ? (
-                    <motion.div 
-                      animate={{ rotate: 360 }} 
-                      transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                    >
-                      <LogIn size={20} />
-                    </motion.div>
-                  ) : (
-                    "Acessar Sistema"
-                  )}
-                </Button>
-
-                <div className="pt-4 text-center">
-                  <button 
-                    type="button"
-                    onClick={() => setView('register')}
-                    className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest hover:text-purple-600 transition-colors"
-                  >
-                    Não tem uma conta? <span className="text-purple-600">Solicite acesso</span>
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-          ) : view === 'forgot-password' ? (
-            <motion.div
-              key="forgot-password"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <button 
-                onClick={() => setView('login')}
-                className="flex items-center gap-2 text-zinc-400 hover:text-purple-600 transition-colors mb-8 group"
-              >
-                <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-                <span className="text-xs font-bold uppercase tracking-widest">Voltar ao login</span>
-              </button>
-
-              <div className="flex flex-col items-center mb-8 md:mb-10 text-center">
-                <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-purple-50 flex items-center justify-center mb-4 md:mb-6">
-                  <Mail className="text-purple-600 w-7 h-7 md:w-8 md:h-8" />
-                </div>
-                <h1 className="text-2xl md:text-3xl font-display font-bold text-zinc-900 mb-2 tracking-tight">Recuperar Senha</h1>
-                <p className="text-zinc-500 text-xs md:text-sm max-w-[240px]">Informe seu e-mail para receber as instruções de recuperação.</p>
-              </div>
-
-              <form onSubmit={handleForgotPassword} className="space-y-6">
-                <div className="space-y-2">
-                  <label htmlFor="forgot-email" className="text-xs font-bold text-zinc-500 uppercase tracking-widest ml-1 block">E-mail Cadastrado</label>
-                  <div className="relative">
-                    <User aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
-                    <Input
-                      id="forgot-email"
-                      type="email"
-                      autoComplete="email"
-                      placeholder="seu@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="pl-12 h-14 rounded-2xl border-purple-100 focus:ring-purple-500 focus:border-purple-500 bg-purple-50/30"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <Button 
-                  type="submit" 
-                  disabled={isLoading}
-                  className="w-full h-14 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-white font-bold text-lg shadow-lg transition-all active:scale-[0.98]"
-                >
-                  {isLoading ? (
-                    <motion.div 
-                      animate={{ rotate: 360 }} 
-                      transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                    >
-                      <LogIn size={20} />
-                    </motion.div>
-                  ) : (
-                    "Enviar Instruções"
-                  )}
-                </Button>
-              </form>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="register"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <button 
-                onClick={() => setView('login')}
-                className="flex items-center gap-2 text-zinc-400 hover:text-purple-600 transition-colors mb-6 group"
-              >
-                <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-                <span className="text-xs font-bold uppercase tracking-widest">Voltar ao login</span>
-              </button>
-
-              <div className="flex flex-col items-center mb-6 text-center">
-                <div className="w-14 h-14 rounded-2xl bg-purple-50 flex items-center justify-center mb-4">
-                  <UserPlus className="text-purple-600 w-7 h-7" />
-                </div>
-                <h1 className="text-2xl font-display font-bold text-zinc-900 mb-2 tracking-tight">Criar Conta</h1>
-                <p className="text-zinc-500 text-xs">Preencha os dados para solicitar seu acesso premium</p>
-              </div>
-
-              <form onSubmit={handleRegister} className="space-y-4">
-                <div className="space-y-1.5">
-                  <label htmlFor="register-name" className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1 block">Nome Completo</label>
-                  <div className="relative">
-                    <User aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
-                    <Input
-                      id="register-name"
-                      autoComplete="name"
-                      placeholder="Seu nome"
-                      value={registerData.name}
-                      onChange={(e) => setRegisterData({...registerData, name: e.target.value})}
-                      className="pl-11 h-12 rounded-xl border-purple-100 bg-purple-50/30"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label htmlFor="register-whatsapp" className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1 block">WhatsApp</label>
-                  <div className="relative">
-                    <Phone aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
-                    <Input
-                      id="register-whatsapp"
-                      type="tel"
-                      autoComplete="tel"
-                      placeholder="(00) 00000-0000"
-                      value={registerData.whatsapp}
-                      onChange={(e) => setRegisterData({...registerData, whatsapp: e.target.value})}
-                      className="pl-11 h-12 rounded-xl border-purple-100 bg-purple-50/30"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label htmlFor="register-email" className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1 block">E-mail</label>
-                  <div className="relative">
-                    <Mail aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
-                    <Input
-                      id="register-email"
-                      type="email"
-                      autoComplete="email"
-                      placeholder="seu@email.com"
-                      value={registerData.email}
-                      onChange={(e) => setRegisterData({...registerData, email: e.target.value})}
-                      className="pl-11 h-12 rounded-xl border-purple-100 bg-purple-50/30"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label htmlFor="register-password" className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1 block">Senha</label>
-                  <div className="relative">
-                    <Lock aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
-                    <Input
-                      id="register-password"
-                      type="password"
-                      autoComplete="new-password"
-                      placeholder="••••••••"
-                      value={registerData.password}
-                      onChange={(e) => setRegisterData({...registerData, password: e.target.value})}
-                      className="pl-11 h-12 rounded-xl border-purple-100 bg-purple-50/30"
-                      required
-                      minLength={6}
-                    />
-                  </div>
-                </div>
-
-                <Button 
-                  type="submit" 
-                  disabled={isLoading}
-                  className="w-full h-12 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm shadow-lg transition-all active:scale-[0.98] mt-2"
-                >
-                  {isLoading ? "Enviando..." : "Solicitar Acesso Premium"}
-                </Button>
-              </form>
-            </motion.div>
-          )}
+            {view === 'register' && (
+              <RegisterForm isLoading={isLoading} onSubmit={handleRegister} onBack={goToLogin} />
+            )}
+          </motion.div>
         </AnimatePresence>
 
-        <div className="mt-10 pt-8 border-t border-purple-50 text-center">
-        </div>
+        <div className="mt-10 pt-8 border-t border-purple-50 text-center" />
       </motion.div>
-      
-      <motion.footer 
+
+      <motion.footer
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8 }}
@@ -418,7 +88,9 @@ const Login = () => {
         <p className="text-[10px] text-purple-400/70 font-medium text-center flex flex-col gap-1 md:block">
           <span>Lotofácil Intelligence {currentYear}</span>
           <span className="hidden md:inline"> - </span>
-          <span>Desenvolvido por: <span className="font-semibold text-purple-500/80">Paulo H. Santos</span></span>
+          <span>
+            Desenvolvido por: <span className="font-semibold text-purple-500/80">Paulo H. Santos</span>
+          </span>
         </p>
       </motion.footer>
     </div>
