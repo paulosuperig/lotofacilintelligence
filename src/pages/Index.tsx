@@ -72,6 +72,11 @@ const Index = () => {
   const goGenerator = useCallback(() => setActiveTab('gerador'), []);
   const goSettings = useCallback(() => setActiveTab('ajustes'), []);
 
+  const navigateToTab = useCallback((tab: string) => {
+    setActiveTab(tab);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
 
   if (loading) return null; // Prevent flicker during auth check
   
@@ -99,95 +104,39 @@ const Index = () => {
             <Header role={user.role} isRefreshing={isRefreshing} onRefresh={fetchLatestResult} />
 
             <AnimatePresence mode="wait">
-              <Suspense fallback={<PanelFallback />}>
-              {activeTab === 'historico' && (
-                <HistoryPanel
-                  history={history}
-                  onBack={goHome}
-                  onClearHistory={clearHistory}
-                  onGoToGenerator={goGenerator}
-                  latestResult={latestResult}
-                />
-              )}
-              
-              {activeTab === 'stats' && (
-                <FechamentosPanel
-                  onBack={goHome}
-                  onSaveGames={(games) => saveToHistory(games)}
-                />
-              )}
-
-              {activeTab === 'dicas' && (
-                <TipsPanel onBack={goHome} />
-              )}
-
-              {activeTab === 'estatisticas' && (
-                <StatsPanel onBack={goHome} />
-              )}
-
-              {activeTab === 'provareal' && (
-                <BacktestPanel onBack={goHome} />
-              )}
-
-              {activeTab === 'conferidor' && (
-                <ConferidorPanel
-                  onBack={goHome}
-                  defaultConcurso={latestResult?.concurso}
-                  history={history}
-                />
-              )}
-
-              {activeTab === 'bolao' && (
-                <BolaoPanel
-                  onBack={goHome}
-                  defaultConcurso={latestResult?.concurso}
-                  history={history}
-                />
-              )}
-
-              {activeTab === 'ia' && (
-                <AiAssistant 
-                  isAiConfigured={isAiConfigured}
-                  aiChat={aiChat}
-                  isAiLoading={isAiLoading}
-                  aiMessage={aiMessage}
-                  onSendMessage={(e, msg) => sendMessage(msg || aiMessage)}
-                  onSetAiMessage={setAiMessage}
-                  onSaveAiGame={saveAiGameToHistory}
-                  onClearChat={clearChatHistory}
-                  onBack={goHome}
-                  onGoToSettings={goSettings}
-                  role={user.role}
-                />
-              )}
-
-              {(activeTab === 'usuarios' || activeTab === 'ajustes') && isAdmin && (
-                <AdminPanel 
-                  users={users}
-                  onBack={goHome}
-                  onCreateOrUpdateUser={createOrUpdateUser}
-                  onDeleteUser={deleteUser}
-                  onToggleUserStatus={toggleUserStatus}
-                  onResetPassword={resetPassword}
-                  isAiConfigured={isAiConfigured}
-                  onSaveDeepSeekKey={saveDeepSeekKey}
-                  defaultTab={activeTab === 'usuarios' ? 'users' : 'settings'}
-                />
-              )}
-
-              {(activeTab === 'home' || activeTab === 'gerador') && (
-                <BentoGrid 
-                  latestResult={latestResult} 
-                  isLoading={isLoading} 
-                  historyLength={history.length}
-                  onClearHistory={clearHistory}
-                  onNavigate={(tab) => {
-                    setActiveTab(tab);
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
-                />
-              )}
-              </Suspense>
+              <AppPanels
+                activeTab={activeTab}
+                isAdmin={isAdmin}
+                latestResult={latestResult}
+                isLoading={isLoading}
+                history={history}
+                onNavigate={navigateToTab}
+                onGoHome={goHome}
+                onGoGenerator={goGenerator}
+                onGoSettings={goSettings}
+                onClearHistory={clearHistory}
+                onSaveGames={saveToHistory}
+                ai={{
+                  isAiConfigured,
+                  aiChat,
+                  isAiLoading,
+                  aiMessage,
+                  onSendMessage: (e, msg) => sendMessage(msg || aiMessage),
+                  onSetAiMessage: setAiMessage,
+                  onSaveAiGame: saveAiGameToHistory,
+                  onClearChat: clearChatHistory,
+                  role: user.role,
+                }}
+                admin={{
+                  users,
+                  onCreateOrUpdateUser: createOrUpdateUser,
+                  onDeleteUser: deleteUser,
+                  onToggleUserStatus: toggleUserStatus,
+                  onResetPassword: resetPassword,
+                  isAiConfigured,
+                  onSaveDeepSeekKey: saveDeepSeekKey,
+                }}
+              />
             </AnimatePresence>
           </motion.div>
         </main>
