@@ -1,10 +1,13 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
   buildCorsHeaders,
+  clientIpFrom,
   forbiddenOrigin,
   internalError,
   isOriginAllowed,
+  rateLimit,
 } from "../_shared/security.ts";
+
 
 Deno.serve(async (req) => {
   const origin = req.headers.get("Origin");
@@ -41,7 +44,28 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { messages, max_tokens, model: requestedModel } = await req.json();
+    // Rate limiting por usuário (custo de API externa): 20 req/min.
+    const rl = rateLimit(`ai:${user.id}:${clientIpFrom(req)}`, 20, 60_000);
+    if (!rl.ok) {
+      return new Response(
+        JSON.stringify({ error: "RATE_LIMITED", message: "Muitas solicitações. Aguarde alguns segundos." }),
+        {
+          status: 429,
+          headers: { ...cors, "Content-Type": "application/json", "Retry-After": String(rl.retryAfterSec) },
+        },
+      );
+    }
+
+    let body: { messages?: unknown; max_tokens?: number; model?: string };
+    try {
+      body = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: "INVALID_JSON", message: "Corpo da requisição inválido." }),
+        { status: 400, headers: { ...cors, "Content-Type": "application/json" } },
+      );
+    }
+    const { messages, max_tokens, model: requestedModel } = body;
 
     // Validação de entrada: evita repassar payloads malformados/abusivos ao upstream.
     if (!Array.isArray(messages) || messages.length === 0) {
@@ -50,6 +74,7 @@ Deno.serve(async (req) => {
         { status: 400, headers: { ...cors, "Content-Type": "application/json" } },
       );
     }
+
 
     const adminClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     const { data: cfg } = await adminClient

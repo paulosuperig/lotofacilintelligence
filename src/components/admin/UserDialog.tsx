@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { UserProfile, UserFormData } from '@/types/lottery';
 import { Mail, Lock, Key } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,9 +34,9 @@ import {
 interface UserDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  editingUser: any;
-  userFormData: any;
-  setUserFormData: (data: any) => void;
+  editingUser: UserProfile | null;
+  userFormData: UserFormData;
+  setUserFormData: (data: UserFormData) => void;
   onSubmit: (e: React.FormEvent) => void;
   onResetPassword?: (newPassword: string) => void;
 }
@@ -97,7 +98,7 @@ export const UserDialog = ({
             <Label htmlFor="role" className="text-zinc-700 dark:text-zinc-300">Perfil de Acesso</Label>
             <Select 
               value={userFormData.role} 
-              onValueChange={(value: any) => setUserFormData({...userFormData, role: value})}
+              onValueChange={(value: UserFormData['role']) => setUserFormData({...userFormData, role: value})}
             >
               <SelectTrigger className="rounded-xl bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100">
                 <SelectValue placeholder="Selecione o perfil" />

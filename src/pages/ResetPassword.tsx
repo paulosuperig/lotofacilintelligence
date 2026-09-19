@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
+import { getErrorMessage } from '@/lib/errors';
 
 const ResetPassword = () => {
   const [password, setPassword] = useState('');
@@ -27,10 +28,10 @@ const ResetPassword = () => {
         description: "Sua nova senha foi salva com sucesso.",
       });
       navigate('/');
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Erro",
-        description: error.message,
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     } finally {

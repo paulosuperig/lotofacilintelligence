@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useToast } from './use-toast';
 import { sanitizeString } from '@/lib/security/utils';
@@ -60,7 +60,7 @@ export const useAiAssistant = (latestResult?: LotteryResult | null) => {
     },
   });
 
-  const aiChat = chatQuery.data ?? [];
+  const aiChat = useMemo(() => chatQuery.data ?? [], [chatQuery.data]);
 
   /** Escreve no cache do Query — fonte única de verdade do chat. */
   const appendMessage = useCallback(

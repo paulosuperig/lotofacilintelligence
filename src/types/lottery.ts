@@ -34,6 +34,14 @@ export interface UserProfile {
   status: 'active' | 'blocked';
   createdAt: string;
   created_at?: string; // Fallback for Supabase queries
+  whatsapp?: string | null;
+}
+
+export interface UserFormData {
+  email: string;
+  password: string;
+  role: 'admin' | 'demo';
+  status: 'active' | 'blocked';
 }
 
 export interface Statistics {

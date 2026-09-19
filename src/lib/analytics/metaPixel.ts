@@ -13,10 +13,18 @@
  *  - Guarda contra init duplicado e validação de Pixel ID
  */
 
+type FbqFunction = ((...args: unknown[]) => void) & {
+  callMethod?: (...args: unknown[]) => void;
+  queue?: unknown[];
+  push?: unknown;
+  loaded?: boolean;
+  version?: string;
+};
+
 declare global {
   interface Window {
-    fbq?: any;
-    _fbq?: any;
+    fbq?: FbqFunction;
+    _fbq?: FbqFunction;
     __META_PIXEL_INITIALIZED__?: boolean;
     __META_PIXEL_ID__?: string | null;
   }
@@ -41,7 +49,7 @@ const sha256 = async (input: string): Promise<string> => {
 
 /** UUID v4 — usado como eventID para deduplicação Pixel ↔ CAPI. */
 export const generateEventId = (): string => {
-  if (isBrowser() && (window.crypto as any)?.randomUUID) return (window.crypto as any).randomUUID();
+  if (isBrowser() && typeof window.crypto?.randomUUID === 'function') return window.crypto.randomUUID();
   return 'evt-' + Math.random().toString(36).slice(2) + '-' + Date.now().toString(36);
 };
 
@@ -172,13 +180,13 @@ export interface BaseEventParams {
   /** Status de conclusão (CompleteRegistration). */
   status?: boolean | string;
   /** Quaisquer parâmetros customizados extras. */
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 const buildParams = (params?: BaseEventParams) => {
   if (!params) return { params: {}, eventID: generateEventId() };
   const { eventID, eventSourceUrl, ...rest } = params;
-  const finalParams: Record<string, any> = { ...rest };
+  const finalParams: Record<string, unknown> = { ...rest };
   if (finalParams.value != null && !finalParams.currency) finalParams.currency = DEFAULT_CURRENCY;
   return {
     params: finalParams,

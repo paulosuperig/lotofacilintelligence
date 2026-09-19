@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useToast } from './use-toast';
 import { LotteryResult, SavedGame } from '@/types/lottery';
@@ -87,7 +87,7 @@ export const useLottery = () => {
     staleTime: 5 * 60 * 1000,
   });
 
-  const history = historyQuery.data ?? [];
+  const history = useMemo(() => historyQuery.data ?? [], [historyQuery.data]);
   const latestResult = latestResultQuery.data ?? null;
   const analysis = analysisQuery.data ?? null;
 
@@ -110,10 +110,14 @@ export const useLottery = () => {
     let isSubscribed = true;
     const client = supabase;
     const channelName = `games-history-${userId}`;
+    // Guarda a referência real do canal: remover via `client.channel(name)` recria
+    // uma instância e pode deixar um canal "zumbi" inscrito (vazamento de WebSocket).
+    let activeChannel: ReturnType<typeof client.channel> | null = null;
 
     const setupRealtime = async () => {
       try {
         const channel = client.channel(channelName);
+        activeChannel = channel;
 
         channel.on(
           'postgres_changes',
@@ -137,6 +141,12 @@ export const useLottery = () => {
           });
         });
 
+        // Efeito já desmontado enquanto a inscrição estava em andamento.
+        if (!isSubscribed) {
+          client.removeChannel(channel);
+          return;
+        }
+
         if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
           console.error(`[Realtime] Falha na conexão (${status})`);
           // Não mostramos toast aqui para não floodar se houver reconexões
@@ -150,8 +160,12 @@ export const useLottery = () => {
 
     return () => {
       isSubscribed = false;
-      client.removeChannel(client.channel(channelName));
+      if (activeChannel) {
+        client.removeChannel(activeChannel);
+        activeChannel = null;
+      }
     };
+
   }, [userId, queryClient]);
 
   // -------------------------------------------------------------- mutations
