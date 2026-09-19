@@ -14,7 +14,7 @@
     "test:watch": "vitest",
     "setup:supabase": "node scripts/setup-supabase.mjs",
     "validate:supabase": "node scripts/validate-supabase.mjs --strict",
-    "prebuild": "node scripts/validate-supabase.mjs --strict",
+    "prebuild": "node scripts/validate-supabase.mjs",
     "release:check": "npm run lint && npm run test && npm run validate:supabase"
   },
   "dependencies": {
