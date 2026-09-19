@@ -1,18 +1,12 @@
 import { supabase as typedSupabase } from '@/integrations/supabase/client';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabasePublishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || '';
-
-// Only initialize if URL is valid to prevent crash
-export const supabase = supabaseUrl && supabaseUrl.startsWith('http') && supabasePublishableKey
-  ? typedSupabase
-  : null as typeof typedSupabase | null;
+// Fonte única do cliente Supabase. O módulo de integração já resolve as
+// variáveis da hospedagem e os valores públicos de fallback; repetir essa
+// validação aqui desativava o histórico enquanto a autenticação seguia ativa.
+export const supabase = typedSupabase;
 
 /**
- * Skill: Architecture Strategy
- * This utility handles the abstraction between LocalStorage (current) and Supabase (future).
- * When VITE_SUPABASE_URL is present, it will prioritize cloud storage.
+ * Compatibilidade para os serviços que ainda consultam a disponibilidade.
+ * Se o cliente foi criado, todos os fluxos usam a mesma conexão configurada.
  */
-export const isSupabaseEnabled = () => {
-  return !!supabaseUrl && supabaseUrl.startsWith('http') && !!supabasePublishableKey;
-};
+export const isSupabaseEnabled = () => true;
