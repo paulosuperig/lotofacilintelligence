@@ -12,21 +12,16 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
 
       - name: Setup Node
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
 
-      # Usamos `npm install` (e não `npm ci`) porque o lockfile versionado do
-      # projeto é o bun.lockb; o package-lock.json não é mantido em sincronia.
       - name: Instalar dependências
-        run: npm install --no-audit --no-fund
-        env:
-          # o postinstall (setup-supabase) não deve quebrar o CI
-          SKIP_SUPABASE_VALIDATION: '1'
+        run: npm ci --no-audit --no-fund
 
       - name: Typecheck (gate)
         run: npx tsc -p tsconfig.app.json --noEmit
