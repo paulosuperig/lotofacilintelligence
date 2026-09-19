@@ -13,10 +13,10 @@ export const userService = {
     
     if (error) throw error;
     
-    return (data || []).map((u: any) => ({
+    return (data || []).map((u) => ({
       ...u,
       createdAt: u.created_at || new Date().toISOString()
-    })) as UserProfile[];
+    })) as unknown as UserProfile[];
   },
 
   async updateProfile(userId: string, data: { role: 'admin' | 'demo'; status: 'active' | 'blocked' }) {

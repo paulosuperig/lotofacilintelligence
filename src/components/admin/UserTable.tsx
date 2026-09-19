@@ -32,10 +32,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import { maskSensitiveData } from '@/lib/security/utils';
+import { UserProfile } from '@/types/lottery';
 
 interface UserTableProps {
-  users: any[];
-  onEdit: (user: any) => void;
+  users: UserProfile[];
+  onEdit: (user: UserProfile) => void;
   onToggleStatus: (userId: string) => void;
   onDelete: (userId: string) => void;
 }
@@ -196,7 +197,14 @@ export const UserTable = ({ users, onEdit, onToggleStatus, onDelete }: UserTable
   </div>
 );
 
-const ActionMenu = ({ u, onEdit, onToggleStatus, onDelete }: any) => (
+interface ActionMenuProps {
+  u: UserProfile;
+  onEdit: (user: UserProfile) => void;
+  onToggleStatus: (userId: string) => void;
+  onDelete: (userId: string) => void;
+}
+
+const ActionMenu = ({ u, onEdit, onToggleStatus, onDelete }: ActionMenuProps) => (
   <DropdownMenu>
     <DropdownMenuTrigger asChild>
       <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
