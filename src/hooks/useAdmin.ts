@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useToast } from './use-toast';
 import { UserProfile } from '@/types/lottery';
@@ -26,7 +26,7 @@ export const useAdmin = (enabled: boolean = true) => {
     staleTime: 60 * 1000,
   });
 
-  const users = usersQuery.data ?? [];
+  const users = useMemo(() => usersQuery.data ?? [], [usersQuery.data]);
 
   const invalidateUsers = useCallback(
     () => queryClient.invalidateQueries({ queryKey: adminUsersKey }),

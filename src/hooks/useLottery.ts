@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useToast } from './use-toast';
 import { LotteryResult, SavedGame } from '@/types/lottery';
@@ -87,7 +87,7 @@ export const useLottery = () => {
     staleTime: 5 * 60 * 1000,
   });
 
-  const history = historyQuery.data ?? [];
+  const history = useMemo(() => historyQuery.data ?? [], [historyQuery.data]);
   const latestResult = latestResultQuery.data ?? null;
   const analysis = analysisQuery.data ?? null;
 
