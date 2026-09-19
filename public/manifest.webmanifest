@@ -1,4 +1,5 @@
 {
+  "id": "/",
   "name": "Lotofácil Intelligence",
   "short_name": "Lotofácil AI",
   "description": "Sistema exclusivo de inteligência artificial para análise e estatísticas da Lotofácil.",
@@ -9,7 +10,10 @@
   "background_color": "#0b0616",
   "theme_color": "#9333ea",
   "lang": "pt-BR",
-  "categories": ["utilities", "entertainment"],
+  "categories": [
+    "utilities",
+    "entertainment"
+  ],
   "icons": [
     {
       "src": "/favicon.svg",
