@@ -1,11 +1,10 @@
 import { useLotteryLatest } from './lottery/useLotteryLatest';
 import { useLotteryHistory } from './lottery/useLotteryHistory';
 import { useLotteryGeneration } from './lottery/useLotteryGeneration';
+import type { LotteryHookOptions } from './lottery/types';
 
 export { historyKey, latestResultKey, historyAnalysisKey } from '@/lib/lottery/queryKeys';
-export type { SmartFilters, LotteryHookOptions } from './lottery/types';
-
-export interface LotteryHookOptions { realtime?: boolean; analysis?: boolean }
+export type { SmartFilters, SmartOptions, LotteryHookOptions } from './lottery/types';
 
 export const useLottery = (options: LotteryHookOptions = {}) => {
   const { realtime = false, analysis: loadAnalysis = true } = options;

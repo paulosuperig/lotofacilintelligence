@@ -3,7 +3,8 @@ import { generateSecureId } from '@/lib/security/utils';
 import { gameSignature, type GenStrategy } from '@/lib/lottery/generator';
 import { runLotteryTask } from '@/lib/lottery/runTask';
 import { normalizeDraw, type HistoryAnalysis } from '@/lib/lottery/analysis';
-import { LotteryResult, SmartOptions, SavedGame } from '@/types/lottery';
+import { LotteryResult, SavedGame } from '@/types/lottery';
+import { SmartOptions } from './types';
 
 const STRATEGY_LABEL: Record<GenStrategy, string> = {
   equilibrada: 'Equilibrada',
