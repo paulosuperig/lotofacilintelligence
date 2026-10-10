@@ -4,6 +4,7 @@ import { BentoGrid } from '@/components/home/BentoGrid';
 import type { LotteryResult, SavedGame } from '@/types/lottery';
 import type { AiAssistantProps } from '@/components/ai/AiAssistant';
 import type { AdminPanelProps } from '@/components/admin/AdminPanel';
+import type { SaveResult } from '@/lib/lottery/saveConfirmation';
 
 // Painéis pesados: carregados sob demanda para reduzir o bundle inicial.
 const AdminPanel = lazy(() => import('@/components/admin/AdminPanel').then((m) => ({ default: m.AdminPanel })));
@@ -31,7 +32,7 @@ export interface AppPanelsProps {
   onGoGenerator: () => void;
   onGoSettings: () => void;
   onClearHistory: () => void;
-  onSaveGames: (games: SavedGame[]) => void;
+  onSaveGames: (games: SavedGame[]) => Promise<SaveResult>;
   ai: Omit<AiAssistantProps, 'onBack' | 'onGoToSettings'>;
   admin: Omit<AdminPanelProps, 'onBack' | 'defaultTab'>;
 }

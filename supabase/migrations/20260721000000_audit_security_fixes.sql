@@ -17,6 +17,7 @@ AS $$
 $$;
 
 -- 2. Update has_role to include active check (JOIN profiles)
+-- This ensures even admins lose access if their status is 'blocked'
 CREATE OR REPLACE FUNCTION app_private.has_role(_user_id uuid, _role public.app_role)
 RETURNS boolean
 LANGUAGE sql
@@ -46,7 +47,12 @@ AS $$
 $$;
 
 -- 4. Apply restrictive policies to private tables (must be active)
--- We re-create the policies that only checked for auth.uid()
+
+-- USER_ROLES
+DROP POLICY IF EXISTS "user_roles_select_policy" ON public.user_roles;
+CREATE POLICY "user_roles_select_policy" ON public.user_roles
+FOR SELECT TO authenticated
+USING ((user_id = auth.uid() OR app_private.has_role(auth.uid(), 'admin')) AND app_private.is_active(auth.uid()));
 
 -- GAMES_HISTORY
 DROP POLICY IF EXISTS "games_history_user_all_policy" ON public.games_history;
@@ -79,9 +85,11 @@ WITH CHECK (
 CREATE OR REPLACE FUNCTION public.clear_user_history()
 RETURNS void AS $$
 BEGIN
+  -- Explicit guard for status
   IF NOT app_private.is_active(auth.uid()) THEN
-    RAISE EXCEPTION 'Account is not active';
+    RAISE EXCEPTION 'Account is not active or is blocked';
   END IF;
+
   DELETE FROM public.games_history WHERE user_id = auth.uid();
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;

@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { hasActiveAccount } from "../_shared/accountAccess.ts";
 import {
   buildCorsHeaders,
   clientIpFrom,
@@ -45,14 +46,9 @@ Deno.serve(async (req) => {
 
     const adminClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // AUD-001: Explicit AI status check (Account status + Privilege)
-    const { data: profile, error: profileErr } = await adminClient
-      .from("profiles")
-      .select("status, role")
-      .eq("id", user.id)
-      .single();
-
-    if (profileErr || profile?.status !== 'active') {
+    const active = await hasActiveAccount(() => adminClient
+      .from("profiles").select("status").eq("id", user.id).maybeSingle());
+    if (!active) {
       return new Response(JSON.stringify({ 
         error: "FORBIDDEN_STATUS", 
         message: "Sua conta está inativa ou bloqueada." 
@@ -61,9 +57,6 @@ Deno.serve(async (req) => {
         headers: { ...cors, "Content-Type": "application/json" },
       });
     }
-
-    // Opcional: Bloquear role 'demo' de usar IA se for planejado
-    // if (profile.role === 'demo') { ... }
 
     // Rate limiting por usuário: 20 req/min.
     const rl = rateLimit(`ai:${user.id}:${clientIpFrom(req)}`, 20, 60_000);
