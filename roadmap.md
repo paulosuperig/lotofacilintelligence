@@ -12,7 +12,7 @@
 - [ ] Publicar a nova versão — aguardando ação explícita do usuário.
 
 ## Correções autorizadas em 10/10/2026
-- [ ] AUD-001: Impedir acesso de contas bloqueadas no banco e nas funções protegidas.
-- [ ] AUD-002: Corrigir exclusão de perfis mantendo a proteção do último administrador ativo.
-- [ ] AUD-004: Confirmar persistência antes de anunciar jogos de fechamento salvos.
-- [ ] Validar as três regras com testes e revisão dos dez especialistas.
+- [x] AUD-001: Impedir acesso de contas bloqueadas no banco e nas funções protegidas.
+- [x] AUD-002: Corrigir exclusão de perfis mantendo a proteção do último administrador ativo.
+- [x] AUD-004: Confirmar persistência antes de anunciar jogos de fechamento salvos.
+- [x] Validar as três regras com testes e revisão dos dez especialistas; 157 testes passaram, regressões SQL com rollback passaram e funções protegidas foram implantadas.
