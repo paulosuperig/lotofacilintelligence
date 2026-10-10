@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { FlaskConical, RefreshCcw, Info, Cpu, Dice5, Trophy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { lotteryService } from '@/services/lotteryService';
-import { runBacktest, type BacktestReport, type StrategyResult } from '@/lib/lottery/backtest';
+import type { BacktestReport, StrategyResult } from '@/lib/lottery/backtest';
+import { runLotteryTask } from '@/lib/lottery/runTask';
 import { ResponsibleGaming } from '@/components/lottery/ResponsibleGaming';
 
 interface BacktestPanelProps {
@@ -57,25 +58,28 @@ export const BacktestPanel = ({ onBack }: BacktestPanelProps) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const calculation = useRef<AbortController | null>(null);
+  useEffect(() => () => calculation.current?.abort(), []);
   const handleRun = async () => {
     if (loading) return;
     setLoading(true);
     setError(null);
-    // deixa o loading pintar antes do cálculo síncrono pesado
-    await new Promise((r) => setTimeout(r, 60));
+    const controller = new AbortController();
+    calculation.current = controller;
     try {
       const draws = await lotteryService.getChronologicalDraws();
       if (draws.length < BT_OPTS.minHistory + 10) {
         setError('Histórico insuficiente para a prova real. Tente novamente mais tarde.');
         return;
       }
-      // yield extra antes do cálculo bloqueante
-      await new Promise((r) => setTimeout(r, 20));
-      setReport(runBacktest(draws, BT_OPTS));
+      if (controller.signal.aborted) return;
+      const result = await runLotteryTask({ kind: 'backtest', draws, options: BT_OPTS }, controller.signal);
+      if (!controller.signal.aborted) setReport(result);
     } catch {
-      setError('Não foi possível carregar o histórico para a prova real. Verifique sua conexão.');
+      if (!controller.signal.aborted) setError('Não foi possível carregar o histórico para a prova real. Verifique sua conexão.');
     } finally {
-      setLoading(false);
+      if (!controller.signal.aborted) setLoading(false);
+      if (calculation.current === controller) calculation.current = null;
     }
   };
 

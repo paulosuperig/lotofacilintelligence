@@ -2,13 +2,10 @@ import React, { lazy, Suspense } from 'react';
 import { LoadingFallback } from '@/components/ui/spinner';
 import { BentoGrid } from '@/components/home/BentoGrid';
 import type { LotteryResult, SavedGame } from '@/types/lottery';
-import type { AiAssistantProps } from '@/components/ai/AiAssistant';
-import type { AdminPanelProps } from '@/components/admin/AdminPanel';
 import type { SaveResult } from '@/lib/lottery/saveConfirmation';
 
-// Painéis pesados: carregados sob demanda para reduzir o bundle inicial.
-const AdminPanel = lazy(() => import('@/components/admin/AdminPanel').then((m) => ({ default: m.AdminPanel })));
-const AiAssistant = lazy(() => import('@/components/ai/AiAssistant').then((m) => ({ default: m.AiAssistant })));
+const AdminPanel = lazy(() => import('./AdminConnectedPanel').then((m) => ({ default: m.AdminConnectedPanel })));
+const AiAssistant = lazy(() => import('./AiConnectedPanel').then((m) => ({ default: m.AiConnectedPanel })));
 const HistoryPanel = lazy(() => import('@/components/history/HistoryPanel').then((m) => ({ default: m.HistoryPanel })));
 const FechamentosPanel = lazy(() =>
   import('@/components/home/FechamentosPanel').then((m) => ({ default: m.FechamentosPanel })),
@@ -33,15 +30,10 @@ export interface AppPanelsProps {
   onGoSettings: () => void;
   onClearHistory: () => void;
   onSaveGames: (games: SavedGame[]) => Promise<SaveResult>;
-  ai: Omit<AiAssistantProps, 'onBack' | 'onGoToSettings'>;
-  admin: Omit<AdminPanelProps, 'onBack' | 'defaultTab'>;
+  role: 'admin' | 'demo';
 }
 
-/**
- * Seleciona o painel exibido conforme a aba ativa.
- * Mantém `Index` responsável apenas pelo layout e pela composição dos dados.
- */
-export const AppPanels = ({
+export const AppPanels = React.memo(({
   activeTab,
   isAdmin,
   latestResult,
@@ -53,10 +45,9 @@ export const AppPanels = ({
   onGoSettings,
   onClearHistory,
   onSaveGames,
-  ai,
-  admin,
+  role,
 }: AppPanelsProps) => (
-  <Suspense fallback={<LoadingFallback className="py-16" />}>
+  <Suspense fallback={<LoadingFallback className="min-h-[500px] py-16" />}>
     {activeTab === 'historico' && (
       <HistoryPanel
         history={history}
@@ -83,10 +74,10 @@ export const AppPanels = ({
       <BolaoPanel onBack={onGoHome} defaultConcurso={latestResult?.concurso} history={history} />
     )}
 
-    {activeTab === 'ia' && <AiAssistant {...ai} onBack={onGoHome} onGoToSettings={onGoSettings} />}
+    {activeTab === 'ia' && <AiAssistant latestResult={latestResult} role={role} onSaveGames={onSaveGames} onBack={onGoHome} onGoToSettings={onGoSettings} />}
 
     {(activeTab === 'usuarios' || activeTab === 'ajustes') && isAdmin && (
-      <AdminPanel {...admin} onBack={onGoHome} defaultTab={activeTab === 'usuarios' ? 'users' : 'settings'} />
+      <AdminPanel onBack={onGoHome} defaultTab={activeTab === 'usuarios' ? 'users' : 'settings'} />
     )}
 
     {(activeTab === 'home' || activeTab === 'gerador') && (
@@ -99,4 +90,6 @@ export const AppPanels = ({
       />
     )}
   </Suspense>
-);
+));
+
+AppPanels.displayName = 'AppPanels';

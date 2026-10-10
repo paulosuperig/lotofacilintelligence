@@ -16,3 +16,11 @@
 - [x] AUD-002: Corrigir exclusão de perfis mantendo a proteção do último administrador ativo.
 - [x] AUD-004: Confirmar persistência antes de anunciar jogos de fechamento salvos.
 - [x] Validar as três regras com testes e revisão dos dez especialistas; 157 testes passaram, regressões SQL com rollback passaram e funções protegidas foram implantadas.
+
+## Otimização de performance
+- [x] Analisar carregamento, UI, queries, APIs, estado, assets e produção com dez especialistas.
+- [x] Separar carregamento autenticado e carregar IA/admin somente quando necessários.
+- [x] Retirar cálculos pesados da interface, reduzir atrasos artificiais e preservar os algoritmos.
+- [x] Reduzir consultas repetidas e inscrições Realtime; manter confirmação de persistência.
+- [x] Validar testes, carregamento desktop/mobile e registrar resultados e limitações em docs/performance-audit.md.
+- [ ] Validar fluxos autenticados no Supabase real — bloqueado por conexão externa sem sessão de teste gerenciada.

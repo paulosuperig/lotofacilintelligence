@@ -1,34 +1,26 @@
-import { useEffect } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { supabase, isSupabaseEnabled } from '@/lib/supabase';
-
-export const sessionUserKey = ['auth', 'session_user'] as const;
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { sessionKey } from './useAuth';
+import type { Session } from '@supabase/supabase-js';
 
 /**
- * Fonte única do `userId` da sessão para as queries de dados.
- * Mantém o cache sincronizado com `onAuthStateChange` (subscription, não query).
+ * Lightweight hook to get the current userId.
+ * Reuses the cached session from useAuth to avoid duplicate listeners and requests.
  */
 export const useSessionUser = () => {
-  const queryClient = useQueryClient();
-
-  const query = useQuery<string | null>({
-    queryKey: sessionUserKey,
+  const { data: session, isLoading } = useQuery<Session | null>({
+    queryKey: sessionKey,
+    // Note: useAuth handles the actual getSession/subscription logic.
+    // This query just taps into the same cache key.
     queryFn: async () => {
-      if (!isSupabaseEnabled() || !supabase) return null;
       const { data: { session } } = await supabase.auth.getSession();
-      return session?.user?.id ?? null;
+      return session;
     },
-    staleTime: 5 * 60 * 1000,
-    retry: 1,
+    staleTime: Infinity,
   });
 
-  useEffect(() => {
-    if (!isSupabaseEnabled() || !supabase) return;
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      queryClient.setQueryData<string | null>(sessionUserKey, session?.user?.id ?? null);
-    });
-    return () => subscription.unsubscribe();
-  }, [queryClient]);
-
-  return { userId: query.data ?? null, isLoading: query.isLoading };
+  return { 
+    userId: session?.user?.id ?? null, 
+    isLoading 
+  };
 };

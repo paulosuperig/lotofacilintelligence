@@ -39,7 +39,7 @@ const itemVariants: Variants = {
   }
 };
 
-export const BentoGrid = ({ 
+export const BentoGrid = React.memo(({ 
   latestResult, 
   isLoading, 
   historyLength, 
@@ -54,21 +54,15 @@ export const BentoGrid = ({
       exit="hidden"
       className="grid grid-cols-2 lg:grid-cols-12 gap-3 sm:gap-4 lg:gap-6 lg:items-start"
     >
-      {/* Gerador: destaque, largura total (no desktop ocupa 8/12) */}
       <motion.div id="generator-section" variants={itemVariants} className="col-span-2 lg:col-span-8">
         <GeneratorCard />
       </motion.div>
 
-      {/* Coluna direita: Resultado + Tendências empilhados num container próprio.
-          Desacopla a altura desta coluna da do gerador — com lg:items-start no
-          grid, esta coluna fica com altura natural no topo, então o card de
-          resultado NÃO é esticado nem "desce" quando o gerador cresce. */}
       <motion.div variants={itemVariants} className="col-span-2 lg:col-span-4 flex flex-col gap-3 sm:gap-4 lg:gap-6">
         <ResultCard latestResult={latestResult} isLoading={isLoading} />
         <TrendsCard onNavigate={() => onNavigate('estatisticas')} />
       </motion.div>
 
-      {/* Cards compactos lado a lado (2-up) no mobile */}
       <motion.div variants={itemVariants} className="col-span-1 lg:col-span-4">
         <HistoryStatusCard historyLength={historyLength} onClearHistory={onClearHistory} />
       </motion.div>
@@ -77,25 +71,23 @@ export const BentoGrid = ({
         <FechamentosCard onNavigate={() => onNavigate('stats')} />
       </motion.div>
 
-      {/* CTA de dicas: largura total no mobile para dar impacto */}
       <motion.div variants={itemVariants} className="col-span-2 lg:col-span-4">
         <TipsCard onNavigate={() => onNavigate('dicas')} />
       </motion.div>
 
-      {/* Prova Real (backtest) — transparência/assertividade */}
       <motion.div variants={itemVariants} className="col-span-1 lg:col-span-4">
         <BacktestCard onNavigate={() => onNavigate('provareal')} />
       </motion.div>
 
-      {/* Conferidor — checar jogo contra qualquer concurso + prêmio */}
       <motion.div variants={itemVariants} className="col-span-1 lg:col-span-4">
         <ConferidorCard onNavigate={() => onNavigate('conferidor')} />
       </motion.div>
 
-      {/* Bolão — gestão de grupo */}
       <motion.div variants={itemVariants} className="col-span-2 lg:col-span-4">
         <BolaoCard onNavigate={() => onNavigate('bolao')} />
       </motion.div>
     </motion.div>
   );
-};
+});
+
+BentoGrid.displayName = 'BentoGrid';

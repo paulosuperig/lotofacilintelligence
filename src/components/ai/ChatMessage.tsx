@@ -82,7 +82,7 @@ interface ChatMessageProps {
   onSaveAiGame: (content: string) => void;
 }
 
-export const ChatMessage = ({ msg, onSaveAiGame }: ChatMessageProps) => (
+export const ChatMessage = React.memo(({ msg, onSaveAiGame }: ChatMessageProps) => (
   <div className={cn("flex flex-col max-w-[95%] md:max-w-[90%]", msg.role === 'user' ? "ml-auto items-end" : "mr-auto items-start")}>
     <div className={cn(
       "p-3 sm:p-4 rounded-2xl text-sm leading-relaxed shadow-sm",
@@ -115,4 +115,4 @@ export const ChatMessage = ({ msg, onSaveAiGame }: ChatMessageProps) => (
       {msg.role === 'user' ? 'Você' : 'Intelligence AI'}
     </span>
   </div>
-);
+));

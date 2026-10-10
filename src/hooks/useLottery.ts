@@ -7,10 +7,12 @@ import { supabase, isSupabaseEnabled } from '@/lib/supabase';
 import { lotteryService } from '@/services/lotteryService';
 import { historyService } from '@/services/historyService';
 import { trackCustom } from '@/lib/analytics/metaPixel';
-import { generateOptimizedGame, generateBatch, gameSignature, type GenStrategy } from '@/lib/lottery/generator';
+import { gameSignature, type GenStrategy } from '@/lib/lottery/generator';
+import { runLotteryTask } from '@/lib/lottery/runTask';
+import { historyKey, latestResultKey, historyAnalysisKey } from '@/lib/lottery/queryKeys';
+export { historyKey, latestResultKey, historyAnalysisKey } from '@/lib/lottery/queryKeys';
 import { normalizeDraw, type HistoryAnalysis } from '@/lib/lottery/analysis';
 import { useSessionUser } from './useSessionUser';
-import type { RealtimeChannel } from '@supabase/supabase-js';
 import type { SaveResult } from '@/lib/lottery/saveConfirmation';
 
 /** Filtros avançados (faixas soft) escolhidos pelo usuário. */
@@ -55,11 +57,9 @@ const STRATEGY_LABEL: Record<GenStrategy, string> = {
 /** Assinatura canônica de um jogo (usada na deduplicação do histórico). */
 const signatureOf = (numbers: number[]) => [...numbers].sort((a, b) => a - b).join(',');
 
-export const historyKey = (userId: string | null) => ['games_history', userId] as const;
-export const latestResultKey = ['latest_result'] as const;
-export const historyAnalysisKey = ['history_analysis'] as const;
+export interface LotteryHookOptions { realtime?: boolean; analysis?: boolean }
 
-export const useLottery = () => {
+export const useLottery = ({ realtime = false, analysis: loadAnalysis = true }: LotteryHookOptions = {}) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { userId } = useSessionUser();
@@ -74,6 +74,7 @@ export const useLottery = () => {
 
   const analysisQuery = useQuery<HistoryAnalysis | null>({
     queryKey: historyAnalysisKey,
+    enabled: loadAnalysis,
     queryFn: () => lotteryService.getHistoryAnalysis(),
     staleTime: 30 * 60 * 1000,
     retry: 1,
@@ -102,97 +103,56 @@ export const useLottery = () => {
     }
   }, [latestResultQuery.isError, latestResultQuery.error, toast]);
 
-  // -------------------------------------------------------------- realtime
+  // One owner in AppShell; a batch of inserts causes one trailing refresh.
   useEffect(() => {
-    if (!userId || !isSupabaseEnabled() || !supabase) return;
-
-    let isSubscribed = true;
+    if (!realtime || !userId || !isSupabaseEnabled() || !supabase) return;
+    let mounted = true;
+    let timer: ReturnType<typeof setTimeout> | undefined;
     const client = supabase;
-    const channelName = `games-history-${userId}`;
-    // Guarda a referência real do canal: remover via `client.channel(name)` recria
-    // uma instância e pode deixar um canal "zumbi" inscrito (vazamento de WebSocket).
-    let activeChannel: ReturnType<typeof client.channel> | null = null;
-
-    const setupRealtime = async () => {
-      try {
-        const channel = client.channel(channelName);
-        activeChannel = channel;
-
-        channel.on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'games_history',
-            filter: `user_id=eq.${userId}`,
-          },
-          (payload) => {
-            if (!isSubscribed) return;
-            console.log('[Realtime] Mudança detectada no histórico:', payload.eventType);
-            queryClient.invalidateQueries({ queryKey: historyKey(userId) });
-          }
-        );
-
-        const status = await new Promise<string>((resolve) => {
-          channel.subscribe((s, err) => {
-            if (err) console.error('[Realtime] Erro na inscrição:', err);
-            resolve(s);
-          });
-        });
-
-        // Efeito já desmontado enquanto a inscrição estava em andamento.
-        if (!isSubscribed) {
-          client.removeChannel(channel);
-          return;
-        }
-
-        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-          console.error(`[Realtime] Falha na conexão (${status})`);
-          // Não mostramos toast aqui para não floodar se houver reconexões
-        }
-      } catch (err) {
-        console.error('[Realtime] Erro crítico no setup:', err);
-      }
+    const refresh = () => {
+      if (!mounted) return;
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        if (mounted) void queryClient.invalidateQueries({ queryKey: historyKey(userId), exact: true });
+      }, 300);
     };
-
-    setupRealtime();
-
+    const channel = client.channel(`games-history-${userId}`);
+    try {
+      channel.on('postgres_changes', {
+        event: '*', schema: 'public', table: 'games_history', filter: `user_id=eq.${userId}`,
+      }, refresh).subscribe((status, error) => {
+        if (!mounted) return;
+        if (error || status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.error('[Realtime] Falha na inscrição:', error ?? status);
+        }
+        if (status === 'SUBSCRIBED') refresh();
+      });
+    } catch (error) {
+      console.error('[Realtime] Falha ao conectar:', error);
+    }
     return () => {
-      isSubscribed = false;
-      if (activeChannel) {
-        client.removeChannel(activeChannel);
-        activeChannel = null;
-      }
+      mounted = false;
+      clearTimeout(timer);
+      void client.removeChannel(channel).catch((error: unknown) => console.error('[Realtime] Falha no cleanup:', error));
     };
-
-  }, [userId, queryClient]);
+  }, [realtime, userId, queryClient]);
 
   // -------------------------------------------------------------- mutations
-  const saveMutation = useMutation<SavedGame[], Error, SavedGame[], { previous?: SavedGame[] }>({
+  const saveMutation = useMutation<SavedGame[], Error, SavedGame[]>({
     mutationFn: async (games) => {
       if (!userId) throw new Error('Sessão expirada. Faça login novamente.');
       return historyService.saveGames(userId, games);
     },
-    onMutate: async (games) => {
-      await queryClient.cancelQueries({ queryKey: historyKey(userId) });
-      const previous = queryClient.getQueryData<SavedGame[]>(historyKey(userId));
-      queryClient.setQueryData<SavedGame[]>(historyKey(userId), [...games, ...(previous ?? [])]);
-      return { previous };
-    },
-    onError: (error, _games, context) => {
-      queryClient.setQueryData<SavedGame[]>(historyKey(userId), context?.previous ?? []);
+    onError: (error) => {
       console.error('[Lottery] Error saving history:', error);
-      toast({
-        title: 'Erro na persistência',
-        description: 'Não foi possível sincronizar o histórico.',
-        variant: 'destructive',
+      toast({ title: 'Erro na persistência', description: 'Não foi possível sincronizar o histórico.', variant: 'destructive' });
+    },
+    onSuccess: (savedGames) => {
+      queryClient.setQueryData<SavedGame[]>(historyKey(userId), (previous = []) => {
+        const ids = new Set(savedGames.map((game) => game.id));
+        return [...savedGames, ...previous.filter((game) => !ids.has(game.id))]
+          .sort((a, b) => b.timestamp - a.timestamp).slice(0, 100);
       });
-    },
-    onSuccess: (updatedHistory) => {
-      queryClient.setQueryData<SavedGame[]>(historyKey(userId), updatedHistory);
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: historyKey(userId) });
     },
   });
 
@@ -217,7 +177,7 @@ export const useLottery = () => {
       toast({ title: 'Histórico limpo', description: 'Todos os seus jogos foram removidos.' });
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: historyKey(userId) });
+      queryClient.invalidateQueries({ queryKey: historyKey(userId), exact: true, refetchType: "active" });
     },
   });
 
@@ -227,7 +187,7 @@ export const useLottery = () => {
   }, [latestResultQuery]);
 
   const loadHistory = useCallback(async () => {
-    await queryClient.invalidateQueries({ queryKey: historyKey(userId) });
+    await queryClient.invalidateQueries({ queryKey: historyKey(userId), exact: true, refetchType: "active" });
   }, [queryClient, userId]);
 
   const clearHistory = useCallback(async () => {
@@ -259,7 +219,7 @@ export const useLottery = () => {
       }));
 
       try {
-        await saveMutation.mutateAsync(securedGames);
+        const savedGames = await saveMutation.mutateAsync(securedGames);
         trackCustom('SalvarJogo', {
           content_category: 'history',
           content_ids: securedGames.map((g) => g.id),
@@ -267,7 +227,7 @@ export const useLottery = () => {
           value: securedGames.length * 3.5,
           currency: 'BRL',
         });
-        return { success: true, duplicate: false, savedCount: securedGames.length };
+        return { success: savedGames.length > 0, duplicate: false, savedCount: savedGames.length };
       } catch {
         // toast/rollback já tratados no onError da mutation
         return { success: false, duplicate: false, savedCount: 0 };
@@ -276,12 +236,12 @@ export const useLottery = () => {
     [history, queryClient, saveMutation, userId],
   );
 
-  const generateSmartGame = useCallback((opts: SmartOptions = {}) => {
+  const generateSmartGame = useCallback(async (opts: SmartOptions = {}, signal?: AbortSignal) => {
     const avoid = new Set(history.map(g => gameSignature(g.numbers)));
     const previousDraw = latestResult ? normalizeDraw(latestResult.dezenas) : null;
     const strategy = opts.strategy ?? 'equilibrada';
 
-    const result = generateOptimizedGame({
+    const result = await runLotteryTask({ kind: 'game', options: {
       analysis,
       previousDraw,
       avoid,
@@ -289,7 +249,7 @@ export const useLottery = () => {
       fixed: opts.fixed,
       excluded: opts.excluded,
       ...pickFilters(opts),
-    });
+    } }, signal);
 
     const label = STRATEGY_LABEL[strategy];
     return {
@@ -302,12 +262,12 @@ export const useLottery = () => {
     };
   }, [history, analysis, latestResult]);
 
-  const generateSmartBatch = useCallback((count: number, opts: SmartOptions = {}): SavedGame[] => {
+  const generateSmartBatch = useCallback(async (count: number, opts: SmartOptions = {}, signal?: AbortSignal): Promise<SavedGame[]> => {
     const avoid = new Set(history.map(g => gameSignature(g.numbers)));
     const previousDraw = latestResult ? normalizeDraw(latestResult.dezenas) : null;
     const strategy = opts.strategy ?? 'equilibrada';
 
-    const games = generateBatch({
+    const games = await runLotteryTask({ kind: 'batch', options: {
       count,
       analysis,
       previousDraw,
@@ -316,7 +276,7 @@ export const useLottery = () => {
       fixed: opts.fixed,
       excluded: opts.excluded,
       ...pickFilters(opts),
-    });
+    } }, signal);
     const label = STRATEGY_LABEL[strategy];
     return games.map((g) => ({
       id: generateSecureId(),

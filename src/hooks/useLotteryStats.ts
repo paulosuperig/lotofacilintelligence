@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { lotteryService } from '@/services/lotteryService';
 import type { HistoryAnalysis } from '@/lib/lottery/analysis';
-import { historyAnalysisKey } from './useLottery';
+import { historyAnalysisKey } from '@/lib/lottery/queryKeys';
 
 /**
  * Expõe a análise estatística do histórico (frequência, atraso, quentes/frias

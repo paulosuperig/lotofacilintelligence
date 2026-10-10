@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useToast } from './use-toast';
 import { sanitizeString } from '@/lib/security/utils';
@@ -6,7 +6,7 @@ import type { LotteryResult } from '@/types/lottery';
 import { supabase, isSupabaseEnabled } from '@/lib/supabase';
 import { computeLotteryStats, formatStatsForPrompt, formatAnalysisForPrompt, formatCriteriaForPrompt } from '@/lib/ai/lotteryStats';
 import { aiService } from '@/services/aiService';
-import { aiConfigService } from '@/services/aiConfigService';
+import { useAiConfiguration } from './useAiConfiguration';
 import { sanitizeAiGamesDetailed, type UserIntent } from '@/lib/ai/sanitizeGames';
 import { parseUserIntent, estrategiaDirective, formatIntentForPrompt } from '@/lib/ai/intent';
 import { useLotteryStats } from '@/hooks/useLotteryStats';
@@ -34,27 +34,24 @@ export const useAiAssistant = (latestResult?: LotteryResult | null) => {
   const queryClient = useQueryClient();
   const { userId } = useSessionUser();
   const [isAiLoading, setIsAiLoading] = useState(false);
-  const [aiMessage, setAiMessage] = useState('');
+  const activeRequest = useRef<AbortController | null>(null);
+  useEffect(() => () => activeRequest.current?.abort(), []);
 
-  const configQuery = useQuery<boolean>({
-    queryKey: ['ai_config', 'configured'],
-    queryFn: () => aiConfigService.isConfigured(),
-    staleTime: 5 * 60 * 1000,
-  });
-  const isAiConfigured = configQuery.data ?? false;
+  const { isAiConfigured, saveDeepSeekKey } = useAiConfiguration();
 
   const chatQuery = useQuery<AiChatMessage[]>({
     queryKey: aiChatKey(userId),
     enabled: !!userId,
     staleTime: 5 * 60 * 1000,
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       if (!isSupabaseEnabled() || !supabase || !userId) return [];
       const { data, error } = await supabase
         .from('ai_chat_history')
         .select('role, content')
         .eq('user_id', userId)
         .order('created_at', { ascending: true })
-        .limit(30);
+        .limit(30)
+        .abortSignal(signal);
       if (error) throw error;
       return (data ?? []) as AiChatMessage[];
     },
@@ -164,20 +161,20 @@ ${statsBlock}
 ${analysisBlock}`;
   }, [latestResult, analysis]);
 
-  const callAiGateway = useCallback(async (messages: AiGatewayMessage[], maxTokens: number, attempt = 0): Promise<string> => {
+  const callAiGateway = useCallback(async (messages: AiGatewayMessage[], maxTokens: number, signal: AbortSignal, attempt = 0): Promise<string> => {
+    if (signal.aborted) throw new DOMException('Consulta cancelada.', 'AbortError');
     try {
-      const content = await aiService.callAiGateway(messages, maxTokens);
-      // Resposta vazia é tratada como falha transitória e re-tentada (evita
-      // exibir um balão em branco quando o modelo devolve content vazio).
+      const content = await aiService.callAiGateway(messages, maxTokens, signal);
       if ((!content || !content.trim()) && attempt < MAX_RETRIES) {
         await sleep(1000 * Math.pow(2, attempt));
-        return callAiGateway(messages, maxTokens, attempt + 1);
+        return callAiGateway(messages, maxTokens, signal, attempt + 1);
       }
       return content;
     } catch (err) {
+      if (signal.aborted) throw err;
       if (attempt < MAX_RETRIES) {
         await sleep(1000 * Math.pow(2, attempt));
-        return callAiGateway(messages, maxTokens, attempt + 1);
+        return callAiGateway(messages, maxTokens, signal, attempt + 1);
       }
       throw err;
     }
@@ -185,16 +182,16 @@ ${analysisBlock}`;
 
   const sendMessage = useCallback(async (messageToSend: string) => {
     const sanitizedMessage = sanitizeString(messageToSend.trim());
-    if (!sanitizedMessage) return;
+    if (!sanitizedMessage || activeRequest.current) return;
+    const controller = new AbortController();
+    activeRequest.current = controller;
 
     const intent = parseUserIntent(sanitizedMessage);
     const newMessage = { role: 'user' as const, content: sanitizedMessage };
     appendMessage(newMessage);
     persistChatMessage('user', sanitizedMessage);
-    setAiMessage('');
     setIsAiLoading(true);
 
-    // Search event — Meta usa para otimização de campanhas de descoberta
     trackEvent('Search', {
       search_string: sanitizedMessage.slice(0, 120),
       content_category: 'ai_chat',
@@ -209,13 +206,9 @@ ${analysisBlock}`;
         ...aiChat.slice(-MAX_HISTORY_MESSAGES),
         newMessage,
       ];
-      // ~260 tokens/jogo (linha do jogo + "Racional" curto). Teto de 8192 dá
-      // folga ao deepseek-v4-pro para entregar análise + jogos + conferência
-      // completos sem truncar. Limite total seguro de 8192 tokens.
       const dynamicTokens = Math.min(8192, 1200 + (intent.quantidade ?? 3) * 260);
-      const raw = await callAiGateway(payload, dynamicTokens);
-      // Guarda anti-resposta-vazia: se o modelo devolver conteúdo em branco,
-      // não exibimos um balão vazio — sinalizamos e deixamos o usuário reenviar.
+      const raw = await callAiGateway(payload, dynamicTokens, controller.signal);
+      if (controller.signal.aborted) return;
       if (!raw || !raw.trim()) {
         throw new Error('A IA retornou uma resposta vazia. Toque em enviar novamente.');
       }
@@ -234,6 +227,7 @@ ${analysisBlock}`;
         soma_max: intent.somaMax ?? null,
       });
     } catch (error) {
+      if (controller.signal.aborted) return;
       const message = errorMessage(error);
       trackCustom('ConsultaIAFalhou', {
         content_category: 'ai_chat',
@@ -245,28 +239,10 @@ ${analysisBlock}`;
         variant: 'destructive',
       });
     } finally {
-      setIsAiLoading(false);
+      if (!controller.signal.aborted) setIsAiLoading(false);
+      if (activeRequest.current === controller) activeRequest.current = null;
     }
   }, [aiChat, appendMessage, buildSystemPrompt, callAiGateway, persistChatMessage, toast, latestResult]);
-
-  const saveDeepSeekKey = useCallback(async (key: string) => {
-    try {
-      const clean = sanitizeString(key.trim());
-      await aiConfigService.saveKey(clean);
-      queryClient.setQueryData<boolean>(['ai_config', 'configured'], true);
-      queryClient.invalidateQueries({ queryKey: ['ai_config', 'configured'] });
-      toast({
-        title: "Configuração salva",
-        description: "A chave da API DeepSeek foi armazenada com segurança no Supabase.",
-      });
-    } catch (err) {
-      toast({
-        title: "Erro ao salvar",
-        description: errorMessage(err) || "Verifique suas permissões de admin.",
-        variant: "destructive",
-      });
-    }
-  }, [queryClient, toast]);
 
   const clearChatHistory = useCallback(async () => {
     if (isSupabaseEnabled() && supabase && userId) {
@@ -279,8 +255,6 @@ ${analysisBlock}`;
   return {
     aiChat,
     isAiLoading,
-    aiMessage,
-    setAiMessage,
     sendMessage,
     isAiConfigured,
     saveDeepSeekKey,

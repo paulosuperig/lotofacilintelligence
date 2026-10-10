@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Cpu, Loader2, Send } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,6 @@ import type { AiChatMessage } from '@/hooks/useAiAssistant';
 import { cn } from "@/lib/utils";
 import { Sparkles, Flame, ShieldCheck, Snowflake, Zap, Link2, Repeat, Pin } from 'lucide-react';
 
-// Mapa ESTÁTICO de cores (classes dinâmicas `bg-${x}-50` são purgadas pelo Tailwind).
 const SUGGESTION_COLORS: Record<string, string> = {
   purple: 'bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400',
   sky: 'bg-sky-50 text-sky-600 dark:bg-sky-900/20 dark:text-sky-400',
@@ -17,8 +16,6 @@ const SUGGESTION_COLORS: Record<string, string> = {
   indigo: 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400',
 };
 
-// Prompts otimizados: acionam as novas capacidades da IA (estratégias dinâmicas,
-// co-ocorrência, filtros de soma/quantidade) e a análise data-grounded.
 const SUGGESTIONS = [
   { label: "Jogos equilibrados", text: "Gere 3 jogos equilibrados para o próximo concurso, com soma entre 180 e 210.", icon: <Sparkles size={18} />, color: "purple" },
   { label: "Foco em atrasadas", text: "Gere 3 jogos priorizando as dezenas atrasadas.", icon: <Snowflake size={18} />, color: "sky" },
@@ -34,9 +31,7 @@ export interface AiAssistantProps {
   isAiConfigured: boolean;
   aiChat: AiChatMessage[];
   isAiLoading: boolean;
-  aiMessage: string;
-  onSendMessage: (e?: React.FormEvent, customMessage?: string) => void;
-  onSetAiMessage: (val: string) => void;
+  onSendMessage: (msg: string) => void;
   onSaveAiGame: (content: string) => void;
   onClearChat?: () => void;
   onBack: () => void;
@@ -44,26 +39,34 @@ export interface AiAssistantProps {
   role: 'admin' | 'demo';
 }
 
-export const AiAssistant = ({
+export const AiAssistant = React.memo(({
   isAiConfigured,
   aiChat,
   isAiLoading,
-  aiMessage,
   onSendMessage,
-  onSetAiMessage,
   onSaveAiGame,
   onClearChat,
   onBack,
   onGoToSettings,
   role
 }: AiAssistantProps) => {
-  const chatContainerRef = React.useRef<HTMLDivElement>(null);
+  const [message, setMessage] = useState('');
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [aiChat, isAiLoading]);
+
+  const handleSubmit = useCallback((e?: React.FormEvent, customMsg?: string) => {
+    e?.preventDefault();
+    const msg = customMsg || message;
+    if (msg.trim() && !isAiLoading) {
+      onSendMessage(msg);
+      if (!customMsg) setMessage('');
+    }
+  }, [message, isAiLoading, onSendMessage]);
 
   return (
     <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl md:rounded-[2rem] p-4 sm:p-6 md:p-10 shadow-xl shadow-purple-500/5 min-h-[500px] flex flex-col">
@@ -105,7 +108,7 @@ export const AiAssistant = ({
                 {SUGGESTIONS.map((item, idx) => (
                   <button
                     key={idx}
-                    onClick={() => onSendMessage(undefined, item.text)}
+                    onClick={() => handleSubmit(undefined, item.text)}
                     disabled={isAiLoading}
                     className="p-4 bg-white dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700 rounded-2xl text-left hover:border-purple-300 dark:hover:border-purple-600 hover:shadow-md transition-all group outline-none focus-visible:ring-2 focus-visible:ring-purple-500 disabled:opacity-50 disabled:pointer-events-none"
                   >
@@ -137,13 +140,13 @@ export const AiAssistant = ({
         </div>
 
         <form 
-          onSubmit={(e) => { e.preventDefault(); onSendMessage(); }}
+          onSubmit={handleSubmit}
           className="p-3 sm:p-4 md:p-6 bg-white dark:bg-zinc-900 border-t border-zinc-100 dark:border-zinc-800"
         >
           <div className="relative group max-w-4xl mx-auto flex gap-2">
             <Input
-              value={aiMessage}
-              onChange={(e) => onSetAiMessage(e.target.value)}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
               placeholder="Digite sua dúvida ou peça sugestões..."
               aria-label="Mensagem para a Intelligence AI"
               className="flex-grow h-12 md:h-14 px-4 rounded-xl md:rounded-2xl border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 focus:ring-1 focus:ring-zinc-400 transition-all text-sm"
@@ -151,7 +154,7 @@ export const AiAssistant = ({
             />
             <Button
               type="submit"
-              disabled={isAiLoading || !aiMessage.trim()}
+              disabled={isAiLoading || !message.trim()}
               aria-label="Enviar mensagem"
               className="h-12 md:h-14 w-12 md:w-14 rounded-xl md:rounded-2xl bg-zinc-800 hover:bg-zinc-900 text-white shadow-lg transition-all flex items-center justify-center p-0"
             >
@@ -162,4 +165,4 @@ export const AiAssistant = ({
       </div>
     </div>
   );
-};
+});

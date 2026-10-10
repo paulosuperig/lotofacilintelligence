@@ -72,6 +72,7 @@ export const AdminPanel = ({
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const handleUserDialogSubmit = (e: React.FormEvent) => {
@@ -134,7 +135,7 @@ export const AdminPanel = ({
         userFormData={userFormData}
         setUserFormData={setUserFormData}
         onSubmit={handleUserDialogSubmit}
-        onResetPassword={(newPassword) => onResetPassword(editingUser.id, newPassword)}
+        onResetPassword={(newPassword) => { if (editingUser) onResetPassword(editingUser.id, newPassword); }}
       />
 
       {activeTab === 'users' ? (
