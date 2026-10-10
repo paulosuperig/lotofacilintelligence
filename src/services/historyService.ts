@@ -1,5 +1,6 @@
 import { supabase, isSupabaseEnabled } from '@/lib/supabase';
 import { SavedGame } from '@/types/lottery';
+import { mapHistoryRow } from './historyMapper';
 
 /**
  * Skill: @skillslovable — Full-Stack Architecture
@@ -19,14 +20,7 @@ export const historyService = {
 
     if (error) throw error;
 
-    return (data || []).map(item => ({
-      id: item.id,
-      numbers: item.numbers,
-      timestamp: new Date(item.created_at).getTime(),
-      sum: item.sum_value ?? undefined,
-      model: item.model_name ?? undefined,
-      type: item.type || (item.model_name ? 'Fechamento PRO' : 'IA Insight'),
-    }));
+    return (data || []).map(mapHistoryRow);
   },
 
   async saveGames(userId: string | null, games: SavedGame[]): Promise<SavedGame[]> {
@@ -47,11 +41,7 @@ export const historyService = {
       .select('id, numbers, created_at, sum_value, model_name, type');
     if (error) throw error;
 
-    return (data ?? []).map((item) => ({
-      id: item.id, numbers: item.numbers, timestamp: new Date(item.created_at).getTime(),
-      sum: item.sum_value ?? undefined, model: item.model_name ?? undefined,
-      type: item.type || (item.model_name ? 'Fechamento PRO' : 'IA Insight'),
-    }));
+    return (data ?? []).map(mapHistoryRow);
   },
 
   async clearHistory(userId: string | null): Promise<void> {
