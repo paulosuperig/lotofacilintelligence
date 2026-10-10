@@ -102,7 +102,7 @@ export const useAiAssistant = (latestResult?: LotteryResult | null) => {
       if (!controller.signal.aborted) setIsAiLoading(false);
       if (activeRequest.current === controller) activeRequest.current = null;
     }
-  }, [aiChat, appendMessage, analysis, callAiGateway, persistChatMessage, toast, latestResult]);
+  }, [aiChat, appendMessage, analysis, persistChatMessage, toast, latestResult]);
 
   return {
     aiChat,
