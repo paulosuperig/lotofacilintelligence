@@ -3,7 +3,8 @@ import { useToast } from './use-toast';
 import { sanitizeString } from '@/lib/security/utils';
 import type { LotteryResult } from '@/types/lottery';
 import { computeLotteryStats } from '@/lib/ai/lotteryStats';
-import { aiService } from '@/services/aiService';
+import { callAiGateway } from '@/services/aiRequestService';
+import type { AiGatewayMessage } from '@/services/aiService';
 import { useAiConfiguration } from './useAiConfiguration';
 import { sanitizeAiGamesDetailed } from '@/lib/ai/sanitizeGames';
 import { parseUserIntent } from '@/lib/ai/intent';
@@ -11,13 +12,11 @@ import { useLotteryStats } from '@/hooks/useLotteryStats';
 import { useSessionUser } from '@/hooks/useSessionUser';
 import { trackCustom, trackEvent } from '@/lib/analytics/metaPixel';
 import { buildSystemPrompt } from '@/lib/ai/prompts';
+export type { AiChatMessage } from './useAiChat';
 import { useAiChat, type AiChatMessage } from './useAiChat';
 
 const MAX_HISTORY_MESSAGES = 15;
-const MAX_RETRIES = 2;
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-type AiGatewayMessage = { role: 'system' | 'user' | 'assistant'; content: string };
 
 const errorMessage = (e: unknown): string | undefined =>
   e instanceof Error ? e.message : typeof e === 'string' ? e : undefined;
@@ -29,29 +28,10 @@ export const useAiAssistant = (latestResult?: LotteryResult | null) => {
   const [isAiLoading, setIsAiLoading] = useState(false);
   const activeRequest = useRef<AbortController | null>(null);
   
-  const { aiChat, appendMessage, persistChatMessage, clearChatHistory, isLoading: isChatLoading } = useAiChat(userId);
+  const { aiChat, appendMessage, persistChatMessage, clearChatHistory } = useAiChat(userId);
   const { isAiConfigured, saveDeepSeekKey } = useAiConfiguration();
 
   useEffect(() => () => activeRequest.current?.abort(), []);
-
-  const callAiGateway = useCallback(async (messages: AiGatewayMessage[], maxTokens: number, signal: AbortSignal, attempt = 0): Promise<string> => {
-    if (signal.aborted) throw new DOMException('Consulta cancelada.', 'AbortError');
-    try {
-      const content = await aiService.callAiGateway(messages, maxTokens, signal);
-      if ((!content || !content.trim()) && attempt < MAX_RETRIES) {
-        await sleep(1000 * Math.pow(2, attempt));
-        return callAiGateway(messages, maxTokens, signal, attempt + 1);
-      }
-      return content;
-    } catch (err) {
-      if (signal.aborted) throw err;
-      if (attempt < MAX_RETRIES) {
-        await sleep(1000 * Math.pow(2, attempt));
-        return callAiGateway(messages, maxTokens, signal, attempt + 1);
-      }
-      throw err;
-    }
-  }, []);
 
   const sendMessage = useCallback(async (messageToSend: string) => {
     const sanitizedMessage = sanitizeString(messageToSend.trim());
@@ -126,7 +106,7 @@ export const useAiAssistant = (latestResult?: LotteryResult | null) => {
 
   return {
     aiChat,
-    isAiLoading: isAiLoading || isChatLoading,
+    isAiLoading,
     sendMessage,
     isAiConfigured,
     saveDeepSeekKey,

@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useCallback } from 'react';
+import { useMemo, useCallback } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '../use-toast';
 import { SavedGame } from '@/types/lottery';
 import { generateSecureId } from '@/lib/security/utils';
-import { supabase, isSupabaseEnabled } from '@/lib/supabase';
+import { useLotteryRealtime } from '../useLotteryRealtime';
 import { historyService } from '@/services/historyService';
 import { trackCustom } from '@/lib/analytics/metaPixel';
 import { historyKey } from '@/lib/lottery/queryKeys';
@@ -26,38 +26,7 @@ export const useLotteryHistory = (realtime = false) => {
 
   const history = useMemo(() => historyQuery.data ?? [], [historyQuery.data]);
 
-  useEffect(() => {
-    if (!realtime || !userId || !isSupabaseEnabled() || !supabase) return;
-    let mounted = true;
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    const client = supabase;
-    const refresh = () => {
-      if (!mounted) return;
-      clearTimeout(timer);
-      timer = setTimeout(() => {
-        if (mounted) void queryClient.invalidateQueries({ queryKey: historyKey(userId), exact: true });
-      }, 300);
-    };
-    const channel = client.channel(`games-history-${userId}`);
-    try {
-      channel.on('postgres_changes', {
-        event: '*', schema: 'public', table: 'games_history', filter: `user_id=eq.${userId}`,
-      }, refresh).subscribe((status, error) => {
-        if (!mounted) return;
-        if (error || status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-          console.error('[Realtime] Falha na inscrição:', error ?? status);
-        }
-        if (status === 'SUBSCRIBED') refresh();
-      });
-    } catch (error) {
-      console.error('[Realtime] Falha ao conectar:', error);
-    }
-    return () => {
-      mounted = false;
-      clearTimeout(timer);
-      void client.removeChannel(channel).catch((error: unknown) => console.error('[Realtime] Falha no cleanup:', error));
-    };
-  }, [realtime, userId, queryClient]);
+  useLotteryRealtime({ realtime, userId });
 
   const saveMutation = useMutation<SavedGame[], Error, SavedGame[]>({
     mutationFn: async (games) => {
@@ -135,15 +104,15 @@ export const useLotteryHistory = (realtime = false) => {
     [history, queryClient, saveMutation, userId],
   );
 
-  return {
-    history,
-    isLoading: historyQuery.isLoading,
-    saveToHistory,
-    clearHistory: () => clearMutation.mutateAsync(),
-    loadHistory: () => queryClient.invalidateQueries({ queryKey: historyKey(userId), exact: true }),
-    isGameDuplicate: (numbers: number[]) => {
-      const signature = signatureOf(numbers);
-      return history.some((saved) => signatureOf(saved.numbers) === signature);
-    },
-  };
+  const clearHistory = useCallback(async () => {
+    await clearMutation.mutateAsync();
+  }, [clearMutation]);
+  const loadHistory = useCallback(async () => {
+    await queryClient.invalidateQueries({ queryKey: historyKey(userId), exact: true, refetchType: 'active' });
+  }, [queryClient, userId]);
+  const isGameDuplicate = useCallback((numbers: number[]) => {
+    const signature = signatureOf(numbers);
+    return history.some((saved) => signatureOf(saved.numbers) === signature);
+  }, [history]);
+  return { history, saveToHistory, clearHistory, loadHistory, isGameDuplicate };
 };

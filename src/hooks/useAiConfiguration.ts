@@ -38,7 +38,7 @@ export const useAiConfiguration = (enabled = true) => {
   });
 
   const saveDeepSeekKey = useCallback(async (key: string) => {
-    await saveMutation.mutateAsync(key);
+    await saveMutation.mutateAsync(key).catch(() => undefined);
   }, [saveMutation]);
 
   return { 

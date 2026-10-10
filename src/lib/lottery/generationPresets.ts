@@ -3,7 +3,7 @@
  * para as faixas soft consumidas pelo gerador. Lógica pura e testável — a UI
  * (`GenerationFilters`) apenas renderiza estes dados.
  */
-import type { SmartFilters } from '@/hooks/useLottery';
+import type { SmartFilters } from '@/types/lottery';
 
 /** Seleção de presets por dimensão (chave do preset ativo em cada grupo). */
 export interface FilterSelection {

@@ -19,7 +19,6 @@ export const useLottery = (options: LotteryHookOptions = {}) => {
 
   const {
     history,
-    isLoading: isHistoryLoading,
     saveToHistory,
     clearHistory,
     loadHistory,
@@ -33,7 +32,7 @@ export const useLottery = (options: LotteryHookOptions = {}) => {
 
   return {
     latestResult,
-    isLoading: isLatestLoading || isHistoryLoading,
+    isLoading: isLatestLoading,
     isRefreshing,
     history,
     analysis,

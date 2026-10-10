@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useToast } from '../use-toast';
 import { LotteryResult } from '@/types/lottery';
@@ -35,11 +35,15 @@ export const useLotteryLatest = (loadAnalysis = true) => {
     }
   }, [latestResultQuery.isError, latestResultQuery.error, toast]);
 
+  const fetchLatestResult = useCallback(async () => {
+    await latestResultQuery.refetch();
+  }, [latestResultQuery]);
+
   return {
     latestResult: latestResultQuery.data ?? null,
     analysis: analysisQuery.data ?? null,
     isLoading: latestResultQuery.isLoading,
     isRefreshing: latestResultQuery.isFetching,
-    fetchLatestResult: () => latestResultQuery.refetch(),
+    fetchLatestResult,
   };
 };
