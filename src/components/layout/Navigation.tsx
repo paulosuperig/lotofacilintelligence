@@ -96,7 +96,7 @@ interface SidebarProps {
   onLogout: () => void;
 }
 
-export const Sidebar = ({ activeTab, setActiveTab, role, onLogout }: SidebarProps) => {
+export const Sidebar = React.memo(({ activeTab, setActiveTab, role, onLogout }: SidebarProps) => {
   return (
     <aside className="hidden md:flex fixed left-0 top-0 bottom-0 w-[5rem] flex-col items-center py-8 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border-r border-purple-100 dark:border-zinc-800 z-50 shadow-xl shadow-purple-500/5">
       <div className="mb-12">
@@ -126,21 +126,19 @@ export const Sidebar = ({ activeTab, setActiveTab, role, onLogout }: SidebarProp
       </div>
     </aside>
   );
-};
+});
 
-export const MobileNav = ({ activeTab, setActiveTab, role, onLogout }: SidebarProps) => {
+Sidebar.displayName = 'Sidebar';
+
+export const MobileNav = React.memo(({ activeTab, setActiveTab, role, onLogout }: SidebarProps) => {
   return (
-    // Barra inferior FLUTUANTE (pill destacado do rodapé), md:hidden.
-    // Wrapper não captura toques na área vazia (pointer-events-none); só o pill.
     <div className="fixed inset-x-0 bottom-0 z-[100] md:hidden pointer-events-none px-3 pb-[calc(env(safe-area-inset-bottom)+0.6rem)]">
       <nav className="pointer-events-auto mx-auto flex w-full max-w-sm items-center h-16 rounded-[1.75rem] bg-white/85 dark:bg-zinc-900/85 backdrop-blur-2xl border border-purple-100/80 dark:border-zinc-800 shadow-2xl shadow-purple-950/10 px-1.5">
-        {/* Grupo esquerdo (flex-1) — mantém o FAB central sempre centralizado */}
         <div className="flex flex-1 items-center justify-around">
           <NavIcon icon={<Clover size={20} />} active={activeTab === 'home'} label="Início" onClick={() => setActiveTab('home')} />
           <NavIcon icon={<History size={20} />} active={activeTab === 'historico'} label="Histórico" onClick={() => setActiveTab('historico')} />
         </div>
 
-        {/* FAB central elevado acima do pill */}
         <div className="relative -top-5 shrink-0 mx-0.5">
           <div className="absolute inset-0 bg-purple-500 blur-lg opacity-25 rounded-full animate-pulse" />
           <NavIcon
@@ -152,7 +150,6 @@ export const MobileNav = ({ activeTab, setActiveTab, role, onLogout }: SidebarPr
           />
         </div>
 
-        {/* Grupo direito (flex-1) */}
         <div className="flex flex-1 items-center justify-around">
           {role === 'admin' && (
             <>
@@ -165,4 +162,6 @@ export const MobileNav = ({ activeTab, setActiveTab, role, onLogout }: SidebarPr
       </nav>
     </div>
   );
-};
+});
+
+MobileNav.displayName = 'MobileNav';

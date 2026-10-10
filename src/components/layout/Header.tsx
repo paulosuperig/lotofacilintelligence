@@ -9,7 +9,7 @@ interface HeaderProps {
   onRefresh: () => void;
 }
 
-export const Header = ({ role, isRefreshing, onRefresh }: HeaderProps) => {
+export const Header = React.memo(({ role, isRefreshing, onRefresh }: HeaderProps) => {
   const { theme, setTheme } = useTheme();
 
   return (
@@ -65,4 +65,6 @@ export const Header = ({ role, isRefreshing, onRefresh }: HeaderProps) => {
       </motion.div>
     </header>
   );
-};
+});
+
+Header.displayName = 'Header';

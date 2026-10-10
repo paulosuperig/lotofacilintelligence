@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { StatCard } from './StatCard';
 import { Button } from '@/components/ui/button';
@@ -38,11 +38,6 @@ import { BatchSizePicker } from './generator/BatchSizePicker';
 import { DuplicateGameDialog } from './generator/DuplicateGameDialog';
 import { GameDisplay } from './generator/GameDisplay';
 
-/** Tempo da animação de "análise" antes de revelar o jogo. */
-const GENERATION_DELAY_MS = 800;
-
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 export const GameGenerator = () => {
   const { saveToHistory, generateSmartGame, generateSmartBatch } = useLottery();
   const [currentResult, setCurrentResult] = useState<SavedGame | null>(null);
@@ -58,6 +53,9 @@ export const GameGenerator = () => {
   const [showFilters, setShowFilters] = useState(false);
   const { toast } = useToast();
 
+  const calculation = useRef<AbortController | null>(null);
+  const copyTimer = useRef<ReturnType<typeof setTimeout> | undefined>();
+  useEffect(() => () => { calculation.current?.abort(); clearTimeout(copyTimer.current); }, []);
   const busy = isGenerating || isBatchGenerating;
   const activeHint = STRATEGIES.find((s) => s.value === strategy)?.hint ?? '';
   const hasConstraints = selection.fixed.length > 0 || selection.excluded.length > 0;
@@ -87,9 +85,12 @@ export const GameGenerator = () => {
     setIsGenerating(true);
     setIsCopied(false);
 
-    await wait(GENERATION_DELAY_MS);
+    const controller = new AbortController();
+    calculation.current = controller;
+    try {
 
-    const newGame = generateSmartGame(smartOpts);
+    const newGame = await generateSmartGame(smartOpts, controller.signal);
+    if (controller.signal.aborted) return;
     setCurrentResult(newGame);
     await saveToHistory([newGame]);
 
@@ -109,7 +110,12 @@ export const GameGenerator = () => {
       type: newGame.type,
     });
 
-    setIsGenerating(false);
+    } catch (error) {
+      if (!controller.signal.aborted) toast({ title: 'Erro ao gerar', description: error instanceof Error ? error.message : 'Tente novamente.', variant: 'destructive' });
+    } finally {
+      if (!controller.signal.aborted) setIsGenerating(false);
+      if (calculation.current === controller) calculation.current = null;
+    }
   };
 
   const handleGenerateBatch = async () => {
@@ -117,9 +123,12 @@ export const GameGenerator = () => {
     setIsBatchGenerating(true);
     setIsCopied(false);
 
-    await wait(GENERATION_DELAY_MS);
+    const controller = new AbortController();
+    calculation.current = controller;
+    try {
 
-    const games = generateSmartBatch(batchSize, smartOpts);
+    const games = await generateSmartBatch(batchSize, smartOpts, controller.signal);
+    if (controller.signal.aborted) return;
     if (games.length > 0) setCurrentResult(games[0]);
     const { success } = await saveToHistory(games);
 
@@ -143,7 +152,12 @@ export const GameGenerator = () => {
         : 'Alguns jogos já existiam no histórico.',
     });
 
-    setIsBatchGenerating(false);
+    } catch (error) {
+      if (!controller.signal.aborted) toast({ title: 'Erro ao gerar lote', description: error instanceof Error ? error.message : 'Tente novamente.', variant: 'destructive' });
+    } finally {
+      if (!controller.signal.aborted) setIsBatchGenerating(false);
+      if (calculation.current === controller) calculation.current = null;
+    }
   };
 
   const copyToClipboard = () => {
@@ -151,7 +165,8 @@ export const GameGenerator = () => {
     navigator.clipboard.writeText(formatInlinePlain(currentResult.numbers));
     setIsCopied(true);
     toast({ title: 'Copiado!', description: 'Números copiados com sucesso.' });
-    setTimeout(() => setIsCopied(false), 2000);
+    clearTimeout(copyTimer.current);
+    copyTimer.current = setTimeout(() => setIsCopied(false), 2000);
   };
 
   return (

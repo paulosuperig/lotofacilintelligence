@@ -11,7 +11,7 @@ export const historyService = {
 
     const { data, error } = await supabase
       .from('games_history')
-      .select('*')
+      .select('id, numbers, created_at, sum_value, model_name, type')
       // RLS now handles user isolation, but we keep the filter for clarity and performance
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
@@ -43,10 +43,15 @@ export const historyService = {
       created_at: new Date(game.timestamp).toISOString(),
     }));
 
-    const { error } = await supabase.from('games_history').insert(gamesToInsert);
+    const { data, error } = await supabase.from('games_history').insert(gamesToInsert)
+      .select('id, numbers, created_at, sum_value, model_name, type');
     if (error) throw error;
 
-    return this.fetchHistory(userId);
+    return (data ?? []).map((item) => ({
+      id: item.id, numbers: item.numbers, timestamp: new Date(item.created_at).getTime(),
+      sum: item.sum_value ?? undefined, model: item.model_name ?? undefined,
+      type: item.type || (item.model_name ? 'Fechamento PRO' : 'IA Insight'),
+    }));
   },
 
   async clearHistory(userId: string | null): Promise<void> {

@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { LoadingFallback } from "@/components/ui/spinner";
 import { MetaPixelLoader } from "./components/analytics/MetaPixelLoader";
+import { MotionConfig } from "framer-motion";
 
 const Index = lazy(() => import("./pages/Index.tsx"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword.tsx"));
@@ -33,6 +34,7 @@ const RouteFallback = () => (
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
+      <MotionConfig reducedMotion="user">
       <ThemeProvider defaultTheme="system" enableSystem storageKey="intelligence-theme" attribute="class">
         <TooltipProvider>
           <Toaster />
@@ -50,6 +52,7 @@ const App = () => (
           </BrowserRouter>
         </TooltipProvider>
       </ThemeProvider>
+      </MotionConfig>
     </QueryClientProvider>
   </ErrorBoundary>
 );

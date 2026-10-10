@@ -2,6 +2,7 @@ import { LotteryResultSchema } from "@/lib/security/schemas";
 import { LotteryResult } from "@/types/lottery";
 import { analyzeHistory, normalizeDraw, type HistoryAnalysis } from "@/lib/lottery/analysis";
 import { readCache, writeCache } from "@/lib/cache/localCache";
+import { createRequestCache } from '@/lib/cache/requestCache';
 
 const API_BASE = "https://loteriascaixa-api.herokuapp.com/api";
 const FALLBACK_API_BASE = "https://servicebus2.caixa.gov.br/portalloterias/api/lotofacil";
@@ -102,6 +103,14 @@ const extractDezenas = (r: unknown): Array<string | number> => {
 
 let analysisCache: { at: number; data: HistoryAnalysis } | null = null;
 
+// One shared response for trends, generator, AI and backtest during this session.
+const loadAllResults = createRequestCache<unknown[]>(ANALYSIS_TTL_MS, async () => {
+  const response = await fetchWithRetry(`${API_BASE}/lotofacil`, { timeoutMs: 15000 });
+  const data: unknown = await response.json();
+  if (!Array.isArray(data) || data.length === 0) throw new Error('Histórico indisponível.');
+  return data;
+});
+
 export const lotteryService = {
   async getLatestResult(): Promise<LotteryResult> {
     try {
@@ -153,9 +162,7 @@ export const lotteryService = {
 
   /** Retorna a lista bruta de todos os concursos (mais recente primeiro). */
   async getAllResults(): Promise<unknown[]> {
-    const response = await fetchWithRetry(`${API_BASE}/lotofacil`, { timeoutMs: 15000 });
-    const data = await response.json();
-    return Array.isArray(data) ? data : [];
+    return loadAllResults();
   },
 
   /**

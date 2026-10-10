@@ -22,7 +22,7 @@ interface InvokeError {
  * respostas longas do DeepSeek.
  */
 export const aiService = {
-  async callAiGateway(messages: AiGatewayMessage[], maxTokens: number): Promise<string> {
+  async callAiGateway(messages: AiGatewayMessage[], maxTokens: number, signal?: AbortSignal): Promise<string> {
     if (!supabase) throw new Error("Supabase não inicializado.");
 
     const { data: { session } } = await supabase.auth.getSession();
@@ -33,7 +33,7 @@ export const aiService = {
     let data: AiGatewayResponse | null = null;
     let error: InvokeError | null = null;
     try {
-      const res = await supabase.functions.invoke("intelligence-ai", {
+      const res = await supabase.functions.invoke("intelligence-ai", { signal,
         body: { messages, max_tokens: maxTokens },
       });
       data = res.data as AiGatewayResponse | null;
