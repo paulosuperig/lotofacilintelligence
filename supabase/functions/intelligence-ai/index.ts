@@ -8,7 +8,6 @@ import {
   rateLimit,
 } from "../_shared/security.ts";
 
-
 Deno.serve(async (req) => {
   const origin = req.headers.get("Origin");
   const cors = buildCorsHeaders(origin);
@@ -44,7 +43,26 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Rate limiting por usuário (custo de API externa): 20 req/min.
+    const adminClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    // AUD-001: Explicit Edge AI account gate (Check status before usage)
+    const { data: profile, error: profileErr } = await adminClient
+      .from("profiles")
+      .select("status")
+      .eq("id", user.id)
+      .single();
+
+    if (profileErr || profile?.status !== 'active') {
+      return new Response(JSON.stringify({ 
+        error: "FORBIDDEN_STATUS", 
+        message: "Sua conta está inativa ou bloqueada. Acesso à IA negado." 
+      }), {
+        status: 403,
+        headers: { ...cors, "Content-Type": "application/json" },
+      });
+    }
+
+    // Rate limiting por usuário: 20 req/min.
     const rl = rateLimit(`ai:${user.id}:${clientIpFrom(req)}`, 20, 60_000);
     if (!rl.ok) {
       return new Response(
@@ -67,7 +85,6 @@ Deno.serve(async (req) => {
     }
     const { messages, max_tokens, model: requestedModel } = body;
 
-    // Validação de entrada: evita repassar payloads malformados/abusivos ao upstream.
     if (!Array.isArray(messages) || messages.length === 0) {
       return new Response(
         JSON.stringify({ error: "INVALID_REQUEST", message: "Requisição inválida: 'messages' ausente." }),
@@ -75,8 +92,6 @@ Deno.serve(async (req) => {
       );
     }
 
-
-    const adminClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     const { data: cfg } = await adminClient
       .from("system_configs")
       .select("value")
@@ -89,11 +104,9 @@ Deno.serve(async (req) => {
       (typeof cfgValue === "string" ? cfgValue : null) ||
       Deno.env.get("DEEPSEEK_API_KEY");
 
-    // DeepSeek depreciou "deepseek-chat" — aceita apenas deepseek-v4-pro | deepseek-v4-flash.
     const ALLOWED_MODELS = new Set(["deepseek-v4-pro", "deepseek-v4-flash"]);
     const model = ALLOWED_MODELS.has(requestedModel) ? requestedModel : "deepseek-v4-pro";
 
-    // Filtra mensagens inválidas (content vazio/nulo ou papel desconhecido) que o upstream rejeita.
     const validRoles = new Set(["system", "user", "assistant"]);
     const cleanMessages = messages.filter(
       (m: { role?: string; content?: string }) =>
@@ -117,8 +130,6 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Timeout defensivo: sem isto, um upstream travado penduraria a função até
-    // o limite de plataforma. 55s deixa margem para responder antes disso.
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 55_000);
 
@@ -133,11 +144,6 @@ Deno.serve(async (req) => {
         body: JSON.stringify({
           model,
           messages: cleanMessages,
-          // O deepseek-v4-pro é um modelo de RACIOCÍNIO: por padrão gasta tokens
-          // em "thinking" e o max_tokens cobre reasoning + content juntos — com
-          // teto baixo, o content voltava VAZIO. Para gerar jogos em formato
-          // fixo não precisamos de cadeia de raciocínio, então desligamos o
-          // thinking (resposta vai direto ao content) e damos folga de tokens.
           thinking: { type: "disabled" },
           max_tokens: Math.min(max_tokens || 4096, 8192),
           temperature: 0.2,
@@ -166,7 +172,7 @@ Deno.serve(async (req) => {
       console.error("DeepSeek error:", response.status, errorText);
 
       const errorMap: Record<number, { error: string; message: string }> = {
-        400: { error: "BAD_REQUEST", message: "Requisição inválida ao provedor de IA — parâmetros ajustados." },
+        400: { error: "BAD_REQUEST", message: "Requisição inválida ao provedor de IA." },
         401: { error: "INVALID_API_KEY", message: "Chave da API DeepSeek inválida ou expirada." },
         429: { error: "RATE_LIMITED", message: "Limite de requisições atingido na DeepSeek." },
         402: { error: "INSUFFICIENT_CREDITS", message: "Créditos insuficientes na conta DeepSeek." },

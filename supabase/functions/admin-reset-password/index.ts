@@ -1,6 +1,7 @@
 // Edge Function: admin-reset-password
-// Permite que um admin autenticado resete a senha de outro usuário via service_role.
+// Permite que um admin autenticado e ativo resete a senha de outro usuário via service_role.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { hasActiveAccount } from "../_shared/accountAccess.ts";
 import {
   buildCorsHeaders,
   forbiddenOrigin,
@@ -20,9 +21,10 @@ Deno.serve(async (req) => {
   if (!isOriginAllowed(origin)) return forbiddenOrigin(origin);
 
   try {
-    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-    const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+    const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY");
+    if (!SUPABASE_URL || !SERVICE_ROLE || !ANON_KEY) return internalError(origin);
 
     const authHeader = req.headers.get("Authorization") ?? "";
     if (!authHeader) {
@@ -42,11 +44,20 @@ Deno.serve(async (req) => {
     }
 
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
+    
+    const active = await hasActiveAccount(() => admin
+      .from("profiles").select("status").eq("id", user.id).maybeSingle());
+    if (!active) {
+      return new Response(JSON.stringify({ error: "Forbidden: account not active" }), {
+        status: 403, headers: { ...cors, "Content-Type": "application/json" },
+      });
+    }
+
     const { data: isAdmin, error: roleErr } = await admin.rpc("has_role", {
       _user_id: user.id, _role: "admin",
     });
     if (roleErr || !isAdmin) {
-      return new Response(JSON.stringify({ error: "Forbidden: admin only" }), {
+      return new Response(JSON.stringify({ error: "Forbidden: admin role required" }), {
         status: 403, headers: { ...cors, "Content-Type": "application/json" },
       });
     }

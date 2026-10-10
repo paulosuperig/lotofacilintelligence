@@ -11,6 +11,7 @@ import { generateOptimizedGame, generateBatch, gameSignature, type GenStrategy }
 import { normalizeDraw, type HistoryAnalysis } from '@/lib/lottery/analysis';
 import { useSessionUser } from './useSessionUser';
 import type { RealtimeChannel } from '@supabase/supabase-js';
+import type { SaveResult } from '@/lib/lottery/saveConfirmation';
 
 /** Filtros avançados (faixas soft) escolhidos pelo usuário. */
 export interface SmartFilters {
@@ -57,8 +58,6 @@ const signatureOf = (numbers: number[]) => [...numbers].sort((a, b) => a - b).jo
 export const historyKey = (userId: string | null) => ['games_history', userId] as const;
 export const latestResultKey = ['latest_result'] as const;
 export const historyAnalysisKey = ['history_analysis'] as const;
-
-interface SaveResult { success: boolean; duplicate: boolean }
 
 export const useLottery = () => {
   const { toast } = useToast();
@@ -245,13 +244,13 @@ export const useLottery = () => {
 
   const saveToHistory = useCallback(
     async (newGames: SavedGame[]): Promise<SaveResult> => {
-      if (!newGames || newGames.length === 0) return { success: false, duplicate: false };
+      if (!newGames || newGames.length === 0) return { success: false, duplicate: false, savedCount: 0 };
 
       const existing = queryClient.getQueryData<SavedGame[]>(historyKey(userId)) ?? history;
       const historySignatures = new Set(existing.map((saved) => signatureOf(saved.numbers)));
       const nonDuplicateNewGames = newGames.filter((g) => !historySignatures.has(signatureOf(g.numbers)));
 
-      if (nonDuplicateNewGames.length === 0) return { success: false, duplicate: true };
+      if (nonDuplicateNewGames.length === 0) return { success: false, duplicate: true, savedCount: 0 };
 
       const securedGames: SavedGame[] = nonDuplicateNewGames.map((game) => ({
         ...game,
@@ -268,10 +267,10 @@ export const useLottery = () => {
           value: securedGames.length * 3.5,
           currency: 'BRL',
         });
-        return { success: true, duplicate: false };
+        return { success: true, duplicate: false, savedCount: securedGames.length };
       } catch {
         // toast/rollback já tratados no onError da mutation
-        return { success: false, duplicate: false };
+        return { success: false, duplicate: false, savedCount: 0 };
       }
     },
     [history, queryClient, saveMutation, userId],

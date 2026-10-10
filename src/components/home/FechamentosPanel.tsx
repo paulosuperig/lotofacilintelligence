@@ -11,10 +11,11 @@ import { useLotteryStats } from '@/hooks/useLotteryStats';
 import { ResponsibleGaming } from '@/components/lottery/ResponsibleGaming';
 import type { HistoryAnalysis } from '@/lib/lottery/analysis';
 import type { SavedGame } from '@/types/lottery';
+import { confirmGameSave, type SaveResult } from '@/lib/lottery/saveConfirmation';
 
 interface FechamentosPanelProps {
   onBack: () => void;
-  onSaveGames: (games: SavedGame[]) => Promise<{ success: boolean; duplicate: boolean }> | void;
+  onSaveGames: (games: SavedGame[]) => Promise<SaveResult>;
 }
 
 /**
@@ -45,6 +46,7 @@ interface WheelState {
   pool: number[];
   games: number[][];
   guarantee: number;
+  savedCount: number;
 }
 
 export const FechamentosPanel = ({ onBack, onSaveGames }: FechamentosPanelProps) => {
@@ -55,13 +57,14 @@ export const FechamentosPanel = ({ onBack, onSaveGames }: FechamentosPanelProps)
   const handleGenerate = async (model: FechamentoModel) => {
     if (generatingTitle) return;
     setGeneratingTitle(model.title);
+    try {
     // deixa o loading pintar antes do cálculo síncrono
     await new Promise((r) => setTimeout(r, 50));
 
     const pool = buildPool(model.poolSize, analysis);
     const wheel = generateWheel({ pool, numGames: model.numGames, rng: cryptoRng });
 
-    setResult({ model, pool: wheel.pool, games: wheel.games, guarantee: wheel.guarantee });
+    setResult({ model, pool: wheel.pool, games: wheel.games, guarantee: wheel.guarantee, savedCount: 0 });
 
     const saved: SavedGame[] = wheel.games.map((numbers) => ({
       id: generateSecureId(),
@@ -71,12 +74,22 @@ export const FechamentosPanel = ({ onBack, onSaveGames }: FechamentosPanelProps)
       type: 'Fechamento',
       sum: numbers.reduce((a, b) => a + b, 0),
     }));
-    await onSaveGames(saved);
-
-    toast.success(`Fechamento "${model.title}" gerado!`, {
-      description: `${wheel.games.length} jogos salvos • garante ${wheel.guarantee} pontos se as 15 saírem entre as ${model.poolSize} dezenas.`,
-    });
-    setGeneratingTitle(null);
+    const outcome = await confirmGameSave(saved, onSaveGames);
+    if (outcome.success) {
+      setResult({ model, pool: wheel.pool, games: wheel.games, guarantee: wheel.guarantee, savedCount: outcome.savedCount });
+      toast.success(`Fechamento "${model.title}" gerado!`, {
+        description: `${outcome.savedCount} novos jogos salvos • garante ${wheel.guarantee} pontos se as 15 saírem entre as ${model.poolSize} dezenas.`,
+      });
+    } else if (outcome.duplicate) {
+      toast.info('Os jogos deste fechamento já estão no histórico.');
+    } else {
+      toast.error('Fechamento gerado, mas o salvamento não foi confirmado.');
+    }
+    } catch {
+      toast.error('Não foi possível concluir o fechamento. Tente novamente.');
+    } finally {
+      setGeneratingTitle(null);
+    }
   };
 
   const pad = (n: number) => String(n).padStart(2, '0');
@@ -136,7 +149,8 @@ export const FechamentosPanel = ({ onBack, onSaveGames }: FechamentosPanelProps)
                   </span>
                 </div>
                 <p className="text-[11px] text-white/80 mt-1">
-                  se as 15 saírem entre as {result.pool.length} dezenas • {result.games.length} jogos salvos no histórico
+                  se as 15 saírem entre as {result.pool.length} dezenas • {result.games.length} jogos gerados
+                  {result.savedCount > 0 ? ` • ${result.savedCount} novos jogos salvos no histórico` : ' • nenhum novo salvamento confirmado'}
                 </p>
               </div>
               <div className="text-right">
