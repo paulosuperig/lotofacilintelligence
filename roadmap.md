@@ -24,3 +24,10 @@
 - [x] Reduzir consultas repetidas e inscrições Realtime; manter confirmação de persistência.
 - [x] Validar testes, carregamento desktop/mobile e registrar resultados e limitações em docs/performance-audit.md.
 - [ ] Validar fluxos autenticados no Supabase real — bloqueado por conexão externa sem sessão de teste gerenciada.
+
+## Refatoração estrutural
+- [x] Revisar a base com dez especialistas e priorizar organização, duplicações e acoplamento.
+- [x] Separar consultas, persistência, Realtime e geração mantendo o contrato de useLottery.
+- [x] Extrair prompt, histórico e transporte da IA sem mudar conteúdo, payloads ou tentativas.
+- [x] Centralizar mapeamento do histórico e separar lógica de geração e detalhe do bolão da apresentação.
+- [x] Executar regressões, lint e verificação visual pública; limites registrados em docs/REFACTORING-GUIDE.md.

@@ -11,9 +11,10 @@ import { runBacktest, formatBacktestReport } from '../src/lib/lottery/backtest';
 
 const API = 'https://loteriascaixa-api.herokuapp.com/api/lotofacil';
 
-const extractDezenas = (r: any): Array<string | number> => {
-  if (Array.isArray(r.dezenas)) return r.dezenas;
-  if (Array.isArray(r.listaDezenas)) return r.listaDezenas;
+const extractDezenas = (r: unknown): Array<string | number> => {
+  const row = r as { dezenas?: unknown; listaDezenas?: unknown };
+  if (Array.isArray(row.dezenas)) return row.dezenas as Array<string | number>;
+  if (Array.isArray(row.listaDezenas)) return row.listaDezenas as Array<string | number>;
   return [];
 };
 
@@ -25,7 +26,7 @@ async function main() {
   try {
     const res = await fetch(API);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const all = await res.json() as any[];
+    const all = await res.json() as unknown[];
     
     process.stdout.write(`\r✅ Received ${all.length} draws. Processing...\n`);
 
@@ -53,8 +54,9 @@ async function main() {
     for (let h = 15; h >= 11; h--) {
       console.log(`| ${h} | ${report.smart.distribution[h] ?? 0} | ${report.random.distribution[h] ?? 0} |`);
     }
-  } catch (err: any) {
-    console.error(`\n❌ Error during backtest: ${err.message}`);
+  } catch (err: unknown) {
+    const message = (err as { message?: unknown }).message;
+    console.error(`\n❌ Error during backtest: ${message}`);
     process.exit(1);
   }
 }

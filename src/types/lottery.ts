@@ -50,3 +50,21 @@ export interface Statistics {
   hotNumbers: number[];
   coldNumbers: number[];
 }
+
+/** Filtros avançados (faixas soft) escolhidos pelo usuário. */
+export interface SmartFilters {
+  sumMin?: number;
+  sumMax?: number;
+  paresMin?: number;
+  paresMax?: number;
+  primosMin?: number;
+  primosMax?: number;
+  seqMax?: number;
+}
+
+/** Opções de composição escolhidas na UI (estratégia + restrições + filtros). */
+export interface SmartOptions extends SmartFilters {
+  strategy?: import('@/lib/lottery/generator').GenStrategy;
+  fixed?: number[];
+  excluded?: number[];
+}
