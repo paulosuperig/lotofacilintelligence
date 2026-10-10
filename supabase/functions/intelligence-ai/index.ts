@@ -1,5 +1,4 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { hasActiveAccount } from "../_shared/accountAccess.ts";
 import {
   buildCorsHeaders,
   clientIpFrom,
@@ -46,12 +45,17 @@ Deno.serve(async (req) => {
 
     const adminClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    const active = await hasActiveAccount(() => adminClient
-      .from("profiles").select("status").eq("id", user.id).maybeSingle());
-    if (!active) {
+    // AUD-001: Explicit Edge AI account gate (Check status before usage)
+    const { data: profile, error: profileErr } = await adminClient
+      .from("profiles")
+      .select("status")
+      .eq("id", user.id)
+      .single();
+
+    if (profileErr || profile?.status !== 'active') {
       return new Response(JSON.stringify({ 
         error: "FORBIDDEN_STATUS", 
-        message: "Sua conta está inativa ou bloqueada." 
+        message: "Sua conta está inativa ou bloqueada. Acesso à IA negado." 
       }), {
         status: 403,
         headers: { ...cors, "Content-Type": "application/json" },
