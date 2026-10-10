@@ -25,10 +25,12 @@ import { EMPTY_FILTER_SELECTION } from '@/lib/lottery/generationPresets';
 import { StrategyPicker } from './generator/StrategyPicker';
 import { BatchSizePicker } from './generator/BatchSizePicker';
 import { DuplicateGameDialog } from './generator/DuplicateGameDialog';
+import { qualityInfo } from './generator/strategies';
 import { GameDisplay } from './generator/GameDisplay';
 
 export const GameGenerator = () => {
-  const { currentResult, isGenerating, isBatchGenerating, isCopied, showDuplicateModal, setShowDuplicateModal, strategy, setStrategy, batchSize, setBatchSize, selection, setSelection, showBoard, setShowBoard, filterSel, setFilterSel, showFilters, setShowFilters, busy, activeHint, hasConstraints, filtersActive, ignoraFiltros, stats, quality, handleGenerate, handleGenerateBatch, copyToClipboard } = useGameGenerator();
+  const { currentResult, isGenerating, isBatchGenerating, isCopied, showDuplicateModal, setShowDuplicateModal, strategy, setStrategy, batchSize, setBatchSize, selection, setSelection, showBoard, setShowBoard, filterSel, setFilterSel, showFilters, setShowFilters, busy, activeHint, hasConstraints, filtersActive, ignoraFiltros, stats, handleGenerate, handleGenerateBatch, copyToClipboard } = useGameGenerator();
+  const quality = qualityInfo(currentResult?.quality);
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-zinc-900 overflow-y-auto pb-24 xs:pb-32 text-zinc-900 dark:text-zinc-100">

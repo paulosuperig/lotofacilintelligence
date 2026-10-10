@@ -1,20 +1,11 @@
 import { useCallback } from 'react';
 import { generateSecureId } from '@/lib/security/utils';
-import { gameSignature, type GenStrategy } from '@/lib/lottery/generator';
+import { gameSignature } from '@/lib/lottery/generator';
 import { runLotteryTask } from '@/lib/lottery/runTask';
 import { normalizeDraw, type HistoryAnalysis } from '@/lib/lottery/analysis';
 import { LotteryResult, SavedGame } from '@/types/lottery';
+import { strategyLabel } from '@/lib/lottery/strategies';
 import { SmartOptions } from './types';
-
-const STRATEGY_LABEL: Record<GenStrategy, string> = {
-  equilibrada: 'Equilibrada',
-  quentes: 'Quentes',
-  atrasadas: 'Atrasadas',
-  repetidas: 'Repetidas',
-  ciclo: 'Ciclo',
-  agressiva: 'Agressiva',
-  surpresinha: 'Surpresinha',
-};
 
 const pickFilters = (o: SmartOptions) => ({
   sumMin: o.sumMin,
@@ -46,7 +37,7 @@ export const useLotteryGeneration = (
       ...pickFilters(opts),
     } }, signal);
 
-    const label = STRATEGY_LABEL[strategy];
+    const label = strategyLabel(strategy);
     return {
       id: generateSecureId(),
       numbers: result.numbers,
@@ -72,7 +63,7 @@ export const useLotteryGeneration = (
       excluded: opts.excluded,
       ...pickFilters(opts),
     } }, signal);
-    const label = STRATEGY_LABEL[strategy];
+    const label = strategyLabel(strategy);
     return games.map((g) => ({
       id: generateSecureId(),
       numbers: g.numbers,

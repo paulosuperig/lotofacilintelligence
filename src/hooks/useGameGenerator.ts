@@ -8,7 +8,7 @@ import { formatInlinePlain } from '@/lib/whatsapp';
 import { trackCustom, trackEvent } from '@/lib/analytics/metaPixel';
 import { emptySelection, type Selection } from '@/lib/lottery/selection';
 import { filtersFromSelection, hasActiveFilters, EMPTY_FILTER_SELECTION, type FilterSelection } from '@/lib/lottery/generationPresets';
-import { STRATEGIES, STRATEGIES_SEM_FILTRO, qualityInfo } from '@/components/lottery/generator/strategies';
+import { STRATEGY_DEFINITIONS, STRATEGIES_SEM_FILTRO } from '@/lib/lottery/strategies';
 
 export const useGameGenerator = () => {
   const { saveToHistory, generateSmartGame, generateSmartBatch } = useLottery();
@@ -29,7 +29,7 @@ export const useGameGenerator = () => {
   const copyTimer = useRef<ReturnType<typeof setTimeout> | undefined>();
   useEffect(() => () => { calculation.current?.abort(); clearTimeout(copyTimer.current); }, []);
   const busy = isGenerating || isBatchGenerating;
-  const activeHint = STRATEGIES.find((s) => s.value === strategy)?.hint ?? '';
+  const activeHint = STRATEGY_DEFINITIONS.find((s) => s.value === strategy)?.hint ?? '';
   const hasConstraints = selection.fixed.length > 0 || selection.excluded.length > 0;
   const filtersActive = hasActiveFilters(filterSel);
   const ignoraFiltros = STRATEGIES_SEM_FILTRO.has(strategy);
@@ -50,8 +50,6 @@ export const useGameGenerator = () => {
     [currentResult],
   );
 
-  const quality = useMemo(() => qualityInfo(currentResult?.quality), [currentResult]);
-
   const handleGenerate = async () => {
     if (busy) return;
     setIsGenerating(true);
@@ -61,26 +59,26 @@ export const useGameGenerator = () => {
     calculation.current = controller;
     try {
 
-    const newGame = await generateSmartGame(smartOpts, controller.signal);
-    if (controller.signal.aborted) return;
-    setCurrentResult(newGame);
-    await saveToHistory([newGame]);
+      const newGame = await generateSmartGame(smartOpts, controller.signal);
+      if (controller.signal.aborted) return;
+      setCurrentResult(newGame);
+      await saveToHistory([newGame]);
 
-    trackEvent('Lead', {
-      content_name: 'Jogo Lotofácil Gerado',
-      content_category: 'game_generator',
-      content_type: 'lottery_game',
-      content_ids: [newGame.id],
-      value: 3.5, // valor médio de aposta Lotofácil (BRL)
-      currency: 'BRL',
-      num_items: 1,
-      sum: newGame.sum,
-    });
-    trackCustom('GerarJogo', {
-      content_category: 'game_generator',
-      sum: newGame.sum,
-      type: newGame.type,
-    });
+      trackEvent('Lead', {
+        content_name: 'Jogo Lotofácil Gerado',
+        content_category: 'game_generator',
+        content_type: 'lottery_game',
+        content_ids: [newGame.id],
+        value: 3.5, // valor médio de aposta Lotofácil (BRL)
+        currency: 'BRL',
+        num_items: 1,
+        sum: newGame.sum,
+      });
+      trackCustom('GerarJogo', {
+        content_category: 'game_generator',
+        sum: newGame.sum,
+        type: newGame.type,
+      });
 
     } catch (error) {
       if (!controller.signal.aborted) toast({ title: 'Erro ao gerar', description: error instanceof Error ? error.message : 'Tente novamente.', variant: 'destructive' });
@@ -99,30 +97,30 @@ export const useGameGenerator = () => {
     calculation.current = controller;
     try {
 
-    const games = await generateSmartBatch(batchSize, smartOpts, controller.signal);
-    if (controller.signal.aborted) return;
-    if (games.length > 0) setCurrentResult(games[0]);
-    const { success } = await saveToHistory(games);
+      const games = await generateSmartBatch(batchSize, smartOpts, controller.signal);
+      if (controller.signal.aborted) return;
+      if (games.length > 0) setCurrentResult(games[0]);
+      const { success } = await saveToHistory(games);
 
-    const qualities = games.map((g) => g.quality).filter((q): q is number => q != null);
-    const avgQuality = qualities.length
-      ? Math.round((qualities.reduce((a, b) => a + b, 0) / qualities.length) * 100)
-      : null;
+      const qualities = games.map((g) => g.quality).filter((q): q is number => q != null);
+      const avgQuality = qualities.length
+        ? Math.round((qualities.reduce((a, b) => a + b, 0) / qualities.length) * 100)
+        : null;
 
-    trackCustom('GerarLote', {
-      content_category: 'game_generator',
-      num_items: games.length,
-      avg_quality: avgQuality,
-    });
+      trackCustom('GerarLote', {
+        content_category: 'game_generator',
+        num_items: games.length,
+        avg_quality: avgQuality,
+      });
 
-    toast({
-      title: success ? `${games.length} jogos gerados!` : 'Lote gerado',
-      description: success
-        ? avgQuality != null
-          ? `Lote diversificado salvo · aderência média ${avgQuality}%.`
-          : 'Jogos diversificados salvos no seu histórico.'
-        : 'Alguns jogos já existiam no histórico.',
-    });
+      toast({
+        title: success ? `${games.length} jogos gerados!` : 'Lote gerado',
+        description: success
+          ? avgQuality != null
+            ? `Lote diversificado salvo · aderência média ${avgQuality}%.`
+            : 'Jogos diversificados salvos no seu histórico.'
+          : 'Alguns jogos já existiam no histórico.',
+      });
 
     } catch (error) {
       if (!controller.signal.aborted) toast({ title: 'Erro ao gerar lote', description: error instanceof Error ? error.message : 'Tente novamente.', variant: 'destructive' });
@@ -141,5 +139,5 @@ export const useGameGenerator = () => {
     copyTimer.current = setTimeout(() => setIsCopied(false), 2000);
   };
 
-  return { currentResult, isGenerating, isBatchGenerating, isCopied, showDuplicateModal, setShowDuplicateModal, strategy, setStrategy, batchSize, setBatchSize, selection, setSelection, showBoard, setShowBoard, filterSel, setFilterSel, showFilters, setShowFilters, busy, activeHint, hasConstraints, filtersActive, ignoraFiltros, stats, quality, handleGenerate, handleGenerateBatch, copyToClipboard };
+  return { currentResult, isGenerating, isBatchGenerating, isCopied, showDuplicateModal, setShowDuplicateModal, strategy, setStrategy, batchSize, setBatchSize, selection, setSelection, showBoard, setShowBoard, filterSel, setFilterSel, showFilters, setShowFilters, busy, activeHint, hasConstraints, filtersActive, ignoraFiltros, stats, handleGenerate, handleGenerateBatch, copyToClipboard };
 };

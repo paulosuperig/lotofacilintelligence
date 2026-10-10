@@ -1,5 +1,6 @@
 import React from 'react';
 import { Dice5, Flame, Orbit, Repeat, Scale, Shuffle, Snowflake } from 'lucide-react';
+import { STRATEGY_DEFINITIONS } from '@/lib/lottery/strategies';
 import type { GenStrategy } from '@/lib/lottery/generator';
 
 export interface StrategyOption {
@@ -9,24 +10,21 @@ export interface StrategyOption {
   icon: React.ReactNode;
 }
 
-/** Estratégias disponíveis no gerador — espelham as do Intelligence AI. */
-export const STRATEGIES: StrategyOption[] = [
-  { value: 'equilibrada', label: 'Equilibrada', hint: 'Todas as métricas na faixa ideal', icon: <Scale size={15} /> },
-  { value: 'quentes', label: 'Quentes', hint: 'Prioriza as dezenas mais frequentes', icon: <Flame size={15} /> },
-  { value: 'atrasadas', label: 'Atrasadas', hint: 'Peso às dezenas de maior atraso', icon: <Snowflake size={15} /> },
-  { value: 'repetidas', label: 'Repetidas', hint: 'Âncora forte no último concurso', icon: <Repeat size={15} /> },
-  { value: 'ciclo', label: 'Ciclo', hint: 'Cobre as ausentes do último concurso', icon: <Orbit size={15} /> },
-  { value: 'agressiva', label: 'Agressiva', hint: 'Mais diversificação e risco', icon: <Dice5 size={15} /> },
-  {
-    value: 'surpresinha',
-    label: 'Surpresinha',
-    hint: 'Aleatório puro, como a geração oficial da Caixa',
-    icon: <Shuffle size={15} />,
-  },
-];
+const STRATEGY_ICONS: Record<GenStrategy, React.ReactNode> = {
+  equilibrada: <Scale size={15} />,
+  quentes: <Flame size={15} />,
+  atrasadas: <Snowflake size={15} />,
+  repetidas: <Repeat size={15} />,
+  ciclo: <Orbit size={15} />,
+  agressiva: <Dice5 size={15} />,
+  surpresinha: <Shuffle size={15} />,
+};
 
-/** Estratégias que ignoram os filtros avançados (geração puramente aleatória). */
-export const STRATEGIES_SEM_FILTRO = new Set<GenStrategy>(['surpresinha']);
+export const STRATEGIES: StrategyOption[] = STRATEGY_DEFINITIONS.map((definition) => ({
+  ...definition,
+  icon: STRATEGY_ICONS[definition.value],
+}));
+export { STRATEGIES_SEM_FILTRO } from '@/lib/lottery/strategies';
 
 /** Quantidades disponíveis para geração em lote. */
 export const BATCH_SIZES = [3, 5, 10, 15] as const;
