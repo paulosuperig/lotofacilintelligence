@@ -25,6 +25,12 @@ export const useLotteryHistory = (realtime = false) => {
   });
 
   const history = useMemo(() => historyQuery.data ?? [], [historyQuery.data]);
+  
+  // Otimização: Cache de assinaturas para busca O(1)
+  const historySignatures = useMemo(() => 
+    new Set(history.map((saved) => signatureOf(saved.numbers))),
+    [history]
+  );
 
   useLotteryRealtime({ realtime, userId });
 
@@ -75,8 +81,7 @@ export const useLotteryHistory = (realtime = false) => {
     async (newGames: SavedGame[]): Promise<SaveResult> => {
       if (!newGames || newGames.length === 0) return { success: false, duplicate: false, savedCount: 0 };
 
-      const existing = queryClient.getQueryData<SavedGame[]>(historyKey(userId)) ?? history;
-      const historySignatures = new Set(existing.map((saved) => signatureOf(saved.numbers)));
+      // Usando o Set otimizado
       const nonDuplicateNewGames = newGames.filter((g) => !historySignatures.has(signatureOf(g.numbers)));
 
       if (nonDuplicateNewGames.length === 0) return { success: false, duplicate: true, savedCount: 0 };
@@ -101,18 +106,20 @@ export const useLotteryHistory = (realtime = false) => {
         return { success: false, duplicate: false, savedCount: 0 };
       }
     },
-    [history, queryClient, saveMutation, userId],
+    [historySignatures, saveMutation],
   );
 
   const clearHistory = useCallback(async () => {
     await clearMutation.mutateAsync();
   }, [clearMutation]);
+
   const loadHistory = useCallback(async () => {
     await queryClient.invalidateQueries({ queryKey: historyKey(userId), exact: true, refetchType: 'active' });
   }, [queryClient, userId]);
+
   const isGameDuplicate = useCallback((numbers: number[]) => {
-    const signature = signatureOf(numbers);
-    return history.some((saved) => signatureOf(saved.numbers) === signature);
-  }, [history]);
+    return historySignatures.has(signatureOf(numbers));
+  }, [historySignatures]);
+
   return { history, saveToHistory, clearHistory, loadHistory, isGameDuplicate };
 };
