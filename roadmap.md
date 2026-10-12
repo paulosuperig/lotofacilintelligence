@@ -33,9 +33,9 @@
 - [x] Executar regressões, lint e verificação visual pública; limites registrados em docs/REFACTORING-GUIDE.md.
 
 ## Refatoração aprovada em 12/10/2026
-- [ ] REF-001/002: Restaurar isolamento dos workers e propriedade única do Realtime com regressões.
-- [ ] REF-003/006: Consolidar assinaturas e chaves leves por domínio com compatibilidade.
-- [ ] REF-004: Separar persistência do chat preservando consultas e falhas.
-- [ ] REF-005: Extrair pool e controladores do conferidor/bolão sem mudanças visuais.
-- [ ] REF-007: Separar transporte e normalização mantendo caches e tentativas.
-- [ ] Validar regressões, lint, compilação automática e apresentação pública; registrar limites autenticados.
+- [x] REF-001/002: Restaurar isolamento dos workers e propriedade única do Realtime com regressões.
+- [x] REF-003/006: Consolidar assinaturas e chaves leves por domínio com compatibilidade.
+- [x] REF-004: Separar persistência do chat preservando consultas e falhas.
+- [x] REF-005: Extrair pool e controladores do conferidor/bolão sem mudanças visuais.
+- [x] REF-007: Separar transporte e normalização mantendo caches e tentativas.
+- [x] Validar regressões, lint, compilação automática e apresentação pública; registrar limites autenticados.
