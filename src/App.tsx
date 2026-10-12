@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { LoadingFallback } from "@/components/ui/spinner";
 import { MetaPixelLoader } from "./components/analytics/MetaPixelLoader";
+import { AuthSync } from "./components/auth/AuthSync";
 import { MotionConfig } from "framer-motion";
 
 const Index = lazy(() => import("./pages/Index.tsx"));
@@ -40,6 +41,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <MetaPixelLoader />
+          <AuthSync />
           <BrowserRouter>
             <Suspense fallback={<RouteFallback />}>
               <Routes>

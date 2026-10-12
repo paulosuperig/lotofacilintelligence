@@ -1,12 +1,11 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useToast } from './use-toast';
 import { UserProfile } from '@/types/lottery';
 import { userService } from '@/services/userService';
 
-export const adminUsersKey = ['admin', 'users'] as const;
+export const adminUsersKey = (page: number) => ['admin', 'users', page] as const;
 
-/** Extrai a mensagem de erro de um `unknown` de forma segura (TS strict). */
 const errorMessage = (e: unknown, fallback: string): string =>
   e instanceof Error ? e.message : typeof e === 'string' ? e : fallback;
 
@@ -18,18 +17,22 @@ interface UserFormData {
 export const useAdmin = (enabled: boolean = true) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [page, setPage] = useState(0);
+  const pageSize = 20;
 
-  const usersQuery = useQuery<UserProfile[]>({
-    queryKey: adminUsersKey,
-    queryFn: () => userService.fetchProfiles(),
+  const usersQuery = useQuery({
+    queryKey: adminUsersKey(page),
+    queryFn: () => userService.fetchProfiles(page, pageSize),
     enabled,
     staleTime: 60 * 1000,
   });
 
-  const users = useMemo(() => usersQuery.data ?? [], [usersQuery.data]);
+  const users = useMemo(() => usersQuery.data?.profiles ?? [], [usersQuery.data]);
+  const total = usersQuery.data?.total ?? 0;
+  const pageCount = Math.ceil(total / pageSize);
 
   const invalidateUsers = useCallback(
-    () => queryClient.invalidateQueries({ queryKey: adminUsersKey }),
+    () => queryClient.invalidateQueries({ queryKey: ['admin', 'users'] }),
     [queryClient],
   );
 
@@ -133,6 +136,10 @@ export const useAdmin = (enabled: boolean = true) => {
 
   return {
     users,
+    total,
+    page,
+    pageCount,
+    setPage,
     isLoading: usersQuery.isLoading,
     createOrUpdateUser,
     deleteUser,

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UserPlus, Settings, Users, ArrowLeft, Download } from 'lucide-react';
+import { UserPlus, Settings, Users, ArrowLeft, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { UserDialog } from './UserDialog';
 import { UserTable } from './UserTable';
@@ -7,7 +7,6 @@ import { DeepSeekConfig } from './DeepSeekConfig';
 import { SecurityBanner } from './SecurityBanner';
 import { MetaPixelConfig } from './MetaPixelConfig';
 import { UserProfile, UserFormData } from '@/types/lottery';
-
 
 export interface AdminPanelProps {
   users: UserProfile[];
@@ -19,6 +18,11 @@ export interface AdminPanelProps {
   isAiConfigured: boolean;
   onSaveDeepSeekKey: (key: string) => void;
   defaultTab?: 'users' | 'settings';
+  // Pagination props
+  page?: number;
+  pageCount?: number;
+  onPageChange?: (page: number) => void;
+  totalUsers?: number;
 }
 
 export const AdminPanel = ({ 
@@ -30,14 +34,17 @@ export const AdminPanel = ({
   onResetPassword,
   isAiConfigured,
   onSaveDeepSeekKey,
-  defaultTab = 'users'
+  defaultTab = 'users',
+  page = 0,
+  pageCount = 1,
+  onPageChange,
+  totalUsers = 0
 }: AdminPanelProps) => {
   const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
   const [userFormData, setUserFormData] = useState<UserFormData>({ email: '', password: '', role: 'demo', status: 'active' });
   const [activeTab, setActiveTab] = useState<'users' | 'settings'>(defaultTab);
 
-  // Sync with defaultTab prop when it changes
   React.useEffect(() => {
     setActiveTab(defaultTab);
   }, [defaultTab]);
@@ -91,7 +98,7 @@ export const AdminPanel = ({
             {activeTab === 'users' ? 'Usuários Cadastrados' : 'Painel Administrativo'}
           </h2>
           <p className="text-zinc-500 dark:text-zinc-400 text-xs sm:text-sm">
-            {activeTab === 'users' ? 'Gerencie usuários e permissões de acesso' : 'Gerencie usuários, acessos e configurações do sistema'}
+            {activeTab === 'users' ? `Exibindo ${users.length} de ${totalUsers} usuários` : 'Gerencie usuários, acessos e configurações do sistema'}
           </p>
         </div>
         <div className="grid grid-cols-1 min-[360px]:grid-cols-2 sm:flex sm:flex-wrap items-center justify-center lg:justify-end gap-2 sm:gap-3 w-full lg:w-auto">
@@ -148,6 +155,32 @@ export const AdminPanel = ({
               onDelete={onDeleteUser} 
             />
           </div>
+          
+          {pageCount > 1 && onPageChange && (
+            <div className="flex items-center justify-center gap-4 mt-6">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onPageChange(page - 1)}
+                disabled={page === 0}
+                className="rounded-xl"
+              >
+                <ChevronLeft size={20} />
+              </Button>
+              <span className="text-sm font-bold text-zinc-600 dark:text-zinc-400">
+                Página {page + 1} de {pageCount}
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onPageChange(page + 1)}
+                disabled={page >= pageCount - 1}
+                className="rounded-xl"
+              >
+                <ChevronRight size={20} />
+              </Button>
+            </div>
+          )}
         </div>
       ) : (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -156,9 +189,7 @@ export const AdminPanel = ({
               isConfigured={isAiConfigured}
               onSaveDeepSeekKey={onSaveDeepSeekKey} 
             />
-            
             <MetaPixelConfig />
-            
             <SecurityBanner />
           </div>
         </div>
