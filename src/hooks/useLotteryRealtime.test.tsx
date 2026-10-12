@@ -1,0 +1,42 @@
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { act, renderHook } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import type { ReactNode } from 'react';
+import { supabase } from '@/lib/supabase';
+import { historyKey } from '@/lib/lottery/queryKeys';
+import { useLotteryRealtime } from './useLotteryRealtime';
+
+afterEach(() => { vi.restoreAllMocks(); vi.useRealTimers(); });
+describe('history realtime ownership', () => {
+  it('registers callbacks before subscribe, coalesces changes and cleans up one channel', async () => {
+    if (!supabase) throw new Error('Supabase client unavailable');
+    vi.useFakeTimers();
+    const channel = supabase.channel('realtime-test');
+    const on = vi.spyOn(channel, 'on');
+    const subscribe = vi.spyOn(channel, 'subscribe').mockReturnValue(channel);
+    const create = vi.spyOn(supabase, 'channel').mockReturnValue(channel);
+    const remove = vi.spyOn(supabase, 'removeChannel').mockResolvedValue('ok');
+    const client = new QueryClient();
+    const invalidate = vi.spyOn(client, 'invalidateQueries').mockResolvedValue();
+    const wrapper = ({ children }: { children: ReactNode }) => <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+    const { unmount } = renderHook(() => useLotteryRealtime({ realtime: true, userId: 'user-a' }), { wrapper });
+    expect(on.mock.invocationCallOrder[0]).toBeLessThan(subscribe.mock.invocationCallOrder[0]);
+    expect(on.mock.calls[0]?.[1]).toEqual({ event: '*', schema: 'public', table: 'games_history', filter: 'user_id=eq.user-a' });
+    const status = subscribe.mock.calls[0]?.[0];
+    const refresh = on.mock.calls[0]?.[2];
+    if (!status || !refresh) throw new Error('Missing subscription callbacks');
+    act(() => { status('SUBSCRIBED'); refresh({}); refresh({}); });
+    await act(async () => { await vi.advanceTimersByTimeAsync(300); });
+    expect(invalidate).toHaveBeenCalledExactlyOnceWith({ queryKey: historyKey('user-a'), exact: true });
+    act(() => { status('CHANNEL_ERROR', new Error('offline')); status('TIMED_OUT'); });
+    await act(async () => { await vi.advanceTimersByTimeAsync(10_000); });
+    expect(create).toHaveBeenCalledOnce();
+    act(() => refresh({}));
+    unmount();
+    await vi.runAllTimersAsync();
+    expect(remove).toHaveBeenCalledExactlyOnceWith(channel);
+    expect(invalidate).toHaveBeenCalledOnce();
+    expect(vi.getTimerCount()).toBe(0);
+    client.clear();
+  });
+});
