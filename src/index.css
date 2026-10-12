@@ -203,3 +203,7 @@ All colors MUST be HSL.
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+#lovable-badge {
+  display: none !important;
+}
