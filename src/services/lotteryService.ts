@@ -1,4 +1,5 @@
-import { LotteryResultSchema } from "@/lib/security/schemas";
+import { normalizeResult, extractDezenas } from './lotteryResultMapper';
+import { fetchWithRetry } from './fetchWithRetry';
 import { LotteryResult } from "@/types/lottery";
 import { analyzeHistory, normalizeDraw, type HistoryAnalysis } from "@/lib/lottery/analysis";
 import { readCache, writeCache } from "@/lib/cache/localCache";
@@ -20,33 +21,6 @@ const ANALYSIS_TTL_MS = 30 * 60 * 1000;
 /** Chave de persistência da análise em localStorage. */
 const ANALYSIS_STORAGE_KEY = "lf_history_analysis_v2";
 
-/**
- * fetch com timeout e retry/backoff exponencial. A API primária é instável
- * (herokuapp), então tolerar falhas transitórias melhora muito a robustez.
- */
-const fetchWithRetry = async (
-  url: string,
-  { retries = 2, timeoutMs = 8000 }: { retries?: number; timeoutMs?: number } = {}
-): Promise<Response> => {
-  let lastError: unknown;
-  for (let attempt = 0; attempt <= retries; attempt++) {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), timeoutMs);
-    try {
-      const response = await fetch(url, { signal: controller.signal });
-      clearTimeout(timer);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      return response;
-    } catch (error) {
-      clearTimeout(timer);
-      lastError = error;
-      if (attempt < retries) {
-        await new Promise((r) => setTimeout(r, 400 * Math.pow(2, attempt)));
-      }
-    }
-  }
-  throw lastError instanceof Error ? lastError : new Error("fetch failed");
-};
 
 const readStoredAnalysis = (): { at: number; data: HistoryAnalysis } | null => {
   try {
@@ -66,40 +40,6 @@ const writeStoredAnalysis = (entry: { at: number; data: HistoryAnalysis }): void
   } catch { /* quota/serialization errors são não-fatais */ }
 };
 
-const normalizeResult = (raw: unknown): LotteryResult => {
-  const data = (raw ?? {}) as Record<string, unknown>;
-  // Se os dados vierem da Heroku API
-  if (data.dezenas) {
-    return LotteryResultSchema.parse({
-      ...data,
-      valorEstimadoProximoConcurso: data.valorEstimadoProximoConcurso || data.valor_estimado || 0,
-      proximoConcurso: data.proximoConcurso || data.proximo_concurso || 0,
-    }) as unknown as LotteryResult;
-  }
-
-  // Se os dados vierem diretamente da API da Caixa (Portal Loterias)
-  if (data.listaDezenas) {
-    return LotteryResultSchema.parse({
-      concurso: data.numero,
-      data: data.dataApuracao,
-      dezenas: data.listaDezenas,
-      acumulou: data.acumulado,
-      proximoConcurso: data.numeroConcursoProximo,
-      valorEstimadoProximoConcurso: data.valorEstimadoProximoConcurso || 0,
-      dataProximoConcurso: data.dataPróximoSorteio
-    }) as unknown as LotteryResult;
-  }
-
-  return LotteryResultSchema.parse(data) as unknown as LotteryResult;
-};
-
-/** Extrai as dezenas cruas de um resultado, aceitando os formatos das APIs. */
-const extractDezenas = (r: unknown): Array<string | number> => {
-  const row = (r ?? {}) as { dezenas?: unknown; listaDezenas?: unknown };
-  if (Array.isArray(row.dezenas)) return row.dezenas as Array<string | number>;
-  if (Array.isArray(row.listaDezenas)) return row.listaDezenas as Array<string | number>;
-  return [];
-};
 
 let analysisCache: { at: number; data: HistoryAnalysis } | null = null;
 

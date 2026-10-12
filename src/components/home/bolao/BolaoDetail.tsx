@@ -1,15 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Trash2, ArrowLeft, RefreshCcw, SearchCheck, XCircle, UserPlus, Ticket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { generateSecureId } from '@/lib/security/utils';
-import { lotteryService } from '@/services/lotteryService';
 import { formatBRL } from '@/lib/lottery/prizeValue';
-import { totalCotas, custoTotal, custoPorCota, custoDoCotista, conferirBolao, type Bolao, type BolaoConferencia } from '@/lib/lottery/bolao';
+import { custoTotal, custoPorCota, custoDoCotista, type Bolao } from '@/lib/lottery/bolao';
 import { ResponsibleGaming } from '@/components/lottery/ResponsibleGaming';
 import type { SavedGame } from '@/types/lottery';
+import { useBolaoDetail } from '@/hooks/useBolaoDetail';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const CELLS = Array.from({ length: 25 }, (_, i) => i + 1);
@@ -26,51 +25,7 @@ interface DetailProps {
 }
 
 export const BolaoDetail = ({ bolao, history, defaultConcurso, onChange, onDelete, onBackToList }: DetailProps) => {
-  const [nomeCotista, setNomeCotista] = useState('');
-  const [cotasCotista, setCotasCotista] = useState('1');
-  const [picker, setPicker] = useState<number[]>([]);
-  const [concurso, setConcurso] = useState(defaultConcurso ? String(defaultConcurso) : '');
-  const [conf, setConf] = useState<BolaoConferencia | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const addCotista = () => {
-    const cotas = Math.max(1, Math.round(parseFloat(cotasCotista.replace(',', '.')) || 1));
-    onChange({ ...bolao, cotistas: [...bolao.cotistas, { id: generateSecureId(), nome: nomeCotista.trim() || `Cotista ${bolao.cotistas.length + 1}`, cotas }] });
-    setNomeCotista('');
-    setCotasCotista('1');
-  };
-  const removeCotista = (id: string) => onChange({ ...bolao, cotistas: bolao.cotistas.filter((c) => c.id !== id) });
-
-  const addGame = (nums: number[]) => {
-    if (nums.length !== 15) return;
-    const sig = [...nums].sort((a, b) => a - b).join(',');
-    if (bolao.jogos.some((g) => [...g].sort((a, b) => a - b).join(',') === sig)) return;
-    onChange({ ...bolao, jogos: [...bolao.jogos, [...nums].sort((a, b) => a - b)] });
-    setConf(null);
-  };
-  const removeGame = (idx: number) => { onChange({ ...bolao, jogos: bolao.jogos.filter((_, i) => i !== idx) }); setConf(null); };
-  const togglePick = (n: number) => setPicker((p) => p.includes(n) ? p.filter((x) => x !== n) : p.length >= 15 ? p : [...p, n]);
-
-  const savedNotInBolao = history.filter((g) => {
-    const sig = [...g.numbers].sort((a, b) => a - b).join(',');
-    return !bolao.jogos.some((j) => [...j].sort((a, b) => a - b).join(',') === sig);
-  }).slice(0, 12);
-
-  const totCotas = totalCotas(bolao);
-
-  const handleConferir = async () => {
-    if (!concurso.trim() || bolao.jogos.length === 0 || loading) return;
-    setLoading(true); setError(null); setConf(null);
-    try {
-      const res = await lotteryService.getResultByConcurso(parseInt(concurso, 10));
-      setConf(conferirBolao(bolao, res.dezenas, res.premiacoes));
-    } catch {
-      setError('Não foi possível conferir. Verifique o concurso e sua conexão.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { nomeCotista, setNomeCotista, cotasCotista, setCotasCotista, picker, setPicker, concurso, setConcurso, conf, setConf, loading, error, addCotista, removeCotista, addGame, removeGame, togglePick, savedNotInBolao, totCotas, handleConferir } = useBolaoDetail(bolao, history, onChange, defaultConcurso);
 
   return (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="grid grid-cols-1 gap-6">
