@@ -5,13 +5,12 @@ import type { Session } from '@supabase/supabase-js';
 
 /**
  * Lightweight hook to get the current userId.
- * Reuses the cached session from useAuth to avoid duplicate listeners and requests.
+ * Reuses the cached session from useAuth/AuthSync.
  */
 export const useSessionUser = () => {
   const { data: session, isLoading } = useQuery<Session | null>({
     queryKey: sessionKey,
-    // Note: useAuth handles the actual getSession/subscription logic.
-    // This query just taps into the same cache key.
+    // Relying on the centralized fetch logic or providing a minimal fallback
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession();
       return session;
