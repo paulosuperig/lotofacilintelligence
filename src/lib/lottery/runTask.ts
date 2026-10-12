@@ -2,53 +2,6 @@ import type { LotteryTask, LotteryTaskResult, LotteryWorkerResponse } from './wo
 import type { GeneratedGame } from './generator';
 import type { BacktestReport } from './backtest';
 
-let persistentWorker: Worker | null = null;
-const taskQueue: { 
-  task: LotteryTask; 
-  resolve: (res: any) => void; 
-  reject: (err: any) => void; 
-  signal?: AbortSignal;
-  timer: ReturnType<typeof setTimeout>;
-}[] = [];
-
-function getWorker() {
-  if (typeof Worker === 'undefined') return null;
-  if (!persistentWorker) {
-    persistentWorker = new Worker(new URL('./lottery.worker.ts', import.meta.url), { type: 'module' });
-    persistentWorker.onmessage = (event: MessageEvent<LotteryWorkerResponse>) => {
-      const current = taskQueue.shift();
-      if (!current) return;
-      
-      clearTimeout(current.timer);
-      if ('error' in event.data) current.reject(new Error(event.data.error));
-      else current.resolve(event.data.result);
-      
-      processQueue();
-    };
-    persistentWorker.onerror = () => {
-      const current = taskQueue.shift();
-      if (current) {
-        clearTimeout(current.timer);
-        current.reject(new Error('Não foi possível calcular o jogo. Tente novamente.'));
-      }
-      persistentWorker?.terminate();
-      persistentWorker = null;
-      processQueue();
-    };
-  }
-  return persistentWorker;
-}
-
-function processQueue() {
-  const worker = getWorker();
-  if (!worker || taskQueue.length === 0) return;
-  
-  // Note: This implementation is sequential to keep it simple and safe.
-  // For true parallelism, a worker pool would be better.
-  const next = taskQueue[0];
-  worker.postMessage(next.task);
-}
-
 export function runLotteryTask(task: Extract<LotteryTask, { kind: 'game' }>, signal?: AbortSignal): Promise<GeneratedGame>;
 export function runLotteryTask(task: Extract<LotteryTask, { kind: 'batch' }>, signal?: AbortSignal): Promise<GeneratedGame[]>;
 export function runLotteryTask(task: Extract<LotteryTask, { kind: 'backtest' }>, signal?: AbortSignal): Promise<BacktestReport>;
@@ -61,24 +14,33 @@ export async function runLotteryTask(task: LotteryTask, signal?: AbortSignal): P
   }
 
   return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => {
-      const idx = taskQueue.findIndex(q => q.timer === timer);
-      if (idx !== -1) {
-        taskQueue.splice(idx, 1);
-        reject(new Error('O cálculo demorou demais. Tente novamente.'));
-      }
-    }, 60_000);
-
-    const abort = () => {
-      const idx = taskQueue.findIndex(q => q.timer === timer);
-      if (idx !== -1) {
-        taskQueue.splice(idx, 1);
-        reject(new DOMException('Cálculo cancelado.', 'AbortError'));
-      }
+    const worker = new Worker(new URL('./lottery.worker.ts', import.meta.url), { type: 'module' });
+    let settled = false;
+    const cleanup = () => {
+      clearTimeout(timer);
+      signal?.removeEventListener('abort', abort);
+      worker.onmessage = null;
+      worker.onerror = null;
+      worker.terminate();
     };
+    const fail = (error: unknown) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      reject(error);
+    };
+    const abort = () => fail(new DOMException('Cálculo cancelado.', 'AbortError'));
+    const timer = setTimeout(() => fail(new Error('O cálculo demorou demais. Tente novamente.')), 60_000);
     signal?.addEventListener('abort', abort, { once: true });
-
-    taskQueue.push({ task, resolve, reject, signal, timer });
-    if (taskQueue.length === 1) processQueue();
+    worker.onmessage = (event: MessageEvent<LotteryWorkerResponse>) => {
+      if (settled) return;
+      if ('error' in event.data) { fail(new Error(event.data.error)); return; }
+      settled = true;
+      cleanup();
+      resolve(event.data.result);
+    };
+    worker.onerror = () => fail(new Error('Não foi possível calcular o jogo. Tente novamente.'));
+    if (signal?.aborted) { abort(); return; }
+    try { worker.postMessage(task); } catch (error) { fail(error); }
   });
 }
