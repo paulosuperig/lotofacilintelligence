@@ -11,9 +11,8 @@ export interface RegisterInput {
 }
 
 /**
- * Ações de autenticação usadas pelas telas públicas (login, cadastro e
- * recuperação de senha). Concentra chamadas ao Supabase, estado de carregamento
- * e feedback ao usuário, mantendo os componentes apenas com apresentação.
+ * Ações de autenticação usadas pelas telas públicas e privadas.
+ * Concentra chamadas ao Supabase, estado de carregamento e feedback ao usuário.
  */
 export const useAuthActions = () => {
   const { toast } = useToast();
@@ -73,7 +72,32 @@ export const useAuthActions = () => {
     [toast],
   );
 
-  /** Retorna `true` quando a conta já está ativa; `false` exige confirmação por e-mail. */
+  const updatePassword = useCallback(
+    async (password: string) => {
+      setIsLoading(true);
+      try {
+        const { error } = await supabase.auth.updateUser({ password });
+        if (error) throw error;
+
+        toast({
+          title: "Senha atualizada",
+          description: "Sua nova senha foi salva com sucesso.",
+        });
+        return true;
+      } catch (error: unknown) {
+        toast({
+          title: "Erro",
+          description: getErrorMessage(error),
+          variant: "destructive",
+        });
+        return false;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [toast],
+  );
+
   const signUp = useCallback(
     async (input: RegisterInput) => {
       setIsLoading(true);
@@ -115,5 +139,5 @@ export const useAuthActions = () => {
     [toast],
   );
 
-  return { isLoading, signIn, requestPasswordReset, signUp };
+  return { isLoading, signIn, requestPasswordReset, updatePassword, signUp };
 };
