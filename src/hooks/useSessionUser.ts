@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { sessionKey } from './useAuth';
+import { sessionKey } from '@/lib/auth/queryKeys';
 import type { Session } from '@supabase/supabase-js';
 
 /**

@@ -1,9 +1,11 @@
 import { useCallback, useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { supabase, isSupabaseEnabled } from '@/lib/supabase';
+import { aiChatService } from '@/services/aiChatService';
+import { aiChatKey } from '@/lib/ai/queryKeys';
+import type { AiChatMessage } from '@/types/aiChat';
+export type { AiChatMessage } from '@/types/aiChat';
 
-export type AiChatMessage = { role: 'user' | 'assistant'; content: string };
-const aiChatKey = (userId: string | null) => ['ai_chat_history', userId] as const;
+
 
 export const useAiChat = (userId: string | null) => {
   const queryClient = useQueryClient();
@@ -12,18 +14,7 @@ export const useAiChat = (userId: string | null) => {
     queryKey: aiChatKey(userId),
     enabled: !!userId,
     staleTime: 5 * 60 * 1000,
-    queryFn: async ({ signal }) => {
-      if (!isSupabaseEnabled() || !supabase || !userId) return [];
-      const { data, error } = await supabase
-        .from('ai_chat_history')
-        .select('role, content')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: true })
-        .limit(30)
-        .abortSignal(signal);
-      if (error) throw error;
-      return (data ?? []) as AiChatMessage[];
-    },
+    queryFn: ({ signal }) => aiChatService.fetchChat(userId, signal),
   });
 
   const aiChat = useMemo(() => chatQuery.data ?? [], [chatQuery.data]);
@@ -36,11 +27,7 @@ export const useAiChat = (userId: string | null) => {
   );
 
   const persistMutation = useMutation<void, Error, AiChatMessage>({
-    mutationFn: async ({ role, content }) => {
-      if (!isSupabaseEnabled() || !supabase || !userId) return;
-      const { error } = await supabase.from('ai_chat_history').insert({ user_id: userId, role, content });
-      if (error) throw error;
-    },
+    mutationFn: (message) => aiChatService.persistMessage(userId, message),
     onError: (error) => {
       console.error('[AI] Error persisting chat message:', error);
     },
@@ -54,9 +41,7 @@ export const useAiChat = (userId: string | null) => {
   );
 
   const clearChatHistory = useCallback(async () => {
-    if (isSupabaseEnabled() && supabase && userId) {
-      await supabase.from('ai_chat_history').delete().eq('user_id', userId);
-    }
+    await aiChatService.clearChat(userId);
     queryClient.setQueryData<AiChatMessage[]>(aiChatKey(userId), []);
     queryClient.invalidateQueries({ queryKey: aiChatKey(userId) });
   }, [queryClient, userId]);

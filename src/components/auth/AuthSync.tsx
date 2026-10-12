@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { sessionKey } from '@/hooks/useAuth';
+import { sessionKey, profilesKey } from '@/lib/auth/queryKeys';
 import { setAdvancedMatching, clearAdvancedMatching, trackEvent, trackCustom } from '@/lib/analytics/metaPixel';
 
 export const AuthSync = () => {
@@ -36,7 +36,7 @@ export const AuthSync = () => {
           if (event === 'SIGNED_OUT') {
             trackCustom('UserLogout', { content_category: 'auth' });
             clearAdvancedMatching();
-            queryClient.removeQueries({ queryKey: ['profile'] });
+            queryClient.removeQueries({ queryKey: profilesKey });
             queryClient.setQueryData(sessionKey, null);
           }
         }

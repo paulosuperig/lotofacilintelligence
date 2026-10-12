@@ -4,13 +4,14 @@ import { aiConfigService } from '@/services/aiConfigService';
 import { sanitizeString } from '@/lib/security/utils';
 import { useToast } from './use-toast';
 import { useSessionUser } from './useSessionUser';
+import { aiConfigurationKey } from '@/lib/ai/queryKeys';
 
 export const useAiConfiguration = (enabled = true) => {
   const { userId } = useSessionUser();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   
-  const queryKey = ['ai_config', 'configured', userId] as const;
+  const queryKey = aiConfigurationKey(userId);
   
   const config = useQuery({ 
     queryKey, 
