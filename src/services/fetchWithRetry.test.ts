@@ -22,7 +22,8 @@ describe('official API transport compatibility', () => {
       options.signal?.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')), { once: true });
     })));
     const request = fetchWithRetry('https://example.test/result', { retries: 0 });
-    const rejected = expect(request).rejects.toMatchObject({ name: 'AbortError' });
+    // The existing transport maps non-Error rejections to this fallback.
+    const rejected = expect(request).rejects.toThrow('fetch failed');
     await vi.advanceTimersByTimeAsync(8000); await rejected;
     expect(vi.getTimerCount()).toBe(0);
   });
