@@ -18,6 +18,8 @@
 import { TOTAL_NUMBERS, NUMBERS_PER_GAME, BANDS, type BandKey } from './constants';
 import { computeGameMetrics, type GameMetrics } from './metrics';
 import type { HistoryAnalysis } from './analysis';
+import { gameSignature } from './gameSignature';
+export { gameSignature } from './gameSignature';
 
 export type Rng = () => number;
 
@@ -132,9 +134,6 @@ export interface GeneratedGame {
   dataDriven: boolean;
 }
 
-/** Assinatura canônica de um jogo (para dedup). */
-export const gameSignature = (nums: number[]): string =>
-  [...nums].sort((a, b) => a - b).join(',');
 
 /**
  * Peso de cada dezena para a amostragem. Combina:

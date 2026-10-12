@@ -10,7 +10,7 @@ import { historyKey } from '@/lib/lottery/queryKeys';
 import { useSessionUser } from '../useSessionUser';
 import type { SaveResult } from '@/lib/lottery/saveConfirmation';
 
-const signatureOf = (numbers: number[]) => [...numbers].sort((a, b) => a - b).join(',');
+import { gameSignature } from '@/lib/lottery/gameSignature';
 
 export const useLotteryHistory = (realtime = false) => {
   const { toast } = useToast();
@@ -28,7 +28,7 @@ export const useLotteryHistory = (realtime = false) => {
   
   // Otimização: Cache de assinaturas para busca O(1)
   const historySignatures = useMemo(() => 
-    new Set(history.map((saved) => signatureOf(saved.numbers))),
+    new Set(history.map((saved) => gameSignature(saved.numbers))),
     [history]
   );
 
@@ -82,7 +82,7 @@ export const useLotteryHistory = (realtime = false) => {
       if (!newGames || newGames.length === 0) return { success: false, duplicate: false, savedCount: 0 };
 
       // Usando o Set otimizado
-      const nonDuplicateNewGames = newGames.filter((g) => !historySignatures.has(signatureOf(g.numbers)));
+      const nonDuplicateNewGames = newGames.filter((g) => !historySignatures.has(gameSignature(g.numbers)));
 
       if (nonDuplicateNewGames.length === 0) return { success: false, duplicate: true, savedCount: 0 };
 
@@ -118,7 +118,7 @@ export const useLotteryHistory = (realtime = false) => {
   }, [queryClient, userId]);
 
   const isGameDuplicate = useCallback((numbers: number[]) => {
-    return historySignatures.has(signatureOf(numbers));
+    return historySignatures.has(gameSignature(numbers));
   }, [historySignatures]);
 
   return { history, saveToHistory, clearHistory, loadHistory, isGameDuplicate };

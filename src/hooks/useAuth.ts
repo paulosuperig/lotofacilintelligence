@@ -8,8 +8,8 @@ import { setAdvancedMatching } from '@/lib/analytics/metaPixel';
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-export const profileKey = (userId: string | null) => ['profile', userId] as const;
-export const sessionKey = ['auth', 'session'] as const;
+import { profileKey, profilesKey, sessionKey } from '@/lib/auth/queryKeys';
+export { profileKey, sessionKey } from '@/lib/auth/queryKeys';
 
 /**
  * Skill: Advanced Authentication & Token Management
@@ -84,7 +84,7 @@ export const useAuth = () => {
       toast.error('Erro ao sair', { description: error.message });
     } else {
       queryClient.setQueryData(sessionKey, null);
-      queryClient.removeQueries({ queryKey: ['profile'] });
+      queryClient.removeQueries({ queryKey: profilesKey });
     }
   }, [queryClient]);
 

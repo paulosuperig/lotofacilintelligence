@@ -4,7 +4,8 @@ import { useToast } from './use-toast';
 import { UserProfile } from '@/types/lottery';
 import { userService } from '@/services/userService';
 
-export const adminUsersKey = (page: number) => ['admin', 'users', page] as const;
+import { adminUsersKey, adminUsersPrefix } from '@/lib/admin/queryKeys';
+export { adminUsersKey } from '@/lib/admin/queryKeys';
 
 const errorMessage = (e: unknown, fallback: string): string =>
   e instanceof Error ? e.message : typeof e === 'string' ? e : fallback;
@@ -32,7 +33,7 @@ export const useAdmin = (enabled: boolean = true) => {
   const pageCount = Math.ceil(total / pageSize);
 
   const invalidateUsers = useCallback(
-    () => queryClient.invalidateQueries({ queryKey: ['admin', 'users'] }),
+    () => queryClient.invalidateQueries({ queryKey: adminUsersPrefix }),
     [queryClient],
   );
 

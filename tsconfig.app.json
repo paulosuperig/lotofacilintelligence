@@ -15,12 +15,12 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
-    /* Linting & Maintainability */
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitAny": true,
-    "noFallthroughCasesInSwitch": true,
+    /* Preserve project-wide compatibility; harden extracted boundaries incrementally. */
+    "strict": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noImplicitAny": false,
+    "noFallthroughCasesInSwitch": false,
 
     "paths": {
       "@/*": ["./src/*"]

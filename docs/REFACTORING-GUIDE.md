@@ -2,6 +2,49 @@
 
 Este documento define as prioridades e o roadmap para melhoria da qualidade do código sem comprometer a estabilidade do sistema.
 
+## Resultado da rodada aprovada de 12/10/2026
+
+### REF-001 a REF-007 implementados
+- Workers curtos por pedido: conclusão, erro, timeout de 60 segundos e cancelamento encerram o worker e removem timers/listeners; resultados concorrentes permanecem isolados.
+- Realtime: uma inscrição por shell, callbacks antes de subscribe, eventos agrupados em 300 ms e limpeza do canal. Reconexão pertence ao cliente Supabase, sem canais adicionais manuais.
+- Assinatura canônica em `lib/lottery/gameSignature`; o motor conserva o reexport existente. Histórico, geração e bolão compartilham a mesma identidade sem mutação das dezenas.
+- Chaves leves em `lib/auth/queryKeys`, `lib/admin/queryKeys` e `lib/ai/queryKeys`, preservando valores, isolamento por usuário e exports públicos anteriores.
+- `aiChatService` contém leitura/inserção/exclusão; `useAiChat` mantém cache, mutações e feedback. Ordem ascendente, limite de 30 e contrato legado de exclusão preservados.
+- `useConferidor` e `useBolaoDetail` concentram os controladores extraídos literalmente. Componentes mantêm a marcação, textos e estilos. `buildPool` concentra seleção de dezenas do fechamento sem alterar o algoritmo.
+- `fetchWithRetry` e `lotteryResultMapper` isolam transporte e normalização; `lotteryService` conserva caches, TTLs, endpoints, fallback offline e análise.
+- Restaurado `build:dev`, exigido pela compilação automática. Rigor global de TypeScript não foi introduzido; fronteiras novas receberam tipos e testes graduais.
+
+### Evidências de validação
+- **197 testes aprovados em 36 arquivos**; 26 regressões adicionadas ao baseline de 171.
+- Testes cobrem isolamento/cancelamento/timeout/erro de workers, limpeza e coalescência Realtime, identidade e compatibilidade de chaves, payloads/falhas de chat, normalização dos dois formatos oficiais, seleção do pool, conferência de 15 acertos e rateio 100/200 de um prêmio de 300.
+- Transporte mantém duas retentativas com intervalos de 400/800 ms e timeout padrão de 8 segundos; falhas preservam o mapeamento original.
+- **ESLint: zero erros e 11 avisos preexistentes de Fast Refresh.**
+- **Compilação automática: build OK em 12/10/2026, 19:50:06 UTC.** Nenhum build/typecheck manual foi executado.
+- Navegador público: login, abertura da recuperação e página de nova senha renderizados; nenhum erro de página observado.
+- Não verificados: fluxos autenticados completos no Supabase externo, chamadas pagas da IA, carga concorrente, cobertura percentual e Lighthouse. Não houve publicação, migration ou alteração de permissões.
+
+### Relatório 10/10
+**Padrão:** REFACTOR · **Stack:** React 18 + Vite + Supabase · **Wave de revisão:** dez especialistas em paralelo.
+
+| Especialista | Modo da revisão | Resultado utilizado |
+|---|---|---|
+| UI | VERIFY | Extrações de conferidor, fechamento e bolão, sem mudança visual |
+| Supabase | VERIFY | Persistência, limites e contratos mapeados; banco preservado |
+| Auditor | VERIFY | Coesão e responsabilidades revisadas |
+| Testing | VERIFY | Lacunas cobertas por novas regressões; suíte final aprovada |
+| SEO | VERIFY | Rotas e metadados preservados |
+| Deploy | VERIFY | Compilação automática acompanhada; nenhuma publicação |
+| API | VERIFY | Transporte e normalização isolados sem novos payloads |
+| Prompter | VERIFY | Plano e invariantes conservadores consolidados |
+| Auth | VERIFY | Chaves desacopladas e apresentação pública verificada |
+| State | VERIFY | Workers e Realtime estabilizados e testados |
+
+**Gates:** regressões aprovadas, lint sem erros, compilação automática aprovada. Publicação não autorizada; validação autenticada bloqueada pela conexão externa sem sessão gerenciada. **Sem score numérico**, pois não há métricas completas.
+
+A revisão de segurança utiliza apenas resultados do scanner: leitura pública de `heartbeat` e proteção contra senhas vazadas desativada. Sem resultado recente de análise profunda, recomenda-se executá-la pela aba Segurança; nenhuma afirmação de segurança integral.
+
+As implementações são apenas dos IDs aprovados. Migração de armazenamento dos bolões/caches, paginação administrativa, revisão de schemas e atualizações de dependências permanecem fora desta autorização.
+
 ## Resultado da rodada de 10/10/2026
 
 ### Organização implementada

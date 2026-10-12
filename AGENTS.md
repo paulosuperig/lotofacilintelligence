@@ -6,11 +6,16 @@
 - Keep the authenticated application and connected AI/admin panels behind dynamic imports so login never loads private tools or starts their queries.
 - Execute lottery generation and backtesting in short-lived module workers using the existing pure algorithms; terminate workers on completion, cancellation and timeout.
 - Own history Realtime once per authenticated shell and coalesce change events; only database-acknowledged rows enter the saved history cache.
-- Keep lightweight query keys separate from feature hooks so statistics consumers do not import mutations or generation engines.
+- Keep query keys in lightweight domain modules with compatibility reexports; consumers must not import feature hooks to identify cached data.
 - Compose the public lottery hook from latest-result, history and generation hooks; preserve its return values and callback contracts to avoid UI regressions.
 - Keep AI prompt construction pure and chat persistence separate from request orchestration; this isolates concerns without changing prompts or transport behavior.
 - Share one typed mapper for history reads and insert acknowledgements; both paths must produce identical saved-game representations.
-- Keep generator interaction state in its controller hook and pool detail in a dedicated view; presentation changes must not be coupled to data operations.
+- Keep generator, checker and pool-detail interaction state in controller hooks; presentation changes must not be coupled to data operations.
+
+- Keep combination identity in a pure lightweight module shared by generation, history and pools; importing deduplication must not load the generation engine.
+- Keep chat I/O in its service and cache orchestration in its hook; preserve selection, ordering, limits and error contracts during extraction.
+- Keep official-result transport and mapping separate from cached orchestration; refactors must preserve retries, normalization and offline fallbacks.
+- Keep wheel-pool composition in the pure lottery domain; presentation must not own number-selection algorithms.
 
 ## 1. Principles
 

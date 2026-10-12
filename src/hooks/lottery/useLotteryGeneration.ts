@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { generateSecureId } from '@/lib/security/utils';
-import { gameSignature } from '@/lib/lottery/generator';
+import { gameSignature } from '@/lib/lottery/gameSignature';
 import { runLotteryTask } from '@/lib/lottery/runTask';
 import { normalizeDraw, type HistoryAnalysis } from '@/lib/lottery/analysis';
 import { LotteryResult, SavedGame } from '@/types/lottery';
