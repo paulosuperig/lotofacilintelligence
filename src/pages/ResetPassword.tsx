@@ -1,41 +1,21 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Lock, LogIn, Mail, ArrowLeft } from 'lucide-react';
+import { Lock, ArrowLeft } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { useAuthActions } from '@/hooks/useAuthActions';
 import { useNavigate } from 'react-router-dom';
-import { getErrorMessage } from '@/lib/errors';
 
 const ResetPassword = () => {
   const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
+  const { updatePassword, isLoading } = useAuthActions();
   const navigate = useNavigate();
 
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      const { error } = await supabase.auth.updateUser({ password });
-      
-      if (error) throw error;
-
-      toast({
-        title: "Senha atualizada",
-        description: "Sua nova senha foi salva com sucesso.",
-      });
+    const success = await updatePassword(password);
+    if (success) {
       navigate('/');
-    } catch (error: unknown) {
-      toast({
-        title: "Erro",
-        description: getErrorMessage(error),
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
     }
   };
 
