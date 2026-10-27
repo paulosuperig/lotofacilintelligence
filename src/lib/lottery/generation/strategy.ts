@@ -11,7 +11,7 @@ export interface StrategyConfig {
   repeatBias: 'high' | 'mid' | 'low';
 }
 
-const STRATEGY: Record<GenStrategy, StrategyConfig> = {
+export const STRATEGY: Record<GenStrategy, StrategyConfig> = {
   equilibrada: { freqW: 0.6, atrasoW: 0.25, repeatBias: 'mid' },
   quentes: { freqW: 1.1, atrasoW: 0.1, repeatBias: 'mid' },
   atrasadas: { freqW: 0.15, atrasoW: 1.1, repeatBias: 'mid' },
