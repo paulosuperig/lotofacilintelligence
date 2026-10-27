@@ -63,7 +63,9 @@ export const AppPanels = React.memo(({
   onClearHistory,
   onSaveGames,
   role,
-}: AppPanelsProps) => (
+}: AppPanelsProps) => {
+  usePanelPrefetch(isAdmin);
+  return (
   <Suspense fallback={<LoadingFallback className="min-h-[500px] py-16" />}>
     {activeTab === 'historico' && (
       <HistoryPanel
