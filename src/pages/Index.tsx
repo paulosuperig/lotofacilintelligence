@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import Login from '@/components/Login';
+import Login from '@/components/auth/Login';
 import { LoadingFallback } from '@/components/ui/spinner';
 
 const AppShell = lazy(() => import('@/components/home/AppShell'));
