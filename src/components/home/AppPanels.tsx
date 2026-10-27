@@ -28,7 +28,7 @@ const BolaoPanel = lazy(() => loadBolao().then((m) => ({ default: m.BolaoPanel }
 /** Prefetch panel code after first paint; admin code only for administrators. */
 const usePanelPrefetch = (isAdmin: boolean) => {
   useEffect(() => {
-    const loaders = [loadHistory, loadConferidor, loadFechamentos, loadBolao, loadTips, loadBacktest, loadAi, loadStats];
+    const loaders: Array<() => Promise<unknown>> = [loadHistory, loadConferidor, loadFechamentos, loadBolao, loadTips, loadBacktest, loadAi, loadStats];
     if (isAdmin) loaders.push(loadAdmin);
     return prefetchWhenIdle(loaders);
   }, [isAdmin]);
