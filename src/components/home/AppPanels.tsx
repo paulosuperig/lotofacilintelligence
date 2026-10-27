@@ -109,6 +109,7 @@ export const AppPanels = React.memo(({
       />
     )}
   </Suspense>
-));
+  );
+});
 
 AppPanels.displayName = 'AppPanels';
