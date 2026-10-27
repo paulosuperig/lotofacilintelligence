@@ -1,4 +1,7 @@
-import { aiService, type AiGatewayMessage } from './aiService';
+import type { AiGatewayMessage } from '@/types/ai';
+import { aiService } from './aiService';
+
+// Política de novas tentativas sobre o transporte de uma tentativa (aiService).
 
 const MAX_RETRIES = 2;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));

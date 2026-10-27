@@ -4,7 +4,7 @@ import { sanitizeString } from '@/lib/security/utils';
 import type { LotteryResult } from '@/types/lottery';
 import { computeLotteryStats } from '@/lib/ai/lotteryStats';
 import { callAiGateway } from '@/services/aiRequestService';
-import type { AiGatewayMessage } from '@/services/aiService';
+import type { AiGatewayMessage } from '@/types/ai';
 import { useAiConfiguration } from './useAiConfiguration';
 import { sanitizeAiGamesDetailed } from '@/lib/ai/sanitizeGames';
 import { parseUserIntent } from '@/lib/ai/intent';
