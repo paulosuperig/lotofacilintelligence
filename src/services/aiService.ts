@@ -1,7 +1,7 @@
 import { supabase } from "@/lib/supabase";
 
-/** Mensagem no formato do gateway de chat (papéis system/user/assistant). */
-export type AiGatewayMessage = { role: 'system' | 'user' | 'assistant'; content: string };
+import type { AiGatewayMessage } from "@/types/ai";
+export type { AiGatewayMessage } from "@/types/ai";
 
 /** Resposta da Edge Function `intelligence-ai` (sucesso ou erro mapeado). */
 interface AiGatewayResponse {
