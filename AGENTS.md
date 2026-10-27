@@ -17,6 +17,9 @@
 - Keep official-result transport and mapping separate from cached orchestration; refactors must preserve retries, normalization and offline fallbacks.
 - Prefetch panel code only on idle after the authenticated shell mounts, never data, and admin code only for administrators; this keeps tab switches instant without leaking private tools.
 - Keep wheel-pool composition in the pure lottery domain; presentation must not own number-selection algorithms.
+- Keep the generation engine split by responsibility under lib/lottery/generation behind the generator facade; seeded outputs must stay byte-identical across refactors.
+- Keep Meta Pixel browser helpers, loading and events in separate modules behind the metaPixel facade; event names and IDs are a tracking contract.
+- Remove unused UI primitives instead of keeping template leftovers; re-add from shadcn only when a screen needs them.
 
 ## 1. Principles
 

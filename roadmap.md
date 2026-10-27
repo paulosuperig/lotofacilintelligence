@@ -39,3 +39,13 @@
 - [x] REF-005: Extrair pool e controladores do conferidor/bolão sem mudanças visuais.
 - [x] REF-007: Separar transporte e normalização mantendo caches e tentativas.
 - [x] Validar regressões, lint, compilação automática e apresentação pública; registrar limites autenticados.
+
+## Reorganização final aprovada em 27/10/2026
+- [x] Remover 36 componentes visuais sem uso.
+- [x] Dividir o gerador em módulos com teste de paridade por semente.
+- [x] Mover o tipo de mensagem da IA para a pasta de tipos (transporte e tentativas mantidos em camadas separadas).
+- [x] Dividir a tabela de usuários do admin em tabela, lista móvel e menu de ações.
+- [x] Separar o Meta Pixel em navegador, carregamento e eventos.
+- [x] Mover a tela de login para a pasta de autenticação.
+- [x] Validar: 205 testes, tipos, lint e telas públicas.
+- [ ] Validar telas depois do login — bloqueado: ambiente sem sessão de teste.
