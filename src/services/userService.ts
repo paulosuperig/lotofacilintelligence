@@ -10,7 +10,7 @@ export const userService = {
 
     // Fetch total count and profiles in parallel
     const [countResult, dataResult] = await Promise.all([
-      supabase.from('profiles').select('*', { count: 'exact', head: true }),
+      supabase.from('profiles').select('id', { count: 'exact', head: true }),
       supabase
         .from('profiles')
         .select('*')
