@@ -15,6 +15,7 @@
 - Keep combination identity in a pure lightweight module shared by generation, history and pools; importing deduplication must not load the generation engine.
 - Keep chat I/O in its service and cache orchestration in its hook; preserve selection, ordering, limits and error contracts during extraction.
 - Keep official-result transport and mapping separate from cached orchestration; refactors must preserve retries, normalization and offline fallbacks.
+- Prefetch panel code only on idle after the authenticated shell mounts, never data, and admin code only for administrators; this keeps tab switches instant without leaking private tools.
 - Keep wheel-pool composition in the pure lottery domain; presentation must not own number-selection algorithms.
 
 ## 1. Principles
