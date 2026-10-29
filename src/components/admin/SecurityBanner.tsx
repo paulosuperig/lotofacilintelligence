@@ -7,7 +7,7 @@ export const SecurityBanner = () => (
       <ShieldAlert size={20} />
     </div>
     <div>
-      <h4 className="text-sm font-bold text-amber-900 dark:text-amber-400 mb-1">Proteção de Dados Intelligence</h4>
+      <h4 className="text-sm font-bold text-amber-900 dark:text-amber-400 mb-1">Proteção de Dados Sistema Inteligente</h4>
       <p className="text-xs text-amber-700 dark:text-amber-500 leading-relaxed">
         Este painel opera sob diretrizes de <strong>Zero Trust</strong>. Dados sensíveis como e-mails são mascarados e senhas são criptografadas com SHA-256 antes do armazenamento local.
       </p>
