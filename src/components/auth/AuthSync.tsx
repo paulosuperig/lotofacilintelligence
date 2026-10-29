@@ -21,7 +21,7 @@ export const AuthSync = () => {
           
           if (event === 'SIGNED_IN') {
             trackEvent('CompleteRegistration', {
-              content_name: 'Login Lotofácil Intelligence',
+              content_name: 'Login Lotofácil Sistema Inteligente',
               content_category: 'auth',
               status: true,
               value: 0,

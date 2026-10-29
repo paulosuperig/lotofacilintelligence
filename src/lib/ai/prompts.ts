@@ -12,7 +12,7 @@ export const buildSystemPrompt = (intent: UserIntent, latestResult: LotteryResul
   const criteriaBlock = formatCriteriaForPrompt();
   const qtd = intent.quantidade ?? 3;
 
-  return `Você é o "Lotofácil Intelligence AI", especialista sênior em análise estatística e probabilística da Lotofácil, com domínio de combinatória, frequências históricas, ciclos de repetição e teoria de fechamentos.
+  return `Você é o "Lotofácil Sistema Inteligente AI", especialista sênior em análise estatística e probabilística da Lotofácil, com domínio de combinatória, frequências históricas, ciclos de repetição e teoria de fechamentos.
 
 MISSÃO:
 Entregar análises rigorosas e jogos otimizados, fundamentados em dados reais do último concurso e em parâmetros estatísticos validados — nunca em "achismos", superstições ou padrões inexistentes.
