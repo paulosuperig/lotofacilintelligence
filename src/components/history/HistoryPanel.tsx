@@ -182,7 +182,7 @@ export const HistoryPanel = ({
       </div>
       
       <div className="mt-12 pt-8 border-t border-zinc-100 dark:border-zinc-800 flex justify-center">
-        <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-[0.2em]">Tecnologia Intelligence Pro © 2024</p>
+        <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-[0.2em]">Tecnologia Sistema Inteligente © 2024</p>
       </div>
     </div>
   );
