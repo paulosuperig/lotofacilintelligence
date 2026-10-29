@@ -45,7 +45,7 @@ export const LoginForm = ({
         <h1 className="text-xl md:text-2xl font-display font-bold text-zinc-900 mb-2 tracking-tight">
           Lotofácil{' '}
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-fuchsia-600">
-            Intelligence
+            Sistema Inteligente
           </span>
         </h1>
         <p className="text-zinc-500 text-xs md:text-sm">Faça login para acessar sua conta premium</p>
