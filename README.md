@@ -1,4 +1,4 @@
-# Lotofácil Intelligence
+# Lotofácil Sistema Inteligente
 
 Plataforma inteligente para análise e geração de jogos da Lotofácil baseada em dados reais e transparência estatística.
 

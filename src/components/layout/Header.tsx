@@ -28,7 +28,7 @@ export const Header = React.memo(({ role, isRefreshing, onRefresh }: HeaderProps
           <span className="text-[10px] sm:text-[11px] uppercase font-bold tracking-[0.25em] text-purple-600/60">Membro Premium Intelligence</span>
         </div>
         <h1 className="text-[1.75rem] sm:text-3xl md:text-5xl font-display font-bold tracking-tight leading-[1.1] text-zinc-900 dark:text-zinc-100">
-          Lotofácil <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-fuchsia-600">Intelligence</span>
+          Lotofácil <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-fuchsia-600">Sistema Inteligente</span>
         </h1>
       </motion.div>
       

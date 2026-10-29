@@ -1,4 +1,4 @@
-# Lotofácil Intelligence
+# Lotofácil Sistema Inteligente
 
 Sistema avançado de análise estatística e inteligência artificial para Lotofácil.
 

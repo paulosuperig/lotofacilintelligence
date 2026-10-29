@@ -115,7 +115,7 @@ export const useAuthActions = () => {
         if (data.session) {
           toast({
             title: 'Cadastro realizado!',
-            description: 'Bem-vindo ao Lotofácil Intelligence.',
+            description: 'Bem-vindo ao Lotofácil Sistema Inteligente.',
           });
           return true;
         }

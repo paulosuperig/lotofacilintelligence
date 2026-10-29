@@ -86,7 +86,7 @@ const Login = () => {
         aria-label="Rodapé institucional"
       >
         <p className="text-[10px] text-purple-400/70 font-medium text-center flex flex-col gap-1 md:block">
-          <span>Lotofácil Intelligence {currentYear}</span>
+          <span>Lotofácil Sistema Inteligente {currentYear}</span>
           <span className="hidden md:inline"> - </span>
           <span>
             Desenvolvido por: <span className="font-semibold text-purple-500/80">Paulo H. Santos</span>
